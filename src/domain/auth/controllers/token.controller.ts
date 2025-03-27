@@ -1,11 +1,15 @@
-import { Request, Response, NextFunction } from "express"
+import { NextFunction, Request, Response } from "express"
 import { ApiError } from "../../../errors/ApiError"
-import { logger } from "../../../utils/logger/logger.util"
 import { ApiUtils } from "../../../utils/api/api.utils"
+import { logger } from "../../../utils/logger/logger.util"
 import { TokenResponseDTO } from "../dto/token.DTO"
-import { tokenService } from "../services/services"
+import { TokenService } from "../services/token.service"
 
-export class AuthController {
+export class TokenController {
+  private readonly tokenService: TokenService
+  constructor({ tokenService }: { tokenService: TokenService }) {
+    this.tokenService = tokenService
+  }
   /**
    * token 발급
    */
@@ -14,7 +18,7 @@ export class AuthController {
       const { email, password } = req.body
       logger.debug(`Token 발급 요청 || email: ${email}, password: ${password}`)
       // 서비스 호출
-      const tokenData = await tokenService.createToken({ input: { email, password } })
+      const tokenData = await this.tokenService.createToken({ input: { email, password } })
       //  출력 가공
       const tokenDTO = TokenResponseDTO.fromEntity({
         tokenData,

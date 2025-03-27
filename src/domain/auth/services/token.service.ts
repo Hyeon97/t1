@@ -1,11 +1,12 @@
 import { ApiError } from "../../../errors/ApiError"
+import { TokenVerificationError } from "../../../errors/domain-errors/AuthError"
 import { UserNotFoundError } from "../../../errors/domain-errors/UserError"
 import { JwtUtil } from "../../../utils/jwt.utils"
 import { logger } from "../../../utils/logger/logger.util"
 import { UserInfoRepository } from "../../user/repositories/user-info.repository"
 import { UserTokenRepository } from "../../user/repositories/user-token.repository"
 import { TokenIssueBodyDTO } from "../dto/token.DTO"
-import { CreateTokenData, TokenDBInput } from "../interface/token"
+import { CreateTokenData, TokenDBInput, ToKenVerifiSuccessResult } from "../interface/token"
 
 export class TokenService {
   private readonly userInfoRepository: UserInfoRepository
@@ -50,5 +51,18 @@ export class TokenService {
       logger.error("토큰 생성 중 오류 발생", error)
       throw ApiError
     }
+  }
+
+  /**
+   * token 검증
+   */
+  async verifyToken({ token }: { token: string }): Promise<ToKenVerifiSuccessResult> {
+    // JWT 토큰 검증
+    const payload = JwtUtil.verifyToken({ token })
+    if (!payload) {
+      throw new TokenVerificationError()
+    }
+
+    return payload
   }
 }

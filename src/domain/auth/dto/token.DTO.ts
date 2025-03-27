@@ -16,7 +16,9 @@ const DEFAULT_VALUES = {
 }
 
 //  기본 리턴 객체 정의
-export type BaseTokenResponseFields = { token: string }
+export interface BaseTokenResponseFields {
+  token: string
+}
 
 // 기본 Token 응답 DTO
 export class TokenResponseDTO {
