@@ -27,15 +27,9 @@ export interface TokenDBInput {
 /**
  * 토큰 검증성공시 리턴 타입
  */
-export interface ToKenVerifiSuccessResult {
+export interface TokenVerifySuccessResult {
   id: number
   email: string
   iat: number
   exp: number
 }
-// {
-//   email: 'admin@zconverter.com',
-//   password: '6c110a9ef2e671a1abf00a1ad4f42cbb669119dbf0416a9577a105c804d703dc',
-//   iat: 1741533990,
-//   exp: 1741537590
-// }

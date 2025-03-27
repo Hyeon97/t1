@@ -4,7 +4,7 @@ import { TokenNotFoundError } from "../../../errors/domain-errors/AuthError"
 import { validationMiddleware } from "../../../middlewares/validation/validationMiddleware"
 import { ExtendedRequest } from "../../../types/common/req.types"
 import { TokenIssueBodyDTO } from "../dto/token.DTO"
-import { tokenService } from "../services/services"
+import { tokenService } from "../services/service-registry"
 
 /**
  * 토큰 발급요청 body 검증

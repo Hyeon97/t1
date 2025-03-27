@@ -6,7 +6,7 @@ import { logger } from "../../../utils/logger/logger.util"
 import { UserInfoRepository } from "../../user/repositories/user-info.repository"
 import { UserTokenRepository } from "../../user/repositories/user-token.repository"
 import { TokenIssueBodyDTO } from "../dto/token.DTO"
-import { CreateTokenData, TokenDBInput, ToKenVerifiSuccessResult } from "../interface/token"
+import { CreateTokenData, TokenDBInput, TokenVerifySuccessResult } from "../interface/token"
 
 export class TokenService {
   private readonly userInfoRepository: UserInfoRepository
@@ -56,7 +56,7 @@ export class TokenService {
   /**
    * token 검증
    */
-  async verifyToken({ token }: { token: string }): Promise<ToKenVerifiSuccessResult> {
+  async verifyToken({ token }: { token: string }): Promise<TokenVerifySuccessResult> {
     // JWT 토큰 검증
     const payload = JwtUtil.verifyToken({ token })
     if (!payload) {

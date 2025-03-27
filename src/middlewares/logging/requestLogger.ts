@@ -1,4 +1,4 @@
-import { NextFunction } from "express"
+import { NextFunction, Request, Response } from "express"
 import { v4 as uuidv4 } from "uuid"
 import { logger } from "../../utils/logger/logger.util"
 import { asyncLocalStorage } from "../../utils/asyncContext"
@@ -13,18 +13,18 @@ export const requestLogger = (req: Request, res: Response, next: NextFunction): 
     url: req.url,
   })
 
-  // //  응답 완료
-  // res.on("finish", () => {
-  //   const duration = Date.now() - startTime
-  //   logger.info(`Request completed`, {
-  //     requestId,
-  //     method: req.method,
-  //     status: res.statusCode,
-  //     duration: `${duration}ms`,
-  //   })
-  // })
+  // 응답 완료 시 로깅 추가
+  res.on("finish", () => {
+    const duration = Date.now() - startTime
+    logger.info(`Request completed`, {
+      requestId,
+      method: req.method,
+      status: res.statusCode,
+      duration: `${duration}ms`,
+    })
+  })
 
-  //  AsyncLocalStorage에 요청 ID와 시작 시간 저장
+  // AsyncLocalStorage에 요청 ID와 시작 시간 저장
   asyncLocalStorage.run({ requestId, startTime }, () => {
     next()
   })

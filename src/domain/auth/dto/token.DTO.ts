@@ -1,6 +1,8 @@
 import { IsEmail, IsNotEmpty } from "class-validator"
 
-//  토큰 발급 요청 body DTO
+/**
+ * 토큰 발급 요청 body DTO
+ */
 export class TokenIssueBodyDTO {
   @IsEmail({}, { message: "유효한 이메일 형식이 아닙니다" })
   @IsNotEmpty({ message: "email은 필수 입력값입니다" })
@@ -10,21 +12,20 @@ export class TokenIssueBodyDTO {
   password: string = ""
 }
 
-//  기본값 상수
-const DEFAULT_VALUES = {
-  token: "",
-}
-
-//  기본 리턴 객체 정의
-export interface BaseTokenResponseFields {
+/**
+ * 토큰 응답 DTO 인터페이스
+ */
+export interface TokenResponseFields {
   token: string
 }
 
-// 기본 Token 응답 DTO
+/**
+ * 토큰 응답 DTO
+ */
 export class TokenResponseDTO {
   token: string
 
-  constructor({ token = DEFAULT_VALUES.token }: Partial<BaseTokenResponseFields> = {}) {
+  constructor({ token = "" }: Partial<TokenResponseFields> = {}) {
     this.token = token
   }
 
@@ -32,21 +33,17 @@ export class TokenResponseDTO {
    * JSON 직렬화를 위한 메서드
    */
   toJSON(): Record<string, any> {
-    const json: Record<string, any> = {
+    return {
       token: this.token,
     }
-
-    return json
   }
 
   /**
-   * 엔티티에서 기본 DTO로 변환하는 정적 메서드
+   * 엔티티에서 DTO로 변환하는 정적 메서드
    */
-  static fromEntity({ tokenData }: { tokenData: any }): TokenResponseDTO {
-    const { token } = tokenData
-
+  static fromEntity({ tokenData }: { tokenData: { token: string; expiresAt: Date } }): TokenResponseDTO {
     return new TokenResponseDTO({
-      token,
+      token: tokenData.token,
     })
   }
 }

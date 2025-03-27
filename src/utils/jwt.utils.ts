@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken"
-import { CreateTokenData, ToKenVerifiSuccessResult } from "../domain/auth/interface/token"
+import { CreateTokenData, TokenVerifySuccessResult } from "../domain/auth/interface/token"
 
 const JWT_SECRET = "z1c@o3n$v5e^r7t*e9r)A9P*I7S^e5r$v3e@r1"
 const JWT_EXPIRES_IN = "1h"
@@ -17,9 +17,9 @@ export class JwtUtil {
   /**
    * JWT 토큰 검증
    */
-  public static verifyToken({ token }: { token: string }): ToKenVerifiSuccessResult | null {
+  public static verifyToken({ token }: { token: string }): TokenVerifySuccessResult | null {
     try {
-      const decoded = jwt.verify(token, JWT_SECRET) as ToKenVerifiSuccessResult
+      const decoded = jwt.verify(token, JWT_SECRET) as TokenVerifySuccessResult
       return decoded
     } catch (error) {
       return null

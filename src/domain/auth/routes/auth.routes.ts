@@ -1,5 +1,5 @@
 import { Router } from "express"
-import { tokenController } from "../controllers/controllers"
+import { tokenController } from "../controllers/controller-registry"
 import { validateTokenIssueBody } from "../validators/token.validators"
 
 export class AuthRoutes {
