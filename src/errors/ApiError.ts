@@ -7,7 +7,7 @@ export class ApiError extends Error {
   details?: any
 
   constructor({ name, statusCode, message, errorCode, details }: ErrorOptions) {
-    super(message)
+    super(message || "")
     this.statusCode = statusCode
     this.errorCode = errorCode
     this.details = details
@@ -16,104 +16,95 @@ export class ApiError extends Error {
   }
 
   // 일반적인 에러 팩토리 메서드
-  static badRequest(options: ErrorIOptions): ApiError {
+  static badRequest({ message, details }: ErrorIOptions): ApiError {
     return new ApiError({
       statusCode: 400,
-      message: options.message,
+      message,
       errorCode: ErrorCode.BAD_REQUEST,
-      details: options.details,
+      details,
     })
   }
 
-  static unauthorized(options: ErrorIOptions): ApiError {
+  static unauthorized({ message, details }: ErrorIOptions): ApiError {
     return new ApiError({
       statusCode: 401,
-      message: options.message,
+      message,
       errorCode: ErrorCode.UNAUTHORIZED,
-      details: options.details,
+      details,
     })
   }
 
-  static forbidden(options: ErrorIOptions): ApiError {
+  static forbidden({ message, details }: ErrorIOptions): ApiError {
     return new ApiError({
       statusCode: 403,
-      message: options.message,
+      message,
       errorCode: ErrorCode.FORBIDDEN,
-      details: options.details,
+      details,
     })
   }
 
-  static notFound(options: ErrorIOptions): ApiError {
+  static notFound({ message, details }: ErrorIOptions): ApiError {
     return new ApiError({
       statusCode: 404,
-      message: options.message,
+      message,
       errorCode: ErrorCode.NOT_FOUND,
-      details: options.details,
+      details,
     })
   }
 
-  static conflict(options: ErrorIOptions): ApiError {
+  static conflict({ message, details }: ErrorIOptions): ApiError {
     return new ApiError({
       statusCode: 409,
-      message: options.message,
+      message,
       errorCode: ErrorCode.CONFLICT,
-      details: options.details,
+      details,
     })
   }
 
-  static internal(options: ErrorIOptions): ApiError {
+  static internal({ message, details }: ErrorIOptions): ApiError {
     return new ApiError({
       statusCode: 500,
-      message: options.message,
+      message,
       errorCode: ErrorCode.INTERNAL_ERROR,
-      details: options.details,
+      details,
     })
   }
 
   // 서비스 이용 불가 오류
-  static serviceUnavailable(options: ErrorIOptions): ApiError {
+  static serviceUnavailable({ message, details }: ErrorIOptions): ApiError {
     return new ApiError({
       statusCode: 503,
-      message: options.message,
+      message,
       errorCode: ErrorCode.SERVICE_UNAVAILABLE,
-      details: options.details,
+      details,
     })
   }
 
   // 비즈니스 도메인 에러 팩토리 메서드
-  static validationError(options: ErrorIOptions): ApiError {
+  static validationError({ message, details }: ErrorIOptions): ApiError {
     return new ApiError({
       statusCode: 400,
-      message: options.message,
+      message,
       errorCode: ErrorCode.VALIDATION_ERROR,
-      details: options.details,
+      details,
     })
   }
 
-  // static businessRuleViolation(options: ErrorIOptions): ApiError {
-  //   return new ApiError({
-  //     statusCode: 422,
-  //     message: options.message,
-  //     errorCode: ErrorCode.BUSINESS_RULE_VIOLATION,
-  //     details: options.details,
-  //   })
-  // }
-
-  static resourceExists(options: ErrorIOptions): ApiError {
+  static resourceExists({ message, details }: ErrorIOptions): ApiError {
     return new ApiError({
       statusCode: 409,
-      message: options.message,
+      message,
       errorCode: ErrorCode.RESOURCE_EXISTS,
-      details: options.details,
+      details,
     })
   }
 
-  static databaseError(options: ErrorIOptions): ApiError {
+  static databaseError({ message, details }: ErrorIOptions): ApiError {
     return new ApiError({
       statusCode: 500,
-      message: options.message,
+      message,
       errorCode: ErrorCode.DATABASE_ERROR,
-      details: options.details,
+      details,
     })
   }
 }

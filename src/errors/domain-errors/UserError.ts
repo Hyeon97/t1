@@ -1,30 +1,48 @@
 import { ApiError } from "../ApiError"
-import { DomainError } from "./DomainError"
+import { AppError } from "../AppError"
 
-// 사용자 에러의 기본 클래스
-export abstract class UserError extends DomainError {
-  // 공통 속성이 필요하다면 여기에 추가
-}
+export namespace UserError {
+  /**
+   * user 찾을 수 없음
+   */
+  export class UserNotFound extends AppError {
+    user: string | number
+    type: "ID" | "Email"
 
-// 사용자를 찾을 수 없는 에러
-export class UserNotFoundError extends UserError {
-  user: string | number
-  type: "ID" | "Email"
-  constructor({ user, type }: { user: string | number; type: "ID" | "Email" }) {
-    super()
-    this.user = user
-    this.type = type
-    if (type === "ID") {
-      this.message = `ID가 ${user}인 사용자를 찾을 수 없습니다`
-    } else {
-      this.message = `이메일이 ${user}인 사용자를 찾을 수 없습니다`
+    constructor({ user, type }: { user: string | number; type: "ID" | "Email" }) {
+      const message = type === "ID"
+        ? `ID가 ${user}인 사용자를 찾을 수 없습니다`
+        : `이메일이 ${user}인 사용자를 찾을 수 없습니다`
+
+      super({ message })
+      this.user = user
+      this.type = type
+    }
+
+    toApiError(): ApiError {
+      return ApiError.notFound({
+        message: this.message,
+        details: { user: this.user, type: this.type },
+      })
     }
   }
 
-  toApiError(): ApiError {
-    return ApiError.notFound({
-      message: this.message,
-      details: { user: this.user },
-    })
+  /**
+   * email 중복
+   */
+  export class DuplicateEmail extends AppError {
+    email: string
+
+    constructor({ email }: { email: string }) {
+      super({ message: `이메일 ${email}는 이미 사용 중입니다` })
+      this.email = email
+    }
+
+    toApiError(): ApiError {
+      return ApiError.conflict({
+        message: this.message,
+        details: { email: this.email },
+      })
+    }
   }
 }

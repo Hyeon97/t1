@@ -1,4 +1,4 @@
-import { UserNotFoundError } from "../../../errors/domain-errors/UserError"
+import { UserError } from "../../../errors/domain-errors/UserError"
 import { logger } from "../../../utils/logger/logger.util"
 import { UserInfoTable } from "../interface/db/user_info"
 import { UserInfoRepository } from "../repositories/user-info.repository"
@@ -16,7 +16,7 @@ export class UserService {
       logger.debug(`이메일 ${email}로 사용자 조회 시도`)
       const user = await this.userInfoRepository.findByEmail({ email })
       if (!user) {
-        throw new UserNotFoundError({ user: email, type: "Email" })
+        throw new UserError.UserNotFound({ user: email, type: "Email" })
       }
       return user
     } catch (error) {

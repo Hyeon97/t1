@@ -1,4 +1,5 @@
 import { Router } from "express"
+import { requestLogger } from "../../../middlewares/logging/requestLogger"
 import { tokenController } from "../controllers/controller-registry"
 import { validateTokenIssueBody } from "../validators/token.validators"
 
@@ -12,6 +13,6 @@ export class AuthRoutes {
 
   private tokenRoutes(): void {
     //  token 발급
-    this.router.post("/issue", validateTokenIssueBody, tokenController.issueToken)
+    this.router.post("/issue", requestLogger, validateTokenIssueBody, tokenController.issueToken)
   }
 }

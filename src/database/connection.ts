@@ -1,7 +1,7 @@
-// src/database/Database.ts
+// src/database/connection.ts
 import mysql from "mysql2/promise"
-import { ConnectionError, DataIntegrityError, QueryError, RecordNotFoundError, TransactionError } from "../errors/domain-errors/DatabaseError"
-import { logger } from "../utils/logger/logger.util"
+import { DatabaseError } from "../errors/domain-errors/DatabaseError"
+import { ContextLogger } from "../utils/logger/logger.custom"
 
 // 환경 변수에서 데이터베이스 설정 가져오기
 const dbConfig = {
@@ -22,17 +22,22 @@ export const pool = mysql.createPool(dbConfig)
 export const testConnection = async (): Promise<boolean> => {
   try {
     const connection = await pool.getConnection()
-    logger.info("데이터베이스 연결 성공")
+    ContextLogger.info({
+      message: "데이터베이스 연결 성공"
+    })
     connection.release()
     return true
   } catch (error: any) {
-    logger.error(`데이터베이스 연결 실패: ${error.message}`)
-    throw new ConnectionError(`데이터베이스 연결 실패: ${error.message}`)
+    ContextLogger.error({
+      message: `데이터베이스 연결 실패: ${error.message}`,
+      error
+    })
+    throw new DatabaseError.ConnectionError({ message: `데이터베이스 연결 실패: ${error.message}` })
   }
 }
 
 // 민감한 데이터 검사 유틸리티 함수
-const containsSensitiveData = (sql: string, params: any[]): boolean => {
+const containsSensitiveData = ({ sql, params }: { sql: string, params: any[] }): boolean => {
   const sensitiveKeywords = ["password", "token", "secret", "credit_card", "ssn"]
 
   // SQL 문에 민감한 키워드가 있는지 확인
@@ -72,18 +77,28 @@ export const executeQuery = async <T>({
     const startTime = Date.now() // 성능 측정 시작
 
     // 민감한 데이터 로깅 방지
-    const isSensitive = containsSensitiveData(sql, params)
+    const isSensitive = containsSensitiveData({ sql, params })
 
     if (!isSensitive) {
-      logger.debug(`쿼리 실행: ${queryName}, SQL: ${pool.format(sql, params)}`)
+      ContextLogger.debug({
+        message: `쿼리 실행: ${queryName}, SQL: ${pool.format(sql, params)}`
+      })
     } else {
-      logger.debug(`쿼리 실행: ${queryName}, SQL: [민감한 데이터 포함 - 로깅 제한]`)
+      ContextLogger.debug({
+        message: `쿼리 실행: ${queryName}, SQL: [민감한 데이터 포함 - 로깅 제한]`
+      })
     }
 
     const [rows] = await conn.execute(sql, params)
 
     const duration = Date.now() - startTime
-    logger.debug(`쿼리 완료: ${queryName}, 소요시간: ${duration}ms, 결과 수: ${Array.isArray(rows) ? rows.length : 1}`)
+    ContextLogger.debug({
+      message: `쿼리 완료: ${queryName}`,
+      meta: {
+        duration: `${duration}ms`,
+        resultCount: Array.isArray(rows) ? rows.length : 1
+      }
+    })
 
     return rows as T[]
   } catch (error: any) {
@@ -91,25 +106,33 @@ export const executeQuery = async <T>({
     if (error.code) {
       switch (error.code) {
         case "ER_DUP_ENTRY":
-          throw new DataIntegrityError(`무결성 제약 조건 위반: ${error.message}`, sql, params)
+          throw new DatabaseError.DataIntegrityError({ message: `무결성 제약 조건 위반: ${error.message}`, query: sql, params })
         case "ER_NO_REFERENCED_ROW":
         case "ER_ROW_IS_REFERENCED":
-          throw new DataIntegrityError(`참조 무결성 위반: ${error.message}`, sql, params)
+          throw new DatabaseError.DataIntegrityError({ message: `참조 무결성 위반: ${error.message}`, query: sql, params })
         case "ER_ACCESS_DENIED_ERROR":
-          throw new ConnectionError(`데이터베이스 접근 거부: ${error.message}`, sql)
+          throw new DatabaseError.ConnectionError({ message: `데이터베이스 접근 거부: ${error.message}`, query: sql })
         case "ER_PARSE_ERROR":
-          throw new QueryError(`SQL 구문 오류: ${error.message}`, sql, params)
+          throw new DatabaseError.QueryError({ message: `SQL 구문 오류: ${error.message}`, query: sql, params })
         case "ER_BAD_DB_ERROR":
-          throw new ConnectionError(`데이터베이스를 찾을 수 없음: ${error.message}`, sql)
+          throw new DatabaseError.ConnectionError({ message: `데이터베이스를 찾을 수 없음: ${error.message}`, query: sql })
         default:
-          throw new QueryError(`쿼리 실행 오류(${error.code}): ${error.message}`, sql, params)
+          throw new DatabaseError.QueryError({ message: `쿼리 실행 오류(${error.code}): ${error.message}`, query: sql, params })
       }
     }
 
     // 일반적인 에러
-    logger.error(`쿼리 오류: ${queryName}, ${error.message}`)
-    logger.debug(`SQL: ${sql}, 매개변수: ${JSON.stringify(params)}`)
-    throw new QueryError(`쿼리 실행 오류: ${error.message}`, sql, params)
+    ContextLogger.error({
+      message: `쿼리 오류: ${queryName}, ${error.message}`,
+      error
+    })
+
+    ContextLogger.debug({
+      message: `SQL: ${sql}`,
+      meta: { params: JSON.stringify(params) }
+    })
+
+    throw new DatabaseError.QueryError({ message: `쿼리 실행 오류: ${error.message}`, query: sql, params })
   }
 }
 
@@ -131,7 +154,7 @@ export const executeQuerySingle = async <T>({
 
   if (results.length === 0) {
     if (errorOnNotFound) {
-      throw new RecordNotFoundError(`요청한 데이터를 찾을 수 없습니다: ${queryName}`, sql, params)
+      throw new DatabaseError.RecordNotFoundError({ message: `요청한 데이터를 찾을 수 없습니다: ${queryName}`, query: sql, params })
     }
     return null
   }
@@ -140,33 +163,43 @@ export const executeQuerySingle = async <T>({
 }
 
 // 트랜잭션 헬퍼 함수 (레거시 지원)
-export const withTransaction = async <T>({ callback }: { callback: (connection: mysql.PoolConnection) => Promise<T> }): Promise<T> => {
+export const withTransaction = async <T>({
+  callback
+}: {
+  callback: (connection: mysql.PoolConnection) => Promise<T>
+}): Promise<T> => {
   const connection = await pool.getConnection()
 
   try {
     await connection.beginTransaction()
-    logger.debug("트랜잭션 시작됨 (레거시 방식)")
+    ContextLogger.debug({
+      message: "트랜잭션 시작됨 (레거시 방식)"
+    })
 
     const result = await callback(connection)
 
     await connection.commit()
-    logger.debug("트랜잭션 커밋됨 (레거시 방식)")
+    ContextLogger.debug({
+      message: "트랜잭션 커밋됨 (레거시 방식)"
+    })
 
     return result
   } catch (error: any) {
-    logger.debug("트랜잭션 롤백 시도 (레거시 방식)")
+    ContextLogger.debug({
+      message: "트랜잭션 롤백 시도 (레거시 방식)"
+    })
     await connection.rollback()
 
     if (
-      error instanceof DataIntegrityError ||
-      error instanceof QueryError ||
-      error instanceof ConnectionError ||
-      error instanceof RecordNotFoundError
+      error instanceof DatabaseError.DataIntegrityError ||
+      error instanceof DatabaseError.QueryError ||
+      error instanceof DatabaseError.ConnectionError ||
+      error instanceof DatabaseError.RecordNotFoundError
     ) {
       throw error
     }
 
-    throw new TransactionError(`트랜잭션 실패: ${error.message}`)
+    throw new DatabaseError.TransactionError({ message: `트랜잭션 실패: ${error.message}` })
   } finally {
     connection.release()
   }
@@ -187,31 +220,44 @@ export class Transaction {
 
       try {
         await connection.beginTransaction()
-        logger.debug("트랜잭션 시작됨")
+        ContextLogger.debug({
+          message: "트랜잭션 시작됨"
+        })
         return new Transaction(connection)
       } catch (error: any) {
         connection.release()
-        logger.error(`트랜잭션 시작 실패: ${error.message}`)
-        throw new TransactionError(`트랜잭션 시작 실패: ${error.message}`)
+        ContextLogger.error({
+          message: `트랜잭션 시작 실패: ${error.message}`,
+          error
+        })
+        throw new DatabaseError.TransactionError({ message: `트랜잭션 시작 실패: ${error.message}` })
       }
     } catch (error: any) {
-      logger.error(`데이터베이스 연결 실패: ${error.message}`)
-      throw new ConnectionError(`데이터베이스 연결 실패: ${error.message}`)
+      ContextLogger.error({
+        message: `데이터베이스 연결 실패: ${error.message}`,
+        error
+      })
+      throw new DatabaseError.ConnectionError({ message: `데이터베이스 연결 실패: ${error.message}` })
     }
   }
 
   // 트랜잭션 커밋
   public async commit(): Promise<void> {
     if (!this.connection) {
-      throw new TransactionError("커밋할 활성 트랜잭션이 없습니다")
+      throw new DatabaseError.TransactionError({ message: "커밋할 활성 트랜잭션이 없습니다" })
     }
 
     try {
       await this.connection.commit()
-      logger.debug("트랜잭션 커밋됨")
+      ContextLogger.debug({
+        message: "트랜잭션 커밋됨"
+      })
     } catch (error: any) {
-      logger.error(`트랜잭션 커밋 실패: ${error.message}`)
-      throw new TransactionError(`트랜잭션 커밋 실패: ${error.message}`)
+      ContextLogger.error({
+        message: `트랜잭션 커밋 실패: ${error.message}`,
+        error
+      })
+      throw new DatabaseError.TransactionError({ message: `트랜잭션 커밋 실패: ${error.message}` })
     } finally {
       this.connection.release()
       this.connection = null
@@ -226,10 +272,15 @@ export class Transaction {
 
     try {
       await this.connection.rollback()
-      logger.debug("트랜잭션 롤백됨")
+      ContextLogger.debug({
+        message: "트랜잭션 롤백됨"
+      })
     } catch (error: any) {
-      logger.error(`트랜잭션 롤백 실패: ${error.message}`)
-      throw new TransactionError(`트랜잭션 롤백 실패: ${error.message}`)
+      ContextLogger.error({
+        message: `트랜잭션 롤백 실패: ${error.message}`,
+        error
+      })
+      throw new DatabaseError.TransactionError({ message: `트랜잭션 롤백 실패: ${error.message}` })
     } finally {
       this.connection.release()
       this.connection = null
@@ -239,15 +290,23 @@ export class Transaction {
   // 트랜잭션 연결 반환
   public getConnection(): mysql.PoolConnection {
     if (!this.connection) {
-      throw new TransactionError("활성 트랜잭션이 없습니다")
+      throw new DatabaseError.TransactionError({ message: "활성 트랜잭션이 없습니다" })
     }
     return this.connection
   }
 
   // 트랜잭션 내 쿼리 실행
-  public async executeQuery<T>(sql: string, params: any[] = [], queryName: string = "transaction-query"): Promise<T[]> {
+  public async executeQuery<T>({
+    sql,
+    params = [],
+    queryName = "transaction-query"
+  }: {
+    sql: string
+    params?: any[]
+    queryName?: string
+  }): Promise<T[]> {
     if (!this.connection) {
-      throw new TransactionError("활성 트랜잭션이 없습니다")
+      throw new DatabaseError.TransactionError({ message: "활성 트랜잭션이 없습니다" })
     }
 
     return executeQuery<T>({
@@ -259,14 +318,19 @@ export class Transaction {
   }
 
   // 트랜잭션 내 단일 결과 쿼리 실행
-  public async executeQuerySingle<T>(
-    sql: string,
-    params: any[] = [],
-    queryName: string = "transaction-query-single",
-    errorOnNotFound: boolean = false
-  ): Promise<T | null> {
+  public async executeQuerySingle<T>({
+    sql,
+    params = [],
+    queryName = "transaction-query-single",
+    errorOnNotFound = false
+  }: {
+    sql: string
+    params?: any[]
+    queryName?: string
+    errorOnNotFound?: boolean
+  }): Promise<T | null> {
     if (!this.connection) {
-      throw new TransactionError("활성 트랜잭션이 없습니다")
+      throw new DatabaseError.TransactionError({ message: "활성 트랜잭션이 없습니다" })
     }
 
     return executeQuerySingle<T>({

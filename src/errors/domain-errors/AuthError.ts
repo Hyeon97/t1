@@ -1,41 +1,37 @@
 import { ApiError } from "../ApiError"
-import { DomainError } from "./DomainError"
+import { AppError } from "../AppError"
 
-// 사용자 에러의 기본 클래스
-export abstract class AuthError extends DomainError {
-  // 공통 속성이 필요하다면 여기에 추가
-}
+export namespace AuthError {
+  /**
+   * token 찾을 수 없음
+   */
+  export class TokenNotFound extends AppError {
+    constructor() {
+      super({ message: "Token을 찾을 수 없습니다" })
+    }
 
-/**
- * token 찾을 수 없음
- */
-export class TokenNotFoundError extends AuthError {
-  constructor() {
-    super()
-    this.message = "Token을 찾을 수 없습니다"
+    toApiError(): ApiError {
+      return ApiError.notFound({
+        message: this.message,
+        details: {},
+      })
+    }
   }
 
-  toApiError(): ApiError {
-    return ApiError.notFound({
-      message: this.message,
-      details: {},
-    })
-  }
-}
+  /**
+   * token 검증 실패
+   */
+  export class TokenVerificationFail extends AppError {
+    constructor() {
+      super({ message: "Token 검증 실패" })
+    }
 
-/**
- * token 검증 실패
- */
-export class TokenVerificationError extends AuthError {
-  constructor() {
-    super()
-    this.message = "Token 검증 실패"
+    toApiError(): ApiError {
+      return ApiError.unauthorized({
+        message: this.message,
+        details: {},
+      })
+    }
   }
 
-  toApiError(): ApiError {
-    return ApiError.unauthorized({
-      message: this.message,
-      details: {},
-    })
-  }
 }

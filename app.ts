@@ -3,7 +3,8 @@ import express, { Application } from "express"
 import helmet from "helmet"
 import "reflect-metadata"
 import { config } from "./src/config/config"
-import { notFoundHandler } from "./src/errors/error-handler"
+import { AuthRoutes } from "./src/domain/auth/routes/auth.routes"
+import { errorHandler, notFoundHandler } from "./src/errors/error-handler"
 import { logger, morganMiddleware } from "./src/utils/logger/logger.util"
 
 class App {
@@ -44,12 +45,11 @@ class App {
     })
 
     // API 라우트
-    // this.app.use(`${config.apiPrefix}/token`, new AuthRoutes().router)
+    this.app.use(`${config.apiPrefix}/token`, new AuthRoutes().router)
     // this.app.use(`${config.apiPrefix}/users`, validateToken, new UserRoutes().router)
     // this.app.use(`${config.apiPrefix}/servers`, validateToken, new ServerRoutes().router)
     // this.app.use(`${config.apiPrefix}/zdms`, validateToken, new ZDMRoutes().router)
     // this.app.use(`${config.apiPrefix}/backups`, validateToken, new BackupRoutes().router)
-    logger.info(`사용자 API 라우트가 ${config.apiPrefix}/users 경로에 등록되었습니다.`)
   }
 
   private setupErrorHandling(): void {
@@ -57,7 +57,7 @@ class App {
     this.app.use(notFoundHandler)
 
     // 전역 에러 핸들러
-    // this.app.use(errorHandler)
+    this.app.use(errorHandler)
 
     logger.info("에러 핸들러가 설정되었습니다.")
   }

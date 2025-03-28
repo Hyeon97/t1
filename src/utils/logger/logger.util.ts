@@ -34,20 +34,30 @@ const colors = {
 // Winston에 색상 추가
 winston.addColors(colors)
 
-// 로그 포맷 정의
+// 로그 포맷 정의 - 메타데이터 처리 개선
 const logFormat = winston.format.combine(
   winston.format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
   winston.format.printf((info) => {
-    return `${info.timestamp} ${info.level}: ${info.message}`
+    const { timestamp, level, message, ...meta } = info
+    // 메타데이터가 있으면 포함
+    const metaStr = Object.keys(meta).length
+      ? ` | ${JSON.stringify(meta)}`
+      : ''
+    return `${timestamp} ${level}: ${message}${metaStr}`
   })
 )
 
-// 콘솔용 컬러 포맷 정의
+// 콘솔용 컬러 포맷 정의 - 메타데이터 처리 개선
 const consoleFormat = winston.format.combine(
   winston.format.colorize({ all: true }),
   winston.format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
   winston.format.printf((info) => {
-    return `${info.timestamp} ${info.level}: ${info.message}`
+    const { timestamp, level, message, ...meta } = info
+    // 메타데이터가 있으면 포함
+    const metaStr = Object.keys(meta).length
+      ? ` | ${JSON.stringify(meta)}`
+      : ''
+    return `${timestamp} ${level}: ${message}${metaStr}`
   })
 )
 
