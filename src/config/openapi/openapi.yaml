@@ -1,0 +1,120 @@
+openapi: 3.0.3
+info:
+  title: API Server
+  description: RESTful API Documentation for Authentication and other services.
+  version: 1.0.0
+  contact:
+    name: Admin
+    email: admin@example.com
+servers:
+  - url: /api
+    description: API Server
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+              example: NOT_FOUND
+            message:
+              type: string
+              example: 리소스를 찾을 수 없습니다
+            details:
+              type: object
+              example: {}
+        timestamp:
+          type: string
+          format: date-time
+          example: "2025-03-28T12:34:56.789Z"
+
+    TokenIssueRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          example: user@example.com
+        password:
+          type: string
+          format: password
+          example: "password123"
+
+    TokenResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "토큰이 성공적으로 발급되었습니다"
+        data:
+          type: object
+          properties:
+            token:
+              type: string
+              example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        timestamp:
+          type: string
+          format: date-time
+          example: "2025-03-28T12:34:56.789Z"
+
+security:
+  - bearerAuth: []
+
+paths:
+  /token/issue:
+    post:
+      summary: 토큰 발급
+      description: 이메일과 비밀번호를 사용하여 인증 토큰을 발급합니다
+      tags:
+        - Authentication
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TokenIssueRequest"
+      responses:
+        "201":
+          description: 토큰 발급 성공
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenResponse"
+        "400":
+          description: 잘못된 요청
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: 인증 실패
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: 서버 오류
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
