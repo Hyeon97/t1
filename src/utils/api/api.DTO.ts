@@ -3,6 +3,7 @@
  */
 export interface ApiResponseDTO<T> {
   success: boolean
+  requestID: string
   data?: T
   message?: string
   error?: string
