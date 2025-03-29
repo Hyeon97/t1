@@ -39,7 +39,6 @@ export class UserInfoRepository {
     const query = `SELECT * FROM ${this.tableName} WHERE email=?`
     const params = [email]
     const user = await executeQuerySingle<UserInfoTable>({ sql: query, params })
-    return null
     return user
   }
 }

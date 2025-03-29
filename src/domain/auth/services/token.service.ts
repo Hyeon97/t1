@@ -22,9 +22,7 @@ export class TokenService {
    */
   async createToken({ input }: { input: TokenIssueBodyDTO }) {
     try {
-      ContextLogger.debug({
-        message: `토큰 생성 시작 - 이메일: ${input.email}`
-      })
+      ContextLogger.debug({ message: `토큰 생성 시작 - 이메일: ${input.email}` })
       //  사용자 조회
       const user = await this.userInfoRepository.findByEmail({ email: input.email })
       //  추후 아래 로직으로 변경
@@ -52,7 +50,7 @@ export class TokenService {
       await this.userTokenRepository.saveTokenInfo({ input: saveData })
       ContextLogger.debug({
         message: `사용자 ${input.email}의 토큰이 생성되었습니다`,
-        meta: { expiresAt }
+        meta: { expiresAt },
       })
       return { token, expiresAt }
     } catch (error: any) {
@@ -65,8 +63,8 @@ export class TokenService {
       ContextLogger.error({
         message: "토큰 생성 중 예상치 못한 오류 발생",
         meta: {
-          error: error instanceof Error ? error.message : String(error)
-        }
+          error: error instanceof Error ? error.message : String(error),
+        },
       })
       throw ApiError.internal({ message: "토큰 생성 중 서버 오류가 발생했습니다" })
     }
@@ -76,20 +74,16 @@ export class TokenService {
    * token 검증
    */
   async verifyToken({ token }: { token: string }): Promise<TokenVerifySuccessResult> {
-    ContextLogger.debug({
-      message: "토큰 검증 시도"
-    })
+    ContextLogger.debug({ message: "토큰 검증 시도" })
+
     // JWT 토큰 검증
     const payload = JwtUtil.verifyToken({ token })
     if (!payload) {
-      ContextLogger.warn({
-        message: "토큰 검증 실패"
-      })
+      ContextLogger.warn({ message: "토큰 검증 실패" })
       throw new AuthError.TokenVerificationFail()
     }
-    ContextLogger.debug({
-      message: `토큰 검증 성공: ${payload.email}`
-    })
+
+    ContextLogger.debug({ message: `토큰 검증 성공: ${payload.email}` })
     return payload
   }
 }
