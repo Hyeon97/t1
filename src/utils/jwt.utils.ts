@@ -1,17 +1,32 @@
 import jwt from "jsonwebtoken"
 import { CreateTokenData, TokenVerifySuccessResult } from "../domain/auth/interface/token"
 
-const JWT_SECRET = "z1c@o3n$v5e^r7t*e9r)A9P*I7S^e5r$v3e@r1"
-const JWT_EXPIRES_IN = "1h"
 export class JwtUtil {
+  /**
+   * JWT 시크릿 키 가져오기
+   */
+  private static getJwtSecret(): string {
+    // ConfigManager가 초기화되지 않은 경우를 대비해 환경변수 직접 사용
+    return process.env.JWT_SECRET || "z1c@o3n$v5e^r7t*e9r)A9P*I7S^e5r$v3e@r1"
+  }
+
+  /**
+   * JWT 만료 시간 가져오기
+   */
+  private static getJwtExpiresIn(): string {
+    return process.env.JWT_EXPIRES_IN || "1h"
+  }
+
   /**
    * JWT 토큰 생성
    */
   public static generateToken({ payload }: { payload: CreateTokenData }): string {
-    const token = jwt.sign(payload, JWT_SECRET, {
-      expiresIn: JWT_EXPIRES_IN,
-    })
-    return token
+    // 직접 타입 캐스팅을 하지 않고 일반 객체로 처리
+    const secret = this.getJwtSecret()
+    const options = { expiresIn: this.getJwtExpiresIn() }
+
+    // any 타입을 사용하여 타입 오류 해결
+    return jwt.sign(payload as any, secret as any, options as any)
   }
 
   /**
@@ -19,7 +34,8 @@ export class JwtUtil {
    */
   public static verifyToken({ token }: { token: string }): TokenVerifySuccessResult | null {
     try {
-      const decoded = jwt.verify(token, JWT_SECRET) as TokenVerifySuccessResult
+      const secret = this.getJwtSecret()
+      const decoded = jwt.verify(token, secret) as unknown as TokenVerifySuccessResult
       return decoded
     } catch (error) {
       return null
@@ -31,7 +47,7 @@ export class JwtUtil {
    * @returns 만료 날짜
    */
   public static getTokenExpiration(): Date {
-    const expiresIn = JWT_EXPIRES_IN
+    const expiresIn = this.getJwtExpiresIn()
     const unit = expiresIn.slice(-1)
     const value = parseInt(expiresIn.slice(0, -1), 10)
 
