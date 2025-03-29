@@ -3,41 +3,51 @@ import mysql from "mysql2/promise"
 import { DatabaseError } from "../errors/domain-errors/DatabaseError"
 import { ContextLogger } from "../utils/logger/logger.custom"
 
-// 환경 변수에서 데이터베이스 설정 가져오기
-const dbConfig = {
-  host: process.env.DB_HOST || "localhost",
-  user: process.env.DB_USER || "root",
-  password: process.env.DB_PASSWORD || "",
-  database: process.env.DB_NAME || "test_database",
-  port: parseInt(process.env.DB_PORT || "3306"),
-  connectionLimit: parseInt(process.env.DB_CONNECTION_LIMIT || "10"),
-  waitForConnections: true,
-  queueLimit: 0,
+// 데이터베이스 설정 가져오기
+const getDbConfig = () => {
+  // ConfigManager가 초기화되기 전에 호출되지 않도록 필요할 때 설정을 가져옴
+  return {
+    host: process.env.DB_HOST || "localhost",
+    user: process.env.DB_USER || "root",
+    password: process.env.DB_PASSWORD || "",
+    database: process.env.DB_NAME || "test_database",
+    port: parseInt(process.env.DB_PORT || "3306", 10),
+    connectionLimit: parseInt(process.env.DB_CONNECTION_LIMIT || "10", 10),
+    waitForConnections: true,
+    queueLimit: 0,
+  }
 }
 
-// 커넥션 풀 생성
-export const pool = mysql.createPool(dbConfig)
+// 커넥션 풀 생성 (지연 초기화)
+let poolInstance: mysql.Pool | null = null
+const getPool = (): mysql.Pool => {
+  if (!poolInstance) {
+    poolInstance = mysql.createPool(getDbConfig())
+  }
+  return poolInstance
+}
 
 // 데이터베이스 연결 확인
 export const testConnection = async (): Promise<boolean> => {
   try {
+    const pool = getPool()
     const connection = await pool.getConnection()
     ContextLogger.info({
-      message: "데이터베이스 연결 성공"
+      message: "데이터베이스 연결 성공",
     })
     connection.release()
     return true
   } catch (error: any) {
     ContextLogger.error({
       message: `데이터베이스 연결 실패: ${error.message}`,
-      error
+      error,
     })
     throw new DatabaseError.ConnectionError({ message: `데이터베이스 연결 실패: ${error.message}` })
   }
 }
 
 // 민감한 데이터 검사 유틸리티 함수
-const containsSensitiveData = ({ sql, params }: { sql: string, params: any[] }): boolean => {
+const containsSensitiveData = ({ sql, params }: { sql: string; params: any[] }): boolean => {
   const sensitiveKeywords = ["password", "token", "secret", "credit_card", "ssn"]
 
   // SQL 문에 민감한 키워드가 있는지 확인
@@ -73,6 +83,7 @@ export const executeQuery = async <T>({
   queryName?: string
 }): Promise<T[]> => {
   try {
+    const pool = getPool()
     const conn = connection || pool
     const startTime = Date.now() // 성능 측정 시작
 
@@ -81,11 +92,11 @@ export const executeQuery = async <T>({
 
     if (!isSensitive) {
       ContextLogger.debug({
-        message: `쿼리 실행: ${queryName}, SQL: ${pool.format(sql, params)}`
+        message: `쿼리 실행: ${queryName}, SQL: ${pool.format(sql, params)}`,
       })
     } else {
       ContextLogger.debug({
-        message: `쿼리 실행: ${queryName}, SQL: [민감한 데이터 포함 - 로깅 제한]`
+        message: `쿼리 실행: ${queryName}, SQL: [민감한 데이터 포함 - 로깅 제한]`,
       })
     }
 
@@ -96,8 +107,8 @@ export const executeQuery = async <T>({
       message: `쿼리 완료: ${queryName}`,
       meta: {
         duration: `${duration}ms`,
-        resultCount: Array.isArray(rows) ? rows.length : 1
-      }
+        resultCount: Array.isArray(rows) ? rows.length : 1,
+      },
     })
 
     return rows as T[]
@@ -124,12 +135,12 @@ export const executeQuery = async <T>({
     // 일반적인 에러
     ContextLogger.error({
       message: `쿼리 오류: ${queryName}, ${error.message}`,
-      error
+      error,
     })
 
     ContextLogger.debug({
       message: `SQL: ${sql}`,
-      meta: { params: JSON.stringify(params) }
+      meta: { params: JSON.stringify(params) },
     })
 
     throw new DatabaseError.QueryError({ message: `쿼리 실행 오류: ${error.message}`, query: sql, params })
@@ -163,30 +174,27 @@ export const executeQuerySingle = async <T>({
 }
 
 // 트랜잭션 헬퍼 함수 (레거시 지원)
-export const withTransaction = async <T>({
-  callback
-}: {
-  callback: (connection: mysql.PoolConnection) => Promise<T>
-}): Promise<T> => {
+export const withTransaction = async <T>({ callback }: { callback: (connection: mysql.PoolConnection) => Promise<T> }): Promise<T> => {
+  const pool = getPool()
   const connection = await pool.getConnection()
 
   try {
     await connection.beginTransaction()
     ContextLogger.debug({
-      message: "트랜잭션 시작됨 (레거시 방식)"
+      message: "트랜잭션 시작됨 (레거시 방식)",
     })
 
     const result = await callback(connection)
 
     await connection.commit()
     ContextLogger.debug({
-      message: "트랜잭션 커밋됨 (레거시 방식)"
+      message: "트랜잭션 커밋됨 (레거시 방식)",
     })
 
     return result
   } catch (error: any) {
     ContextLogger.debug({
-      message: "트랜잭션 롤백 시도 (레거시 방식)"
+      message: "트랜잭션 롤백 시도 (레거시 방식)",
     })
     await connection.rollback()
 
@@ -216,26 +224,27 @@ export class Transaction {
   // 트랜잭션 시작
   public static async begin(): Promise<Transaction> {
     try {
+      const pool = getPool()
       const connection = await pool.getConnection()
 
       try {
         await connection.beginTransaction()
         ContextLogger.debug({
-          message: "트랜잭션 시작됨"
+          message: "트랜잭션 시작됨",
         })
         return new Transaction(connection)
       } catch (error: any) {
         connection.release()
         ContextLogger.error({
           message: `트랜잭션 시작 실패: ${error.message}`,
-          error
+          error,
         })
         throw new DatabaseError.TransactionError({ message: `트랜잭션 시작 실패: ${error.message}` })
       }
     } catch (error: any) {
       ContextLogger.error({
         message: `데이터베이스 연결 실패: ${error.message}`,
-        error
+        error,
       })
       throw new DatabaseError.ConnectionError({ message: `데이터베이스 연결 실패: ${error.message}` })
     }
@@ -250,12 +259,12 @@ export class Transaction {
     try {
       await this.connection.commit()
       ContextLogger.debug({
-        message: "트랜잭션 커밋됨"
+        message: "트랜잭션 커밋됨",
       })
     } catch (error: any) {
       ContextLogger.error({
         message: `트랜잭션 커밋 실패: ${error.message}`,
-        error
+        error,
       })
       throw new DatabaseError.TransactionError({ message: `트랜잭션 커밋 실패: ${error.message}` })
     } finally {
@@ -273,12 +282,12 @@ export class Transaction {
     try {
       await this.connection.rollback()
       ContextLogger.debug({
-        message: "트랜잭션 롤백됨"
+        message: "트랜잭션 롤백됨",
       })
     } catch (error: any) {
       ContextLogger.error({
         message: `트랜잭션 롤백 실패: ${error.message}`,
-        error
+        error,
       })
       throw new DatabaseError.TransactionError({ message: `트랜잭션 롤백 실패: ${error.message}` })
     } finally {
@@ -299,7 +308,7 @@ export class Transaction {
   public async executeQuery<T>({
     sql,
     params = [],
-    queryName = "transaction-query"
+    queryName = "transaction-query",
   }: {
     sql: string
     params?: any[]
@@ -322,7 +331,7 @@ export class Transaction {
     sql,
     params = [],
     queryName = "transaction-query-single",
-    errorOnNotFound = false
+    errorOnNotFound = false,
   }: {
     sql: string
     params?: any[]
