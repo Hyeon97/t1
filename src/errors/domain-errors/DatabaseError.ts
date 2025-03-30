@@ -1,9 +1,10 @@
-import { ApiError } from '../ApiError'
-import { AppError } from '../AppError'
+///////////////////////////////
+//  Database Error 객체 정의  //
+///////////////////////////////
 
-/**
- * 데이터베이스 오류 네임스페이스
- */
+import { ApiError } from "../ApiError"
+import { AppError } from "../AppError"
+
 export namespace DatabaseError {
   // 공통 프로퍼티를 처리하는 기본 클래스
   abstract class BaseDatabaseError extends AppError {
@@ -17,14 +18,13 @@ export namespace DatabaseError {
 
       // 민감한 정보 필터링
       if (this.params && Array.isArray(this.params)) {
-        this.params = this.params.map(param => {
-          if (typeof param === 'string' && param.includes('password')) {
-            return '[FILTERED]'
+        this.params = this.params.map((param) => {
+          if (typeof param === "string" && param.includes("password")) {
+            return "[FILTERED]"
           }
           return param
         })
       }
-
     }
   }
 
@@ -39,7 +39,7 @@ export namespace DatabaseError {
     toApiError(): ApiError {
       return ApiError.serviceUnavailable({
         message: this.message,
-        details: { error: 'database_connection_error' }
+        details: { error: "database_connection_error" },
       })
     }
   }
@@ -54,8 +54,8 @@ export namespace DatabaseError {
 
     toApiError(): ApiError {
       return ApiError.databaseError({
-        message: '데이터베이스 쿼리 오류가 발생했습니다',
-        details: { error: 'query_execution_error' }
+        message: "데이터베이스 쿼리 오류가 발생했습니다",
+        details: { error: "query_execution_error" },
       })
     }
   }
@@ -70,8 +70,8 @@ export namespace DatabaseError {
 
     toApiError(): ApiError {
       return ApiError.databaseError({
-        message: '데이터베이스 트랜잭션 오류가 발생했습니다',
-        details: { error: 'transaction_error' }
+        message: "데이터베이스 트랜잭션 오류가 발생했습니다",
+        details: { error: "transaction_error" },
       })
     }
   }
@@ -86,7 +86,7 @@ export namespace DatabaseError {
     toApiError(): ApiError {
       return ApiError.conflict({
         message: this.message,
-        details: { error: 'data_integrity_violation' }
+        details: { error: "data_integrity_violation" },
       })
     }
   }
@@ -102,7 +102,7 @@ export namespace DatabaseError {
     toApiError(): ApiError {
       return ApiError.notFound({
         message: this.message,
-        details: { error: 'record_not_found' }
+        details: { error: "record_not_found" },
       })
     }
   }

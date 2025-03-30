@@ -1,4 +1,7 @@
-//  repository 공통 ( DB와 상호작용하는 repository를 의미 )
+/////////////////////////////////////////////////////////////
+//  repository 공통 ( DB와 상호작용하는 repository를 의미 )  //
+/////////////////////////////////////////////////////////////
+
 export abstract class CommonRepository {
   protected abstract readonly tableName: string
   protected conditions: string[] = []

@@ -1,3 +1,7 @@
+///////////////////////////
+//  User Error 객체 정의  //
+///////////////////////////
+
 import { ApiError } from "../ApiError"
 import { AppError } from "../AppError"
 
@@ -10,9 +14,7 @@ export namespace UserError {
     type: "ID" | "Email"
 
     constructor({ user, type }: { user: string | number; type: "ID" | "Email" }) {
-      const message = type === "ID"
-        ? `ID가 ${user}인 사용자를 찾을 수 없습니다`
-        : `이메일이 ${user}인 사용자를 찾을 수 없습니다`
+      const message = type === "ID" ? `ID가 ${user}인 사용자를 찾을 수 없습니다` : `이메일이 ${user}인 사용자를 찾을 수 없습니다`
 
       super({ message })
       this.user = user

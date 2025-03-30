@@ -1,6 +1,7 @@
-/**
- * user_token table 스키마 정의
- */
+///////////////////////////////////
+//  user_token table 스키마 정의  //
+///////////////////////////////////
+
 export interface UserTokenTable {
   nID: number
   sToken: string

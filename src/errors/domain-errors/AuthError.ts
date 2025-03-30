@@ -1,3 +1,7 @@
+///////////////////////////
+//  Auth Error 객체 정의  //
+///////////////////////////
+
 import { ApiError } from "../ApiError"
 import { AppError } from "../AppError"
 
@@ -33,5 +37,4 @@ export namespace AuthError {
       })
     }
   }
-
 }
