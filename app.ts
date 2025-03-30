@@ -1,14 +1,16 @@
-import cors from "cors"
-import express, { Application } from "express"
-import helmet from "helmet"
 import "reflect-metadata"
+import express, { Application } from "express"
+import cors from "cors"
+import helmet from "helmet"
 import { config } from "./src/config/config"
-import { AuthRoutes } from "./src/domain/auth/routes/auth.routes"
 import { errorHandler, notFoundHandler } from "./src/errors/error-handler"
-import { logger, morganMiddleware } from "./src/utils/logger/logger.util"
 import { ConfigManager } from "./src/config/config-manager"
-import { requestLogger } from "./src/middlewares/logging/requestLogger"
 import { OpenApiConfig } from "./src/config/openapi-manager"
+import { AuthRoutes } from "./src/domain/auth/routes/auth.routes"
+import { validateToken } from "./src/domain/auth/validators/token.validators"
+import { ServerRoutes } from "./src/domain/server/routes/server.routes"
+import { requestLogger } from "./src/middlewares/logging/requestLogger"
+import { logger, morganMiddleware } from "./src/utils/logger/logger.util"
 
 class App {
   public app: Application
@@ -65,16 +67,12 @@ class App {
 
   private async setupRoutes(): Promise<void> {
     try {
+      this.app.use(`${config.apiPrefix}/token`, new AuthRoutes().router)
+      this.app.use(`${config.apiPrefix}/servers`, validateToken, new ServerRoutes().router)
+
       // OpenAPI 설정
       const openApiConfig = new OpenApiConfig()
       await openApiConfig.setupOpenApi({ app: this.app as any })
-
-      // 인증 라우트
-      this.app.use(`${config.apiPrefix}/token`, new AuthRoutes().router)
-
-      // 다른 라우트들
-      // this.app.use(`${config.apiPrefix}/users`, validateToken, new UserRoutes().router)
-      // this.app.use(`${config.apiPrefix}/servers`, validateToken, new ServerRoutes().router)
     } catch (error) {
       logger.error("API 설정 실패", error)
     }
