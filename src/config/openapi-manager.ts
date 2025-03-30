@@ -4,6 +4,7 @@ import path from "path"
 import swaggerUi from "swagger-ui-express"
 import { ContextLogger } from "../utils/logger/logger.custom"
 import { config } from "./config"
+import { generateOpenApiSpec } from "./openapi"
 
 export class OpenApiConfig {
   private readonly specPath: string
@@ -16,11 +17,6 @@ export class OpenApiConfig {
 
     this.specPath = path.join(rootDir, "/src/config/openapi/openapi.yaml")
     this.jsonSpecPath = path.join(rootDir, "/src/config/openapi/openapi.json")
-
-    // 스펙 파일 존재 여부 확인
-    if (!fs.existsSync(this.jsonSpecPath)) {
-      console.warn(`OpenAPI JSON 스펙 파일을 찾을 수 없습니다: ${this.jsonSpecPath}`)
-    }
   }
 
   /**
@@ -28,42 +24,51 @@ export class OpenApiConfig {
    */
   async setupOpenApi({ app }: { app: any }): Promise<void> {
     try {
-      // JSON 스펙 파일을 직접 로드
-      let swaggerDocument = null
+      // 모듈화된 구조에서 OpenAPI 스펙 생성
+      const swaggerDocument = generateOpenApiSpec()
+
+      // 필요한 경우에만 JSON 파일로 저장
+      let shouldWriteFile = true
 
       if (fs.existsSync(this.jsonSpecPath)) {
-        const fileContent = fs.readFileSync(this.jsonSpecPath, "utf8")
-        swaggerDocument = JSON.parse(fileContent)
-      } else {
-        console.warn("OpenAPI JSON 스펙 파일을 찾을 수 없어 기본 문서를 사용합니다.")
-        swaggerDocument = {
-          openapi: "3.0.3",
-          info: {
-            title: "API Server",
-            version: "1.0.0",
-            description: "API Documentation (Spec file not found)",
-          },
-          paths: {},
+        try {
+          const existingContent = fs.readFileSync(this.jsonSpecPath, "utf8")
+          const existingDoc = JSON.parse(existingContent)
+
+          // 내용이 동일한지 비교 (버전만 비교하거나 더 정확한 비교가 필요할 수 있음)
+          if (JSON.stringify(existingDoc) === JSON.stringify(swaggerDocument)) {
+            shouldWriteFile = false
+          }
+        } catch (err) {
+          // 파일 읽기나 파싱 실패시 새로 쓰기
+          shouldWriteFile = true
         }
+      }
+
+      if (shouldWriteFile) {
+        if (!fs.existsSync(path.dirname(this.jsonSpecPath))) {
+          fs.mkdirSync(path.dirname(this.jsonSpecPath), { recursive: true })
+        }
+        fs.writeFileSync(this.jsonSpecPath, JSON.stringify(swaggerDocument, null, 2), "utf8")
+        ContextLogger.debug({
+          message: `OpenAPI JSON 스펙이 ${this.jsonSpecPath}에 업데이트 되었습니다.`,
+        })
       }
 
       // Swagger UI 설정 (JSON 문서 직접 사용)
       app.use(`${config.apiPrefix}/docs`, swaggerUi.serve, swaggerUi.setup(swaggerDocument))
 
-      // 스펙 파일이 존재하는 경우에만 Validator 설정
-      if (fs.existsSync(this.jsonSpecPath)) {
-        // OpenAPI Validator 미들웨어 설정
-        const validatorMiddleware = middleware({
-          apiSpec: this.jsonSpecPath,
-          validateRequests: true,
-          validateResponses: true,
-          operationHandlers: false,
-        })
+      // OpenAPI Validator 미들웨어 설정
+      const validatorMiddleware = middleware({
+        apiSpec: this.jsonSpecPath, // 파일 경로를 사용 (파일에 이미 저장했으므로)
+        validateRequests: true,
+        validateResponses: true,
+        operationHandlers: false,
+      })
 
-        // 미들웨어 적용
-        for (const mw of validatorMiddleware) {
-          app.use(mw)
-        }
+      // 미들웨어 적용
+      for (const mw of validatorMiddleware) {
+        app.use(mw)
       }
 
       ContextLogger.info({
