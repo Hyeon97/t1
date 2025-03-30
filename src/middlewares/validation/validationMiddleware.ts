@@ -19,6 +19,9 @@ export class ValidationMiddleware {
         // 요청 데이터를 DTO 클래스의 인스턴스로 변환
         const dtoInstance = plainToInstance(dtoClass, data, {
           enableImplicitConversion: true, // 문자열->숫자 등의 암시적 변환 허용
+          exposeDefaultValues: true, // 기본값 노출
+          excludeExtraneousValues: false, // 추가 값 제외 안함
+          enableCircularCheck: false, // 순환 참조 체크 비활성화
         })
 
         // class-validator를 사용한 유효성 검사
@@ -33,16 +36,6 @@ export class ValidationMiddleware {
           },
         })
 
-        // if (errors.length > 0) {
-        //   // 검증 오류 메시지 추출
-        //   const errorMessages = errors.map((error) => {
-        //     const constraints = error.constraints || {}
-        //     return Object.values(constraints).join(", ")
-        //   })
-
-        //   logger.warn(`[class-validator] 요청 유효성 검사 실패: ${errorMessages.join(", ")}`)
-        //   throw ApiError.validationError({ message: "요청 데이터 유효성 검사 실패", details: errorMessages })
-        // }
         if (errors.length > 0) {
           // 재귀적으로 중첩된 에러 메시지를 포함하여 처리
           const errorMessages = this.extractValidationErrorMessages(errors)
