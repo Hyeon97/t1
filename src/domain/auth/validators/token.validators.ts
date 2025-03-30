@@ -1,4 +1,4 @@
-import { NextFunction } from "express"
+import { NextFunction, Request, Response } from "express"
 import { ApiError } from "../../../errors/ApiError"
 import { AppError } from "../../../errors/AppError"
 import { AuthError } from "../../../errors/domain-errors/AuthError"
@@ -22,7 +22,7 @@ export const validateToken = async (req: ExtendedRequest, res: Response, next: N
     const token = req.headers.authorization
     // if (!authHeader || !authHeader.startsWith("Bearer ")) {
     if (!token) {
-      throw new AuthError.TokenNotFound
+      throw new AuthError.TokenNotFound()
     }
 
     // 토큰 검증
@@ -36,7 +36,7 @@ export const validateToken = async (req: ExtendedRequest, res: Response, next: N
     ContextLogger.debug({ message: `인증 성공: ${payload.email}` })
     next()
   } catch (error) {
-    ContextLogger.error({ message: `인증 처리 중 오류: ${error instanceof Error ? error.message : 'Unknown error'}` })
+    ContextLogger.error({ message: `인증 처리 중 오류: ${error instanceof Error ? error.message : "Unknown error"}` })
 
     // AppError는 ApiError로 변환하여 처리
     if (error instanceof AppError) {
