@@ -5,7 +5,6 @@ import { ApiUtils } from "../../../utils/api/api.utils"
 import { ContextLogger } from "../../../utils/logger/logger.custom"
 import { TokenResponseDTO } from "../dto/token.DTO"
 import { TokenService } from "../services/token.service"
-import { asyncLocalStorage } from "../../../utils/asyncContext"
 
 export class TokenController {
   private readonly tokenService: TokenService

@@ -53,7 +53,7 @@ export class TokenService {
         meta: { expiresAt },
       })
       return { token, expiresAt }
-    } catch (error: any) {
+    } catch (error) {
       // AppError는 그대로 전파 (한 번의 체크로 모든 도메인 에러 처리)
       // ApiError 인스턴스는 그대로 전파
       if (error instanceof AppError || error instanceof ApiError) {
