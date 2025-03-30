@@ -37,12 +37,15 @@ export const testConnection = async (): Promise<boolean> => {
     })
     connection.release()
     return true
-  } catch (error: any) {
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : String(error)
     ContextLogger.error({
-      message: `데이터베이스 연결 실패: ${error.message}`,
-      error,
+      message: `데이터베이스 연결 실패`,
+      meta: {
+        error: msg,
+      },
     })
-    throw new DatabaseError.ConnectionError({ message: `데이터베이스 연결 실패: ${error.message}` })
+    throw new DatabaseError.ConnectionError({ message: `데이터베이스 연결 실패: ${msg}` })
   }
 }
 
@@ -75,12 +78,10 @@ export const executeQuery = async <T>({
   sql,
   params = [],
   connection,
-  queryName = "unnamed",
 }: {
   sql: string
   params?: any[]
   connection?: mysql.PoolConnection
-  queryName?: string
 }): Promise<T[]> => {
   try {
     const pool = getPool()
@@ -92,11 +93,11 @@ export const executeQuery = async <T>({
 
     if (!isSensitive) {
       ContextLogger.debug({
-        message: `쿼리 실행: ${queryName}, SQL: ${pool.format(sql, params)}`,
+        message: `SQL: ${pool.format(sql, params)}`,
       })
     } else {
       ContextLogger.debug({
-        message: `쿼리 실행: ${queryName}, SQL: [민감한 데이터 포함 - 로깅 제한]`,
+        message: `SQL: [민감한 데이터 포함 - 로깅 제한]`,
       })
     }
 
@@ -104,7 +105,7 @@ export const executeQuery = async <T>({
 
     const duration = Date.now() - startTime
     ContextLogger.debug({
-      message: `쿼리 완료: ${queryName}`,
+      message: `쿼리 완료`,
       meta: {
         duration: `${duration}ms`,
         resultCount: Array.isArray(rows) ? rows.length : 1,
@@ -124,9 +125,13 @@ export const executeQuery = async <T>({
         case "ER_ACCESS_DENIED_ERROR":
           throw new DatabaseError.ConnectionError({ message: `데이터베이스 접근 거부: ${error.message}`, query: sql })
         case "ER_PARSE_ERROR":
+        case "ER_BAD_FIELD_ERROR":
           throw new DatabaseError.QueryError({ message: `SQL 구문 오류: ${error.message}`, query: sql, params })
         case "ER_BAD_DB_ERROR":
           throw new DatabaseError.ConnectionError({ message: `데이터베이스를 찾을 수 없음: ${error.message}`, query: sql })
+        case "ER_LOCK_DEADLOCK":
+        case "ER_LOCK_WAIT_TIMEOUT":
+          throw new DatabaseError.TransactionError({ message: `트랜잭션 오류: ${error.message}`, query: sql })
         default:
           throw new DatabaseError.QueryError({ message: `쿼리 실행 오류(${error.code}): ${error.message}`, query: sql, params })
       }
@@ -134,7 +139,7 @@ export const executeQuery = async <T>({
 
     // 일반적인 에러
     ContextLogger.error({
-      message: `쿼리 오류: ${queryName}, ${error.message}`,
+      message: `쿼리 오류${error.message}`,
       error,
     })
 
@@ -161,7 +166,7 @@ export const executeQuerySingle = async <T>({
   queryName?: string
   errorOnNotFound?: boolean
 }): Promise<T | null> => {
-  const results = await executeQuery<T>({ sql, params, connection, queryName })
+  const results = await executeQuery<T>({ sql, params, connection })
 
   if (results.length === 0) {
     if (errorOnNotFound) {
@@ -233,20 +238,26 @@ export class Transaction {
           message: "트랜잭션 시작됨",
         })
         return new Transaction(connection)
-      } catch (error: any) {
+      } catch (error) {
         connection.release()
+        const msg = error instanceof Error ? error.message : String(error)
         ContextLogger.error({
-          message: `트랜잭션 시작 실패: ${error.message}`,
-          error,
+          message: `트랜잭션 시작 실패`,
+          meta: {
+            error: msg,
+          },
         })
-        throw new DatabaseError.TransactionError({ message: `트랜잭션 시작 실패: ${error.message}` })
+        throw new DatabaseError.TransactionError({ message: `트랜잭션 시작 실패: ${msg}` })
       }
-    } catch (error: any) {
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : String(error)
       ContextLogger.error({
-        message: `데이터베이스 연결 실패: ${error.message}`,
-        error,
+        message: `데이터베이스 연결 실패`,
+        meta: {
+          error: msg,
+        },
       })
-      throw new DatabaseError.ConnectionError({ message: `데이터베이스 연결 실패: ${error.message}` })
+      throw new DatabaseError.ConnectionError({ message: `데이터베이스 연결 실패: ${msg}` })
     }
   }
 
@@ -261,12 +272,15 @@ export class Transaction {
       ContextLogger.debug({
         message: "트랜잭션 커밋됨",
       })
-    } catch (error: any) {
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : String(error)
       ContextLogger.error({
-        message: `트랜잭션 커밋 실패: ${error.message}`,
-        error,
+        message: `트랜잭션 커밋 실패`,
+        meta: {
+          error: msg,
+        },
       })
-      throw new DatabaseError.TransactionError({ message: `트랜잭션 커밋 실패: ${error.message}` })
+      throw new DatabaseError.TransactionError({ message: `트랜잭션 커밋 실패: ${msg}` })
     } finally {
       this.connection.release()
       this.connection = null
@@ -284,12 +298,15 @@ export class Transaction {
       ContextLogger.debug({
         message: "트랜잭션 롤백됨",
       })
-    } catch (error: any) {
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : String(error)
       ContextLogger.error({
-        message: `트랜잭션 롤백 실패: ${error.message}`,
-        error,
+        message: `트랜잭션 롤백 실패`,
+        meta: {
+          error: msg,
+        },
       })
-      throw new DatabaseError.TransactionError({ message: `트랜잭션 롤백 실패: ${error.message}` })
+      throw new DatabaseError.TransactionError({ message: `트랜잭션 롤백 실패: ${msg}` })
     } finally {
       this.connection.release()
       this.connection = null
@@ -305,15 +322,7 @@ export class Transaction {
   }
 
   // 트랜잭션 내 쿼리 실행
-  public async executeQuery<T>({
-    sql,
-    params = [],
-    queryName = "transaction-query",
-  }: {
-    sql: string
-    params?: any[]
-    queryName?: string
-  }): Promise<T[]> {
+  public async executeQuery<T>({ sql, params = [] }: { sql: string; params?: any[] }): Promise<T[]> {
     if (!this.connection) {
       throw new DatabaseError.TransactionError({ message: "활성 트랜잭션이 없습니다" })
     }
@@ -322,7 +331,6 @@ export class Transaction {
       sql,
       params,
       connection: this.connection,
-      queryName,
     })
   }
 
