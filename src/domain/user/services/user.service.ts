@@ -1,27 +1,32 @@
 import { UserError } from "../../../errors/domain-errors/UserError"
-import { logger } from "../../../utils/logger/logger.util"
-import { UserInfoTable } from "../interface/db/user_info"
+import { handleServiceError } from "../../../errors/handler/service-error-handler"
+import { ContextLogger } from "../../../utils/logger/logger.custom"
 import { UserInfoRepository } from "../repositories/user-info.repository"
+import { UserInfoTable } from "../types/db/user_info"
 
 export class UserService {
   private readonly userInfoRepository: UserInfoRepository
   constructor({ userInfoRepository }: { userInfoRepository: UserInfoRepository }) {
     this.userInfoRepository = userInfoRepository
   }
+
   /**
    * 이메일로 사용자 조회
    */
   async getUserByEmail({ email }: { email: string }): Promise<UserInfoTable> {
     try {
-      logger.debug(`이메일 ${email}로 사용자 조회 시도`)
+      ContextLogger.debug({ message: `이메일 ${email}로 사용자 조회` })
       const user = await this.userInfoRepository.findByEmail({ email })
       if (!user) {
         throw new UserError.UserNotFound({ user: email, type: "Email" })
       }
       return user
     } catch (error) {
-      logger.error(`사용자 조회 중 오류 발생`)
-      throw error
+      return handleServiceError({
+        error,
+        logErrorMessage: "User 정보 조회중 UserService.getUserByEmail() 에러 발생",
+        apiErrorMessage: "User 정보 조회 중 오류가 발생했습니다",
+      })
     }
   }
 }

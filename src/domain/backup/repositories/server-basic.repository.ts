@@ -2,9 +2,9 @@ import { executeQuery, executeQuerySingle } from "../../../database/connection"
 import { OSTypeMap } from "../../../types/common/os"
 import { ContextLogger } from "../../../utils/logger/logger.custom"
 import { CommonRepository } from "../../../utils/repository.utils"
+import { SystemModeMap } from "../types/backup-common.type"
+import { ServerFilterOptions } from "../types/backup-filter.type"
 import { ServerBasicTable } from "../types/db/server-basic"
-import { SystemModeMap } from "../types/server-common.type"
-import { ServerFilterOptions } from "../types/server-filter.type"
 
 export class ServerBasicRepository extends CommonRepository {
   protected readonly tableName = "server_basic"

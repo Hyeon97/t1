@@ -1,8 +1,7 @@
-import { ApiError } from "../../../errors/ApiError"
-import { AppError } from "../../../errors/AppError"
 import { ServerError } from "../../../errors/domain-errors/ServerError"
+import { handleServiceError } from "../../../errors/handler/service-error-handler"
 import { ContextLogger } from "../../../utils/logger/logger.custom"
-import { logger } from "../../../utils/logger/logger.util"
+import { regNumberOnly } from "../../../utils/regex.utils"
 import { ServerBasicRepository } from "../repositories/server-basic.repository"
 import { ServerDiskRepository } from "../repositories/server-disk.repository"
 import { ServerNetworkRepository } from "../repositories/server-network.repository"
@@ -188,7 +187,7 @@ export class ServerService {
             serverResponse[propertyName as ServerDataPropertyKey] = []
           }
           // 타입스크립트 타입 단언 필요
-          ;(serverResponse[propertyName] as any[]).push(item)
+          ; (serverResponse[propertyName] as any[]).push(item)
         }
       })
     }
@@ -203,48 +202,11 @@ export class ServerService {
   }
 
   /**
-   * 공통 에러 처리
-   */
-  private handleServiceError({
-    error,
-    operationName,
-    errorMessage = "Server 정보 조회 중 오류가 발생했습니다",
-    logContext = {},
-  }: {
-    error: unknown
-    operationName: string
-    errorMessage?: string
-    logContext?: Record<string, any>
-  }): never {
-    // 이미 처리된 에러는 그대로 전파
-    if (error instanceof AppError || error instanceof ApiError) {
-      throw error
-    }
-
-    // 에러 로깅
-    ContextLogger.error({
-      message: `Server 정보 조회 중 ServerService.${operationName}() 오류 발생`,
-      meta: {
-        error: error instanceof Error ? error.message : String(error),
-        ...logContext,
-      },
-    })
-
-    // 새로운 API 에러로 변환
-    throw ApiError.internal({ message: errorMessage })
-  }
-
-  /**
    * 모든 서버 조회
    */
   async getServers({ filterOptions }: { filterOptions: ServerFilterOptions }): Promise<ServerDataResponse[]> {
     try {
-      ContextLogger.debug({
-        message: `모든 Server 정보 조회`,
-        meta: {
-          filterOptions,
-        },
-      })
+      ContextLogger.debug({ message: `모든 Server 정보 조회`, meta: { filterOptions, }, })
       const servers = await this.serverBasicRepository.findAll({ filterOptions })
       const systemNames = servers.map((server) => server.sSystemName)
 
@@ -261,9 +223,10 @@ export class ServerService {
 
       return result
     } catch (error) {
-      return this.handleServiceError({
+      return handleServiceError({
         error,
-        operationName: "getServers",
+        logErrorMessage: 'Server 정보 조회 중 ServerService.getServers() 오류 발생',
+        apiErrorMessage: 'Server 정보 조회 중 오류가 발생했습니다',
         logContext: { filterOptions },
       })
     }
@@ -290,9 +253,10 @@ export class ServerService {
 
       return result[0]
     } catch (error) {
-      return this.handleServiceError({
+      return handleServiceError({
         error,
-        operationName: "getServerByName",
+        logErrorMessage: 'Server 정보 조회 중 ServerService.getServerByName() 오류 발생',
+        apiErrorMessage: 'Server 정보 조회 중 오류가 발생했습니다',
         logContext: { name, filterOptions },
       })
     }
@@ -301,9 +265,18 @@ export class ServerService {
   /**
    * 서버 ID로 조회
    */
-  async getServerById({ id, filterOptions }: { id: number; filterOptions: ServerFilterOptions }): Promise<ServerDataResponse> {
+  async getServerById({ id, filterOptions }: { id: string; filterOptions: ServerFilterOptions }): Promise<ServerDataResponse> {
     try {
-      const server = await this.serverBasicRepository.findByServerId({ id, filterOptions })
+      if (!regNumberOnly.test(id)) {
+        throw new ServerError.ServerRequestParameterError({
+          message: `identifierType이 id인 경우 identifier값은 숫자만 가능합니다`,
+          details: {
+            identifierType: 'id',
+            identifier: id
+          }
+        })
+      }
+      const server = await this.serverBasicRepository.findByServerId({ id: parseInt(id), filterOptions })
       if (!server) {
         throw new ServerError.ServerNotFound({ server: id, type: "id" })
       }
@@ -323,9 +296,10 @@ export class ServerService {
 
       return result[0]
     } catch (error) {
-      return this.handleServiceError({
+      return handleServiceError({
         error,
-        operationName: "getServerById",
+        logErrorMessage: 'Server 정보 조회 중 ServerService.getServerById() 오류 발생',
+        apiErrorMessage: 'Server 정보 조회 중 오류가 발생했습니다',
         logContext: { id, filterOptions },
       })
     }

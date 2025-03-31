@@ -32,6 +32,10 @@ npm install -D @types/express-list-endpoints
 # 데이터베이스
 npm install mysql2
 
+# swagger
+npm install express-openapi-validator swagger-ui-express
+npm install -D @types/swagger-ui-express
+
 # 기타
 npm install uuid
 npm install -D @types/uuid
@@ -51,4 +55,10 @@ npm run bulid && npm run start
 npm test
 # DB 파일적용
 mysql -u root -p < D:\STUDY\TS-Express2\db\test.sql
+```
+
+# Github 동기화
+```
+git fetch --prune origin 
+git reset --hard origin/main
 ```

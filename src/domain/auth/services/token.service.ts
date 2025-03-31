@@ -1,7 +1,6 @@
-import { ApiError } from "../../../errors/ApiError"
-import { AppError } from "../../../errors/AppError"
 import { AuthError } from "../../../errors/domain-errors/AuthError"
 import { UserError } from "../../../errors/domain-errors/UserError"
+import { handleServiceError } from "../../../errors/handler/service-error-handler"
 import { JwtUtil } from "../../../utils/jwt.utils"
 import { ContextLogger } from "../../../utils/logger/logger.custom"
 import { UserInfoRepository } from "../../user/repositories/user-info.repository"
@@ -54,19 +53,11 @@ export class TokenService {
       })
       return { token, expiresAt }
     } catch (error) {
-      // AppError는 그대로 전파 (한 번의 체크로 모든 도메인 에러 처리)
-      // ApiError 인스턴스는 그대로 전파
-      if (error instanceof AppError || error instanceof ApiError) {
-        throw error
-      }
-      // 기타 예상치 못한 에러는 로깅 후 일반 API 에러로 변환
-      ContextLogger.error({
-        message: "토큰 생성 중 예상치 못한 오류 발생",
-        meta: {
-          error: error instanceof Error ? error.message : String(error),
-        },
+      return handleServiceError({
+        error,
+        logErrorMessage: "토큰 생성 중 TokenService.createToken() 오류 발생",
+        apiErrorMessage: "토큰 생성 중 오류가 발생했습니다"
       })
-      throw ApiError.internal({ message: "토큰 생성 중 서버 오류가 발생했습니다" })
     }
   }
 
@@ -74,16 +65,24 @@ export class TokenService {
    * token 검증
    */
   async verifyToken({ token }: { token: string }): Promise<TokenVerifySuccessResult> {
-    ContextLogger.debug({ message: "토큰 검증 시도" })
+    try {
+      ContextLogger.debug({ message: "토큰 검증 시작" })
 
-    // JWT 토큰 검증
-    const payload = JwtUtil.verifyToken({ token })
-    if (!payload) {
-      ContextLogger.warn({ message: "토큰 검증 실패" })
-      throw new AuthError.TokenVerificationFail()
+      // JWT 토큰 검증
+      const payload = JwtUtil.verifyToken({ token })
+      if (!payload) {
+        ContextLogger.warn({ message: "토큰 검증 실패" })
+        throw new AuthError.TokenVerificationFail()
+      }
+
+      ContextLogger.debug({ message: `토큰 검증 성공: ${payload.email}` })
+      return payload
+    } catch (error) {
+      return handleServiceError({
+        error,
+        logErrorMessage: "토큰 검증 중 TokenService.verifyToken() 오류 발생",
+        apiErrorMessage: "토큰 검증 중 오류가 발생했습니다"
+      })
     }
-
-    ContextLogger.debug({ message: `토큰 검증 성공: ${payload.email}` })
-    return payload
   }
 }

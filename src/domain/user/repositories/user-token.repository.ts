@@ -1,6 +1,6 @@
 import { ResultSetHeader } from "mysql2"
 import { executeQuerySingle } from "../../../database/connection"
-import { CommonRepository } from "../../../types/common/repository"
+import { CommonRepository } from "../../../utils/repository.utils"
 import { TokenDBInput } from "../../auth/interface/token"
 
 export class UserTokenRepository extends CommonRepository {

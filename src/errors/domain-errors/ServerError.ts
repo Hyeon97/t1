@@ -40,4 +40,21 @@ export namespace ServerError {
   /**
    * Server repository 찾을 수 없음
    */
+  /**
+   * Server 요청 파라미터 에러
+   */
+  export class ServerRequestParameterError extends AppError {
+    details: Record<string, any>
+    constructor({ message, details = {} }: { message: string, details: Record<string, any> }) {
+      super({ message })
+      this.details = details
+    }
+
+    toApiError(): ApiError {
+      return ApiError.badRequest({
+        message: this.message,
+        details: this.details
+      })
+    }
+  }
 }

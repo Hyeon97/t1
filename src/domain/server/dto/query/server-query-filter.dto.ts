@@ -2,30 +2,10 @@
 //  server data 조회 공통 필터링 옵션 DTO  //
 ///////////////////////////////////////////
 
-import { IsBoolean, IsIn, IsOptional } from "class-validator"
+import { IsIn, IsOptional } from "class-validator"
 import { OSType } from "../../../../types/common/os"
 import { LicenseAssignType, SystemConnectType, SystemModeType } from "../../types/server-common.type"
 import { ServerFilterOptions } from "../../types/server-filter.type"
-import { Transform } from "class-transformer"
-
-export function TransformToBoolean() {
-  return Transform(({ value }) => {
-    console.log(`TransformToBoolean - 입력값: "${value}", 타입: ${typeof value}`)
-
-    if (value === true || value === "true") {
-      console.log("true로 변환")
-      return true
-    }
-
-    if (value === false || value === "false") {
-      console.log("false로 변환")
-      return false
-    }
-
-    console.log(`변환 없음, 원래 값 반환: ${value}`)
-    return undefined
-  })
-}
 
 export class ServerQueryFilterDTO implements ServerFilterOptions {
   //  일반 필터링

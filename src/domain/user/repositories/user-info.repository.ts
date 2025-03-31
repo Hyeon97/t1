@@ -1,6 +1,6 @@
 import { executeQuery, executeQuerySingle } from "../../../database/connection"
 import { ContextLogger } from "../../../utils/logger/logger.custom"
-import { UserInfoTable } from "../interface/db/user_info"
+import { UserInfoTable } from "../types/db/user_info"
 
 export class UserInfoRepository {
   private readonly tableName = "user_info"

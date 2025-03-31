@@ -1,9 +1,9 @@
 import { NextFunction, Request, Response } from "express"
-import { ContextLogger } from "../utils/logger/logger.custom"
-import { ApiError } from "./ApiError"
-import { AppError } from "./AppError"
-import { ErrorCode } from "./error-codes"
-import { ErrorResponse, RequestInfo } from "./interfaces"
+import { ContextLogger } from "../../utils/logger/logger.custom"
+import { ApiError } from "../ApiError"
+import { AppError } from "../AppError"
+import { ErrorCode } from "../error-codes"
+import { ErrorResponse, RequestInfo } from "../interfaces"
 
 export const errorHandler = (err: Error, req: Request, res: Response, next: NextFunction) => {
   let statusCode = 500

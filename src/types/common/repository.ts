@@ -1,43 +1,77 @@
-/////////////////////////////////////////////////////////////
-//  repository 공통 ( DB와 상호작용하는 repository를 의미 )  //
-/////////////////////////////////////////////////////////////
+////////////////////////////////
+//  Repository 관련 타입 정의  //
+////////////////////////////////
 
-export abstract class CommonRepository {
-  protected abstract readonly tableName: string
-  protected conditions: string[] = []
-  protected params: any[] = []
-  protected rawConditions: string[] = [] // 파라미터가 없는 조건
+import { VALID_REPOSITORY_VALUES } from "./const-value"
 
-  /**
-   * 조건과 파라미터 초기화
-   */
-  protected resetQueryState(): void {
-    this.conditions = []
-    this.params = []
-  }
+/**
+ * 일반적인 Repository 타입 정의
+ */
+export type RepositoryType = (typeof VALID_REPOSITORY_VALUES)[number]
+export enum RepositoryEnum {
+  SMB = 20,
+  NFS = 21,
+}
+//  repository 타입 변환
+export const RepositoryTypeMap = {
+  // 문자열 → 숫자
+  fromString: (str: string): number => {
+    const upperStr = str.toUpperCase()
+    switch (upperStr) {
+      case "SMB":
+        return RepositoryEnum.SMB
+      case "NFS":
+        return RepositoryEnum.NFS
+      default:
+        throw new Error(`Unknown Repository type: ${str}`)
+    }
+  },
 
-  /**
-   * 파라미터가 존재하는 WHERE 조건 추가
-   */
-  protected addCondition({ condition, params }: { condition: string; params: any[] }): this {
-    this.conditions.push(condition)
-    this.params.push(...params)
-    return this
-  }
+  // 숫자 → 문자열
+  toString: (value: number): string => {
+    switch (value) {
+      case RepositoryEnum.SMB:
+        return "SMB"
+      case RepositoryEnum.NFS:
+        return "NFS"
+      default:
+        return "Unknown"
+    }
+  },
+}
 
-  /**
-   * 파라미터가 없는 원시 SQL 조건 추가
-   */
-  protected addRawCondition({ condition }: { condition: string }): this {
-    this.rawConditions.push(condition)
-    return this
-  }
+/**
+ * backup, recovery에서 repository 연결 타입 정의
+ */
+export type RepositoryConnectionType = (typeof VALID_REPOSITORY_VALUES)[number]
+export enum RepositoryConnectionEnum {
+  SMB = 1,
+  NFS = 2,
+}
+//  repository 타입 변환
+export const RepositoryConnectionTypeMap = {
+  // 문자열 → 숫자
+  fromString: (str: string): number => {
+    const upperStr = str.toUpperCase()
+    switch (upperStr) {
+      case "SMB":
+        return RepositoryConnectionEnum.SMB
+      case "NFS":
+        return RepositoryConnectionEnum.NFS
+      default:
+        throw new Error(`Unknown Repository Connection type: ${str}`)
+    }
+  },
 
-  /**
-   * WHERE 절 생성
-   */
-  protected buildWhereClause(): string {
-    const allConditions = [...this.conditions, ...this.rawConditions]
-    return allConditions.length > 0 ? ` WHERE ${allConditions.join(" AND ")}` : ""
-  }
+  // 숫자 → 문자열
+  toString: (value: number): string => {
+    switch (value) {
+      case RepositoryConnectionEnum.SMB:
+        return "SMB"
+      case RepositoryConnectionEnum.NFS:
+        return "NFS"
+      default:
+        return "Unknown"
+    }
+  },
 }

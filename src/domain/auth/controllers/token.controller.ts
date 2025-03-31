@@ -1,6 +1,5 @@
 import { NextFunction, Request, Response } from "express"
-import { ApiError } from "../../../errors/ApiError"
-import { AppError } from "../../../errors/AppError"
+import { handleControllerError } from "../../../errors/handler/controller-error-handler"
 import { ApiUtils } from "../../../utils/api/api.utils"
 import { ContextLogger } from "../../../utils/logger/logger.custom"
 import { TokenResponseDTO } from "../dto/token.DTO"
@@ -37,29 +36,12 @@ export class TokenController {
         message: "토큰이 성공적으로 발급되었습니다",
       })
     } catch (error) {
-      ContextLogger.error({
-        message: `토큰 발급 처리 중 오류: ${error instanceof Error ? error.message : "Unknown error"}`,
-        error: error instanceof Error ? error : undefined,
+      return handleControllerError({
+        next,
+        error,
+        logErrorMessage: "토큰 생성 중 TokenController.issueToken() 오류 발생",
+        apiErrorMessage: "토큰 생성 중 오류가 발생했습니다",
       })
-      // AppError는 toApiError로 변환하여 처리 (한 번의 체크로 모든 도메인 에러 처리)
-      if (error instanceof AppError) {
-        next(error.toApiError())
-        return
-      }
-
-      // 이미 ApiError인 경우
-      if (error instanceof ApiError) {
-        next(error)
-        return
-      }
-
-      // 기타 예상치 못한 에러
-      next(
-        ApiError.internal({
-          message: "토큰 발급 처리 중 예기치 않은 오류가 발생했습니다",
-          details: process.env.NODE_ENV !== "production" ? { error: error instanceof Error ? error.message : String(error) } : undefined,
-        })
-      )
     }
   }
 }
