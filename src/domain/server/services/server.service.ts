@@ -187,7 +187,7 @@ export class ServerService {
             serverResponse[propertyName as ServerDataPropertyKey] = []
           }
           // 타입스크립트 타입 단언 필요
-          ; (serverResponse[propertyName] as any[]).push(item)
+          ;(serverResponse[propertyName] as any[]).push(item)
         }
       })
     }
@@ -206,7 +206,7 @@ export class ServerService {
    */
   async getServers({ filterOptions }: { filterOptions: ServerFilterOptions }): Promise<ServerDataResponse[]> {
     try {
-      ContextLogger.debug({ message: `모든 Server 정보 조회`, meta: { filterOptions, }, })
+      ContextLogger.debug({ message: `모든 Server 정보 조회`, meta: { filterOptions } })
       const servers = await this.serverBasicRepository.findAll({ filterOptions })
       const systemNames = servers.map((server) => server.sSystemName)
 
@@ -225,9 +225,12 @@ export class ServerService {
     } catch (error) {
       return handleServiceError({
         error,
-        logErrorMessage: 'Server 정보 조회 중 ServerService.getServers() 오류 발생',
-        apiErrorMessage: 'Server 정보 조회 중 오류가 발생했습니다',
-        logContext: { filterOptions },
+        logErrorMessage: "Server 정보 조회 중 ServerService.getServers() 오류 발생",
+        apiErrorMessage: "Server 정보 조회 중 오류가 발생했습니다",
+        operation: "server 조회",
+        dataType: "server 조회",
+        processingStage: "조회",
+        errorCreator: (params) => new ServerError.DataProcessingError(params),
       })
     }
   }
@@ -255,9 +258,12 @@ export class ServerService {
     } catch (error) {
       return handleServiceError({
         error,
-        logErrorMessage: 'Server 정보 조회 중 ServerService.getServerByName() 오류 발생',
-        apiErrorMessage: 'Server 정보 조회 중 오류가 발생했습니다',
-        logContext: { name, filterOptions },
+        logErrorMessage: "Server 정보 조회 중 ServerService.getServerByName() 오류 발생",
+        apiErrorMessage: "Server 정보 조회 중 오류가 발생했습니다",
+        operation: "단일 server 조회",
+        dataType: "단일 server 조회",
+        processingStage: "조회",
+        errorCreator: (params) => new ServerError.DataProcessingError(params),
       })
     }
   }
@@ -271,9 +277,9 @@ export class ServerService {
         throw new ServerError.ServerRequestParameterError({
           message: `identifierType이 id인 경우 identifier값은 숫자만 가능합니다`,
           details: {
-            identifierType: 'id',
-            identifier: id
-          }
+            identifierType: "id",
+            identifier: id,
+          },
         })
       }
       const server = await this.serverBasicRepository.findByServerId({ id: parseInt(id), filterOptions })
@@ -298,9 +304,12 @@ export class ServerService {
     } catch (error) {
       return handleServiceError({
         error,
-        logErrorMessage: 'Server 정보 조회 중 ServerService.getServerById() 오류 발생',
-        apiErrorMessage: 'Server 정보 조회 중 오류가 발생했습니다',
-        logContext: { id, filterOptions },
+        logErrorMessage: "Server 정보 조회 중 ServerService.getServerById() 오류 발생",
+        apiErrorMessage: "Server 정보 조회 중 오류가 발생했습니다",
+        operation: "단일 server 조회",
+        dataType: "단일 server 조회",
+        processingStage: "조회",
+        errorCreator: (params) => new ServerError.DataProcessingError(params),
       })
     }
   }

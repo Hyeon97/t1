@@ -37,9 +37,7 @@ export namespace JobError {
     identifier?: string | number
 
     constructor({ dataType, identifier, message }: { dataType: string; identifier?: string | number; message?: string }) {
-      const defaultMessage = identifier
-        ? `관련된 ${dataType} 정보(${identifier})를 찾을 수 없습니다`
-        : `관련된 ${dataType} 정보를 찾을 수 없습니다`
+      const defaultMessage = identifier ? `관련된 ${dataType} 정보(${identifier})를 찾을 수 없습니다` : `관련된 ${dataType} 정보를 찾을 수 없습니다`
 
       super({ message: message || defaultMessage })
       this.dataType = dataType
@@ -51,8 +49,8 @@ export namespace JobError {
         message: this.message,
         details: {
           dataType: this.dataType,
-          identifier: this.identifier
-        }
+          identifier: this.identifier,
+        },
       })
     }
   }
@@ -66,7 +64,7 @@ export namespace JobError {
     reason?: string
 
     constructor({ operation, dataType, reason, message }: { operation: string; dataType: string; reason?: string; message?: string }) {
-      const defaultMessage = `${operation} 작업 중 ${dataType} 데이터 조회에 실패했습니다${reason ? `: ${reason}` : ''}`
+      const defaultMessage = `${operation} 작업 중 ${dataType} 데이터 조회에 실패했습니다${reason ? `: ${reason}` : ""}`
 
       super({ message: message || defaultMessage })
       this.operation = operation
@@ -80,14 +78,14 @@ export namespace JobError {
         details: {
           operation: this.operation,
           dataType: this.dataType,
-          reason: this.reason
-        }
+          reason: this.reason,
+        },
       })
     }
   }
 
   /**
-   * 백업 데이터 처리 및 가공 실패
+   * 데이터 처리 및 가공 실패
    */
   export class DataProcessingError extends AppError {
     operation: string
@@ -100,7 +98,7 @@ export namespace JobError {
       dataType,
       processingStage,
       reason,
-      message
+      message,
     }: {
       operation: string
       dataType: string
@@ -108,7 +106,7 @@ export namespace JobError {
       reason?: string
       message?: string
     }) {
-      const defaultMessage = `${operation} 작업 중 ${dataType} 데이터 ${processingStage} 처리에 실패했습니다${reason ? `: ${reason}` : ''}`
+      const defaultMessage = `${operation} 작업 중 ${dataType} 데이터 ${processingStage}에 실패했습니다${reason ? `: ${reason}` : ""}`
 
       super({ message: message || defaultMessage })
       this.operation = operation
@@ -124,8 +122,8 @@ export namespace JobError {
           operation: this.operation,
           dataType: this.dataType,
           processingStage: this.processingStage,
-          reason: this.reason
-        }
+          reason: this.reason,
+        },
       })
     }
   }
@@ -153,8 +151,8 @@ export namespace JobError {
         details: {
           paramName: this.paramName,
           value: this.value,
-          reason: this.reason
-        }
+          reason: this.reason,
+        },
       })
     }
   }

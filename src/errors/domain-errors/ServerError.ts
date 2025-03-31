@@ -40,12 +40,13 @@ export namespace ServerError {
   /**
    * Server repository 찾을 수 없음
    */
+
   /**
    * Server 요청 파라미터 에러
    */
   export class ServerRequestParameterError extends AppError {
     details: Record<string, any>
-    constructor({ message, details = {} }: { message: string, details: Record<string, any> }) {
+    constructor({ message, details = {} }: { message: string; details: Record<string, any> }) {
       super({ message })
       this.details = details
     }
@@ -53,7 +54,51 @@ export namespace ServerError {
     toApiError(): ApiError {
       return ApiError.badRequest({
         message: this.message,
-        details: this.details
+        details: this.details,
+      })
+    }
+  }
+
+  /**
+   * 데이터 처리 및 가공 실패
+   */
+  export class DataProcessingError extends AppError {
+    operation: string
+    dataType: string
+    processingStage: string
+    reason?: string
+
+    constructor({
+      operation,
+      dataType,
+      processingStage,
+      reason,
+      message,
+    }: {
+      operation: string
+      dataType: string
+      processingStage: string
+      reason?: string
+      message?: string
+    }) {
+      const defaultMessage = `${operation} 작업 중 ${dataType} 데이터 ${processingStage}에 실패했습니다${reason ? `: ${reason}` : ""}`
+
+      super({ message: message || defaultMessage })
+      this.operation = operation
+      this.dataType = dataType
+      this.processingStage = processingStage
+      this.reason = reason
+    }
+
+    toApiError(): ApiError {
+      return ApiError.internal({
+        message: this.message,
+        details: {
+          operation: this.operation,
+          dataType: this.dataType,
+          processingStage: this.processingStage,
+          reason: this.reason,
+        },
       })
     }
   }
