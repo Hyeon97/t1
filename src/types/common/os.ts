@@ -27,11 +27,11 @@ export const OSTypeMap = {
   toString: ({ value }: { value: number }): string => {
     switch (value) {
       case OSTypeEnum.WINDOW:
-        return "win"
+        return "Window"
       case OSTypeEnum.LINUX:
-        return "lin"
+        return "Linux"
       case OSTypeEnum.CLOUD:
-        return "cloud"
+        return "Cloud"
       default:
         throw new Error(`Unknown OS type: ${value}`)
     }

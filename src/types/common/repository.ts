@@ -15,7 +15,7 @@ export enum RepositoryEnum {
 //  repository 타입 변환
 export const RepositoryTypeMap = {
   // 문자열 → 숫자
-  fromString: (str: string): number => {
+  fromString: ({ str }: { str: string }): number => {
     const upperStr = str.toUpperCase()
     switch (upperStr) {
       case "SMB":
@@ -28,7 +28,7 @@ export const RepositoryTypeMap = {
   },
 
   // 숫자 → 문자열
-  toString: (value: number): string => {
+  toString: ({ value }: { value: number }): string => {
     switch (value) {
       case RepositoryEnum.SMB:
         return "SMB"
@@ -51,7 +51,7 @@ export enum RepositoryConnectionEnum {
 //  repository 타입 변환
 export const RepositoryConnectionTypeMap = {
   // 문자열 → 숫자
-  fromString: (str: string): number => {
+  fromString: ({ str }: { str: string }): number => {
     const upperStr = str.toUpperCase()
     switch (upperStr) {
       case "SMB":
@@ -64,7 +64,7 @@ export const RepositoryConnectionTypeMap = {
   },
 
   // 숫자 → 문자열
-  toString: (value: number): string => {
+  toString: ({ value }: { value: number }): string => {
     switch (value) {
       case RepositoryConnectionEnum.SMB:
         return "SMB"
