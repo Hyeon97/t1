@@ -1,5 +1,5 @@
 import { UserError } from "../../../errors/domain-errors/UserError"
-import { handleServiceError } from "../../../errors/handler/service-error-handler"
+import { handleServiceError } from "../../../errors/handler/integration-error-handler"
 import { ContextLogger } from "../../../utils/logger/logger.custom"
 import { UserInfoRepository } from "../repositories/user-info.repository"
 import { UserInfoTable } from "../types/db/user_info"
@@ -26,6 +26,9 @@ export class UserService {
         error,
         logErrorMessage: "User 정보 조회중 UserService.getUserByEmail() 에러 발생",
         apiErrorMessage: "User 정보 조회 중 오류가 발생했습니다",
+        operation: "User 정보 조회",
+        // processingStage: "조회",
+        errorCreator: (params) => new UserError.DataProcessingError(params),
       })
     }
   }
