@@ -1,5 +1,5 @@
 import { JobError } from "../../../errors/domain-errors/JobError"
-import { handleServiceError } from "../../../errors/handler/service-error-handler"
+import { handleServiceError } from "../../../errors/handler/integration-error-handler"
 import { ContextLogger } from "../../../utils/logger/logger.custom"
 import { ServerService } from "../../server/services/server.service"
 import { ServerBasicTable } from "../../server/types/db/server-basic"
@@ -90,7 +90,7 @@ export class BackupRegistService {
       throw new JobError.DataRetrievalError({
         operation: "백업 등록",
         dataType: "서버 정보",
-        reason: error instanceof Error ? error.message : String(error)
+        reason: error instanceof Error ? error.message : String(error),
       })
     }
   }
@@ -106,7 +106,7 @@ export class BackupRegistService {
       throw new JobError.DataRetrievalError({
         operation: "백업 등록",
         dataType: "파티션 정보",
-        reason: error instanceof Error ? error.message : String(error)
+        reason: error instanceof Error ? error.message : String(error),
       })
     }
   }
@@ -168,7 +168,7 @@ export class BackupRegistService {
    */
   async regist({ data }: { data: BackupRegistRequestBody }) {
     try {
-      ContextLogger.debug({ message: 'Backup 작업 등록 시작', meta: { data } })
+      ContextLogger.debug({ message: "Backup 작업 등록 시작", meta: { data } })
 
       //  server 정보 가져오기
       const server = await this.getServerInfo({ server: data.server })
@@ -186,9 +186,10 @@ export class BackupRegistService {
           const partitionInfo = partitionList.find((item) => item.sLetter === partition)
           if (!partitionInfo) {
             throw new JobError.BackupRequestParameterError({
-              paramName: "partition",
-              value: partition,
-              reason: `요청한 파티션(${partition})이 서버에 존재하지 않습니다`
+              message: `요청한 파티션이 서버에 존재하지 않습니다`,
+              details: {
+                partition,
+              },
             })
           }
           dataSet.push({
@@ -219,12 +220,11 @@ export class BackupRegistService {
     } catch (error) {
       return handleServiceError({
         error,
-        logErrorMessage: '백업 정보 등록 중 오류 발생',
-        apiErrorMessage: '백업 정보 등록 중 오류가 발생했습니다',
-        operation: '백업 등록',
-        dataType: '백업 정보',
-        processingStage: '생성',
-        errorCreator: (params) => new JobError.DataProcessingError(params)
+        logErrorMessage: "백업 정보 등록 중 오류 발생",
+        apiErrorMessage: "백업 정보 등록 중 오류가 발생했습니다",
+        operation: "백업 등록",
+        processingStage: "생성",
+        errorCreator: (params) => new JobError.DataProcessingError(params),
       })
     }
   }

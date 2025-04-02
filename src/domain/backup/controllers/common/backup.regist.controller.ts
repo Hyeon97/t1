@@ -1,13 +1,11 @@
 import { NextFunction, Response } from "express"
+import { JobError } from "../../../../errors/domain-errors/JobError"
+import { handleControllerError } from "../../../../errors/handler/integration-error-handler"
+import { ExtendedRequest } from "../../../../types/common/req.types"
+import { ApiUtils } from "../../../../utils/api/api.utils"
 import { ContextLogger } from "../../../../utils/logger/logger.custom"
-import { JobError } from "../../../errors/domain-errors/backup-error"
-import { BackupRegistRequestBody } from "../../../types/job/backup/backup.regist"
-import { ExtendedRequest } from "../../../types/req.types"
-import { ApiUtils } from "../../../utils/api.utils"
-import { logger } from "../../../utils/logger"
-import { BackupRegistService } from "../../services/backup/backup.regist.service"
-import { BackupService } from "../../services/backup/backup.service"
-import { backupRegistService, backupService } from "../../services/backup/services"
+import { BackupRegistService } from "../../services/backup.service"
+import { BackupRegistRequestBody } from "../../types/backup-regist.type"
 
 export class BackupRegistController {
   private readonly backupService: BackupService
@@ -40,23 +38,17 @@ export class BackupRegistController {
       const result = {
         backupName: "test backup name",
       }
-      ApiUtils.success({ res, data: result, message: "Backup data regist success" })
-    } catch (error: any) {
-      if (error instanceof JobError) next(error)
-      else {
-        logger.debug("Backup 정보 등록 중 Controller 오류 발생")
-        next(
-          JobError.getDataError({
-            message: error.message,
-            logMessage: ["Backup 정보 조회 중 Controller.regist() 오류 발생", error.logMessage],
-          })
-        )
-      }
+      ApiUtils.success({ res, data: result, message: "Backup job data regist success" })
+    } catch (error) {
+      return handleControllerError({
+        next,
+        error,
+        logErrorMessage: "Backup 작업 정보 등록 중 Controller.regist() 오류 발생",
+        apiErrorMessage: "Backup 작업 정보 등록 중 오류가 발생했습니다",
+        operation: "server 조회",
+        processingStage: "조회",
+        errorCreator: (params) => new JobError.DataProcessingError(params),
+      })
     }
   }
 }
-
-export const backupController = new BackupController({
-  backupService,
-  backupRegistService,
-})
