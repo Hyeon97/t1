@@ -157,8 +157,6 @@ export const executeQuerySingle = async <T>({
   sql,
   params = [],
   connection,
-  queryName = "unnamed",
-  errorOnNotFound = false,
 }: {
   sql: string
   params?: any[]
@@ -167,15 +165,7 @@ export const executeQuerySingle = async <T>({
   errorOnNotFound?: boolean
 }): Promise<T | null> => {
   const results = await executeQuery<T>({ sql, params, connection })
-
-  if (results.length === 0) {
-    if (errorOnNotFound) {
-      throw new DatabaseError.RecordNotFoundError({ message: `요청한 데이터를 찾을 수 없습니다: ${queryName}`, query: sql, params })
-    }
-    return null
-  }
-
-  return results[0]
+  return results.length ? results[0] : null
 }
 
 // 트랜잭션 헬퍼 함수 (레거시 지원)
@@ -335,17 +325,7 @@ export class Transaction {
   }
 
   // 트랜잭션 내 단일 결과 쿼리 실행
-  public async executeQuerySingle<T>({
-    sql,
-    params = [],
-    queryName = "transaction-query-single",
-    errorOnNotFound = false,
-  }: {
-    sql: string
-    params?: any[]
-    queryName?: string
-    errorOnNotFound?: boolean
-  }): Promise<T | null> {
+  public async executeQuerySingle<T>({ sql, params = [] }: { sql: string; params?: any[] }): Promise<T | null> {
     if (!this.connection) {
       throw new DatabaseError.TransactionError({ message: "활성 트랜잭션이 없습니다" })
     }
@@ -354,8 +334,6 @@ export class Transaction {
       sql,
       params,
       connection: this.connection,
-      queryName,
-      errorOnNotFound,
     })
   }
 }
