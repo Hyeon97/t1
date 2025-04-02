@@ -33,7 +33,6 @@ export const validateToken = async (req: ExtendedRequest, res: Response, next: N
       id: payload.id,
       email: payload.email,
     }
-    ContextLogger.debug({ message: `인증 성공: ${payload.email}` })
     next()
   } catch (error) {
     ContextLogger.error({ message: `인증 처리 중 오류: ${error instanceof Error ? error.message : "Unknown error"}` })

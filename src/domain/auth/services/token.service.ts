@@ -1,6 +1,6 @@
 import { AuthError } from "../../../errors/domain-errors/AuthError"
 import { UserError } from "../../../errors/domain-errors/UserError"
-import { handleServiceError } from "../../../errors/handler/service-error-handler"
+import { handleServiceError } from "../../../errors/handler/integration-error-handler"
 import { JwtUtil } from "../../../utils/jwt.utils"
 import { ContextLogger } from "../../../utils/logger/logger.custom"
 import { UserInfoRepository } from "../../user/repositories/user-info.repository"
@@ -56,7 +56,10 @@ export class TokenService {
       return handleServiceError({
         error,
         logErrorMessage: "토큰 생성 중 TokenService.createToken() 오류 발생",
-        apiErrorMessage: "토큰 생성 중 오류가 발생했습니다"
+        apiErrorMessage: "토큰 생성 중 오류가 발생했습니다",
+        operation: "토큰 생성",
+        // processingStage: "생성",
+        errorCreator: (params) => new AuthError.DataProcessingError(params),
       })
     }
   }
@@ -75,13 +78,16 @@ export class TokenService {
         throw new AuthError.TokenVerificationFail()
       }
 
-      ContextLogger.debug({ message: `토큰 검증 성공: ${payload.email}` })
+      ContextLogger.debug({ message: `토큰 검증 성공 || User: ${payload.email}` })
       return payload
     } catch (error) {
       return handleServiceError({
         error,
         logErrorMessage: "토큰 검증 중 TokenService.verifyToken() 오류 발생",
-        apiErrorMessage: "토큰 검증 중 오류가 발생했습니다"
+        apiErrorMessage: "토큰 검증 중 오류가 발생했습니다",
+        operation: "토큰 검증",
+        // processingStage: "검증",
+        errorCreator: (params) => new AuthError.DataProcessingError(params),
       })
     }
   }

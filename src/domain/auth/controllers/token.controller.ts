@@ -1,9 +1,10 @@
 import { NextFunction, Request, Response } from "express"
-import { handleControllerError } from "../../../errors/handler/controller-error-handler"
 import { ApiUtils } from "../../../utils/api/api.utils"
 import { ContextLogger } from "../../../utils/logger/logger.custom"
 import { TokenResponseDTO } from "../dto/token.DTO"
 import { TokenService } from "../services/token.service"
+import { AuthError } from "../../../errors/domain-errors/AuthError"
+import { handleControllerError } from "../../../errors/handler/integration-error-handler"
 
 export class TokenController {
   private readonly tokenService: TokenService
@@ -41,6 +42,9 @@ export class TokenController {
         error,
         logErrorMessage: "토큰 생성 중 TokenController.issueToken() 오류 발생",
         apiErrorMessage: "토큰 생성 중 오류가 발생했습니다",
+        operation: "토큰 생성",
+        // processingStage: "생성",
+        errorCreator: (params) => new AuthError.DataProcessingError(params),
       })
     }
   }
