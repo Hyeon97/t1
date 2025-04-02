@@ -16,7 +16,6 @@ export abstract class AppError extends Error {
     Error.captureStackTrace(this, this.constructor)
   }
 
-
   /**
    * 이 에러를 API 응답에 적합한 ApiError로 변환
    * 모든 자식 클래스에서 구현해야 함
@@ -27,10 +26,10 @@ export abstract class AppError extends Error {
     // 새로운 에러를 생성하여 스택 트레이스를 얻습니다
     const stack = new Error().stack
 
-    if (!stack) return 'Unknown location'
+    if (!stack) return "Unknown location"
 
     // 스택 트레이스를 줄 단위로 분할
-    const stackLines = stack.split('\n')
+    const stackLines = stack.split("\n")
 
     // 첫 번째 줄은 Error 생성자, 두 번째 줄은 현재 메서드
     // 세 번째 줄부터 실제 에러 발생 위치가 나타남
@@ -45,6 +44,6 @@ export abstract class AppError extends Error {
       }
     }
 
-    return 'Unknown location'
+    return "Unknown location"
   }
 }

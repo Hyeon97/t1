@@ -15,12 +15,10 @@ export namespace ServerError {
 
     constructor({ server, type }: { server: string | number; type: "id" | "name" }) {
       const message = type === "id" ? `ID가 ${server}인 Server를 찾을 수 없습니다` : `이름이 ${server}인 server를 찾을 수 없습니다`
-
       super({ message })
       this.server = server
       this.type = type
     }
-
     toApiError(): ApiError {
       return ApiError.notFound({
         message: this.message,
@@ -46,9 +44,23 @@ export namespace ServerError {
    */
   export class ServerRequestParameterError extends AppError {
     details: Record<string, any>
-    constructor({ message, details = {} }: { message: string; details: Record<string, any> }) {
+    operation?: string
+    processingStage?: string
+    constructor({
+      details,
+      message,
+      processingStage,
+      operation,
+    }: {
+      details: Record<string, any>
+      message: string
+      processingStage?: string
+      operation?: string
+    }) {
       super({ message })
       this.details = details
+      this.processingStage = processingStage
+      this.operation = operation
     }
 
     toApiError(): ApiError {
@@ -63,29 +75,13 @@ export namespace ServerError {
    * 데이터 처리 및 가공 실패
    */
   export class DataProcessingError extends AppError {
-    operation: string
-    dataType: string
-    processingStage: string
+    operation?: string
+    processingStage?: string
     reason?: string
 
-    constructor({
-      operation,
-      dataType,
-      processingStage,
-      reason,
-      message,
-    }: {
-      operation: string
-      dataType: string
-      processingStage: string
-      reason?: string
-      message?: string
-    }) {
-      const defaultMessage = `${operation} 작업 중 ${dataType} 데이터 ${processingStage}에 실패했습니다${reason ? `: ${reason}` : ""}`
-
-      super({ message: message || defaultMessage })
+    constructor({ operation, processingStage, reason, message }: { operation?: string; processingStage?: string; reason?: string; message: string }) {
+      super({ message })
       this.operation = operation
-      this.dataType = dataType
       this.processingStage = processingStage
       this.reason = reason
     }
@@ -95,7 +91,6 @@ export namespace ServerError {
         message: this.message,
         details: {
           operation: this.operation,
-          dataType: this.dataType,
           processingStage: this.processingStage,
           reason: this.reason,
         },

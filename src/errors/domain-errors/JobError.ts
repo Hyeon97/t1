@@ -89,28 +89,12 @@ export namespace JobError {
    */
   export class DataProcessingError extends AppError {
     operation: string
-    dataType: string
-    processingStage: string
+    processingStage?: string
     reason?: string
 
-    constructor({
-      operation,
-      dataType,
-      processingStage,
-      reason,
-      message,
-    }: {
-      operation: string
-      dataType: string
-      processingStage: string
-      reason?: string
-      message?: string
-    }) {
-      const defaultMessage = `${operation} 작업 중 ${dataType} 데이터 ${processingStage}에 실패했습니다${reason ? `: ${reason}` : ""}`
-
-      super({ message: message || defaultMessage })
+    constructor({ operation, processingStage, reason, message }: { operation: string; processingStage?: string; reason?: string; message: string }) {
+      super({ message })
       this.operation = operation
-      this.dataType = dataType
       this.processingStage = processingStage
       this.reason = reason
     }
@@ -120,7 +104,6 @@ export namespace JobError {
         message: this.message,
         details: {
           operation: this.operation,
-          dataType: this.dataType,
           processingStage: this.processingStage,
           reason: this.reason,
         },
@@ -132,27 +115,17 @@ export namespace JobError {
    * Backup 정보 요청 파라미터 에러
    */
   export class BackupRequestParameterError extends AppError {
-    paramName: string
-    value: any
-    reason: string
+    details: Record<string, any>
 
-    constructor({ paramName, value, reason, message }: { paramName: string; value: any; reason: string; message?: string }) {
-      const defaultMessage = `백업 요청 파라미터 오류: ${paramName}=${value}. ${reason}`
-
-      super({ message: message || defaultMessage })
-      this.paramName = paramName
-      this.value = value
-      this.reason = reason
+    constructor({ details, message }: { details: Record<string, any>; message: string }) {
+      super({ message })
+      this.details = details
     }
 
     toApiError(): ApiError {
       return ApiError.badRequest({
         message: this.message,
-        details: {
-          paramName: this.paramName,
-          value: this.value,
-          reason: this.reason,
-        },
+        details: this.details,
       })
     }
   }
