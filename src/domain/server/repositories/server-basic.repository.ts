@@ -12,7 +12,7 @@ export class ServerBasicRepository extends CommonRepository {
   /**
    * 필터 옵션 적용
    */
-  private applyFilters(filterOptions: ServerFilterOptions): void {
+  private applyFilters({ filterOptions }: { filterOptions: ServerFilterOptions }): void {
     // OS 필터 적용
     if (filterOptions.os) {
       this.addCondition({ condition: "nOS = ?", params: [OSTypeMap.fromString({ str: filterOptions.os })] })
@@ -39,7 +39,7 @@ export class ServerBasicRepository extends CommonRepository {
   async findAll({ filterOptions }: { filterOptions: ServerFilterOptions }): Promise<ServerBasicTable[]> {
     try {
       this.resetQueryState()
-      this.applyFilters(filterOptions)
+      this.applyFilters({ filterOptions })
 
       let query = `SELECT * FROM ${this.tableName}`
       query += this.buildWhereClause()
@@ -56,13 +56,13 @@ export class ServerBasicRepository extends CommonRepository {
   }
 
   /**
-   * 특정 서버 조회
+   * 특정 서버 조회 ( by Name )
    */
   async findByServerName({ name, filterOptions }: { name: string; filterOptions: ServerFilterOptions }): Promise<ServerBasicTable | null> {
     try {
       this.resetQueryState()
       this.addCondition({ condition: "sSystemName = ?", params: [name] })
-      this.applyFilters(filterOptions)
+      this.applyFilters({ filterOptions })
 
       let query = `SELECT * FROM ${this.tableName}`
       query += this.buildWhereClause()
@@ -79,13 +79,13 @@ export class ServerBasicRepository extends CommonRepository {
   }
 
   /**
-   * 특정 서버 조회
+   * 특정 서버 조회 ( By ID )
    */
   async findByServerId({ id, filterOptions }: { id: number; filterOptions: ServerFilterOptions }): Promise<ServerBasicTable | null> {
     try {
       this.resetQueryState()
       this.addCondition({ condition: "nID = ?", params: [id] })
-      this.applyFilters(filterOptions)
+      this.applyFilters({ filterOptions })
 
       let query = `SELECT * FROM ${this.tableName}`
       query += this.buildWhereClause()

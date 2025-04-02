@@ -3,7 +3,7 @@ import { ContextLogger } from "../../../utils/logger/logger.custom"
 import { regNumberOnly } from "../../../utils/regex.utils"
 import { CommonRepository } from "../../../utils/repository.utils"
 import { ServerPartitionTable } from "../types/db/server-partition"
-import { ServerPartitionFilterOptions } from "../types/server-partition-filter-type"
+import { ServerPartitionFilterOptions } from "../types/server-partition-filter.type"
 
 export class ServerPartitionRepository extends CommonRepository {
   protected readonly tableName = "server_partition"

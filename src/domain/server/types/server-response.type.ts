@@ -1,8 +1,8 @@
 /////////////////////////////////
-//  server 조회 응답 type 정의  //
+//  server 정보 조회 응답 type  //
 /////////////////////////////////
 
-import { ServerDiskInfoDTO } from "../dto/disk/server.disk"
+import { ServerDiskInfoDTO } from "../dto/disk/server.disk.dto"
 import { ServerNetworkInfoDTO } from "../dto/network/server.network.dto"
 import { ServerPartitionInfoDTO } from "../dto/partition/server.partition.dto"
 import { ServerBasicTable } from "./db/server-basic"
@@ -15,7 +15,7 @@ import { ServerRepositoryTable } from "./db/server-repository"
 export type ArrayPropertyName = "disk" | "network" | "partition" | "repository"
 
 /**
- * 기본 서버 정보 응답 필드 인터페이스
+ * 서버 기본 정보 응답 필드 인터페이스
  */
 export interface ServerResponseBaseFields {
   id: string
@@ -34,7 +34,7 @@ export interface ServerResponseBaseFields {
 }
 
 /**
- * 상세 서버 정보 응답 필드 인터페이스
+ * 서버 상세 정보 응답 필드 인터페이스
  */
 export interface ServerResponseDetailFields extends ServerResponseBaseFields {
   agent: string

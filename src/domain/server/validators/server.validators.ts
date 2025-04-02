@@ -1,7 +1,7 @@
 import { validationMiddleware } from "../../../middlewares/validation/validationMiddleware"
 import { ServerQueryFilterDTO } from "../dto/query/server-query-filter.dto"
-import { SpecificServerFilterDTO } from "../dto/query/specific-server-filter.dto"
-import { SpecificServerParamDTO } from "../dto/query/specific-server-param.dto"
+import { SpecificServerFilterDTO } from "../dto/query/specific-server-query-filter.dto"
+import { SpecificServerParamDTO } from "../dto/query/specific-server-param-filter.dto"
 
 /**
  * 특정 server 조회 요청 parameter 검증

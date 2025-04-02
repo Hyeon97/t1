@@ -1,15 +1,15 @@
 import { NextFunction, Response } from "express"
 import { ServerError } from "../../../errors/domain-errors/ServerError"
-import { handleControllerError } from "../../../errors/handler/controller-error-handler"
 import { ExtendedRequest } from "../../../types/common/req.types"
 import { ApiUtils } from "../../../utils/api/api.utils"
 import { stringToBoolean } from "../../../utils/data-convert.util"
 import { ContextLogger } from "../../../utils/logger/logger.custom"
 import { ServerQueryFilterDTO } from "../dto/query/server-query-filter.dto"
-import { SpecificServerFilterDTO } from "../dto/query/specific-server-filter.dto"
+import { SpecificServerFilterDTO } from "../dto/query/specific-server-query-filter.dto"
 import { ServerResponseFactory } from "../dto/response/server-response-factory"
 import { ServerService } from "../services/server.service"
 import { ServerFilterOptions } from "../types/server-filter.type"
+import { handleControllerError } from "../../../errors/handler/integration-error-handler"
 
 export class ServerController {
   private readonly serverService: ServerService
@@ -18,7 +18,9 @@ export class ServerController {
     this.serverService = serverService
   }
 
-  //  server 조회 옵션 추출
+  /**
+   * server 조회 옵션 추출
+   */
   private extractFilterOptions({ query }: { query: SpecificServerFilterDTO | ServerQueryFilterDTO }): ServerFilterOptions {
     const filterOptions: ServerFilterOptions = {
       mode: query.mode || "",
@@ -60,13 +62,16 @@ export class ServerController {
       })
       ContextLogger.info({ message: `총 ${serversData.length}개의 서버 정보를 조회했습니다. 상세 정보 포함: ${filterOptions.detail}` })
 
-      ApiUtils.success({ res, data: serversDTOs, message: "server infomation list" })
+      ApiUtils.success({ res, data: serversDTOs, message: "Server infomation list" })
     } catch (error) {
       return handleControllerError({
         next,
         error,
-        logErrorMessage: '서버 목록 조회 중 ServerController.getServers() 오류 발생',
+        logErrorMessage: "서버 목록 조회 중 ServerController.getServers() 오류 발생",
         apiErrorMessage: "서버 목록 조회 중 오류가 발생했습니다",
+        operation: "server 조회",
+        // processingStage: "조회",
+        errorCreator: (params) => new ServerError.DataProcessingError(params),
       })
     }
   }
@@ -111,13 +116,16 @@ export class ServerController {
       })
       ContextLogger.info({ message: `${identifierType}이(가) ${identifier}인 서버 정보 조회 완료. 상세 정보 포함: ${filterOptions.detail}` })
 
-      ApiUtils.success({ res, data: serverDTO, message: "server information" })
+      ApiUtils.success({ res, data: serverDTO, message: "Server information" })
     } catch (error) {
       return handleControllerError({
         next,
         error,
-        logErrorMessage: '서버 정보 조회 중 ServerController.getServer() 오류 발생',
+        logErrorMessage: "서버 정보 조회 중 ServerController.getServer() 오류 발생",
         apiErrorMessage: "서버 정보 조회 중 오류가 발생했습니다",
+        operation: "단일 server 조회",
+        // processingStage: "조회",
+        errorCreator: (params) => new ServerError.DataProcessingError(params),
       })
     }
   }

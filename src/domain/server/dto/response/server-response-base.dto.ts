@@ -5,7 +5,7 @@
 import { OSTypeMap } from "../../../../types/common/os"
 import { SystemModeMap } from "../../types/server-common.type"
 import { ServerResponseBaseFields, ServerDataResponse, DEFAULT_VALUES_SERVER_RESPONSE, ArrayPropertyName } from "../../types/server-response.type"
-import { ServerDiskInfoDTO } from "../disk/server.disk"
+import { ServerDiskInfoDTO } from "../disk/server.disk.dto"
 import { ServerNetworkInfoDTO } from "../network/server.network.dto"
 import { ServerPartitionInfoDTO } from "../partition/server.partition.dto"
 
@@ -50,16 +50,16 @@ export class ServerResponseBaseDTO implements ServerResponseBaseFields {
     this.lastUpdated = lastUpdated
 
     // 비어있지 않은 배열만 포함
-    this.assignArrayIfNotEmpty("disk", disk)
-    this.assignArrayIfNotEmpty("network", network)
-    this.assignArrayIfNotEmpty("partition", partition)
-    this.assignArrayIfNotEmpty("repository", repository)
+    this.assignArrayIfNotEmpty({ propName: "disk", value: disk })
+    this.assignArrayIfNotEmpty({ propName: "network", value: network })
+    this.assignArrayIfNotEmpty({ propName: "partition", value: partition })
+    this.assignArrayIfNotEmpty({ propName: "repository", value: repository })
   }
 
   /**
    * 배열이 비어있지 않은 경우에만 속성 할당
    */
-  protected assignArrayIfNotEmpty<T>(propName: ArrayPropertyName, value?: T[]): void {
+  protected assignArrayIfNotEmpty<T>({ propName, value }: { propName: ArrayPropertyName; value?: T[] }): void {
     if (value && value.length > 0) {
       // 타입 안전성 향상을 위해 명시적인 타입 가드 사용
       this[propName] = value as any
@@ -83,10 +83,10 @@ export class ServerResponseBaseDTO implements ServerResponseBaseFields {
     }
 
     // 비어있지 않은 배열만 JSON 객체에 추가
-    this.addToJsonIfNotEmpty(json, "disk", this.disk)
-    this.addToJsonIfNotEmpty(json, "network", this.network)
-    this.addToJsonIfNotEmpty(json, "partition", this.partition)
-    this.addToJsonIfNotEmpty(json, "repository", this.repository)
+    this.addToJsonIfNotEmpty({ json, propName: "disk", value: this.disk })
+    this.addToJsonIfNotEmpty({ json, propName: "network", value: this.network })
+    this.addToJsonIfNotEmpty({ json, propName: "partition", value: this.partition })
+    this.addToJsonIfNotEmpty({ json, propName: "repository", value: this.repository })
 
     return json
   }
@@ -94,7 +94,7 @@ export class ServerResponseBaseDTO implements ServerResponseBaseFields {
   /**
    * 배열이 비어있지 않은 경우에만 JSON에 추가
    */
-  protected addToJsonIfNotEmpty<T>(json: Record<string, any>, propName: ArrayPropertyName, value?: T[]): void {
+  protected addToJsonIfNotEmpty<T>({ json, propName, value }: { json: Record<string, any>; propName: ArrayPropertyName; value?: T[] }): void {
     if (value && value.length > 0) {
       json[propName] = value
     }

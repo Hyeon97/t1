@@ -1,5 +1,5 @@
 import { ServerError } from "../../../errors/domain-errors/ServerError"
-import { handleServiceError } from "../../../errors/handler/service-error-handler"
+import { handleServiceError } from "../../../errors/handler/integration-error-handler"
 import { ContextLogger } from "../../../utils/logger/logger.custom"
 import { regNumberOnly } from "../../../utils/regex.utils"
 import { ServerBasicRepository } from "../repositories/server-basic.repository"
@@ -228,8 +228,7 @@ export class ServerService {
         logErrorMessage: "Server 정보 조회 중 ServerService.getServers() 오류 발생",
         apiErrorMessage: "Server 정보 조회 중 오류가 발생했습니다",
         operation: "server 조회",
-        dataType: "server 조회",
-        processingStage: "조회",
+        // processingStage: "조회",
         errorCreator: (params) => new ServerError.DataProcessingError(params),
       })
     }
@@ -261,8 +260,7 @@ export class ServerService {
         logErrorMessage: "Server 정보 조회 중 ServerService.getServerByName() 오류 발생",
         apiErrorMessage: "Server 정보 조회 중 오류가 발생했습니다",
         operation: "단일 server 조회",
-        dataType: "단일 server 조회",
-        processingStage: "조회",
+        // processingStage: "조회",
         errorCreator: (params) => new ServerError.DataProcessingError(params),
       })
     }
@@ -307,8 +305,7 @@ export class ServerService {
         logErrorMessage: "Server 정보 조회 중 ServerService.getServerById() 오류 발생",
         apiErrorMessage: "Server 정보 조회 중 오류가 발생했습니다",
         operation: "단일 server 조회",
-        dataType: "단일 server 조회",
-        processingStage: "조회",
+        // processingStage: "조회",
         errorCreator: (params) => new ServerError.DataProcessingError(params),
       })
     }
