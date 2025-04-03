@@ -8,6 +8,7 @@ import { OpenApiConfig } from "./src/config/openapi-manager"
 import { AuthRoutes } from "./src/domain/auth/routes/auth.routes"
 import { validateToken } from "./src/domain/auth/validators/token.validators"
 import { ServerRoutes } from "./src/domain/server/routes/server.routes"
+import { ZdmRoutes } from "./src/domain/zdm/routes/zdm.routes"
 import { errorHandler, notFoundHandler } from "./src/errors/handler/error-handler"
 import { requestLogger } from "./src/middlewares/logging/requestLogger"
 import { logger, morganMiddleware } from "./src/utils/logger/logger.util"
@@ -69,6 +70,7 @@ class App {
     try {
       this.app.use(`${config.apiPrefix}/token`, new AuthRoutes().router)
       this.app.use(`${config.apiPrefix}/servers`, validateToken, new ServerRoutes().router)
+      this.app.use(`${config.apiPrefix}/zdms`, validateToken, new ZdmRoutes().router)
 
       // OpenAPI 설정
       const openApiConfig = new OpenApiConfig()
