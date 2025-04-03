@@ -1,5 +1,5 @@
 import { validationMiddleware } from "../../../middlewares/validation/validationMiddleware"
-import { ZdmRepositoryCommonFilterDTO } from "../dto/query/zdm-repository/zdm-repository-query-filter.dto"
+import { ZdmRepositoryFilterDTO } from "../dto/query/zdm-repository/zdm-repository-query-filter.dto"
 import { SpecificZdmParamDTO } from "../dto/query/zdm/specific-zdm-param-filter.dto"
 import { ZdmQueryFilterDTO } from "../dto/query/zdm/zdm-query-filter.dto"
 
@@ -19,7 +19,7 @@ export const validateSpecificZdmQuery = validationMiddleware.validateQuery(null)
 //  ZDM 레포지토리 정보 등록 요청 queryString 검증
 export const validateRepositoryRegistQuery = validationMiddleware.validateQuery(null)
 //  전체 레포지토리 조회 요청 queryString 검증 ( ZDM 구분 X )
-export const validateRepositoryListQuery = validationMiddleware.validateQuery(ZdmRepositoryCommonFilterDTO)
+export const validateRepositoryListQuery = validationMiddleware.validateQuery(ZdmRepositoryFilterDTO)
 //  특정 ZDM의 전체 레포지토리 조회 요청 queryString 검증
 export const validateZdmRepositoryListQuery = validationMiddleware.validateQuery(null)
 //  특정 ZDM의 특정 레포지토리 조회 요청 queryString 검증

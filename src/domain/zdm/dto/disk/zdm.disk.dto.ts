@@ -15,7 +15,7 @@ export class ZdmDiskInfoDTO {
   constructor({ disk }: { disk: ZdmInfoDiskTable }) {
     this.diskCaption = disk.sDiskCaption || "-"
     this.diskType = DiskTypeMap.toString({ value: disk.nDiskType })
-    this.diskSize = disk.sDiskSize
+    this.diskSize = disk.sDiskSize || "-"
     this.lastUpdated = disk.sLastUpdateTime || "Unknwon"
   }
 
@@ -24,7 +24,7 @@ export class ZdmDiskInfoDTO {
    */
   formatSize(): string {
     try {
-      if (!this.diskSize) {
+      if (!this.diskSize || this.diskSize === "-") {
         return this.diskSize
       }
       return `${this.diskSize} (${formatDiskSize({ sizeInBytes: this.diskSize })})`

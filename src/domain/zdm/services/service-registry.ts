@@ -9,6 +9,7 @@ import { ZdmRepositoryRepository } from "./../repositories/center-repository.rep
 
 import { ZdmZosRepositoryRepository } from "../repositories/center-zos-repository.repository"
 import { ZdmService } from "./zdm.service"
+import { ZdmRepositoryService } from "./zdm.repository.service"
 
 // 리포지토리 인스턴스 생성
 const zdmRepository = new ZdmRepository()
@@ -25,5 +26,10 @@ export const zdmService = new ZdmService({
   zdmNetworkRepository,
   zdmPartitionRepository,
   zdmRepositoryRepository,
-  zdmZosRepositoryRepository
+  zdmZosRepositoryRepository,
+})
+
+export const zdmRepositoryService = new ZdmRepositoryService({
+  zdmRepository,
+  zdmRepositoryRepository,
 })

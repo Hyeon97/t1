@@ -28,6 +28,27 @@ export namespace ZdmError {
   }
 
   /**
+   * ZDM Repository 찾을 수 없음
+   */
+  export class ZdmRepositoryNotFound extends AppError {
+    repo: string | number
+    type: "id" | "path"
+
+    constructor({ repo, type }: { repo: string | number; type: "id" | "path" }) {
+      const message = type === "id" ? `ID가 ${repo}인 ZDM Repository를 찾을 수 없습니다` : `Path가 ${repo}인 ZDM Repository를 찾을 수 없습니다`
+      super({ message })
+      this.repo = repo
+      this.type = type
+    }
+    toApiError(): ApiError {
+      return ApiError.notFound({
+        message: this.message,
+        details: { repo: this.repo, type: this.type },
+      })
+    }
+  }
+
+  /**
    * ZDM 요청 파라미터 에러
    */
   export class ZdmRequestParameterError extends AppError {

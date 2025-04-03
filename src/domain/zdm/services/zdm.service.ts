@@ -192,7 +192,7 @@ export class ZdmService {
             zdmResponse[propertyName as ZdmDataPropertyKey] = []
           }
           // 타입스크립트 타입 단언 필요
-          ; (zdmResponse[propertyName] as any[]).push(item)
+          ;(zdmResponse[propertyName] as any[]).push(item)
         }
       })
     }

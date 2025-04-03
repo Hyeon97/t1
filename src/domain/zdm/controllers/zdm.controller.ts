@@ -63,11 +63,10 @@ export class ZdmController {
 
       ApiUtils.success({ res, data: zdmsDTOs, message: "ZDM infomation list" })
     } catch (error) {
-      console.error(error)
       return handleControllerError({
         next,
         error,
-        logErrorMessage: "ZDM 목록 조회 중 ZDMController.getZDMs() 오류 발생",
+        logErrorMessage: "ZDM 목록 조회 중 ZdmController.getZDMs() 오류 발생",
         apiErrorMessage: "ZDM 목록 조회 중 오류가 발생했습니다",
         operation: "ZDM 조회",
         errorCreator: (params) => new ZdmError.DataProcessingError(params),
@@ -116,12 +115,11 @@ export class ZdmController {
       ContextLogger.info({ message: `${identifierType}이(가) ${identifier}인 ZDM 정보 조회 완료. 상세 정보 포함: ${filterOptions.detail}` })
 
       ApiUtils.success({ res, data: zdmDTO, message: "ZDM information" })
-
     } catch (error) {
       return handleControllerError({
         next,
         error,
-        logErrorMessage: "ZDM 정보 중 ZDMController.getZdm() 오류 발생",
+        logErrorMessage: "ZDM 정보 중 ZdmController.getZdm() 오류 발생",
         apiErrorMessage: "ZDM 정보 중 오류가 발생했습니다",
         operation: "단일 ZDM 조회",
         errorCreator: (params) => new ZdmError.DataProcessingError(params),
