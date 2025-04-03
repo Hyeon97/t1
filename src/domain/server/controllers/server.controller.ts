@@ -1,5 +1,6 @@
 import { NextFunction, Response } from "express"
 import { ServerError } from "../../../errors/domain-errors/ServerError"
+import { handleControllerError } from "../../../errors/handler/integration-error-handler"
 import { ExtendedRequest } from "../../../types/common/req.types"
 import { ApiUtils } from "../../../utils/api/api.utils"
 import { stringToBoolean } from "../../../utils/data-convert.util"
@@ -9,7 +10,6 @@ import { SpecificServerFilterDTO } from "../dto/query/specific-server-query-filt
 import { ServerResponseFactory } from "../dto/response/server-response-factory"
 import { ServerService } from "../services/server.service"
 import { ServerFilterOptions } from "../types/server-filter.type"
-import { handleControllerError } from "../../../errors/handler/integration-error-handler"
 
 export class ServerController {
   private readonly serverService: ServerService
@@ -77,7 +77,7 @@ export class ServerController {
   }
 
   /**
-   * 서버 이름으로 정보 조회
+   * 단일 서버 정보 조회 ( id or Name )
    */
   getServer = async (req: ExtendedRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
