@@ -1,9 +1,9 @@
 import { ZdmError } from "../../../errors/domain-errors/ZdmError"
 import { handleServiceError } from "../../../errors/handler/integration-error-handler"
-import { logger } from "../../../utils/logger/logger.util"
 import { ZdmRepository } from "../repositories/center-info.repository"
 import { ZdmRepositoryRepository } from "../repositories/center-repository.repository"
 import { ZdmRepositoryFilterOptions } from "../types/zdm-repository/zdm-repository-filter.type"
+import { ZdmRepositoryDataResponse } from "../types/zdm-repository/zdm-repository-response.type"
 
 export class ZdmRepositoryService {
   private readonly zdmRepository: ZdmRepository
@@ -21,11 +21,13 @@ export class ZdmRepositoryService {
       const repos = await this.zdmRepositoryRepository.findAll({ filterOptions })
       return { items: repos }
     } catch (error) {
-      if (error instanceof ZdmError) throw error
-      logger.debug("ZDM Repository 조회 중 ZdmRepositoryService.getRepositoryList() 오류 발생")
-      throw ZdmError.getDataError({
-        message: error.message,
-        logMessage: ["ZDM Repository 조회 중 ZdmRepositoryService.getRepositoryList() 오류 발생", error.logMessage],
+      return handleServiceError({
+        error,
+        logErrorMessage: "ZDM Repository 정보 조회 중 ZdmService.getZdms() 오류 발생",
+        apiErrorMessage: "ZDM Repository 정보 조회 중 오류가 발생했습니다",
+        operation: "ZDM Repository 조회",
+        // processingStage: "조회",
+        errorCreator: (params) => new ZdmError.DataProcessingError(params),
       })
     }
   }

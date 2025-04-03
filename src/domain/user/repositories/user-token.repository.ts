@@ -1,10 +1,14 @@
 import { ResultSetHeader } from "mysql2"
-import { executeQuerySingle } from "../../../database/connection"
-import { CommonRepository } from "../../../utils/repository.utils"
+import { BaseRepository } from "../../../utils/base/base-repository"
 import { TokenDBInput } from "../../auth/interface/token"
 
-export class UserTokenRepository extends CommonRepository {
-  protected readonly tableName = "user_token"
+export class UserTokenRepository extends BaseRepository {
+  constructor() {
+    super({
+      tableName: "user_token",
+      entityName: "UserToken",
+    })
+  }
   /**
    * token 정보 저장
    */
@@ -13,6 +17,6 @@ export class UserTokenRepository extends CommonRepository {
     const placeholders = ["?", "?", "now()", "now()"]
     const query = `INSERT INTO ${this.tableName} (${fieldsList}) VALUES (${placeholders})`
     const params = [input.token, input.mail]
-    await executeQuerySingle<ResultSetHeader>({ sql: query, params })
+    await this.executeQuerySingle<ResultSetHeader>({ sql: query, params, functionName: "saveTokenInfo" })
   }
 }

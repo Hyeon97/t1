@@ -227,9 +227,9 @@ export class ZdmService {
     } catch (error) {
       return handleServiceError({
         error,
-        logErrorMessage: "Zdm 정보 조회 중 ZdmService.getZdms() 오류 발생",
-        apiErrorMessage: "Zdm 정보 조회 중 오류가 발생했습니다",
-        operation: "zdm 조회",
+        logErrorMessage: "ZDM 정보 조회 중 ZdmService.getZdms() 오류 발생",
+        apiErrorMessage: "ZDM 정보 조회 중 오류가 발생했습니다",
+        operation: "ZDM 조회",
         // processingStage: "조회",
         errorCreator: (params) => new ZdmError.DataProcessingError(params),
       })

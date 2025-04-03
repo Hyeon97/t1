@@ -1,13 +1,17 @@
-import { executeQuery, executeQuerySingle } from "../../../database/connection"
 import { OSTypeMap } from "../../../types/common/os"
 import { RepositoryTypeMap } from "../../../types/common/repository"
+import { BaseRepository } from "../../../utils/base/base-repository"
 import { ContextLogger } from "../../../utils/logger/logger.custom"
-import { CommonRepository } from "../../../utils/repository.utils"
 import { ZdmRepositoryTable } from "../types/db/center-repository"
 import { ZdmRepositoryFilterOptions } from "../types/zdm-repository/zdm-repository-filter.type"
 
-export class ZdmRepositoryRepository extends CommonRepository {
-  protected readonly tableName = "center_repository"
+export class ZdmRepositoryRepository extends BaseRepository {
+  constructor() {
+    super({
+      tableName: "center_repository",
+      entityName: "CenterRepository",
+    })
+  }
   /**
    * 필터 옵션 적용
    */
@@ -41,7 +45,7 @@ export class ZdmRepositoryRepository extends CommonRepository {
       this.applyFilters(filterOptions)
       let query = `SELECT * FROM ${this.tableName}`
       query += this.buildWhereClause()
-      return await executeQuery<ZdmRepositoryTable>({ sql: query, params: this.params })
+      return await this.executeQuery<ZdmRepositoryTable>({ sql: query, params: this.params })
     } catch (error) {
       ContextLogger.debug({
         message: `ZdmRepositoryRepository.findAll() 오류 발생`,
@@ -63,7 +67,7 @@ export class ZdmRepositoryRepository extends CommonRepository {
       this.applyFilters(filterOptions)
       let query = `SELECT * FROM ${this.tableName}`
       query += this.buildWhereClause()
-      return await executeQuerySingle<ZdmRepositoryTable>({ sql: query, params: this.params })
+      return await this.executeQuerySingle<ZdmRepositoryTable>({ sql: query, params: this.params, functionName: "findById" })
     } catch (error) {
       ContextLogger.debug({
         message: `ZdmRepositoryRepository.findById() 오류 발생`,
@@ -85,7 +89,7 @@ export class ZdmRepositoryRepository extends CommonRepository {
       }
       const placeholders = systemNames.map(() => "?").join(",")
       const query = `SELECT * FROM ${this.tableName} WHERE sSystemName IN (${placeholders})`
-      return await executeQuery<ZdmRepositoryTable>({ sql: query, params: systemNames })
+      return await this.executeQuery<ZdmRepositoryTable>({ sql: query, params: systemNames })
     } catch (error) {
       ContextLogger.debug({
         message: `ZdmRepositoryRepository.findBySystemNames() 오류 발생`,

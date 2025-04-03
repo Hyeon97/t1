@@ -8,6 +8,7 @@ import { ZdmRepositoryFilterOptions } from "../types/zdm-repository/zdm-reposito
 import { ContextLogger } from "../../../utils/logger/logger.custom"
 import { ZdmError } from "../../../errors/domain-errors/ZdmError"
 import { handleControllerError } from "../../../errors/handler/integration-error-handler"
+import { ZdmRepositoryService } from "../services/zdm.repository.service"
 
 export class ZdmRepositoryController {
   private readonly zdmRepositoryService: ZdmRepositoryService
@@ -22,7 +23,7 @@ export class ZdmRepositoryController {
       type: query.type || "",
       os: query.os || "",
       path: query.path || "",
-      identifierType: query.identifierType || "",
+      // identifierType: query.identifierType || "",
       center: query.center || "",
     }
     return filterOptions
@@ -41,10 +42,10 @@ export class ZdmRepositoryController {
       ContextLogger.debug({ message: `적용된 필터 옵션`, meta: filterOptions })
 
       //  서비스 호출
-      const repositoriesData = await this.repositorySerive.getRepositoryList({ filterOptions })
+      const repositories = await this.zdmRepositoryService.getRepositoryList({ filterOptions })
 
       //  출력 가공
-      const repositoriesDTO = ZdmRepositoryInfoDTO.fromEntities({ repositoriesData })
+      const repositoriesDTO = ZdmRepositoryInfoDTO.fromEntities({ repositories })
       logger.info(`총 ${repositoriesDTO.length}개의 ZDM Repository 정보를 조회했습니다.`)
 
       ApiUtils.success({ res, data: repositoriesDTO, message: "ZDM Repository infomation list" })

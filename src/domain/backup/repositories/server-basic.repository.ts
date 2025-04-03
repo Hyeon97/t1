@@ -1,14 +1,18 @@
-import { executeQuery, executeQuerySingle } from "../../../database/connection"
 import { OSTypeMap } from "../../../types/common/os"
+import { BaseRepository } from "../../../utils/base/base-repository"
 import { ContextLogger } from "../../../utils/logger/logger.custom"
-import { CommonRepository } from "../../../utils/repository.utils"
-import { SystemModeMap } from "../types/backup-common.type"
-import { ServerFilterOptions } from "../types/backup-filter.type"
-import { ServerBasicTable } from "../types/db/server-basic"
+import { ServerBasicTable } from "../../server/types/db/server-basic"
+import { SystemModeMap } from "../../server/types/server-common.type"
+import { ServerFilterOptions } from "../../server/types/server-filter.type"
 
-export class ServerBasicRepository extends CommonRepository {
+export class ServerBasicRepository extends BaseRepository {
   protected readonly tableName = "server_basic"
-
+  constructor() {
+    super({
+      tableName: "server_basic",
+      entityName: "ServerBasic",
+    })
+  }
   /**
    * 필터 옵션 적용
    */
@@ -43,7 +47,7 @@ export class ServerBasicRepository extends CommonRepository {
 
       let query = `SELECT * FROM ${this.tableName}`
       query += this.buildWhereClause()
-      return await executeQuery<ServerBasicTable>({ sql: query, params: this.params })
+      return await this.executeQuery<ServerBasicTable>({ sql: query, params: this.params })
     } catch (error) {
       ContextLogger.debug({
         message: `ServerBasicRepository.findAll() 오류 발생`,
@@ -66,7 +70,7 @@ export class ServerBasicRepository extends CommonRepository {
 
       let query = `SELECT * FROM ${this.tableName}`
       query += this.buildWhereClause()
-      return await executeQuerySingle<ServerBasicTable>({ sql: query, params: this.params })
+      return await this.executeQuerySingle<ServerBasicTable>({ sql: query, params: this.params, functionName: "findByServerName" })
     } catch (error) {
       ContextLogger.debug({
         message: `ServerBasicRepository.findByServerName() 오류 발생`,
@@ -89,7 +93,7 @@ export class ServerBasicRepository extends CommonRepository {
 
       let query = `SELECT * FROM ${this.tableName}`
       query += this.buildWhereClause()
-      return await executeQuerySingle<ServerBasicTable>({ sql: query, params: this.params })
+      return await this.executeQuerySingle<ServerBasicTable>({ sql: query, params: this.params, functionName: "findByServerId" })
     } catch (error) {
       ContextLogger.debug({
         message: `ServerBasicRepository.findByServerId() 오류 발생`,

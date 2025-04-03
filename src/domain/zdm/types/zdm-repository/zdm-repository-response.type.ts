@@ -4,6 +4,6 @@
 
 import { ZdmRepositoryTable } from "../db/center-repository"
 
-export interface ZDMRepositoryDataResponse {
+export interface ZdmRepositoryDataResponse {
   items: ZdmRepositoryTable[]
 }

@@ -68,9 +68,10 @@ class App {
 
   private async setupRoutes(): Promise<void> {
     try {
-      this.app.use(`${config.apiPrefix}/token`, new AuthRoutes().router)
-      this.app.use(`${config.apiPrefix}/servers`, validateToken, new ServerRoutes().router)
-      this.app.use(`${config.apiPrefix}/zdms`, validateToken, new ZdmRoutes().router)
+      // this.app.use(`${config.apiPrefix}/token`, new AuthRoutes().router)
+      // this.app.use(`${config.apiPrefix}/servers`, validateToken, new ServerRoutes().router)
+      this.app.use(`${config.apiPrefix}/servers`, new ServerRoutes().router)
+      // this.app.use(`${config.apiPrefix}/zdms`, validateToken, new ZdmRoutes().router)
 
       // OpenAPI 설정
       const openApiConfig = new OpenApiConfig()

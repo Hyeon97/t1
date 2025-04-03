@@ -1,5 +1,10 @@
-import { CommonRepository } from "../../../utils/repository.utils"
+import { BaseRepository } from "../../../utils/base/base-repository"
 
-export class ZdmZosRepositoryRepository extends CommonRepository {
-  protected readonly tableName = "center_zos_repository"
+export class ZdmZosRepositoryRepository extends BaseRepository {
+  constructor() {
+    super({
+      tableName: "center_zos_repository",
+      entityName: "CenterZosRepository",
+    })
+  }
 }

@@ -1,9 +1,14 @@
-import { executeQuery, executeQuerySingle } from "../../../database/connection"
+import { BaseRepository } from "../../../utils/base/base-repository"
 import { ContextLogger } from "../../../utils/logger/logger.custom"
 import { UserInfoTable } from "../types/db/user_info"
 
-export class UserInfoRepository {
-  private readonly tableName = "user_info"
+export class UserInfoRepository extends BaseRepository {
+  constructor() {
+    super({
+      tableName: "user_info",
+      entityName: "UserInfo",
+    })
+  }
   /**
    * 모든 사용자 조회
    */
@@ -11,7 +16,7 @@ export class UserInfoRepository {
     try {
       const query = `SELECT * FROM ${this.tableName}`
 
-      return await executeQuery<UserInfoTable>({ sql: query })
+      return await this.executeQuery<UserInfoTable>({ sql: query })
     } catch (error) {
       ContextLogger.debug({
         message: `UserInfoRepository.findAll() 오류 발생`,
@@ -31,7 +36,7 @@ export class UserInfoRepository {
       const query = `SELECT * FROM ${this.tableName} WHERE idx=?`
       const params = [id]
 
-      return await executeQuerySingle<UserInfoTable>({ sql: query, params })
+      return await this.executeQuerySingle<UserInfoTable>({ sql: query, params, functionName: "findById" })
     } catch (error) {
       ContextLogger.debug({
         message: `UserInfoRepository.findById() 오류 발생`,
@@ -51,7 +56,7 @@ export class UserInfoRepository {
       const query = `SELECT * FROM ${this.tableName} WHERE email=? and password=?`
       const params = [email, password]
 
-      return await executeQuerySingle<UserInfoTable>({ sql: query, params })
+      return await this.executeQuerySingle<UserInfoTable>({ sql: query, params, functionName: "findByEmailAndPassword" })
     } catch (error) {
       ContextLogger.debug({
         message: `UserInfoRepository.findByEmailAndPassword() 오류 발생`,
@@ -71,7 +76,7 @@ export class UserInfoRepository {
       const query = `SELECT * FROM ${this.tableName} WHERE email=?`
       const params = [email]
 
-      return await executeQuerySingle<UserInfoTable>({ sql: query, params })
+      return await this.executeQuerySingle<UserInfoTable>({ sql: query, params, functionName: "findByEmail" })
     } catch (error) {
       ContextLogger.debug({
         message: `UserInfoRepository.findByEmail() 오류 발생`,

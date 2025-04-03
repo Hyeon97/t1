@@ -1,11 +1,15 @@
-import { executeQuery } from "../../../database/connection"
+import { BaseRepository } from "../../../utils/base/base-repository"
 import { ContextLogger } from "../../../utils/logger/logger.custom"
-import { CommonRepository } from "../../../utils/repository.utils"
-import { ServerNetworkTable } from "../types/db/server-network"
+import { ServerNetworkTable } from "../../server/types/db/server-network"
 
-export class ServerNetworkRepository extends CommonRepository {
+export class ServerNetworkRepository extends BaseRepository {
   protected readonly tableName = "server_network"
-
+  constructor() {
+    super({
+      tableName: "server_network",
+      entityName: "ServerNetwork",
+    })
+  }
   /**
    * 특정 시스템 이름을 가진 서버들의 네트워크 정보 조회
    */
@@ -17,7 +21,7 @@ export class ServerNetworkRepository extends CommonRepository {
       const placeholders = systemNames.map(() => "?").join(",")
       const query = `SELECT * FROM ${this.tableName} WHERE sSystemName IN (${placeholders})`
 
-      return await executeQuery<ServerNetworkTable>({ sql: query, params: systemNames })
+      return await this.executeQuery<ServerNetworkTable>({ sql: query, params: systemNames })
     } catch (error) {
       ContextLogger.debug({
         message: `ServerNetworkRepository.findBySystemNames() 오류 발생`,

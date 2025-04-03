@@ -1,13 +1,17 @@
-import { executeQuery } from "../../../database/connection"
+import { BaseRepository } from "../../../utils/base/base-repository"
 import { ContextLogger } from "../../../utils/logger/logger.custom"
 import { regNumberOnly } from "../../../utils/regex.utils"
-import { CommonRepository } from "../../../utils/repository.utils"
-import { ServerPartitionTable } from "../types/db/server-partition"
-import { ServerPartitionFilterOptions } from "../types/server-partition-filter-type"
+import { ServerPartitionTable } from "../../server/types/db/server-partition"
+import { ServerPartitionFilterOptions } from "../../server/types/server-partition-filter.type"
 
-export class ServerPartitionRepository extends CommonRepository {
+export class ServerPartitionRepository extends BaseRepository {
   protected readonly tableName = "server_partition"
-
+  constructor() {
+    super({
+      tableName: "server_partition",
+      entityName: "ServerPartition",
+    })
+  }
   /**
    * 필터 옵션 적용
    */
@@ -30,7 +34,7 @@ export class ServerPartitionRepository extends CommonRepository {
       let query = `SELECT * FROM ${this.tableName}`
       query += this.buildWhereClause()
 
-      return await executeQuery<ServerPartitionTable>({ sql: query, params: this.params })
+      return await this.executeQuery<ServerPartitionTable>({ sql: query, params: this.params })
     } catch (error) {
       ContextLogger.debug({
         message: `ServerPartitionRepository.findAll() 오류 발생`,
@@ -54,7 +58,7 @@ export class ServerPartitionRepository extends CommonRepository {
       const placeholders = systemNames.map(() => "?").join(",")
       const query = `SELECT * FROM ${this.tableName} WHERE sSystemName IN (${placeholders})`
 
-      return await executeQuery<ServerPartitionTable>({ sql: query, params: systemNames })
+      return await this.executeQuery<ServerPartitionTable>({ sql: query, params: systemNames })
     } catch (error) {
       ContextLogger.debug({
         message: `ServerPartitionRepository.findBySystemNames() 오류 발생`,
@@ -76,7 +80,7 @@ export class ServerPartitionRepository extends CommonRepository {
       this.applyFilters(filterOptions)
       let query = `SELECT * FROM ${this.tableName}`
 
-      return await executeQuery<ServerPartitionTable>({ sql: query, params: this.params })
+      return await this.executeQuery<ServerPartitionTable>({ sql: query, params: this.params })
     } catch (error) {
       ContextLogger.debug({
         message: `ServerPartitionRepository.findByServerName() 오류 발생`,

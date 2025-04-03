@@ -1,5 +1,5 @@
-import { ServerError } from "../../../errors/domain-errors/ServerError"
-import { handleServiceError } from "../../../errors/handler/integration-error-handler"
+import { ServiceError } from "../../../errors/service/service-error"
+import { BaseService } from "../../../utils/base/base-service"
 import { ContextLogger } from "../../../utils/logger/logger.custom"
 import { regNumberOnly } from "../../../utils/regex.utils"
 import { ServerBasicRepository } from "../repositories/server-basic.repository"
@@ -18,7 +18,7 @@ import { ServerDataResponse } from "../types/server-response.type"
 type AdditionalInfoKey = "disks" | "networks" | "partitions" | "repositories"
 type ServerDataPropertyKey = Exclude<keyof ServerDataResponse, "server">
 
-export class ServerService {
+export class ServerService extends BaseService {
   private readonly serverBasicRepository: ServerBasicRepository
   private readonly serverDiskRepository: ServerDiskRepository
   private readonly serverPartitionRepository: ServerPartitionRepository
@@ -37,6 +37,10 @@ export class ServerService {
     serverNetworkRepository: ServerNetworkRepository
     serverRepositoryRepository: ServerRepositoryRepository
   }) {
+    super({
+      serviceName: "ServerService",
+      entityName: "Server",
+    })
     this.serverBasicRepository = serverBasicRepository
     this.serverDiskRepository = serverDiskRepository
     this.serverPartitionRepository = serverPartitionRepository
@@ -171,34 +175,43 @@ export class ServerService {
     partitions?: ServerPartitionTable[]
     repositories?: ServerRepositoryTable[]
   }): ServerDataResponse[] {
-    const serverMap = new Map<string, ServerDataResponse>()
+    try {
+      const serverMap = new Map<string, ServerDataResponse>()
 
-    // 서버 기본 정보로 맵 초기화
-    servers.forEach((server) => {
-      serverMap.set(server.sSystemName, { server })
-    })
+      // 서버 기본 정보로 맵 초기화
+      servers.forEach((server) => {
+        serverMap.set(server.sSystemName, { server })
+      })
 
-    const addRelatedData = <T extends { sSystemName: string }>({ items, propertyName }: { items: T[]; propertyName: ServerDataPropertyKey }) => {
-      items.forEach((item) => {
-        const serverResponse = serverMap.get(item.sSystemName)
-        if (serverResponse) {
-          // 배열이 없으면 초기화
-          if (!serverResponse[propertyName]) {
-            serverResponse[propertyName as ServerDataPropertyKey] = []
+      const addRelatedData = <T extends { sSystemName: string }>({ items, propertyName }: { items: T[]; propertyName: ServerDataPropertyKey }) => {
+        items.forEach((item) => {
+          const serverResponse = serverMap.get(item.sSystemName)
+          if (serverResponse) {
+            // 배열이 없으면 초기화
+            if (!serverResponse[propertyName]) {
+              serverResponse[propertyName as ServerDataPropertyKey] = []
+            }
+            // 타입스크립트 타입 단언 필요
+            ;(serverResponse[propertyName] as any[]).push(item)
           }
-          // 타입스크립트 타입 단언 필요
-          ;(serverResponse[propertyName] as any[]).push(item)
-        }
+        })
+      }
+
+      // 모든 관련 데이터 처리
+      addRelatedData({ items: disks, propertyName: "disk" })
+      addRelatedData({ items: networks, propertyName: "network" })
+      addRelatedData({ items: partitions, propertyName: "partition" })
+      addRelatedData({ items: repositories, propertyName: "repository" })
+
+      return Array.from(serverMap.values())
+    } catch (error) {
+      return this.handleServiceError({
+        error,
+        functionName: "combineServerData",
+        operationName: "데이터 조합",
+        message: "서버 데이터 조합 중 오류가 발생했습니다",
       })
     }
-
-    // 모든 관련 데이터 처리
-    addRelatedData({ items: disks, propertyName: "disk" })
-    addRelatedData({ items: networks, propertyName: "network" })
-    addRelatedData({ items: partitions, propertyName: "partition" })
-    addRelatedData({ items: repositories, propertyName: "repository" })
-
-    return Array.from(serverMap.values())
   }
 
   /**
@@ -207,9 +220,12 @@ export class ServerService {
   async getServers({ filterOptions }: { filterOptions: ServerFilterOptions }): Promise<ServerDataResponse[]> {
     try {
       ContextLogger.debug({ message: `모든 Server 정보 조회`, meta: { filterOptions } })
+
+      // 기본 서버 정보 조회
       const servers = await this.serverBasicRepository.findAll({ filterOptions })
       const systemNames = servers.map((server) => server.sSystemName)
 
+      // 추가 정보 조회
       const { disks, networks, partitions, repositories } = await this.getAdditionalInfo({ filterOptions, systemNames })
 
       // 데이터 조합
@@ -223,13 +239,11 @@ export class ServerService {
 
       return result
     } catch (error) {
-      return handleServiceError({
+      return this.handleServiceError({
         error,
-        logErrorMessage: "Server 정보 조회 중 ServerService.getServers() 오류 발생",
-        apiErrorMessage: "Server 정보 조회 중 오류가 발생했습니다",
-        operation: "server 조회",
-        // processingStage: "조회",
-        errorCreator: (params) => new ServerError.DataProcessingError(params),
+        functionName: "getServers",
+        operationName: "server 목록 조회",
+        message: "서버 정보 목록 조회 중 오류가 발생했습니다",
       })
     }
   }
@@ -239,11 +253,23 @@ export class ServerService {
    */
   async getServerByName({ name, filterOptions }: { name: string; filterOptions: ServerFilterOptions }): Promise<ServerDataResponse> {
     try {
+      // 서버 기본 정보 조회
       const server = await this.serverBasicRepository.findByServerName({ name, filterOptions })
+
+      // 서버가 존재하는지 확인
       if (!server) {
-        throw new ServerError.ServerNotFound({ server: name, type: "name" })
+        throw ServiceError.resourceNotFoundError({
+          functionName: "getServerByName",
+          message: `이름이 '${name}'인 서버를 찾을 수 없습니다`,
+          entityName: this.entityName,
+          operationName: "서버 조회",
+          metadata: { name },
+        })
       }
+
+      // 추가 정보 조회
       const { disks, networks, partitions, repositories } = await this.getAdditionalInfo({ filterOptions, systemNames: [name] })
+
       // 데이터 조합
       const result = this.combineServerData({
         servers: [server],
@@ -255,13 +281,11 @@ export class ServerService {
 
       return result[0]
     } catch (error) {
-      return handleServiceError({
+      return this.handleServiceError({
         error,
-        logErrorMessage: "Server 정보 조회 중 ServerService.getServerByName() 오류 발생",
-        apiErrorMessage: "Server 정보 조회 중 오류가 발생했습니다",
-        operation: "단일 server 조회",
-        // processingStage: "조회",
-        errorCreator: (params) => new ServerError.DataProcessingError(params),
+        functionName: "getServerByName",
+        operationName: "서버 이름으로 조회",
+        message: `서버 이름 '${name}'으로 조회 중 오류가 발생했습니다`,
       })
     }
   }
@@ -271,19 +295,30 @@ export class ServerService {
    */
   async getServerById({ id, filterOptions }: { id: string; filterOptions: ServerFilterOptions }): Promise<ServerDataResponse> {
     try {
+      // ID 형식 검증
       if (!regNumberOnly.test(id)) {
-        throw new ServerError.ServerRequestParameterError({
-          message: `identifierType이 id인 경우 identifier값은 숫자만 가능합니다`,
-          details: {
-            identifierType: "id",
-            identifier: id,
-          },
+        throw ServiceError.validationError({
+          functionName: "getServerById",
+          message: `서버 ID는 숫자만 포함해야 합니다. 입력값: '${id}'`,
+          entityName: this.entityName,
+          operationName: "서버 ID로 조회",
+          metadata: { id },
         })
       }
+
+      // 서버 기본 정보 조회
       const server = await this.serverBasicRepository.findByServerId({ id: parseInt(id), filterOptions })
       if (!server) {
-        throw new ServerError.ServerNotFound({ server: id, type: "id" })
+        throw ServiceError.resourceNotFoundError({
+          functionName: "getServerById",
+          message: `ID가 '${id}'인 서버를 찾을 수 없습니다`,
+          entityName: this.entityName,
+          operationName: "서버 ID로 조회",
+          metadata: { id },
+        })
       }
+
+      // 추가 정보 조회
       const { disks, networks, partitions, repositories } = await this.getAdditionalInfo({
         filterOptions,
         systemNames: [server.sSystemName],
@@ -300,13 +335,11 @@ export class ServerService {
 
       return result[0]
     } catch (error) {
-      return handleServiceError({
+      return this.handleServiceError({
         error,
-        logErrorMessage: "Server 정보 조회 중 ServerService.getServerById() 오류 발생",
-        apiErrorMessage: "Server 정보 조회 중 오류가 발생했습니다",
-        operation: "단일 server 조회",
-        // processingStage: "조회",
-        errorCreator: (params) => new ServerError.DataProcessingError(params),
+        functionName: "getServerById",
+        operationName: "서버 ID로 조회",
+        message: `서버 ID '${id}'로 조회 중 오류가 발생했습니다`,
       })
     }
   }

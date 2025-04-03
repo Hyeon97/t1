@@ -1,22 +1,33 @@
-import { executeQuery } from "../../../database/connection"
-import { ContextLogger } from "../../../utils/logger/logger.custom"
+import { BaseRepository } from "../../../utils/base/base-repository"
 import { regNumberOnly } from "../../../utils/regex.utils"
-import { CommonRepository } from "../../../utils/repository.utils"
 import { ServerPartitionTable } from "../types/db/server-partition"
 import { ServerPartitionFilterOptions } from "../types/server-partition-filter.type"
 
-export class ServerPartitionRepository extends CommonRepository {
-  protected readonly tableName = "server_partition"
+export class ServerPartitionRepository extends BaseRepository {
+  constructor() {
+    super({
+      tableName: "server_partition",
+      entityName: "ServerPartition",
+    })
+  }
 
   /**
    * 필터 옵션 적용
    */
   private applyFilters(filterOptions: ServerPartitionFilterOptions): void {
-    //  server 필터 적용
-    //  filterOptions.server 값이 server name 인 경우 별도 처리 필요 ( server 정보 가져와야 함 )
-    if (filterOptions.server) {
-      if (typeof filterOptions.server === "number" || regNumberOnly.test(filterOptions.server as string))
-        this.addCondition({ condition: "sSystemName = ?", params: [filterOptions.server] })
+    try {
+      //  server 필터 적용
+      //  filterOptions.server 값이 server name 인 경우 별도 처리 필요 ( server 정보 가져와야 함 )
+      if (filterOptions.server) {
+        if (typeof filterOptions.server === "number" || regNumberOnly.test(filterOptions.server as string))
+          this.addCondition({ condition: "sSystemName = ?", params: [filterOptions.server] })
+      }
+    } catch (error) {
+      this.handleRepositoryError({
+        error,
+        functionName: "applyFilters",
+        message: "파티션 필터 옵션 적용 중 오류가 발생했습니다",
+      })
     }
   }
 
@@ -27,18 +38,17 @@ export class ServerPartitionRepository extends CommonRepository {
     try {
       this.resetQueryState()
       this.applyFilters(filterOptions)
+
       let query = `SELECT * FROM ${this.tableName}`
       query += this.buildWhereClause()
 
-      return await executeQuery<ServerPartitionTable>({ sql: query, params: this.params })
+      return await this.executeQuery<ServerPartitionTable>({ sql: query, params: this.params })
     } catch (error) {
-      ContextLogger.debug({
-        message: `ServerPartitionRepository.findAll() 오류 발생`,
-        meta: {
-          error: error instanceof Error ? error.message : String(error),
-        },
+      return this.handleRepositoryError({
+        error,
+        functionName: "findAll",
+        message: "모든 파티션 정보 조회 중 오류가 발생했습니다",
       })
-      throw error
     }
   }
 
@@ -54,15 +64,13 @@ export class ServerPartitionRepository extends CommonRepository {
       const placeholders = systemNames.map(() => "?").join(",")
       const query = `SELECT * FROM ${this.tableName} WHERE sSystemName IN (${placeholders})`
 
-      return await executeQuery<ServerPartitionTable>({ sql: query, params: systemNames })
+      return await this.executeQuery<ServerPartitionTable>({ sql: query, params: systemNames })
     } catch (error) {
-      ContextLogger.debug({
-        message: `ServerPartitionRepository.findBySystemNames() 오류 발생`,
-        meta: {
-          error: error instanceof Error ? error.message : String(error),
-        },
+      return this.handleRepositoryError({
+        error,
+        functionName: "findBySystemNames",
+        message: "시스템 이름으로 파티션 정보 조회 중 오류가 발생했습니다",
       })
-      throw error
     }
   }
 
@@ -74,17 +82,17 @@ export class ServerPartitionRepository extends CommonRepository {
       this.resetQueryState()
       this.addCondition({ condition: "sSystemName = ?", params: [name] })
       this.applyFilters(filterOptions)
-      let query = `SELECT * FROM ${this.tableName}`
 
-      return await executeQuery<ServerPartitionTable>({ sql: query, params: this.params })
+      let query = `SELECT * FROM ${this.tableName}`
+      query += this.buildWhereClause()
+
+      return await this.executeQuery<ServerPartitionTable>({ sql: query, params: this.params })
     } catch (error) {
-      ContextLogger.debug({
-        message: `ServerPartitionRepository.findByServerName() 오류 발생`,
-        meta: {
-          error: error instanceof Error ? error.message : String(error),
-        },
+      return this.handleRepositoryError({
+        error,
+        functionName: "findByServerName",
+        message: `서버 이름(${name})으로 파티션 정보 조회 중 오류가 발생했습니다`,
       })
-      throw error
     }
   }
 }

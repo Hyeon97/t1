@@ -3,11 +3,16 @@
 ////////////////////////////////
 
 import { OSTypeMap } from "../../../../types/common/os"
-import { SystemModeMap } from "../../types/backup-common.type"
-import { ArrayPropertyName, DEFAULT_VALUES_SERVER_RESPONSE, ServerDataResponse, ServerResponseBaseFields } from "../../types/backup-response.type"
-import { ServerDiskInfoDTO } from "../disk/server.disk"
-import { ServerNetworkInfoDTO } from "../network/server.network.dto"
-import { ServerPartitionInfoDTO } from "../partition/server.partition.dto"
+import { ServerDiskInfoDTO } from "../../../server/dto/disk/server.disk.dto"
+import { ServerNetworkInfoDTO } from "../../../server/dto/network/server.network.dto"
+import { ServerPartitionInfoDTO } from "../../../server/dto/partition/server.partition.dto"
+import { SystemModeMap } from "../../../server/types/server-common.type"
+import {
+  ServerResponseBaseFields,
+  DEFAULT_VALUES_SERVER_RESPONSE,
+  ArrayPropertyName,
+  ServerDataResponse,
+} from "../../../server/types/server-response.type"
 
 export class ServerResponseBaseDTO implements ServerResponseBaseFields {
   id: string

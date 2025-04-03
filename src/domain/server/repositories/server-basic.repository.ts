@@ -1,36 +1,61 @@
-import { executeQuery, executeQuerySingle } from "../../../database/connection"
 import { OSTypeMap } from "../../../types/common/os"
+import { BaseRepository } from "../../../utils/base/base-repository"
 import { ContextLogger } from "../../../utils/logger/logger.custom"
-import { CommonRepository } from "../../../utils/repository.utils"
 import { ServerBasicTable } from "../types/db/server-basic"
 import { SystemModeMap } from "../types/server-common.type"
 import { ServerFilterOptions } from "../types/server-filter.type"
 
-export class ServerBasicRepository extends CommonRepository {
-  protected readonly tableName = "server_basic"
+export class ServerBasicRepository extends BaseRepository {
+  constructor() {
+    super({
+      tableName: "server_basic",
+      entityName: "ServerBasic",
+    })
+  }
 
   /**
    * 필터 옵션 적용
    */
   private applyFilters({ filterOptions }: { filterOptions: ServerFilterOptions }): void {
-    // OS 필터 적용
-    if (filterOptions.os) {
-      this.addCondition({ condition: "nOS = ?", params: [OSTypeMap.fromString({ str: filterOptions.os })] })
+    try {
+      // OS 필터 적용
+      if (filterOptions.os) {
+        this.addCondition({
+          condition: "nOS = ?",
+          params: [OSTypeMap.fromString({ str: filterOptions.os })],
+        })
+      }
+
+      // 상태 필터 적용
+      if (filterOptions.connection) {
+        this.addCondition({
+          condition: "sStatus = ?",
+          params: [filterOptions.connection],
+        })
+      }
+
+      // 시스템 모드 필터 적용
+      if (filterOptions.mode) {
+        this.addCondition({
+          condition: "nSystemMode = ?",
+          params: [SystemModeMap.fromString({ str: filterOptions.mode })],
+        })
+      }
+
+      // 라이센스 필터 적용
+      if (filterOptions.license) {
+        const condition = filterOptions.license === "assign" ? "nLicenseID > 0" : "nLicenseID = 0"
+        this.addRawCondition({ condition })
+      }
+
+      ContextLogger.debug({ message: `필터 옵션 적용됨` })
+    } catch (error) {
+      this.handleRepositoryError({
+        error,
+        functionName: "applyFilters",
+        message: "필터 옵션 적용 중 오류가 발생했습니다",
+      })
     }
-    // 상태 필터 적용
-    if (filterOptions.connection) {
-      this.addCondition({ condition: "sStatus = ?", params: [filterOptions.connection] })
-    }
-    // 시스템 모드 필터 적용
-    if (filterOptions.mode) {
-      this.addCondition({ condition: "nSystemMode = ?", params: [SystemModeMap.fromString({ str: filterOptions.mode })] })
-    }
-    // 라이센스 필터 적용
-    if (filterOptions.license) {
-      const condition = filterOptions.license === "assign" ? "nLicenseID > 0" : "nLicenseID = 0"
-      this.addRawCondition({ condition })
-    }
-    ContextLogger.debug({ message: `필터 옵션 적용됨` })
   }
 
   /**
@@ -43,15 +68,14 @@ export class ServerBasicRepository extends CommonRepository {
 
       let query = `SELECT * FROM ${this.tableName}`
       query += this.buildWhereClause()
-      return await executeQuery<ServerBasicTable>({ sql: query, params: this.params })
+
+      return await this.executeQuery<ServerBasicTable>({ sql: query, params: this.params })
     } catch (error) {
-      ContextLogger.debug({
-        message: `ServerBasicRepository.findAll() 오류 발생`,
-        meta: {
-          error: error instanceof Error ? error.message : String(error),
-        },
+      return this.handleRepositoryError({
+        error,
+        functionName: "findAll",
+        message: "서버 목록 조회 중 오류가 발생했습니다",
       })
-      throw error
     }
   }
 
@@ -66,15 +90,18 @@ export class ServerBasicRepository extends CommonRepository {
 
       let query = `SELECT * FROM ${this.tableName}`
       query += this.buildWhereClause()
-      return await executeQuerySingle<ServerBasicTable>({ sql: query, params: this.params })
-    } catch (error) {
-      ContextLogger.debug({
-        message: `ServerBasicRepository.findByServerName() 오류 발생`,
-        meta: {
-          error: error instanceof Error ? error.message : String(error),
-        },
+
+      return await this.executeQuerySingle<ServerBasicTable>({
+        sql: query,
+        params: this.params,
+        functionName: "findByServerName",
       })
-      throw error
+    } catch (error) {
+      return this.handleRepositoryError({
+        error,
+        functionName: "findByServerName",
+        message: `서버 이름(${name})으로 조회 중 오류가 발생했습니다`,
+      })
     }
   }
 
@@ -89,15 +116,18 @@ export class ServerBasicRepository extends CommonRepository {
 
       let query = `SELECT * FROM ${this.tableName}`
       query += this.buildWhereClause()
-      return await executeQuerySingle<ServerBasicTable>({ sql: query, params: this.params })
-    } catch (error) {
-      ContextLogger.debug({
-        message: `ServerBasicRepository.findByServerId() 오류 발생`,
-        meta: {
-          error: error instanceof Error ? error.message : String(error),
-        },
+
+      return await this.executeQuerySingle<ServerBasicTable>({
+        sql: query,
+        params: this.params,
+        functionName: "findByServerId",
       })
-      throw error
+    } catch (error) {
+      return this.handleRepositoryError({
+        error,
+        functionName: "findByServerId",
+        message: `서버 ID(${id})로 조회 중 오류가 발생했습니다`,
+      })
     }
   }
 }

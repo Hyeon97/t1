@@ -3,7 +3,7 @@
 ////////////////////////////////
 
 import { formatDiskSize } from "../../../../utils/data-convert.util"
-import { DEFAULT_VALUES_SERVER_RESPONSE, ServerDataResponse, ServerResponseDetailFields } from "../../types/backup-response.type"
+import { DEFAULT_VALUES_SERVER_RESPONSE, ServerDataResponse, ServerResponseDetailFields } from "../../../server/types/server-response.type"
 import { ServerResponseBaseDTO } from "./backup-response-base.dto"
 
 export class ServerResponseDetailDTO extends ServerResponseBaseDTO implements ServerResponseDetailFields {

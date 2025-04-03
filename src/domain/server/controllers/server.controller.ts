@@ -1,6 +1,6 @@
 import { NextFunction, Response } from "express"
+import { ControllerError } from "../../../errors/controller/controller-error"
 import { ServerError } from "../../../errors/domain-errors/ServerError"
-import { handleControllerError } from "../../../errors/handler/integration-error-handler"
 import { ExtendedRequest } from "../../../types/common/req.types"
 import { ApiUtils } from "../../../utils/api/api.utils"
 import { stringToBoolean } from "../../../utils/data-convert.util"
@@ -10,6 +10,7 @@ import { SpecificServerFilterDTO } from "../dto/query/specific-server-query-filt
 import { ServerResponseFactory } from "../dto/response/server-response-factory"
 import { ServerService } from "../services/server.service"
 import { ServerFilterOptions } from "../types/server-filter.type"
+import { handleControllerError } from "../../../errors/handler/error-handler"
 
 export class ServerController {
   private readonly serverService: ServerService
@@ -22,22 +23,33 @@ export class ServerController {
    * server 조회 옵션 추출
    */
   private extractFilterOptions({ query }: { query: SpecificServerFilterDTO | ServerQueryFilterDTO }): ServerFilterOptions {
-    const filterOptions: ServerFilterOptions = {
-      mode: query.mode || "",
-      os: query.os || "",
-      network: query.network ?? false,
-      disk: query.disk ?? false,
-      partition: query.partition ?? false,
-      repository: query.repository ?? false,
-      connection: query.connection || "",
-      license: query.license || "",
-      detail: query.detail ?? false,
-    }
+    try {
+      const filterOptions: ServerFilterOptions = {
+        mode: query.mode || "",
+        os: query.os || "",
+        network: query.network ?? false,
+        disk: query.disk ?? false,
+        partition: query.partition ?? false,
+        repository: query.repository ?? false,
+        connection: query.connection || "",
+        license: query.license || "",
+        detail: query.detail ?? false,
+      }
 
-    if (query instanceof SpecificServerFilterDTO) {
-      filterOptions.identifierType = query.identifierType
+      if (query instanceof SpecificServerFilterDTO) {
+        filterOptions.identifierType = query.identifierType
+      }
+
+      return filterOptions
+    } catch (error) {
+      throw ControllerError.badRequestError({
+        functionName: "extractFilterOptions",
+        message: "서버 필터 옵션을 추출하는 중 오류가 발생했습니다",
+        cause: error,
+        resource: "Server",
+        action: "필터 옵션 추출",
+      })
     }
-    return filterOptions
   }
 
   /**
@@ -64,14 +76,12 @@ export class ServerController {
 
       ApiUtils.success({ res, data: serversDTOs, message: "Server infomation list" })
     } catch (error) {
-      return handleControllerError({
+      handleControllerError({
         next,
         error,
-        logErrorMessage: "서버 목록 조회 중 ServerController.getServers() 오류 발생",
-        apiErrorMessage: "서버 목록 조회 중 오류가 발생했습니다",
-        operation: "server 조회",
-        // processingStage: "조회",
-        errorCreator: (params) => new ServerError.DataProcessingError(params),
+        functionName: "getServers",
+        resource: "Server",
+        action: "목록 조회",
       })
     }
   }
@@ -106,9 +116,7 @@ export class ServerController {
           filterOptions,
         })
       }
-      if (!serverData) {
-        throw new ServerError.ServerNotFound({ server: identifier, type: identifierType })
-      }
+
       //  출력 가공
       const serverDTO = ServerResponseFactory.createFromEntity({
         detail: stringToBoolean({ value: filterOptions?.detail }),
@@ -118,14 +126,12 @@ export class ServerController {
 
       ApiUtils.success({ res, data: serverDTO, message: "Server information" })
     } catch (error) {
-      return handleControllerError({
+      handleControllerError({
         next,
         error,
-        logErrorMessage: "서버 정보 조회 중 ServerController.getServer() 오류 발생",
-        apiErrorMessage: "서버 정보 조회 중 오류가 발생했습니다",
-        operation: "단일 server 조회",
-        // processingStage: "조회",
-        errorCreator: (params) => new ServerError.DataProcessingError(params),
+        functionName: "getServer",
+        resource: "Server",
+        action: "단일 조회",
       })
     }
   }

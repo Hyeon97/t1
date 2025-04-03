@@ -6,7 +6,7 @@ import { OSTypeMap } from "../../../../types/common/os"
 import { RepositoryTypeMap } from "../../../../types/common/repository"
 import { formatDiskSize } from "../../../../utils/data-convert.util"
 import { ZdmRepositoryTable } from "../../types/db/center-repository"
-import { ZDMRepositoryDataResponse } from "../../types/zdm-repository/zdm-repository-response.type"
+import { ZdmRepositoryDataResponse } from "../../types/zdm-repository/zdm-repository-response.type"
 
 export class ZdmRepositoryInfoDTO {
   id: string
@@ -68,7 +68,7 @@ export class ZdmRepositoryInfoDTO {
     return new ZdmRepositoryInfoDTO({ repo: repositories })
   }
 
-  static fromEntities({ repositories }: { repositories: ZDMRepositoryDataResponse | ZdmRepositoryTable[] }): ZdmRepositoryInfoDTO[] {
+  static fromEntities({ repositories }: { repositories: ZdmRepositoryDataResponse | ZdmRepositoryTable[] }): ZdmRepositoryInfoDTO[] {
     if ("items" in repositories) {
       return repositories.items.map((repositories) => ZdmRepositoryInfoDTO.fromEntity({ repositories }))
     } else {

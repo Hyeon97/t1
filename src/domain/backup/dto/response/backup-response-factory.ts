@@ -2,7 +2,7 @@
 //  Backup 응답 DTO 생성 팩토리  //
 //////////////////////////////////
 
-import { ServerDataResponse } from "../../types/backup-response.type"
+import { ServerDataResponse } from "../../../server/types/server-response.type"
 import { ServerResponseBaseDTO } from "./backup-response-base.dto"
 import { ServerResponseDetailDTO } from "./backup-response-detail.dto"
 

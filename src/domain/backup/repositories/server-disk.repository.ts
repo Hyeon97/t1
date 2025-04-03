@@ -1,11 +1,14 @@
-import { executeQuery } from "../../../database/connection"
+import { BaseRepository } from "../../../utils/base/base-repository"
 import { ContextLogger } from "../../../utils/logger/logger.custom"
-import { CommonRepository } from "../../../utils/repository.utils"
-import { ServerDiskTable } from "../types/db/server-disk"
+import { ServerDiskTable } from "../../server/types/db/server-disk"
 
-export class ServerDiskRepository extends CommonRepository {
-  protected readonly tableName = "server_disk"
-
+export class ServerDiskRepository extends BaseRepository {
+  constructor() {
+    super({
+      tableName: "server_disk",
+      entityName: "ServerDisk",
+    })
+  }
   /**
    * 특정 시스템 이름을 가진 서버들의 디스크 정보 조회
    */
@@ -17,7 +20,7 @@ export class ServerDiskRepository extends CommonRepository {
       const placeholders = systemNames.map(() => "?").join(",")
       const query = `SELECT * FROM ${this.tableName} WHERE sSystemName IN (${placeholders})`
 
-      return await executeQuery<ServerDiskTable>({ sql: query, params: systemNames })
+      return await this.executeQuery<ServerDiskTable>({ sql: query, params: systemNames })
     } catch (error) {
       ContextLogger.debug({
         message: `ServerDiskRepository.findBySystemNames() 오류 발생`,

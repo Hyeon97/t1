@@ -6,7 +6,7 @@ import columnify from "columnify"
 import listEndpoints from "express-list-endpoints"
 import { app } from "./app"
 import { config } from "./src/config/config"
-import { testConnection } from "./src/database/connection"
+import { DatabasePool } from "./src/database/connection"
 import { logger } from "./src/utils/logger/logger.util"
 
 //  엔드포인트 로깅
@@ -22,7 +22,7 @@ const endPointLogging = () => {
 //  데이터베이스 연결 테스트
 const checkDatabaseConnection = async () => {
   logger.info("데이터베이스 연결 시도 중...")
-  const dbConnected = await testConnection()
+  const dbConnected = await DatabasePool.getInstance().testConnection()
 
   if (!dbConnected) {
     logger.error("데이터베이스 연결 실패로 서버 시작이 중단되었습니다")
