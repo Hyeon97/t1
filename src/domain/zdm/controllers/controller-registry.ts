@@ -2,6 +2,7 @@
 //  ZDM Controller 선언 및 관리  //
 //////////////////////////////////
 
+import { zdmService } from "../services/service-registry"
 import { ZdmController } from "./zdm.controller"
 
 /**

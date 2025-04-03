@@ -1,5 +1,6 @@
 import { validationMiddleware } from "../../../middlewares/validation/validationMiddleware"
 import { ZdmRepositoryCommonFilterDTO } from "../dto/query/zdm-repository/zdm-repository-query-filter.dto"
+import { SpecificZdmParamDTO } from "../dto/query/zdm/specific-zdm-param-filter.dto"
 import { ZdmQueryFilterDTO } from "../dto/query/zdm/zdm-query-filter.dto"
 
 /**
@@ -7,8 +8,10 @@ import { ZdmQueryFilterDTO } from "../dto/query/zdm/zdm-query-filter.dto"
  */
 //  ZDM 전체 조회 요청 queryString 검증
 export const validateZdmListQuery = validationMiddleware.validateQuery(ZdmQueryFilterDTO)
+//  특정 ZDM 조회 요청 param 검증
+export const validateSpecificZdmParams = validationMiddleware.validateParams(SpecificZdmParamDTO)
 //  특정 ZDM 조회 요청 queryString 검증
-export const validateSpecificZdmListQuery = validationMiddleware.validateQuery(null)
+export const validateSpecificZdmQuery = validationMiddleware.validateQuery(null)
 
 /**
  * ZDM Repository 관련

@@ -2,7 +2,6 @@ import { executeQuery, executeQuerySingle } from "../../../database/connection"
 import { OSTypeMap } from "../../../types/common/os"
 import { RepositoryTypeMap } from "../../../types/common/repository"
 import { ContextLogger } from "../../../utils/logger/logger.custom"
-import { logger } from "../../../utils/logger/logger.util"
 import { CommonRepository } from "../../../utils/repository.utils"
 import { ZdmRepositoryTable } from "../types/db/center-repository"
 import { ZdmRepositoryFilterOptions } from "../types/zdm-repository/zdm-repository-filter.type"
@@ -79,14 +78,14 @@ export class ZdmRepositoryRepository extends CommonRepository {
   /**
    * 특정 센터에 등록된 레포지토리 정보 조회
    */
-  async findBySystemNames({ centerNames }: { centerNames: string[] }): Promise<ZdmRepositoryTable[]> {
+  async findBySystemNames({ systemNames }: { systemNames: string[] }): Promise<ZdmRepositoryTable[]> {
     try {
-      if (centerNames.length === 0) {
+      if (systemNames.length === 0) {
         return []
       }
-      const placeholders = centerNames.map(() => "?").join(",")
+      const placeholders = systemNames.map(() => "?").join(",")
       const query = `SELECT * FROM ${this.tableName} WHERE sSystemName IN (${placeholders})`
-      return await executeQuery<ZdmRepositoryTable>({ sql: query, params: centerNames })
+      return await executeQuery<ZdmRepositoryTable>({ sql: query, params: systemNames })
     } catch (error) {
       ContextLogger.debug({
         message: `ZdmRepositoryRepository.findBySystemNames() 오류 발생`,

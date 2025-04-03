@@ -8,6 +8,10 @@ import { ZdmPartitionRepository } from "../repositories/center-info-partition.re
 import { ZdmRepository } from "../repositories/center-info.repository"
 import { ZdmRepositoryRepository } from "../repositories/center-repository.repository"
 import { ZdmZosRepositoryRepository } from "../repositories/center-zos-repository.repository"
+import { ZdmInfoTable } from "../types/db/center-info"
+import { ZdmInfoDiskTable } from "../types/db/center-info-disk"
+import { ZdmInfoNetworkTable } from "../types/db/center-info-network"
+import { ZdmInfoPartitionTable } from "../types/db/center-info-partition"
 import { ZdmRepositoryTable } from "../types/db/center-repository"
 import { ZdmFilterOptions } from "../types/zdm/zdm-filter.type"
 import { ZdmDataResponse } from "../types/zdm/zdm-response.type"
@@ -45,16 +49,16 @@ export class ZdmService {
     this.zdmZosRepositoryRepository = zdmZosRepositoryRepository
   }
   /**
-   * 서버 추가정보 가져오기
+   * ZDM 추가정보 가져오기
    */
   private async getAdditionalInfo({ filterOptions, systemNames = [] }: { filterOptions: ZdmFilterOptions; systemNames?: string[] }) {
     try {
       // 시스템 이름이 없거나 빈 배열이면 빈 결과 반환
       if (!systemNames.length) {
         return {
-          disks: [] as ZdmDiskTable[],
-          networks: [] as ZdmNetworkTable[],
-          partitions: [] as ZdmPartitionTable[],
+          disks: [] as ZdmInfoDiskTable[],
+          networks: [] as ZdmInfoNetworkTable[],
+          partitions: [] as ZdmInfoPartitionTable[],
           repositories: [] as ZdmRepositoryTable[],
         }
       }
@@ -122,9 +126,9 @@ export class ZdmService {
 
       // 결과 객체 초기화
       const additionalInfo = {
-        disks: [] as ZdmDiskTable[],
-        networks: [] as ZdmNetworkTable[],
-        partitions: [] as ZdmPartitionTable[],
+        disks: [] as ZdmInfoDiskTable[],
+        networks: [] as ZdmInfoNetworkTable[],
+        partitions: [] as ZdmInfoPartitionTable[],
         repositories: [] as ZdmRepositoryTable[],
       }
 
@@ -139,25 +143,25 @@ export class ZdmService {
       return additionalInfo
     } catch (error) {
       ContextLogger.error({
-        message: "추가 서버 정보 조회 중 오류 발생",
+        message: "추가 ZDM 정보 조회 중 오류 발생",
         meta: {
           error: error instanceof Error ? error.message : String(error),
           systemNames,
         },
       })
 
-      // 오류가 발생해도 빈 결과를 반환하여 기본 서버 정보라도 제공
+      // 오류가 발생해도 빈 결과를 반환하여 기본 ZDM 정보라도 제공
       return {
-        disks: [] as ZdmDiskTable[],
-        networks: [] as ZdmNetworkTable[],
-        partitions: [] as ZdmPartitionTable[],
+        disks: [] as ZdmInfoDiskTable[],
+        networks: [] as ZdmInfoNetworkTable[],
+        partitions: [] as ZdmInfoPartitionTable[],
         repositories: [] as ZdmRepositoryTable[],
       }
     }
   }
 
   /**
-   * 서버 데이터와 관련 데이터를 조합
+   * ZDM 데이터와 관련 데이터를 조합
    */
   private combineZdmData({
     zdms,
@@ -166,17 +170,17 @@ export class ZdmService {
     partitions = [],
     repositories = [],
   }: {
-    zdms: ZdmBasicTable[]
-    disks?: ZdmDiskTable[]
-    networks?: ZdmNetworkTable[]
-    partitions?: ZdmPartitionTable[]
+    zdms: ZdmInfoTable[]
+    disks?: ZdmInfoDiskTable[]
+    networks?: ZdmInfoNetworkTable[]
+    partitions?: ZdmInfoPartitionTable[]
     repositories?: ZdmRepositoryTable[]
   }): ZdmDataResponse[] {
     const zdmMap = new Map<string, ZdmDataResponse>()
 
-    // 서버 기본 정보로 맵 초기화
+    // ZDM 기본 정보로 맵 초기화
     zdms.forEach((zdm) => {
-      zdmMap.set(zdm.sSystemName, { zdm })
+      zdmMap.set(zdm.sCenterName, { zdm })
     })
 
     const addRelatedData = <T extends { sSystemName: string }>({ items, propertyName }: { items: T[]; propertyName: ZdmDataPropertyKey }) => {
@@ -188,7 +192,7 @@ export class ZdmService {
             zdmResponse[propertyName as ZdmDataPropertyKey] = []
           }
           // 타입스크립트 타입 단언 필요
-          ;(zdmResponse[propertyName] as any[]).push(item)
+          ; (zdmResponse[propertyName] as any[]).push(item)
         }
       })
     }
@@ -203,13 +207,13 @@ export class ZdmService {
   }
 
   /**
-   * 모든 서버 조회
+   * 모든 ZDM 조회
    */
   async getZdms({ filterOptions }: { filterOptions: ZdmFilterOptions }): Promise<ZdmDataResponse[]> {
     try {
       ContextLogger.debug({ message: `모든 Zdm 정보 조회`, meta: { filterOptions } })
-      const zdms = await this.zdmBasicRepository.findAll({ filterOptions })
-      const systemNames = zdms.map((zdm) => zdm.sSystemName)
+      const zdms = await this.zdmRepository.findAll({ filterOptions })
+      const systemNames = zdms.map((zdm) => zdm.sCenterName)
 
       const { disks, networks, partitions, repositories } = await this.getAdditionalInfo({ filterOptions, systemNames })
 
@@ -236,11 +240,11 @@ export class ZdmService {
   }
 
   /**
-   * 서버 이름으로 조회
+   * ZDM 이름으로 조회
    */
   async getZdmByName({ name, filterOptions }: { name: string; filterOptions: ZdmFilterOptions }): Promise<ZdmDataResponse> {
     try {
-      const zdm = await this.zdmBasicRepository.findByZdmName({ name, filterOptions })
+      const zdm = await this.zdmRepository.findByZdmName({ name, filterOptions })
       if (!zdm) {
         throw new ZdmError.ZdmNotFound({ zdm: name, type: "name" })
       }
@@ -268,7 +272,7 @@ export class ZdmService {
   }
 
   /**
-   * 서버 ID로 조회
+   * ZDM ID로 조회
    */
   async getZdmById({ id, filterOptions }: { id: string; filterOptions: ZdmFilterOptions }): Promise<ZdmDataResponse> {
     try {
@@ -281,13 +285,13 @@ export class ZdmService {
           },
         })
       }
-      const zdm = await this.zdmBasicRepository.findByZdmId({ id: parseInt(id), filterOptions })
+      const zdm = await this.zdmRepository.findByZdmId({ id: parseInt(id), filterOptions })
       if (!zdm) {
         throw new ZdmError.ZdmNotFound({ zdm: id, type: "id" })
       }
       const { disks, networks, partitions, repositories } = await this.getAdditionalInfo({
         filterOptions,
-        systemNames: [zdm.sSystemName],
+        systemNames: [zdm.sCenterName],
       })
 
       // 데이터 조합

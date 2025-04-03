@@ -11,7 +11,7 @@ export class ZdmRepository extends CommonRepository {
   /**
    * 필터 옵션 적용
    */
-  private applyFilters({ filterOptions }: { filterOptions: ZdmFilterOptions }): void {}
+  private applyFilters({ filterOptions }: { filterOptions: ZdmFilterOptions }): void { }
 
   /**
    *  모든 ZDM 조회
@@ -38,7 +38,7 @@ export class ZdmRepository extends CommonRepository {
   /**
    * 특정 ZDM 조회 ( by Name )
    */
-  async findByZDMName({ name, filterOptions }: { name: string; filterOptions: ZdmFilterOptions }): Promise<ZdmInfoTable | null> {
+  async findByZdmName({ name, filterOptions }: { name: string; filterOptions: ZdmFilterOptions }): Promise<ZdmInfoTable | null> {
     try {
       this.resetQueryState()
       this.addCondition({ condition: "sZdmName = ?", params: [name] })
@@ -61,7 +61,7 @@ export class ZdmRepository extends CommonRepository {
   /**
    * 특정 ZDM 조회 ( By ID )
    */
-  async findByZDMId({ id, filterOptions }: { id: number; filterOptions: ZdmFilterOptions }): Promise<ZdmInfoTable | null> {
+  async findByZdmId({ id, filterOptions }: { id: number; filterOptions: ZdmFilterOptions }): Promise<ZdmInfoTable | null> {
     try {
       this.resetQueryState()
       this.addCondition({ condition: "nID = ?", params: [id] })
@@ -81,4 +81,5 @@ export class ZdmRepository extends CommonRepository {
       throw error
     }
   }
+
 }

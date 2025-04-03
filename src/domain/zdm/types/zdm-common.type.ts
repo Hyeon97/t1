@@ -7,7 +7,7 @@ import { VALID_ACTIVATION_VALUES, VALID_STATE_VALUES } from "../../../types/comm
 /**
  * ZDM 조회 타입
  */
-export type ZDMSearchType = "name" | "id" | ""
+export type ZDMSearchType = "name" | "id"
 
 /**
  * ZDM 연결 상태 정의
