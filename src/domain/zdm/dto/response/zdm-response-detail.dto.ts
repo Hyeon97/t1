@@ -86,7 +86,7 @@ export class ZdmResponseDetailDTO extends ZdmResponseBaseDTO implements ZdmRespo
       osVersion: zdm.sOSVersion,
       model: zdm.sModel,
       privateIP: zdm.sPrivateIPAddress,
-      organization: OSTypeMap.toString({ value: zdm.sOrganization }),
+      organization: OSTypeMap.stringToString({ str: zdm.sOrganization }),
       manufacturer: zdm.sManufacturer,
       sytemType: zdm.sSystemType,
       cpu: zdm.sCPUName,

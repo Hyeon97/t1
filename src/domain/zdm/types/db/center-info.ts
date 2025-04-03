@@ -2,7 +2,6 @@
 //  center_info table 스키마 정의  //
 ////////////////////////////////////
 
-import { OSTypeEnum } from "../../../../types/common/os"
 import { ZDMActivationEnum, ZDMModeEnum } from "../zdm-common.type"
 
 export interface ZdmInfoTable {
@@ -18,7 +17,7 @@ export interface ZdmInfoTable {
   sIPAddress: string
   sModel: string
   sPrivateIPAddress: string
-  sOrganization: OSTypeEnum
+  sOrganization: string
   sManufacturer: string
   sSystemType: string
   sCPUName: string

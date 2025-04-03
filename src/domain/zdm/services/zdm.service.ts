@@ -214,9 +214,7 @@ export class ZdmService {
       ContextLogger.debug({ message: `모든 Zdm 정보 조회`, meta: { filterOptions } })
       const zdms = await this.zdmRepository.findAll({ filterOptions })
       const systemNames = zdms.map((zdm) => zdm.sCenterName)
-
       const { disks, networks, partitions, repositories } = await this.getAdditionalInfo({ filterOptions, systemNames })
-
       // 데이터 조합
       const result = this.combineZdmData({
         zdms,
@@ -225,7 +223,6 @@ export class ZdmService {
         partitions,
         repositories,
       })
-
       return result
     } catch (error) {
       return handleServiceError({

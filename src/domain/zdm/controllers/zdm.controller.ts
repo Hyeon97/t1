@@ -63,6 +63,7 @@ export class ZdmController {
 
       ApiUtils.success({ res, data: zdmsDTOs, message: "ZDM infomation list" })
     } catch (error) {
+      console.error(error)
       return handleControllerError({
         next,
         error,
