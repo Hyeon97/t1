@@ -15,8 +15,10 @@ export const OSTypeMap = {
     const lowerStr = str.toLowerCase()
     switch (lowerStr) {
       case "win":
+      case "window":
         return OSTypeEnum.WINDOW
       case "lin":
+      case "linux":
         return OSTypeEnum.LINUX
       case "cloud":
         return OSTypeEnum.CLOUD
@@ -36,4 +38,19 @@ export const OSTypeMap = {
         throw new Error(`Unknown OS type: ${value}`)
     }
   },
+  stringToString: ({ str }: { str: string }): string => {
+    const lowerStr = str.toLowerCase()
+    switch (lowerStr) {
+      case "win":
+      case "window":
+        return "Window"
+      case "lin":
+      case "linux":
+        return "Linux"
+      case "cloud":
+        return "Cloud"
+      default:
+        throw new Error(`Unknown OS type: ${str}`)
+    }
+  }
 }
