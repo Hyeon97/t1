@@ -1,6 +1,6 @@
 import { Router } from "express"
-import { BackupController } from "../controllers/controller-registry"
-import { validateBackupListQuery, validateSpecificBackupParams, validateSpecificBackupQuery } from "../validators/Backup.validators"
+import { backupController } from "../controllers/controller-registry"
+import { validateSpecificBackupParams, validateSpecificBackupQuery } from "../validators/backup.validators"
 
 export class BackupRoutes {
   public router: Router
@@ -12,9 +12,9 @@ export class BackupRoutes {
 
   private BackupRoutes(): void {
     //  전체 목록 리턴
-    this.router.get("/", validateBackupListQuery, BackupController.getBackups)
+    // this.router.get("/", validateBackupQuery, backupController.getBackups)
     //  특정 조건으로 조회 ( 기준 : Backup name | Backup id )
-    this.router.get("/:identifier", validateSpecificBackupParams, validateSpecificBackupQuery, BackupController.getBackup)
+    this.router.get("/:identifier", validateSpecificBackupParams, validateSpecificBackupQuery, backupController.getBackup)
     //  특정 조건으로 삭제 ( 기준 : Backup name | Backup id )
     this.router.delete("/:identifier")
   }
