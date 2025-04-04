@@ -5,8 +5,8 @@ import { TokenDBInput } from "../../auth/interface/token"
 export class UserTokenRepository extends BaseRepository {
   constructor() {
     super({
+      repositoryName: "UserTokenRepository",
       tableName: "user_token",
-      entityName: "UserToken",
     })
   }
   /**

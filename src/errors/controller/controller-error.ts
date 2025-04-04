@@ -1,4 +1,4 @@
-import { BaseError, ErrorDetails } from "../base/base-error"
+import { createErrorChainItem, ErrorChainItem, ErrorLayer } from "../interfaces"
 import { ServiceError, ServiceErrorCode } from "../service/service-error"
 
 export enum ControllerErrorCode {
@@ -7,28 +7,68 @@ export enum ControllerErrorCode {
   AUTHORIZATION = "CTRL_003",
   RESOURCE_NOT_FOUND = "CTRL_004",
   BAD_REQUEST = "CTRL_005",
-  INTERNAL_SERVER = "CTRL_006",
+  INTERNAL_SERVER = "CTRL_006"
 }
 
-export interface ControllerErrorDetails extends ErrorDetails {
-  code: ControllerErrorCode
-  statusCode: number
+export interface ControllerErrorParams {
+  functionName: string
+  message: string
+  cause?: unknown
+  statusCode?: number
   resource?: string
   action?: string
+  metadata?: Record<string, any>
 }
 
-export class ControllerError extends BaseError {
-  public readonly code: ControllerErrorCode
+export class ControllerError extends Error {
+  public readonly errorChain: ErrorChainItem[]
   public readonly statusCode: number
-  public readonly resource?: string
-  public readonly action?: string
 
-  constructor({ functionName, message, code, statusCode, cause, resource, action, metadata }: ControllerErrorDetails) {
-    super({ functionName, message, cause, metadata })
-    this.code = code
+  constructor({
+    errorCode,
+    functionName,
+    message,
+    cause,
+    statusCode = 500,
+    resource,
+    action,
+    metadata
+  }: ControllerErrorParams & { errorCode: ControllerErrorCode }) {
+    super(message)
+    this.name = this.constructor.name
     this.statusCode = statusCode
-    this.resource = resource
-    this.action = action
+
+    // 상세 정보 구성
+    const details: Record<string, any> = { ...metadata }
+    if (resource) details.resource = resource
+    if (action) details.action = action
+
+    // 에러 체인 생성
+    this.errorChain = [
+      createErrorChainItem({
+        layer: "controller" as ErrorLayer,
+        entityName: resource ? `${resource}Controller` : "Controller",
+        functionName,
+        errorCode,
+        message,
+        details
+      })
+    ]
+
+    // 원인 에러의 체인 병합
+    if (cause instanceof ServiceError) {
+      this.errorChain.push(...cause.errorChain)
+    } else if (cause instanceof ControllerError) {
+      this.errorChain.push(...cause.errorChain)
+    } else if (cause instanceof Error) {
+      details.originalError = {
+        name: cause.name,
+        message: cause.message
+      }
+    }
+
+    // 스택 트레이스 보존
+    Error.captureStackTrace(this, this.constructor)
   }
 
   // Controller 에러 팩토리 메서드들
@@ -38,17 +78,17 @@ export class ControllerError extends BaseError {
     cause,
     resource,
     action,
-    metadata,
-  }: Omit<ControllerErrorDetails, "code" | "statusCode">): ControllerError {
+    metadata
+  }: Omit<ControllerErrorParams, "statusCode">): ControllerError {
     return new ControllerError({
+      errorCode: ControllerErrorCode.VALIDATION,
       functionName,
       message,
-      code: ControllerErrorCode.VALIDATION,
-      statusCode: 400,
       cause,
+      statusCode: 400,
       resource,
       action,
-      metadata,
+      metadata
     })
   }
 
@@ -58,17 +98,17 @@ export class ControllerError extends BaseError {
     cause,
     resource,
     action,
-    metadata,
-  }: Omit<ControllerErrorDetails, "code" | "statusCode">): ControllerError {
+    metadata
+  }: Omit<ControllerErrorParams, "statusCode">): ControllerError {
     return new ControllerError({
+      errorCode: ControllerErrorCode.AUTHENTICATION,
       functionName,
       message,
-      code: ControllerErrorCode.AUTHENTICATION,
-      statusCode: 401,
       cause,
+      statusCode: 401,
       resource,
       action,
-      metadata,
+      metadata
     })
   }
 
@@ -78,17 +118,17 @@ export class ControllerError extends BaseError {
     cause,
     resource,
     action,
-    metadata,
-  }: Omit<ControllerErrorDetails, "code" | "statusCode">): ControllerError {
+    metadata
+  }: Omit<ControllerErrorParams, "statusCode">): ControllerError {
     return new ControllerError({
+      errorCode: ControllerErrorCode.AUTHORIZATION,
       functionName,
       message,
-      code: ControllerErrorCode.AUTHORIZATION,
-      statusCode: 403,
       cause,
+      statusCode: 403,
       resource,
       action,
-      metadata,
+      metadata
     })
   }
 
@@ -98,17 +138,17 @@ export class ControllerError extends BaseError {
     cause,
     resource,
     action,
-    metadata,
-  }: Omit<ControllerErrorDetails, "code" | "statusCode">): ControllerError {
+    metadata
+  }: Omit<ControllerErrorParams, "statusCode">): ControllerError {
     return new ControllerError({
+      errorCode: ControllerErrorCode.RESOURCE_NOT_FOUND,
       functionName,
       message,
-      code: ControllerErrorCode.RESOURCE_NOT_FOUND,
-      statusCode: 404,
       cause,
+      statusCode: 404,
       resource,
       action,
-      metadata,
+      metadata
     })
   }
 
@@ -118,17 +158,17 @@ export class ControllerError extends BaseError {
     cause,
     resource,
     action,
-    metadata,
-  }: Omit<ControllerErrorDetails, "code" | "statusCode">): ControllerError {
+    metadata
+  }: Omit<ControllerErrorParams, "statusCode">): ControllerError {
     return new ControllerError({
+      errorCode: ControllerErrorCode.BAD_REQUEST,
       functionName,
       message,
-      code: ControllerErrorCode.BAD_REQUEST,
-      statusCode: 400,
       cause,
+      statusCode: 400,
       resource,
       action,
-      metadata,
+      metadata
     })
   }
 
@@ -139,16 +179,17 @@ export class ControllerError extends BaseError {
     resource,
     action,
     metadata,
-  }: Omit<ControllerErrorDetails, "code" | "statusCode">): ControllerError {
+    statusCode = 500
+  }: ControllerErrorParams): ControllerError {
     return new ControllerError({
+      errorCode: ControllerErrorCode.INTERNAL_SERVER,
       functionName,
       message,
-      code: ControllerErrorCode.INTERNAL_SERVER,
-      statusCode: 500,
       cause,
+      statusCode,
       resource,
       action,
-      metadata,
+      metadata
     })
   }
 
@@ -157,23 +198,28 @@ export class ControllerError extends BaseError {
     error,
     functionName,
     resource,
-    action,
+    action
   }: {
     error: ServiceError
     functionName: string
     resource?: string
     action?: string
   }): ControllerError {
+    // Service 에러의 첫 번째 항목에서 정보 추출
+    const svcErrorItem = error.errorChain[0]
+    const entityName = svcErrorItem.details?.entityName
+    const operationName = svcErrorItem.details?.operationName
+
     let controllerError: ControllerError
 
-    switch (error.code) {
+    switch (svcErrorItem.errorCode) {
       case ServiceErrorCode.RESOURCE_NOT_FOUND:
         controllerError = ControllerError.resourceNotFoundError({
           functionName,
-          message: `요청한 리소스를 찾을 수 없습니다${error.entityName ? `: ${error.entityName}` : ""}`,
+          message: `요청한 리소스를 찾을 수 없습니다${entityName ? `: ${entityName}` : ''}`,
           cause: error,
-          resource: resource || error.entityName,
-          action,
+          resource: resource || entityName,
+          action: action || operationName
         })
         break
       case ServiceErrorCode.VALIDATION:
@@ -181,17 +227,17 @@ export class ControllerError extends BaseError {
           functionName,
           message: `요청 데이터 유효성 검증 실패`,
           cause: error,
-          resource: resource || error.entityName,
-          action: action || error.operationName,
+          resource: resource || entityName,
+          action: action || operationName
         })
         break
       case ServiceErrorCode.BUSINESS_RULE:
         controllerError = ControllerError.badRequestError({
           functionName,
-          message: `비즈니스 규칙 위반${error.operationName ? ` (${error.operationName})` : ""}`,
+          message: `비즈니스 규칙 위반${operationName ? ` (${operationName})` : ''}`,
           cause: error,
-          resource: resource || error.entityName,
-          action: action || error.operationName,
+          resource: resource || entityName,
+          action: action || operationName
         })
         break
       default:
@@ -199,9 +245,9 @@ export class ControllerError extends BaseError {
           functionName,
           message: `서버 내부 오류가 발생했습니다`,
           cause: error,
-          resource: resource || error.entityName,
-          action: action || error.operationName,
-          metadata: { originalCode: error.code },
+          resource: resource || entityName,
+          action: action || operationName,
+          metadata: { originalCode: svcErrorItem.errorCode }
         })
     }
 
@@ -213,7 +259,7 @@ export class ControllerError extends BaseError {
     error,
     functionName,
     resource,
-    action,
+    action
   }: {
     error: unknown
     functionName: string
@@ -236,7 +282,7 @@ export class ControllerError extends BaseError {
       cause: error,
       resource,
       action,
-      metadata: { originalErrorMessage: message },
+      metadata: { originalErrorMessage: message }
     })
   }
 }

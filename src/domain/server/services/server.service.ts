@@ -192,7 +192,7 @@ export class ServerService extends BaseService {
               serverResponse[propertyName as ServerDataPropertyKey] = []
             }
             // 타입스크립트 타입 단언 필요
-            ;(serverResponse[propertyName] as any[]).push(item)
+            ; (serverResponse[propertyName] as any[]).push(item)
           }
         })
       }

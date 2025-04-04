@@ -7,14 +7,14 @@ import { ZdmFilterOptions } from "../types/zdm/zdm-filter.type"
 export class ZdmRepository extends BaseRepository {
   constructor() {
     super({
+      repositoryName: "ZdmRepository",
       tableName: "center_info",
-      entityName: "CenterInfo",
     })
   }
   /**
    * 필터 옵션 적용
    */
-  private applyFilters({ filterOptions }: { filterOptions: ZdmFilterOptions }): void {}
+  private applyFilters({ filterOptions }: { filterOptions: ZdmFilterOptions }): void { }
 
   /**
    *  모든 ZDM 조회
@@ -26,7 +26,7 @@ export class ZdmRepository extends BaseRepository {
 
       let query = `SELECT * FROM ${this.tableName}`
       query += this.buildWhereClause()
-      return await this.executeQuery<ZdmInfoTable>({ sql: query, params: this.params })
+      return await this.executeQuery<ZdmInfoTable>({ sql: query, params: this.params, functionName: "findAll" })
     } catch (error) {
       ContextLogger.debug({
         message: `ZdmRepository.findAll() 오류 발생`,

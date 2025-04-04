@@ -4,8 +4,8 @@ import { ServerRepositoryTable } from "../types/db/server-repository"
 export class ServerRepositoryRepository extends BaseRepository {
   constructor() {
     super({
+      repositoryName: "ServerRepositoryRepository",
       tableName: "server_repository",
-      entityName: "ServerRepository",
     })
   }
 
@@ -21,7 +21,7 @@ export class ServerRepositoryRepository extends BaseRepository {
       const placeholders = systemNames.map(() => "?").join(",")
       const query = `SELECT * FROM ${this.tableName} WHERE sSystemName IN (${placeholders})`
 
-      return await this.executeQuery<ServerRepositoryTable>({ sql: query, params: systemNames })
+      return await this.executeQuery<ServerRepositoryTable>({ sql: query, params: systemNames, functionName: "findBySystemNames" })
     } catch (error) {
       return this.handleRepositoryError({
         error,

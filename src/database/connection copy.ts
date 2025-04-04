@@ -1,3 +1,4 @@
+// src/database/connection.ts
 import mysql from "mysql2/promise"
 import { DatabaseError } from "../errors/database/database-error"
 import { ContextLogger } from "../utils/logger/logger.custom"
@@ -139,12 +140,10 @@ export class DatabaseOperations {
     sql,
     params = [],
     connection,
-    functionName
   }: {
     sql: string
     params?: any[]
     connection?: mysql.PoolConnection
-    functionName: string
   }): Promise<T[]> {
     try {
       const pool = DatabasePool.getInstance().getPool()
@@ -186,58 +185,49 @@ export class DatabaseOperations {
         switch (error.code) {
           case "ER_DUP_ENTRY":
             throw DatabaseError.dataIntegrityError({
-              functionName,
+              functionName: "executeQuery",
               message: `무결성 제약 조건 위반: ${error.message}`,
               cause: error,
-              query: sql,
-              params
+
             })
           case "ER_NO_REFERENCED_ROW":
           case "ER_ROW_IS_REFERENCED":
             throw DatabaseError.dataIntegrityError({
-              functionName,
+              functionName: "executeQuery",
               message: `참조 무결성 위반: ${error.message}`,
               cause: error,
-              query: sql,
-              params
             })
           case "ER_ACCESS_DENIED_ERROR":
             throw DatabaseError.connectionError({
-              functionName,
+              functionName: "executeQuery",
               message: `데이터베이스 접근 거부: ${error.message}`,
               cause: error,
-              query: sql
             })
           case "ER_PARSE_ERROR":
           case "ER_BAD_FIELD_ERROR":
             throw DatabaseError.queryError({
-              functionName,
+              functionName: "executeQuery",
               message: `SQL 구문 오류: ${error.message}`,
               cause: error,
-              query: sql,
-              params
             })
           case "ER_BAD_DB_ERROR":
             throw DatabaseError.connectionError({
-              functionName,
+              functionName: "executeQuery",
               message: `데이터베이스를 찾을 수 없음: ${error.message}`,
               cause: error,
-              query: sql
             })
           case "ER_LOCK_DEADLOCK":
           case "ER_LOCK_WAIT_TIMEOUT":
             throw DatabaseError.transactionError({
-              functionName,
+              functionName: "executeQuery",
               message: `트랜잭션 오류: ${error.message}`,
-              cause: error
+              cause: error,
             })
           default:
             throw DatabaseError.queryError({
-              functionName,
+              functionName: "executeQuery",
               message: `쿼리 실행 오류(${error.code}): ${error.message}`,
               cause: error,
-              query: sql,
-              params
             })
         }
       }
@@ -249,7 +239,7 @@ export class DatabaseOperations {
       })
 
       throw DatabaseError.queryError({
-        functionName,
+        functionName: "executeQuery",
         message: `쿼리 실행 오류: ${error.message}`,
         cause: error,
       })
@@ -263,14 +253,12 @@ export class DatabaseOperations {
     sql,
     params = [],
     connection,
-    functionName
   }: {
     sql: string
     params?: any[]
     connection?: mysql.PoolConnection
-    functionName: string
   }): Promise<T | null> {
-    const results = await this.executeQuery<T>({ sql, params, connection, functionName })
+    const results = await this.executeQuery<T>({ sql, params, connection })
     // 결과가 없으면 null 반환
     return results.length ? results[0] : null
   }
@@ -399,10 +387,10 @@ export class TransactionManager {
   /**
    * 트랜잭션 내에서 쿼리 실행
    */
-  public async executeQuery<T>({ sql, params = [], functionName }: { sql: string; params?: any[], functionName: string }): Promise<T[]> {
+  public async executeQuery<T>({ sql, params = [] }: { sql: string; params?: any[] }): Promise<T[]> {
     if (!this.connection) {
       throw DatabaseError.transactionError({
-        functionName,
+        functionName: "executeQuery",
         message: "활성 트랜잭션이 없습니다",
       })
     }
@@ -411,7 +399,6 @@ export class TransactionManager {
       sql,
       params,
       connection: this.connection,
-      functionName
     })
   }
 
@@ -421,11 +408,9 @@ export class TransactionManager {
   public async executeQuerySingle<T>({
     sql,
     params = [],
-    functionName
   }: {
     sql: string
     params?: any[]
-    functionName: string
   }): Promise<T | null> {
     if (!this.connection) {
       throw DatabaseError.transactionError({
@@ -438,7 +423,6 @@ export class TransactionManager {
       sql,
       params,
       connection: this.connection,
-      functionName
     })
   }
 

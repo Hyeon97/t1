@@ -1,13 +1,13 @@
-import { ContextLogger } from "../../../utils/logger/logger.custom"
 import { BaseRepository } from "../../../utils/base/base-repository"
+import { ContextLogger } from "../../../utils/logger/logger.custom"
 import { ZdmInfoNetworkTable } from "../types/db/center-info-network"
 
 export class ZdmNetworkRepository extends BaseRepository {
   protected readonly tableName = "center_info_network"
   constructor() {
     super({
+      repositoryName: "ZdmNetworkRepository",
       tableName: "center_info_network",
-      entityName: "CenterInfoNetwork",
     })
   }
   /**
@@ -21,7 +21,7 @@ export class ZdmNetworkRepository extends BaseRepository {
       const placeholders = systemNames.map(() => "?").join(",")
       const query = `SELECT * FROM ${this.tableName} WHERE sSystemName IN (${placeholders})`
 
-      return await this.executeQuery<ZdmInfoNetworkTable>({ sql: query, params: systemNames })
+      return await this.executeQuery<ZdmInfoNetworkTable>({ sql: query, params: systemNames, functionName: "findBySystemNames" })
     } catch (error) {
       ContextLogger.debug({
         message: `ZdmNetworkRepository.findBySystemNames() 오류 발생`,

@@ -8,8 +8,8 @@ import { ServerFilterOptions } from "../types/server-filter.type"
 export class ServerBasicRepository extends BaseRepository {
   constructor() {
     super({
+      repositoryName: "ServerBasicRepository",
       tableName: "server_basic",
-      entityName: "ServerBasic",
     })
   }
 
@@ -66,10 +66,10 @@ export class ServerBasicRepository extends BaseRepository {
       this.resetQueryState()
       this.applyFilters({ filterOptions })
 
-      let query = `SELECT * FROM ${this.tableName}`
+      let query = `SELECT * FRO ${this.tableName}`
       query += this.buildWhereClause()
 
-      return await this.executeQuery<ServerBasicTable>({ sql: query, params: this.params })
+      return await this.executeQuery<ServerBasicTable>({ sql: query, params: this.params, functionName: "findAll" })
     } catch (error) {
       return this.handleRepositoryError({
         error,

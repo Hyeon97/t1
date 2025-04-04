@@ -6,8 +6,8 @@ import { ServerPartitionFilterOptions } from "../types/server-partition-filter.t
 export class ServerPartitionRepository extends BaseRepository {
   constructor() {
     super({
+      repositoryName: "ServerPartitionRepository",
       tableName: "server_partition",
-      entityName: "ServerPartition",
     })
   }
 
@@ -42,7 +42,7 @@ export class ServerPartitionRepository extends BaseRepository {
       let query = `SELECT * FROM ${this.tableName}`
       query += this.buildWhereClause()
 
-      return await this.executeQuery<ServerPartitionTable>({ sql: query, params: this.params })
+      return await this.executeQuery<ServerPartitionTable>({ sql: query, params: this.params, functionName: "findAll" })
     } catch (error) {
       return this.handleRepositoryError({
         error,
@@ -64,7 +64,7 @@ export class ServerPartitionRepository extends BaseRepository {
       const placeholders = systemNames.map(() => "?").join(",")
       const query = `SELECT * FROM ${this.tableName} WHERE sSystemName IN (${placeholders})`
 
-      return await this.executeQuery<ServerPartitionTable>({ sql: query, params: systemNames })
+      return await this.executeQuery<ServerPartitionTable>({ sql: query, params: systemNames, functionName: "findBySystemNames" })
     } catch (error) {
       return this.handleRepositoryError({
         error,
@@ -86,7 +86,7 @@ export class ServerPartitionRepository extends BaseRepository {
       let query = `SELECT * FROM ${this.tableName}`
       query += this.buildWhereClause()
 
-      return await this.executeQuery<ServerPartitionTable>({ sql: query, params: this.params })
+      return await this.executeQuery<ServerPartitionTable>({ sql: query, params: this.params, functionName: "findByServerName" })
     } catch (error) {
       return this.handleRepositoryError({
         error,

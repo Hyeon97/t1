@@ -5,8 +5,8 @@ import { UserInfoTable } from "../types/db/user_info"
 export class UserInfoRepository extends BaseRepository {
   constructor() {
     super({
+      repositoryName: "UserInfoRepository",
       tableName: "user_info",
-      entityName: "UserInfo",
     })
   }
   /**
@@ -16,7 +16,7 @@ export class UserInfoRepository extends BaseRepository {
     try {
       const query = `SELECT * FROM ${this.tableName}`
 
-      return await this.executeQuery<UserInfoTable>({ sql: query })
+      return await this.executeQuery<UserInfoTable>({ sql: query, functionName: "findAll" })
     } catch (error) {
       ContextLogger.debug({
         message: `UserInfoRepository.findAll() 오류 발생`,

@@ -1,8 +1,8 @@
 import { NextFunction, Response } from "express"
 import { ControllerError } from "../../../errors/controller/controller-error"
-import { ServerError } from "../../../errors/domain-errors/ServerError"
 import { ExtendedRequest } from "../../../types/common/req.types"
 import { ApiUtils } from "../../../utils/api/api.utils"
+import { BaseController } from "../../../utils/base/base-controller"
 import { stringToBoolean } from "../../../utils/data-convert.util"
 import { ContextLogger } from "../../../utils/logger/logger.custom"
 import { ServerQueryFilterDTO } from "../dto/query/server-query-filter.dto"
@@ -10,12 +10,16 @@ import { SpecificServerFilterDTO } from "../dto/query/specific-server-query-filt
 import { ServerResponseFactory } from "../dto/response/server-response-factory"
 import { ServerService } from "../services/server.service"
 import { ServerFilterOptions } from "../types/server-filter.type"
-import { handleControllerError } from "../../../errors/handler/error-handler"
 
-export class ServerController {
+
+export class ServerController extends BaseController {
   private readonly serverService: ServerService
 
   constructor({ serverService }: { serverService: ServerService }) {
+    super({
+      controllerName: "ServerController",
+      entityName: "Server",
+    })
     this.serverService = serverService
   }
 
@@ -76,7 +80,7 @@ export class ServerController {
 
       ApiUtils.success({ res, data: serversDTOs, message: "Server infomation list" })
     } catch (error) {
-      handleControllerError({
+      this.handleControllerError({
         next,
         error,
         functionName: "getServers",
@@ -126,7 +130,7 @@ export class ServerController {
 
       ApiUtils.success({ res, data: serverDTO, message: "Server information" })
     } catch (error) {
-      handleControllerError({
+      this.handleControllerError({
         next,
         error,
         functionName: "getServer",

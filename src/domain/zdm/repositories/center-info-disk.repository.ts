@@ -1,13 +1,13 @@
-import { ContextLogger } from "../../../utils/logger/logger.custom"
 import { BaseRepository } from "../../../utils/base/base-repository"
+import { ContextLogger } from "../../../utils/logger/logger.custom"
 import { ZdmInfoDiskTable } from "../types/db/center-info-disk"
 
 export class ZdmDiskRepository extends BaseRepository {
   protected readonly tableName = "center_info_disk"
   constructor() {
     super({
+      repositoryName: "ZdmDiskRepository",
       tableName: "center_info_disk",
-      entityName: "CenterInfoDisk",
     })
   }
   /**
@@ -21,7 +21,7 @@ export class ZdmDiskRepository extends BaseRepository {
       const placeholders = systemNames.map(() => "?").join(",")
       const query = `SELECT * FROM ${this.tableName} WHERE sSystemName IN (${placeholders})`
 
-      return await this.executeQuery<ZdmInfoDiskTable>({ sql: query, params: systemNames })
+      return await this.executeQuery<ZdmInfoDiskTable>({ sql: query, params: systemNames, functionName: "findBySystemNames" })
     } catch (error) {
       ContextLogger.debug({
         message: `ZdmDiskRepository.findBySystemNames() 오류 발생`,

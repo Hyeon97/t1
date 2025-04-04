@@ -4,8 +4,8 @@ import { ServerNetworkTable } from "../types/db/server-network"
 export class ServerNetworkRepository extends BaseRepository {
   constructor() {
     super({
+      repositoryName: "ServerNetworkRepository",
       tableName: "server_network",
-      entityName: "ServerNetwork",
     })
   }
 
@@ -21,7 +21,7 @@ export class ServerNetworkRepository extends BaseRepository {
       const placeholders = systemNames.map(() => "?").join(",")
       const query = `SELECT * FROM ${this.tableName} WHERE sSystemName IN (${placeholders})`
 
-      return await this.executeQuery<ServerNetworkTable>({ sql: query, params: systemNames })
+      return await this.executeQuery<ServerNetworkTable>({ sql: query, params: systemNames, functionName: "findBySystemNames" })
     } catch (error) {
       return this.handleRepositoryError({
         error,

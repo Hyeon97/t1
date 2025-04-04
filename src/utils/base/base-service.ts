@@ -17,7 +17,7 @@ export class BaseService {
    */
   protected async executeTransaction<T>({
     callback,
-    operationName,
+    operationName
   }: {
     callback: (transaction: TransactionManager) => Promise<T>
     operationName: string
@@ -29,7 +29,7 @@ export class BaseService {
         error,
         functionName: "executeTransaction",
         operationName,
-        message: `트랜잭션 실행 중 오류가 발생했습니다`,
+        message: `트랜잭션 실행 중 오류가 발생했습니다`
       })
     }
   }
@@ -37,31 +37,31 @@ export class BaseService {
   /**
    * 서비스 에러 처리
    */
-  protected handleServiceError<T>({
+  protected handleServiceError({
     error,
     functionName,
     operationName,
-    message = "서비스 작업 중 오류가 발생했습니다",
+    message = "서비스 작업 중 오류가 발생했습니다"
   }: {
     error: unknown
     functionName: string
     operationName: string
     message?: string
   }): never {
-    ContextLogger.error({
-      message: `${this.serviceName}.${functionName} 함수에서 서비스 오류 발생`,
+    ContextLogger.debug({
+      message: `[Service-Layer] ${this.serviceName}.${functionName}() 오류 발생`,
       meta: {
         entity: this.entityName,
         operation: operationName,
-        error: error instanceof Error ? error.message : String(error),
-      },
+        error: error instanceof Error ? error.message : String(error)
+      }
     })
 
     if (error instanceof RepositoryError) {
       throw ServiceError.fromRepositoryError({
         error,
         functionName,
-        operationName,
+        operationName
       })
     }
 
@@ -73,7 +73,7 @@ export class BaseService {
       error,
       functionName,
       operationName,
-      entityName: this.entityName,
+      entityName: this.entityName
     })
   }
 
@@ -84,7 +84,7 @@ export class BaseService {
     entity,
     identifier,
     functionName,
-    operationName,
+    operationName
   }: {
     entity: T | null
     identifier: any
@@ -97,7 +97,7 @@ export class BaseService {
         message: `${this.entityName}(${identifier})를 찾을 수 없습니다`,
         entityName: this.entityName,
         operationName,
-        metadata: { identifier },
+        metadata: { identifier }
       })
     }
     return entity
@@ -111,7 +111,7 @@ export class BaseService {
     message,
     functionName,
     operationName,
-    metadata,
+    metadata
   }: {
     condition: boolean
     message: string
@@ -125,7 +125,7 @@ export class BaseService {
         message,
         entityName: this.entityName,
         operationName,
-        metadata,
+        metadata
       })
     }
   }

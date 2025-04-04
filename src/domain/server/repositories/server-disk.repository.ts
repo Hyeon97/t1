@@ -4,8 +4,8 @@ import { ServerDiskTable } from "../types/db/server-disk"
 export class ServerDiskRepository extends BaseRepository {
   constructor() {
     super({
+      repositoryName: "ServerDiskRepository",
       tableName: "server_disk",
-      entityName: "ServerDisk",
     })
   }
 
@@ -21,7 +21,7 @@ export class ServerDiskRepository extends BaseRepository {
       const placeholders = systemNames.map(() => "?").join(",")
       const query = `SELECT * FROM ${this.tableName} WHERE sSystemName IN (${placeholders})`
 
-      return await this.executeQuery<ServerDiskTable>({ sql: query, params: systemNames })
+      return await this.executeQuery<ServerDiskTable>({ sql: query, params: systemNames, functionName: "findBySystemNames" })
     } catch (error) {
       return this.handleRepositoryError({
         error,

@@ -1,22 +1,18 @@
-/////////////////////////////////////////////////////////////
-//  repository 공통 ( DB와 상호작용하는 repository를 의미 )  //
-/////////////////////////////////////////////////////////////
-
 import { DatabaseOperations } from "../../database/connection"
 import { DatabaseError } from "../../errors/database/database-error"
 import { RepositoryError } from "../../errors/repository/repository-error"
 import { ContextLogger } from "../logger/logger.custom"
 
 export class BaseRepository {
+  protected readonly repositoryName: string
   protected readonly tableName: string
   protected query: string = ""
   protected params: any[] = []
   protected conditions: string[] = []
-  protected readonly entityName: string
 
-  constructor({ tableName, entityName }: { tableName: string; entityName: string }) {
-    this.tableName = tableName
-    this.entityName = entityName
+  constructor({ repositoryName, tableName }: { repositoryName: string, tableName: string }) {
+    this.repositoryName = repositoryName  //  repository 이름
+    this.tableName = tableName  //  repository에서 사용하는 table 이름
   }
 
   /**
@@ -56,23 +52,14 @@ export class BaseRepository {
   /**
    * 데이터베이스 쿼리 실행
    */
-  protected async executeQuery<T>({ sql, params = [] }: { sql: string; params?: any[] }): Promise<T[]> {
+  protected async executeQuery<T>({ sql, params = [], functionName }: { sql: string; params?: any[], functionName: string }): Promise<T[]> {
     try {
-      return await DatabaseOperations.executeQuery<T>({ sql, params })
+      return await DatabaseOperations.executeQuery<T>({ sql, params, functionName })
     } catch (error) {
       if (error instanceof DatabaseError) {
-        throw RepositoryError.fromDatabaseError({
-          error,
-          functionName: "executeQuery",
-          entityName: this.entityName,
-        })
+        throw RepositoryError.fromDatabaseError({ error, functionName })
       }
-
-      throw RepositoryError.fromError({
-        error,
-        functionName: "executeQuery",
-        entityName: this.entityName,
-      })
+      throw RepositoryError.fromError({ error, functionName })
     }
   }
 
@@ -89,27 +76,17 @@ export class BaseRepository {
     functionName: string
   }): Promise<T | null> {
     try {
-      const result = await DatabaseOperations.executeQuerySingle<T>({ sql, params })
-
-      return result
+      return await DatabaseOperations.executeQuerySingle<T>({ sql, params, functionName })
     } catch (error) {
       if (error instanceof DatabaseError) {
-        throw RepositoryError.fromDatabaseError({
-          error,
-          functionName,
-          entityName: this.entityName,
-        })
+        throw RepositoryError.fromDatabaseError({ error, functionName })
       }
 
       if (error instanceof RepositoryError) {
         throw error
       }
 
-      throw RepositoryError.fromError({
-        error,
-        functionName,
-        entityName: this.entityName,
-      })
+      throw RepositoryError.fromError({ error, functionName })
     }
   }
 
@@ -119,36 +96,29 @@ export class BaseRepository {
   protected handleRepositoryError({
     error,
     functionName,
-    message = "Repository 작업 중 오류가 발생했습니다",
+    message = "Repository 작업 중 오류가 발생했습니다"
   }: {
     error: unknown
     functionName: string
     message?: string
   }): never {
-    ContextLogger.error({
-      message: `${functionName} 함수에서 Repository 오류 발생: ${error instanceof Error ? error.message : String(error)}`,
+    //  로깅
+    ContextLogger.debug({
+      message: `[Repository-Layer] ${this.repositoryName}.${functionName}() 오류 발생`,
       meta: {
-        entity: this.entityName,
-        error,
-      },
+        error: error instanceof Error ? error.message : String(error)
+      }
     })
-
+    //  repository 계층보다 더 아래인 DB 계층에서 발생한 에러인 경우
     if (error instanceof DatabaseError) {
-      throw RepositoryError.fromDatabaseError({
-        error,
-        functionName,
-        entityName: this.entityName,
-      })
-    }
 
+      throw RepositoryError.fromDatabaseError({ error, functionName })
+    }
+    //  Repository 계층에서 발생한 에러인 경우 그냥 상위 계층으로 전송
     if (error instanceof RepositoryError) {
       throw error
     }
 
-    throw RepositoryError.fromError({
-      error,
-      functionName,
-      entityName: this.entityName,
-    })
+    throw RepositoryError.fromError({ error, functionName })
   }
 }
