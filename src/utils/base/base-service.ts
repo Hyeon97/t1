@@ -13,11 +13,33 @@ export class BaseService {
   }
 
   /**
+   * 서비스 에러 처리
+   */
+  protected handleServiceError({ error, functionName, message }: { error: unknown; functionName: string; message: string }): never {
+    //  service 계층보다 더 아래인 계층에서 발생한 에러인 경우
+    if (error instanceof RepositoryError) {
+      throw ServiceError.fromRepositoryError({ error, functionName })
+    }
+    //  로깅
+    ContextLogger.debug({
+      message: `[Service-Layer] ${this.serviceName}.${functionName}() 오류 발생`,
+      meta: {
+        error: error instanceof Error ? error.message : String(error),
+      },
+    })
+    //  service 계층에서 발생한 처리된 에러인 경우 그냥 상위 계층으로 전송
+    if (error instanceof ServiceError) {
+      throw error
+    }
+    //  그 외의 처리되지 않은 에러는 ServiceError로 변환하여 전송
+    throw ServiceError.fromError({ error, functionName, message })
+  }
+
+  /**
    * 트랜잭션 실행
    */
   protected async executeTransaction<T>({
     callback,
-    operationName
   }: {
     callback: (transaction: TransactionManager) => Promise<T>
     operationName: string
@@ -28,53 +50,9 @@ export class BaseService {
       return this.handleServiceError({
         error,
         functionName: "executeTransaction",
-        operationName,
-        message: `트랜잭션 실행 중 오류가 발생했습니다`
+        message: `트랜잭션 실행 중 오류가 발생했습니다`,
       })
     }
-  }
-
-  /**
-   * 서비스 에러 처리
-   */
-  protected handleServiceError({
-    error,
-    functionName,
-    operationName,
-    message = "서비스 작업 중 오류가 발생했습니다"
-  }: {
-    error: unknown
-    functionName: string
-    operationName: string
-    message?: string
-  }): never {
-    ContextLogger.debug({
-      message: `[Service-Layer] ${this.serviceName}.${functionName}() 오류 발생`,
-      meta: {
-        entity: this.entityName,
-        operation: operationName,
-        error: error instanceof Error ? error.message : String(error)
-      }
-    })
-
-    if (error instanceof RepositoryError) {
-      throw ServiceError.fromRepositoryError({
-        error,
-        functionName,
-        operationName
-      })
-    }
-
-    if (error instanceof ServiceError) {
-      throw error
-    }
-
-    throw ServiceError.fromError({
-      error,
-      functionName,
-      operationName,
-      entityName: this.entityName
-    })
   }
 
   /**
@@ -84,7 +62,6 @@ export class BaseService {
     entity,
     identifier,
     functionName,
-    operationName
   }: {
     entity: T | null
     identifier: any
@@ -95,9 +72,7 @@ export class BaseService {
       throw ServiceError.resourceNotFoundError({
         functionName,
         message: `${this.entityName}(${identifier})를 찾을 수 없습니다`,
-        entityName: this.entityName,
-        operationName,
-        metadata: { identifier }
+        metadata: { identifier },
       })
     }
     return entity
@@ -110,22 +85,18 @@ export class BaseService {
     condition,
     message,
     functionName,
-    operationName,
-    metadata
+    metadata,
   }: {
     condition: boolean
     message: string
     functionName: string
-    operationName: string
     metadata?: Record<string, any>
   }): void {
     if (!condition) {
       throw ServiceError.businessRuleError({
         functionName,
         message,
-        entityName: this.entityName,
-        operationName,
-        metadata
+        metadata,
       })
     }
   }

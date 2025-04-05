@@ -98,7 +98,7 @@
 //       })
 
 //       if (errorOnNotFound && !result) {
-//         throw RepositoryError.entityNotFoundError({
+//         throw RepositoryError.NotFoundError({
 //           functionName,
 //           message: `${this.entityName} 엔티티를 찾을 수 없습니다`,
 //           entityName: this.entityName,
