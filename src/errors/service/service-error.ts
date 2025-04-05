@@ -7,48 +7,35 @@ export enum ServiceErrorCode {
   RESOURCE_NOT_FOUND = "SRV_003",
   DEPENDENCY = "SRV_004",
   DATA_PROCESSING = "SRV_005",
-  TRANSACTION = "SRV_006"
+  TRANSACTION = "SRV_006",
 }
 
 export interface ServiceErrorParams {
   functionName: string
   message: string
   cause?: unknown
-  entityName?: string
-  operationName?: string
   metadata?: Record<string, any>
 }
 
 export class ServiceError extends Error {
   public readonly errorChain: ErrorChainItem[]
 
-  constructor({
-    errorCode,
-    functionName,
-    message,
-    cause,
-    entityName,
-    operationName,
-    metadata
-  }: ServiceErrorParams & { errorCode: ServiceErrorCode }) {
+  constructor({ errorCode, functionName, message, cause, metadata }: ServiceErrorParams & { errorCode: ServiceErrorCode }) {
     super(message)
     this.name = this.constructor.name
 
     // 상세 정보 구성
     const details: Record<string, any> = { ...metadata }
-    if (entityName) details.entityName = entityName
-    if (operationName) details.operationName = operationName
 
     // 에러 체인 생성
     this.errorChain = [
       createErrorChainItem({
         layer: "service" as ErrorLayer,
-        entityName: entityName || "Service",
         functionName,
         errorCode,
         message,
-        details
-      })
+        details,
+      }),
     ]
 
     // 원인 에러의 체인 병합
@@ -56,145 +43,83 @@ export class ServiceError extends Error {
       this.errorChain.push(...cause.errorChain)
     } else if (cause instanceof ServiceError) {
       this.errorChain.push(...cause.errorChain)
-    } else if (cause instanceof Error) {
-      details.originalError = {
-        name: cause.name,
-        message: cause.message
-      }
     }
+    // else if (cause instanceof Error) {
+    //   details.originalError = {
+    //     name: cause.name,
+    //     message: cause.message,
+    //   }
+    // }
 
     // 스택 트레이스 보존
     Error.captureStackTrace(this, this.constructor)
   }
 
   // 서비스 에러 팩토리 메서드들
-  static validationError({
-    functionName,
-    message,
-    cause,
-    entityName,
-    operationName,
-    metadata
-  }: ServiceErrorParams): ServiceError {
+  static validationError({ functionName, message, cause, metadata }: ServiceErrorParams): ServiceError {
     return new ServiceError({
       errorCode: ServiceErrorCode.VALIDATION,
       functionName,
       message,
       cause,
-      entityName,
-      operationName,
-      metadata
+      metadata,
     })
   }
 
-  static businessRuleError({
-    functionName,
-    message,
-    cause,
-    entityName,
-    operationName,
-    metadata
-  }: ServiceErrorParams): ServiceError {
+  static businessRuleError({ functionName, message, cause, metadata }: ServiceErrorParams): ServiceError {
     return new ServiceError({
       errorCode: ServiceErrorCode.BUSINESS_RULE,
       functionName,
       message,
       cause,
-      entityName,
-      operationName,
-      metadata
+      metadata,
     })
   }
 
-  static resourceNotFoundError({
-    functionName,
-    message,
-    cause,
-    entityName,
-    operationName,
-    metadata
-  }: ServiceErrorParams): ServiceError {
+  static resourceNotFoundError({ functionName, message, cause, metadata }: ServiceErrorParams): ServiceError {
     return new ServiceError({
       errorCode: ServiceErrorCode.RESOURCE_NOT_FOUND,
       functionName,
       message,
       cause,
-      entityName,
-      operationName,
-      metadata
+      metadata,
     })
   }
 
-  static dependencyError({
-    functionName,
-    message,
-    cause,
-    entityName,
-    operationName,
-    metadata
-  }: ServiceErrorParams): ServiceError {
+  static dependencyError({ functionName, message, cause, metadata }: ServiceErrorParams): ServiceError {
     return new ServiceError({
       errorCode: ServiceErrorCode.DEPENDENCY,
       functionName,
       message,
       cause,
-      entityName,
-      operationName,
-      metadata
+      metadata,
     })
   }
 
-  static dataProcessingError({
-    functionName,
-    message,
-    cause,
-    entityName,
-    operationName,
-    metadata
-  }: ServiceErrorParams): ServiceError {
+  static dataProcessingError({ functionName, message, cause, metadata }: ServiceErrorParams): ServiceError {
     return new ServiceError({
       errorCode: ServiceErrorCode.DATA_PROCESSING,
       functionName,
       message,
       cause,
-      entityName,
-      operationName,
-      metadata
+      metadata,
     })
   }
 
-  static transactionError({
-    functionName,
-    message,
-    cause,
-    entityName,
-    operationName,
-    metadata
-  }: ServiceErrorParams): ServiceError {
+  static transactionError({ functionName, message, cause, metadata }: ServiceErrorParams): ServiceError {
     return new ServiceError({
       errorCode: ServiceErrorCode.TRANSACTION,
       functionName,
       message,
       cause,
-      entityName,
-      operationName,
-      metadata
+      metadata,
     })
   }
 
   // Repository 에러를 Service 에러로 변환하는 팩토리 메서드
-  static fromRepositoryError({
-    error,
-    functionName,
-    operationName
-  }: {
-    error: RepositoryError
-    functionName: string
-    operationName?: string
-  }): ServiceError {
+  static fromRepositoryError({ error, functionName }: { error: RepositoryError; functionName: string }): ServiceError {
     // Repository 에러의 첫 번째 항목에서 정보 추출
     const repoErrorItem = error.errorChain[0]
-    const entityName = repoErrorItem.details?.entityName
 
     let serviceError: ServiceError
 
@@ -202,30 +127,23 @@ export class ServiceError extends Error {
       case RepositoryErrorCode.ENTITY_NOT_FOUND:
         serviceError = ServiceError.resourceNotFoundError({
           functionName,
-          message: `리소스를 찾을 수 없습니다${entityName ? `: ${entityName}` : ''}`,
+          message: `리소스를 찾을 수 없습니다`,
           cause: error,
-          entityName,
-          operationName,
-          metadata: { identifier: repoErrorItem.details?.identifier }
         })
         break
       case RepositoryErrorCode.VALIDATION:
         serviceError = ServiceError.validationError({
           functionName,
-          message: `데이터 유효성 검증 실패${entityName ? `(${entityName})` : ''}`,
+          message: `데이터 유효성 검증 실패`,
           cause: error,
-          entityName,
-          operationName
         })
         break
       default:
         serviceError = ServiceError.dependencyError({
           functionName,
-          message: `Repository 작업 중 오류 발생${entityName ? `(${entityName})` : ''}`,
+          message: `Repository 작업 중 오류 발생`,
           cause: error,
-          entityName,
-          operationName,
-          metadata: { originalCode: repoErrorItem.errorCode }
+          metadata: { originalCode: repoErrorItem.errorCode },
         })
     }
 
@@ -233,33 +151,18 @@ export class ServiceError extends Error {
   }
 
   // 일반 에러를 Service 에러로 변환하는 팩토리 메서드
-  static fromError({
-    error,
-    functionName,
-    operationName,
-    entityName
-  }: {
-    error: unknown
-    functionName: string
-    operationName?: string
-    entityName?: string
-  }): ServiceError {
-    if (error instanceof RepositoryError) {
-      return ServiceError.fromRepositoryError({ error, functionName, operationName })
-    }
-
-    if (error instanceof ServiceError) {
-      return error
-    }
-
-    const message = error instanceof Error ? error.message : String(error)
-
-    return ServiceError.dataProcessingError({
-      functionName,
-      message: `서비스 작업 중 예상치 못한 오류 발생: ${message}`,
-      cause: error,
-      entityName,
-      operationName
-    })
+  static fromError({ error, functionName, message }: { error: unknown; functionName: string; message: string }): ServiceError {
+    // 일반 에러 타입인 경우 ServiceError로 변환
+    // 다른 타입인 경우 ServiceError로 간주 ( 사전 필터링에서 다른 타입은 못들어 온다고 간주 )
+    if (error instanceof Error) {
+      const msg = message || error instanceof Error ? error.message : String(error)
+      return ServiceError.dataProcessingError({
+        functionName,
+        message: msg || `Service 작업 중 예상치 못한 오류 발생: ${message}`,
+        cause: error,
+      })
+    } else if (error instanceof RepositoryError) {
+      return ServiceError.fromRepositoryError({ error, functionName })
+    } else return error as ServiceError
   }
 }

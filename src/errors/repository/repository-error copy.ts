@@ -45,7 +45,7 @@
 //     })
 //   }
 
-//   static entityNotFoundError({
+//   static NotFoundError({
 //     functionName,
 //     message,
 //     cause,
@@ -112,7 +112,7 @@
 
 //     switch (error.code) {
 //       case DatabaseErrorCode.RECORD_NOT_FOUND:
-//         repositoryError = RepositoryError.entityNotFoundError({
+//         repositoryError = RepositoryError.NotFoundError({
 //           functionName,
 //           message: `엔티티를 찾을 수 없습니다${entityName ? `: ${entityName}` : ""}`,
 //           cause: error,

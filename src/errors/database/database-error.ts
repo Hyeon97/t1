@@ -5,16 +5,16 @@ export enum DatabaseErrorCode {
   QUERY_ERROR = "DB_002",
   DATA_INTEGRITY_ERROR = "DB_003",
   RECORD_NOT_FOUND = "DB_004",
-  TRANSACTION_ERROR = "DB_005"
+  TRANSACTION_ERROR = "DB_005",
 }
 
 export interface DatabaseErrorParams {
-  functionName: string
+  functionName?: string
   message: string
   cause?: unknown
+  request?: string
   query?: string
   params?: any[]
-  metadata?: Record<string, any>
 }
 
 export class DatabaseError extends Error {
@@ -22,31 +22,32 @@ export class DatabaseError extends Error {
 
   constructor({
     errorCode,
-    functionName,
+    functionName = "-",
+    request = "-",
     message,
     cause,
     query,
     params,
-    metadata
   }: DatabaseErrorParams & { errorCode: DatabaseErrorCode }) {
     super(message)
     this.name = this.constructor.name
 
-    // 에러 체인 생성
-    const details: Record<string, any> = { ...metadata }
+    //  DB 에러 상세 정의
+    const details: Record<string, any> = {}
     if (query) details.query = query
     if (params) details.params = params
     if (cause) details.cause = cause instanceof Error ? cause.message : String(cause)
 
+    // 에러 체인 생성
     this.errorChain = [
       createErrorChainItem({
         layer: "database" as ErrorLayer,
-        entityName: "Database",
         functionName,
+        request,
         errorCode,
         message,
-        details
-      })
+        details,
+      }),
     ]
 
     // 스택 트레이스 보존
@@ -54,92 +55,48 @@ export class DatabaseError extends Error {
   }
 
   // 구체적인 데이터베이스 에러 팩토리 메서드들
-  static connectionError({
-    functionName,
-    message,
-    cause,
-    query,
-    metadata
-  }: Omit<DatabaseErrorParams, "params">): DatabaseError {
+  static connectionError({ functionName = "-", request = "-", message, cause, query }: Omit<DatabaseErrorParams, "params">): DatabaseError {
     return new DatabaseError({
       errorCode: DatabaseErrorCode.CONNECTION_ERROR,
       functionName,
+      request,
       message,
       cause,
       query,
-      metadata
     })
   }
 
-  static queryError({
-    functionName,
-    message,
-    cause,
-    query,
-    params,
-    metadata
-  }: DatabaseErrorParams): DatabaseError {
+  static queryError({ functionName = "-", request = "-", message, cause, query, params }: DatabaseErrorParams): DatabaseError {
     return new DatabaseError({
       errorCode: DatabaseErrorCode.QUERY_ERROR,
       functionName,
+      request,
       message,
       cause,
       query,
       params,
-      metadata
     })
   }
 
-  static dataIntegrityError({
-    functionName,
-    message,
-    cause,
-    query,
-    params,
-    metadata
-  }: DatabaseErrorParams): DatabaseError {
+  static dataIntegrityError({ functionName = "-", request = "-", message, cause, query, params }: DatabaseErrorParams): DatabaseError {
     return new DatabaseError({
       errorCode: DatabaseErrorCode.DATA_INTEGRITY_ERROR,
       functionName,
+      request,
       message,
       cause,
       query,
       params,
-      metadata
     })
   }
 
-  static recordNotFoundError({
-    functionName,
-    message,
-    cause,
-    query,
-    params,
-    metadata
-  }: DatabaseErrorParams): DatabaseError {
-    return new DatabaseError({
-      errorCode: DatabaseErrorCode.RECORD_NOT_FOUND,
-      functionName,
-      message,
-      cause,
-      query,
-      params,
-      metadata
-    })
-  }
-
-  static transactionError({
-    functionName,
-    message,
-    cause,
-    metadata
-  }: Omit<DatabaseErrorParams, "query" | "params">): DatabaseError {
+  static transactionError({ functionName = "-", request = "-", message, cause }: Omit<DatabaseErrorParams, "query" | "params">): DatabaseError {
     return new DatabaseError({
       errorCode: DatabaseErrorCode.TRANSACTION_ERROR,
       functionName,
+      request,
       message,
       cause,
-      metadata
     })
   }
 }

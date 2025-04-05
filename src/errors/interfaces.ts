@@ -42,8 +42,8 @@ export type ErrorLayer = "database" | "repository" | "service" | "controller"
  */
 export interface ErrorChainItem {
   layer: ErrorLayer
-  entityName: string
   functionName: string
+  request?: string
   errorCode: string
   message: string
   details?: Record<string, any>
@@ -54,11 +54,11 @@ export interface ErrorChainItem {
  */
 export interface UnifiedError {
   // errorId: string  // 고유 에러 ID (UUID 형식)
-  timestamp: string  // ISO 형식 타임스탬프
-  statusCode: number  // HTTP 상태 코드
-  clientMessage: string  // 클라이언트에게 보여줄 메시지
-  clientErrorCode: ErrorCode  // API 에러 코드
-  errorChain: ErrorChainItem[]  // 에러 발생 체인
+  timestamp: string // ISO 형식 타임스탬프
+  statusCode: number // HTTP 상태 코드
+  clientMessage: string // 클라이언트에게 보여줄 메시지
+  clientErrorCode: ErrorCode // API 에러 코드
+  errorChain: ErrorChainItem[] // 에러 발생 체인
 }
 
 /**
@@ -66,26 +66,26 @@ export interface UnifiedError {
  */
 export function createErrorChainItem({
   layer,
-  entityName,
   functionName,
+  request,
   errorCode,
   message,
-  details
+  details,
 }: {
   layer: ErrorLayer
-  entityName: string
   functionName: string
+  request?: string
   errorCode: string
   message: string
   details?: Record<string, any>
 }): ErrorChainItem {
   return {
     layer,
-    entityName,
     functionName,
+    request,
     errorCode,
     message,
-    details
+    details,
   }
 }
 
@@ -96,7 +96,7 @@ export function createUnifiedError({
   statusCode,
   clientMessage,
   clientErrorCode,
-  errorChain
+  errorChain,
 }: {
   statusCode: number
   clientMessage: string
@@ -109,6 +109,6 @@ export function createUnifiedError({
     statusCode,
     clientMessage,
     clientErrorCode,
-    errorChain
+    errorChain,
   }
 }
