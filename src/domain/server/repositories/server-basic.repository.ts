@@ -47,7 +47,6 @@ export class ServerBasicRepository extends BaseRepository {
         const condition = filterOptions.license === "assign" ? "nLicenseID > 0" : "nLicenseID = 0"
         this.addRawCondition({ condition })
       }
-
       ContextLogger.debug({ message: `필터 옵션 적용됨` })
     } catch (error) {
       this.handleRepositoryError({
@@ -66,10 +65,10 @@ export class ServerBasicRepository extends BaseRepository {
       this.resetQueryState()
       this.applyFilters({ filterOptions })
 
-      let query = `SELECT * FRO ${this.tableName}`
+      let query = `SELECT * FROM ${this.tableName}`
       query += this.buildWhereClause()
 
-      return await this.executeQuery<ServerBasicTable>({ sql: query, params: this.params, functionName: "findAll" })
+      return await this.executeQuery<ServerBasicTable>({ sql: query, params: this.params, request: `${this.repositoryName}.findAll` })
     } catch (error) {
       return this.handleRepositoryError({
         error,
@@ -94,7 +93,7 @@ export class ServerBasicRepository extends BaseRepository {
       return await this.executeQuerySingle<ServerBasicTable>({
         sql: query,
         params: this.params,
-        functionName: "findByServerName",
+        request: `${this.repositoryName}.findByServerName`,
       })
     } catch (error) {
       return this.handleRepositoryError({
@@ -120,7 +119,7 @@ export class ServerBasicRepository extends BaseRepository {
       return await this.executeQuerySingle<ServerBasicTable>({
         sql: query,
         params: this.params,
-        functionName: "findByServerId",
+        request: `${this.repositoryName}.findByServerId`,
       })
     } catch (error) {
       return this.handleRepositoryError({

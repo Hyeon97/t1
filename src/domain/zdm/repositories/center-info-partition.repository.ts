@@ -20,7 +20,7 @@ export class ZdmPartitionRepository extends BaseRepository {
       const placeholders = systemNames.map(() => "?").join(",")
       const query = `SELECT * FROM ${this.tableName} WHERE sSystemName IN (${placeholders})`
 
-      return await this.executeQuery<ZdmInfoPartitionTable>({ sql: query, params: systemNames, functionName: "findBySystemNames" })
+      return await this.executeQuery<ZdmInfoPartitionTable>({ sql: query, params: systemNames, request: "findBySystemNames" })
     } catch (error) {
       ContextLogger.debug({
         message: `ZdmPartitionRepository.findBySystemNames() 오류 발생`,

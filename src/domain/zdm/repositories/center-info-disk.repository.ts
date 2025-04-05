@@ -21,7 +21,7 @@ export class ZdmDiskRepository extends BaseRepository {
       const placeholders = systemNames.map(() => "?").join(",")
       const query = `SELECT * FROM ${this.tableName} WHERE sSystemName IN (${placeholders})`
 
-      return await this.executeQuery<ZdmInfoDiskTable>({ sql: query, params: systemNames, functionName: "findBySystemNames" })
+      return await this.executeQuery<ZdmInfoDiskTable>({ sql: query, params: systemNames, request: "findBySystemNames" })
     } catch (error) {
       ContextLogger.debug({
         message: `ZdmDiskRepository.findBySystemNames() 오류 발생`,

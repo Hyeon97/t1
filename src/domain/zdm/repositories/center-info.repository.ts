@@ -14,7 +14,7 @@ export class ZdmRepository extends BaseRepository {
   /**
    * 필터 옵션 적용
    */
-  private applyFilters({ filterOptions }: { filterOptions: ZdmFilterOptions }): void { }
+  private applyFilters({ filterOptions }: { filterOptions: ZdmFilterOptions }): void {}
 
   /**
    *  모든 ZDM 조회
@@ -26,7 +26,7 @@ export class ZdmRepository extends BaseRepository {
 
       let query = `SELECT * FROM ${this.tableName}`
       query += this.buildWhereClause()
-      return await this.executeQuery<ZdmInfoTable>({ sql: query, params: this.params, functionName: "findAll" })
+      return await this.executeQuery<ZdmInfoTable>({ sql: query, params: this.params, request: "findAll" })
     } catch (error) {
       ContextLogger.debug({
         message: `ZdmRepository.findAll() 오류 발생`,
@@ -49,7 +49,7 @@ export class ZdmRepository extends BaseRepository {
 
       let query = `SELECT * FROM ${this.tableName}`
       query += this.buildWhereClause()
-      return await this.executeQuerySingle<ZdmInfoTable>({ sql: query, params: this.params, functionName: "findByZdmName" })
+      return await this.executeQuerySingle<ZdmInfoTable>({ sql: query, params: this.params, request: "findByZdmName" })
     } catch (error) {
       ContextLogger.debug({
         message: `ZdmRepository.findByZDMName() 오류 발생`,
@@ -73,7 +73,7 @@ export class ZdmRepository extends BaseRepository {
       let query = `SELECT * FROM ${this.tableName}`
       query += this.buildWhereClause()
       logger.debug(`실행 쿼리: ${query}, 파라미터: ${this.params.join(", ")}`)
-      return await this.executeQuerySingle<ZdmInfoTable>({ sql: query, params: this.params, functionName: "findByZdmId" })
+      return await this.executeQuerySingle<ZdmInfoTable>({ sql: query, params: this.params, request: "findByZdmId" })
     } catch (error) {
       ContextLogger.debug({
         message: `ZdmRepository.findByZDMId() 오류 발생`,

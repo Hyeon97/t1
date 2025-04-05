@@ -11,7 +11,6 @@ import { ServerResponseFactory } from "../dto/response/server-response-factory"
 import { ServerService } from "../services/server.service"
 import { ServerFilterOptions } from "../types/server-filter.type"
 
-
 export class ServerController extends BaseController {
   private readonly serverService: ServerService
 
@@ -50,8 +49,6 @@ export class ServerController extends BaseController {
         functionName: "extractFilterOptions",
         message: "서버 필터 옵션을 추출하는 중 오류가 발생했습니다",
         cause: error,
-        resource: "Server",
-        action: "필터 옵션 추출",
       })
     }
   }
@@ -84,8 +81,7 @@ export class ServerController extends BaseController {
         next,
         error,
         functionName: "getServers",
-        resource: "Server",
-        action: "목록 조회",
+        message: "서버 목록 조회 중 오류가 발생했습니다",
       })
     }
   }
@@ -134,8 +130,7 @@ export class ServerController extends BaseController {
         next,
         error,
         functionName: "getServer",
-        resource: "Server",
-        action: "단일 조회",
+        message: "서버 정보 조회 중 오류가 발생했습니다",
       })
     }
   }

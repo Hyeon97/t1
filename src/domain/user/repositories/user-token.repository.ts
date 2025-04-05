@@ -17,6 +17,6 @@ export class UserTokenRepository extends BaseRepository {
     const placeholders = ["?", "?", "now()", "now()"]
     const query = `INSERT INTO ${this.tableName} (${fieldsList}) VALUES (${placeholders})`
     const params = [input.token, input.mail]
-    await this.executeQuerySingle<ResultSetHeader>({ sql: query, params, functionName: "saveTokenInfo" })
+    await this.executeQuerySingle<ResultSetHeader>({ sql: query, params, request: "saveTokenInfo" })
   }
 }

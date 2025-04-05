@@ -16,7 +16,7 @@ export class UserInfoRepository extends BaseRepository {
     try {
       const query = `SELECT * FROM ${this.tableName}`
 
-      return await this.executeQuery<UserInfoTable>({ sql: query, functionName: "findAll" })
+      return await this.executeQuery<UserInfoTable>({ sql: query, request: "findAll" })
     } catch (error) {
       ContextLogger.debug({
         message: `UserInfoRepository.findAll() 오류 발생`,
@@ -36,7 +36,7 @@ export class UserInfoRepository extends BaseRepository {
       const query = `SELECT * FROM ${this.tableName} WHERE idx=?`
       const params = [id]
 
-      return await this.executeQuerySingle<UserInfoTable>({ sql: query, params, functionName: "findById" })
+      return await this.executeQuerySingle<UserInfoTable>({ sql: query, params, request: "findById" })
     } catch (error) {
       ContextLogger.debug({
         message: `UserInfoRepository.findById() 오류 발생`,
@@ -56,7 +56,7 @@ export class UserInfoRepository extends BaseRepository {
       const query = `SELECT * FROM ${this.tableName} WHERE email=? and password=?`
       const params = [email, password]
 
-      return await this.executeQuerySingle<UserInfoTable>({ sql: query, params, functionName: "findByEmailAndPassword" })
+      return await this.executeQuerySingle<UserInfoTable>({ sql: query, params, request: "findByEmailAndPassword" })
     } catch (error) {
       ContextLogger.debug({
         message: `UserInfoRepository.findByEmailAndPassword() 오류 발생`,
@@ -76,7 +76,7 @@ export class UserInfoRepository extends BaseRepository {
       const query = `SELECT * FROM ${this.tableName} WHERE email=?`
       const params = [email]
 
-      return await this.executeQuerySingle<UserInfoTable>({ sql: query, params, functionName: "findByEmail" })
+      return await this.executeQuerySingle<UserInfoTable>({ sql: query, params, request: "findByEmail" })
     } catch (error) {
       ContextLogger.debug({
         message: `UserInfoRepository.findByEmail() 오류 발생`,

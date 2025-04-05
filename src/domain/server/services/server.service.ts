@@ -192,7 +192,7 @@ export class ServerService extends BaseService {
               serverResponse[propertyName as ServerDataPropertyKey] = []
             }
             // 타입스크립트 타입 단언 필요
-            ; (serverResponse[propertyName] as any[]).push(item)
+            ;(serverResponse[propertyName] as any[]).push(item)
           }
         })
       }
@@ -208,7 +208,6 @@ export class ServerService extends BaseService {
       return this.handleServiceError({
         error,
         functionName: "combineServerData",
-        operationName: "데이터 조합",
         message: "서버 데이터 조합 중 오류가 발생했습니다",
       })
     }
@@ -242,7 +241,6 @@ export class ServerService extends BaseService {
       return this.handleServiceError({
         error,
         functionName: "getServers",
-        operationName: "server 목록 조회",
         message: "서버 정보 목록 조회 중 오류가 발생했습니다",
       })
     }
@@ -261,8 +259,6 @@ export class ServerService extends BaseService {
         throw ServiceError.resourceNotFoundError({
           functionName: "getServerByName",
           message: `이름이 '${name}'인 서버를 찾을 수 없습니다`,
-          entityName: this.entityName,
-          operationName: "서버 조회",
           metadata: { name },
         })
       }
@@ -284,7 +280,6 @@ export class ServerService extends BaseService {
       return this.handleServiceError({
         error,
         functionName: "getServerByName",
-        operationName: "서버 이름으로 조회",
         message: `서버 이름 '${name}'으로 조회 중 오류가 발생했습니다`,
       })
     }
@@ -300,8 +295,6 @@ export class ServerService extends BaseService {
         throw ServiceError.validationError({
           functionName: "getServerById",
           message: `서버 ID는 숫자만 포함해야 합니다. 입력값: '${id}'`,
-          entityName: this.entityName,
-          operationName: "서버 ID로 조회",
           metadata: { id },
         })
       }
@@ -312,8 +305,6 @@ export class ServerService extends BaseService {
         throw ServiceError.resourceNotFoundError({
           functionName: "getServerById",
           message: `ID가 '${id}'인 서버를 찾을 수 없습니다`,
-          entityName: this.entityName,
-          operationName: "서버 ID로 조회",
           metadata: { id },
         })
       }
@@ -338,7 +329,6 @@ export class ServerService extends BaseService {
       return this.handleServiceError({
         error,
         functionName: "getServerById",
-        operationName: "서버 ID로 조회",
         message: `서버 ID '${id}'로 조회 중 오류가 발생했습니다`,
       })
     }
