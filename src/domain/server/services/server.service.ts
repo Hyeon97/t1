@@ -39,7 +39,6 @@ export class ServerService extends BaseService {
   }) {
     super({
       serviceName: "ServerService",
-      entityName: "Server",
     })
     this.serverBasicRepository = serverBasicRepository
     this.serverDiskRepository = serverDiskRepository
@@ -142,7 +141,7 @@ export class ServerService extends BaseService {
       return additionalInfo
     } catch (error) {
       ContextLogger.error({
-        message: "추가 서버 정보 조회 중 오류 발생",
+        message: "추가 Server 정보 조회 중 오류 발생",
         meta: {
           error: error instanceof Error ? error.message : String(error),
           systemNames,
@@ -208,7 +207,7 @@ export class ServerService extends BaseService {
       return this.handleServiceError({
         error,
         functionName: "combineServerData",
-        message: "서버 데이터 조합 중 오류가 발생했습니다",
+        message: "Server 데이터 조합 중 오류가 발생했습니다",
       })
     }
   }
@@ -241,7 +240,7 @@ export class ServerService extends BaseService {
       return this.handleServiceError({
         error,
         functionName: "getServers",
-        message: "서버 정보 목록 조회 중 오류가 발생했습니다",
+        message: "Server 정보 목록 조회 중 오류가 발생했습니다",
       })
     }
   }
@@ -258,8 +257,7 @@ export class ServerService extends BaseService {
       if (!server) {
         throw ServiceError.resourceNotFoundError({
           functionName: "getServerByName",
-          message: `이름이 '${name}'인 서버를 찾을 수 없습니다`,
-          metadata: { name },
+          message: `이름이 '${name}'인 Server를 찾을 수 없습니다`,
         })
       }
 
@@ -280,7 +278,7 @@ export class ServerService extends BaseService {
       return this.handleServiceError({
         error,
         functionName: "getServerByName",
-        message: `서버 이름 '${name}'으로 조회 중 오류가 발생했습니다`,
+        message: `Server 이름 '${name}'으로 조회 중 오류가 발생했습니다`,
       })
     }
   }

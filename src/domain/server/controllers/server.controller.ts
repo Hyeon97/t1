@@ -17,7 +17,6 @@ export class ServerController extends BaseController {
   constructor({ serverService }: { serverService: ServerService }) {
     super({
       controllerName: "ServerController",
-      entityName: "Server",
     })
     this.serverService = serverService
   }
@@ -28,14 +27,17 @@ export class ServerController extends BaseController {
   private extractFilterOptions({ query }: { query: SpecificServerFilterDTO | ServerQueryFilterDTO }): ServerFilterOptions {
     try {
       const filterOptions: ServerFilterOptions = {
+        //  필터
         mode: query.mode || "",
         os: query.os || "",
+        //  추가 정보
         network: query.network ?? false,
         disk: query.disk ?? false,
         partition: query.partition ?? false,
         repository: query.repository ?? false,
         connection: query.connection || "",
         license: query.license || "",
+        //  상세 정보
         detail: query.detail ?? false,
       }
 
@@ -58,7 +60,7 @@ export class ServerController extends BaseController {
    */
   getServers = async (req: ExtendedRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
-      ContextLogger.debug({ message: `서버 목록 조회 시작` })
+      ContextLogger.debug({ message: `Server 목록 조회 시작` })
 
       // 필터 옵션 추출
       const query = req.query as unknown as ServerQueryFilterDTO
@@ -73,7 +75,7 @@ export class ServerController extends BaseController {
         detail: stringToBoolean({ value: filterOptions?.detail }),
         serversData,
       })
-      ContextLogger.info({ message: `총 ${serversData.length}개의 서버 정보를 조회했습니다. 상세 정보 포함: ${filterOptions.detail}` })
+      ContextLogger.info({ message: `총 ${serversData.length}개의 Server 정보를 조회했습니다. 상세 정보 포함: ${filterOptions.detail}` })
 
       ApiUtils.success({ res, data: serversDTOs, message: "Server infomation list" })
     } catch (error) {
@@ -81,7 +83,7 @@ export class ServerController extends BaseController {
         next,
         error,
         functionName: "getServers",
-        message: "서버 목록 조회 중 오류가 발생했습니다",
+        message: "Server 목록 조회 중 오류가 발생했습니다",
       })
     }
   }
