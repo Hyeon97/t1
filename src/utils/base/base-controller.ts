@@ -5,11 +5,9 @@ import { ServiceError } from "../../errors/service/service-error"
 
 export class BaseController {
   protected readonly controllerName: string
-  protected readonly entityName: string
 
-  constructor({ controllerName, entityName }: { controllerName: string; entityName: string }) {
+  constructor({ controllerName }: { controllerName: string }) {
     this.controllerName = controllerName
-    this.entityName = entityName
   }
 
   /**

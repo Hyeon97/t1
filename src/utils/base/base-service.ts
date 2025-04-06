@@ -5,11 +5,9 @@ import { ContextLogger } from "../logger/logger.custom"
 
 export class BaseService {
   protected readonly serviceName: string
-  protected readonly entityName: string
 
-  constructor({ serviceName, entityName }: { serviceName: string; entityName: string }) {
+  constructor({ serviceName }: { serviceName: string }) {
     this.serviceName = serviceName
-    this.entityName = entityName
   }
 
   /**
@@ -55,28 +53,28 @@ export class BaseService {
     }
   }
 
-  /**
-   * 엔티티 존재 여부 확인 후 처리
-   */
-  protected async ensureEntityExists<T>({
-    entity,
-    identifier,
-    functionName,
-  }: {
-    entity: T | null
-    identifier: any
-    functionName: string
-    operationName: string
-  }): Promise<T> {
-    if (!entity) {
-      throw ServiceError.resourceNotFoundError({
-        functionName,
-        message: `${this.entityName}(${identifier})를 찾을 수 없습니다`,
-        metadata: { identifier },
-      })
-    }
-    return entity
-  }
+  // /**
+  //  * 엔티티 존재 여부 확인 후 처리
+  //  */
+  // protected async ensureEntityExists<T>({
+  //   entity,
+  //   identifier,
+  //   functionName,
+  // }: {
+  //   entity: T | null
+  //   identifier: any
+  //   functionName: string
+  //   operationName: string
+  // }): Promise<T> {
+  //   if (!entity) {
+  //     throw ServiceError.resourceNotFoundError({
+  //       functionName,
+  //       message: `${this.entityName}(${identifier})를 찾을 수 없습니다`,
+  //       metadata: { identifier },
+  //     })
+  //   }
+  //   return entity
+  // }
 
   /**
    * 비즈니스 규칙 검증
