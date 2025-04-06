@@ -38,7 +38,7 @@ export interface BackupResponseFields {
 /**
  * 상세 Backup 정보 응답 필드 인터페이스
  */
-export interface DetailBackupResponseFields extends BackupResponseFields {
+export interface BackupResponseDetailFields extends BackupResponseFields {
   option: {
     rotation: string
     excludeDir: string
@@ -85,5 +85,5 @@ export const DEFAULT_VALUES_BACKUP_RESPONSE = {
  */
 export interface BackupDataResponse {
   backup: BackupTable
-  info?: BackupInfoTable
+  info: BackupInfoTable
 }

@@ -1,23 +1,23 @@
-//////////////////////////////////
-//  Backup 응답 DTO 생성 팩토리  //
-//////////////////////////////////
+////////////////////////////////////////////////
+//  Backup 작업 정보 조회 응답 DTO 생성 팩토리  //
+////////////////////////////////////////////////
 
-import { ServerDataResponse } from "../../../server/types/server-response.type"
-import { ServerResponseBaseDTO } from "./backup-response-base.dto"
-import { ServerResponseDetailDTO } from "./backup-response-detail.dto"
+import { BackupDataResponse } from "../../types/backup-response.type"
+import { BackupResponseBaseDTO } from "./backup-response-base.dto"
+import { BackupResponseDetailDTO } from "./backup-response-detail.dto"
 
-export class ServerResponseFactory {
+export class BackupResponseFactory {
   /**
    * 단일 엔티티에서 응답 DTO 생성
    */
   static createFromEntity({
     detail,
-    serverData,
+    backupData,
   }: {
     detail: boolean
-    serverData: ServerDataResponse
-  }): ServerResponseBaseDTO | ServerResponseDetailDTO {
-    return detail ? ServerResponseDetailDTO.fromEntity({ serverData }) : ServerResponseBaseDTO.fromEntity({ serverData })
+    backupData: BackupDataResponse
+  }): BackupResponseBaseDTO | BackupResponseDetailDTO {
+    return detail ? BackupResponseDetailDTO.fromEntity({ backupData }) : BackupResponseBaseDTO.fromEntity({ backupData })
   }
 
   /**
@@ -25,11 +25,11 @@ export class ServerResponseFactory {
    */
   static createFromEntities({
     detail,
-    serversData,
+    backupsData,
   }: {
     detail: boolean
-    serversData: ServerDataResponse[]
-  }): (ServerResponseBaseDTO | ServerResponseDetailDTO)[] {
-    return detail ? ServerResponseDetailDTO.fromEntities({ serversData }) : ServerResponseBaseDTO.fromEntities({ serversData })
+    backupsData: BackupDataResponse[]
+  }): (BackupResponseBaseDTO | BackupResponseDetailDTO)[] {
+    return detail ? BackupResponseDetailDTO.fromEntities({ backupsData }) : BackupResponseBaseDTO.fromEntities({ backupsData })
   }
 }

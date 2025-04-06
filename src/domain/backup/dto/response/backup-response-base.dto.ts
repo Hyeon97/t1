@@ -2,152 +2,112 @@
 //  기본 Backup 정보 응답 DTO  //
 ////////////////////////////////
 
-import { OSTypeMap } from "../../../../types/common/os"
-import { ServerDiskInfoDTO } from "../../../server/dto/disk/server.disk.dto"
-import { ServerNetworkInfoDTO } from "../../../server/dto/network/server.network.dto"
-import { ServerPartitionInfoDTO } from "../../../server/dto/partition/server.partition.dto"
-import { SystemModeMap } from "../../../server/types/server-common.type"
-import {
-  ServerResponseBaseFields,
-  DEFAULT_VALUES_SERVER_RESPONSE,
-  ArrayPropertyName,
-  ServerDataResponse,
-} from "../../../server/types/server-response.type"
+import { JobResult } from "../../../../types/common/job"
+import { RepositoryConnectionTypeMap, RepositoryType } from "../../../../types/common/repository"
+import { BackupTypeMap } from "../../../backup/types/backup-common.type"
+import { BackupType } from "../../types/backup-common.type"
+import { BackupDataResponse, BackupResponseFields, DEFAULT_VALUES_BACKUP_RESPONSE } from "../../types/backup-response.type"
 
-export class ServerResponseBaseDTO implements ServerResponseBaseFields {
+export class BackupResponseBaseDTO implements BackupResponseFields {
   id: string
+  jobName: string
   systemName: string
-  systemMode: string
-  os: string
-  version: string
-  ip: string
-  status: string
-  licenseID: string | number
-  lastUpdated: string
-  disk?: ServerDiskInfoDTO[]
-  network?: ServerNetworkInfoDTO[]
-  partition?: ServerPartitionInfoDTO[]
-  repository?: any[]
+  partition: string
+  mode: BackupType | string
+  result: JobResult | string
+  schedule: {
+    basic: string
+    advanced: string
+  }
+  repository: {
+    id: string
+    type: RepositoryType | string
+    path: string
+  }
+  timestamp: {
+    start: string
+    end: string
+    elapsed: string
+  }
+  lastUpdate: string
 
   constructor({
-    id = DEFAULT_VALUES_SERVER_RESPONSE.id,
-    systemName = DEFAULT_VALUES_SERVER_RESPONSE.systemName,
-    systemMode = DEFAULT_VALUES_SERVER_RESPONSE.systemMode,
-    os = DEFAULT_VALUES_SERVER_RESPONSE.os,
-    version = DEFAULT_VALUES_SERVER_RESPONSE.version,
-    ip = DEFAULT_VALUES_SERVER_RESPONSE.ip,
-    status = DEFAULT_VALUES_SERVER_RESPONSE.status,
-    licenseID = DEFAULT_VALUES_SERVER_RESPONSE.licenseID,
-    lastUpdated = DEFAULT_VALUES_SERVER_RESPONSE.lastUpdated,
-    disk = DEFAULT_VALUES_SERVER_RESPONSE.disk,
-    network = DEFAULT_VALUES_SERVER_RESPONSE.network,
-    partition = DEFAULT_VALUES_SERVER_RESPONSE.partition,
-    repository = DEFAULT_VALUES_SERVER_RESPONSE.repository,
-  }: Partial<ServerResponseBaseFields> = {}) {
+    id = DEFAULT_VALUES_BACKUP_RESPONSE.id,
+    jobName = DEFAULT_VALUES_BACKUP_RESPONSE.jobName,
+    systemName = DEFAULT_VALUES_BACKUP_RESPONSE.systemName,
+    partition = DEFAULT_VALUES_BACKUP_RESPONSE.partition,
+    mode = DEFAULT_VALUES_BACKUP_RESPONSE.mode,
+    result = DEFAULT_VALUES_BACKUP_RESPONSE.result,
+    schedule = DEFAULT_VALUES_BACKUP_RESPONSE.schedule,
+    repository = DEFAULT_VALUES_BACKUP_RESPONSE.repository,
+    timestamp = DEFAULT_VALUES_BACKUP_RESPONSE.timestamp,
+    lastUpdate = DEFAULT_VALUES_BACKUP_RESPONSE.lastUpdate,
+  }: Partial<BackupResponseFields> = {}) {
     this.id = id
+    this.jobName = jobName
     this.systemName = systemName
-    this.systemMode = systemMode
-    this.os = os
-    this.version = version
-    this.ip = ip
-    this.status = status
-    this.licenseID = licenseID
-    this.lastUpdated = lastUpdated
-
-    // 비어있지 않은 배열만 포함
-    this.assignArrayIfNotEmpty("disk", disk)
-    this.assignArrayIfNotEmpty("network", network)
-    this.assignArrayIfNotEmpty("partition", partition)
-    this.assignArrayIfNotEmpty("repository", repository)
-  }
-
-  /**
-   * 배열이 비어있지 않은 경우에만 속성 할당
-   */
-  protected assignArrayIfNotEmpty<T>(propName: ArrayPropertyName, value?: T[]): void {
-    if (value && value.length > 0) {
-      // 타입 안전성 향상을 위해 명시적인 타입 가드 사용
-      this[propName] = value as any
-    }
+    this.partition = partition
+    this.mode = mode
+    this.result = result
+    this.schedule = schedule
+    this.repository = repository
+    this.timestamp = timestamp
+    this.lastUpdate = lastUpdate
   }
 
   /**
    * JSON 직렬화를 위한 메서드
    */
   toJSON(): Record<string, any> {
-    const json: Record<string, any> = {
+    return {
       id: this.id,
+      jobName: this.jobName,
       systemName: this.systemName,
-      systemMode: this.systemMode,
-      os: this.os,
-      version: this.version,
-      ip: this.ip,
-      status: this.status,
-      licenseID: this.licenseID,
-      lastUpdated: this.lastUpdated,
-    }
-
-    // 비어있지 않은 배열만 JSON 객체에 추가
-    this.addToJsonIfNotEmpty(json, "disk", this.disk)
-    this.addToJsonIfNotEmpty(json, "network", this.network)
-    this.addToJsonIfNotEmpty(json, "partition", this.partition)
-    this.addToJsonIfNotEmpty(json, "repository", this.repository)
-
-    return json
-  }
-
-  /**
-   * 배열이 비어있지 않은 경우에만 JSON에 추가
-   */
-  protected addToJsonIfNotEmpty<T>(json: Record<string, any>, propName: ArrayPropertyName, value?: T[]): void {
-    if (value && value.length > 0) {
-      json[propName] = value
+      partition: this.partition,
+      mode: this.mode,
+      result: this.result,
+      schedule: this.schedule,
+      repository: this.repository,
+      timestamp: this.timestamp,
+      lastUpdate: this.lastUpdate,
     }
   }
 
   /**
    * 엔티티에서 기본 DTO로 변환하는 정적 메서드
    */
-  static fromEntity({ serverData }: { serverData: ServerDataResponse }): ServerResponseBaseDTO {
-    const { server, disk, network, partition, repository } = serverData
+  static fromEntity({ backupData }: { backupData: BackupDataResponse }): BackupResponseBaseDTO {
+    const { backup, info } = backupData
 
-    return new ServerResponseBaseDTO({
-      id: String(server.nID),
-      systemName: server.sSystemName,
-      systemMode: SystemModeMap.toString({ value: server.nSystemMode }),
-      os: OSTypeMap.toString({ value: server.nOS }),
-      version: server.sOSVersion,
-      ip: server.sIPAddress,
-      status: server.sStatus,
-      licenseID: server.nLicenseID === 0 ? DEFAULT_VALUES_SERVER_RESPONSE.licenseID : server.nLicenseID,
-      lastUpdated: server.sLastUpdateTime,
-      disk: ServerResponseBaseDTO.transformEntities({
-        entities: disk,
-        transformer: (entities) => ServerDiskInfoDTO.fromEntities({ disks: entities }),
-      }),
-      network: ServerResponseBaseDTO.transformEntities({
-        entities: network,
-        transformer: (entities) => ServerNetworkInfoDTO.fromEntities({ networks: entities }),
-      }),
-      partition: ServerResponseBaseDTO.transformEntities({
-        entities: partition,
-        transformer: (entities) => ServerPartitionInfoDTO.fromEntities({ partitions: entities }),
-      }),
-      repository: repository && repository.length > 0 ? repository : undefined,
+    return new BackupResponseBaseDTO({
+      id: String(backup.nID),
+      jobName: backup.sJobName,
+      systemName: backup.sSystemName,
+      partition: info.sDrive,
+      mode: BackupTypeMap.toString({ value: info.nBackupType }),
+      result: backup.sJobResult,
+      schedule: {
+        basic: backup.nScheduleID ? String(backup.nScheduleID) : DEFAULT_VALUES_BACKUP_RESPONSE.schedule.basic,
+        advanced: backup.nScheduleID_advanced ? String(backup.nScheduleID_advanced) : DEFAULT_VALUES_BACKUP_RESPONSE.schedule.advanced,
+      },
+      repository: {
+        id: String(info!.nRepositoryID),
+        type: RepositoryConnectionTypeMap.toString({ value: info.nRepositoryType }),
+        path: info!.sRepositoryPath,
+      },
+      timestamp: {
+        start: backup.sStartTime,
+        end: backup.sEndTime,
+        elapsed: backup.sElapsedTime,
+      },
+      lastUpdate: backup.sLastUpdateTime,
     })
-  }
-
-  /**
-   * 엔티티 배열 변환 헬퍼 메서드
-   */
-  protected static transformEntities<T, R>({ entities, transformer }: { entities?: T[]; transformer: (entities: T[]) => R[] }): R[] | undefined {
-    return entities && entities.length > 0 ? transformer(entities) : undefined
   }
 
   /**
    * 엔티티 배열에서 기본 DTO 배열로 변환
    */
-  static fromEntities({ serversData }: { serversData: ServerDataResponse[] }): ServerResponseBaseDTO[] {
-    return serversData.map((serverData) => ServerResponseBaseDTO.fromEntity({ serverData }))
+  static fromEntities({ backupsData }: { backupsData: BackupDataResponse[] }): BackupResponseBaseDTO[] {
+    return backupsData.map((backupData) => BackupResponseBaseDTO.fromEntity({ backupData }))
   }
 }
