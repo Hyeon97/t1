@@ -10,6 +10,8 @@ import { SpecificServerFilterDTO } from "../dto/query/specific-server-query-filt
 import { ServerResponseFactory } from "../dto/response/server-response-factory"
 import { ServerService } from "../services/server.service"
 import { ServerFilterOptions } from "../types/server-filter.type"
+import { regNumberOnly } from "../../../utils/regex.utils"
+import { ServiceError } from "../../../errors/service/service-error"
 
 export class ServerController extends BaseController {
   private readonly serverService: ServerService
@@ -104,6 +106,18 @@ export class ServerController extends BaseController {
       // 필터 옵션 추출
       const filterOptions = this.extractFilterOptions({ query })
       ContextLogger.debug({ message: `적용된 필터 옵션`, meta: filterOptions })
+
+      //  identifierType 값과 parameter의 indefier 값이 일치하는지 확인
+      if (filterOptions.identifierType === "id" && !regNumberOnly.test(identifier)) {
+        throw ControllerError.badRequestError({
+          functionName: "getServer",
+          message: `서버 ID는 숫자여야 합니다.`,
+          metadata: {
+            identifier,
+            identifierType: filterOptions.identifierType,
+          },
+        })
+      }
 
       // 서비스 호출
       let serverData

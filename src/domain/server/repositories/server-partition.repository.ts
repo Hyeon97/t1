@@ -1,5 +1,4 @@
 import { BaseRepository } from "../../../utils/base/base-repository"
-import { regNumberOnly } from "../../../utils/regex.utils"
 import { ServerPartitionTable } from "../types/db/server-partition"
 import { ServerPartitionFilterOptions } from "../types/server-partition-filter.type"
 
@@ -17,16 +16,20 @@ export class ServerPartitionRepository extends BaseRepository {
   private applyFilters(filterOptions: ServerPartitionFilterOptions): void {
     try {
       //  server 필터 적용
-      //  filterOptions.server 값이 server name 인 경우 별도 처리 필요 ( server 정보 가져와야 함 )
-      if (filterOptions.server) {
-        if (typeof filterOptions.server === "number" || regNumberOnly.test(filterOptions.server as string))
-          this.addCondition({ condition: "sSystemName = ?", params: [filterOptions.server] })
+      //  두번째 조건은 findByServerName함수로 인한 중복 처리 방지
+      if (filterOptions.server && !this.conditions.includes("sSystemName = ?")) {
+        this.addCondition({ condition: "sSystemName = ?", params: [filterOptions.server] })
+        // if (typeof filterOptions.server === "number" || regNumberOnly.test(filterOptions.server as string)) {
+        //   this.addCondition({ condition: "sSystemName = ?", params: [filterOptions.server] })
+        // } else {
+        //   this.addCondition({ condition: "sSystemName = ?", params: [filterOptions.server] })
+        // }
       }
     } catch (error) {
       this.handleRepositoryError({
         error,
         functionName: "applyFilters",
-        message: "파티션 필터 옵션 적용 중 오류가 발생했습니다",
+        message: "Server Partition 필터 옵션 적용 중 오류가 발생했습니다",
       })
     }
   }
