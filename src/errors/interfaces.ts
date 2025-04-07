@@ -58,7 +58,7 @@ export interface UnifiedError {
   statusCode: number // HTTP 상태 코드
   clientMessage: string // 클라이언트에게 보여줄 메시지
   clientErrorCode: ErrorCode // API 에러 코드
-  errorChain: ErrorChainItem[] // 에러 발생 체인
+  errorChain?: ErrorChainItem[] // 에러 발생 체인
 }
 
 /**

@@ -183,6 +183,19 @@ export const errorHandler = (err: Error, req: Request, res: Response, next: Next
       statusCode: unifiedError.statusCode,
       errorChain: unifiedError.errorChain,
     }
+  } else {
+    let message = ""
+    let detail = {}
+    if (unifiedError.errorChain) {
+      const l = unifiedError.errorChain.length
+      message = unifiedError.errorChain[l - 1].message
+      detail = unifiedError.errorChain[l - 1].details || {}
+    }
+
+    errorResponse.error.details = {
+      message,
+      ...detail,
+    }
   }
 
   res.status(unifiedError.statusCode).json(errorResponse)

@@ -2,6 +2,7 @@ import { createErrorChainItem, ErrorChainItem, ErrorLayer } from "../interfaces"
 import { RepositoryError, RepositoryErrorCode } from "../repository/repository-error"
 
 export enum ServiceErrorCode {
+  UNAUTHORIZED = "SRV_000",
   VALIDATION = "SRV_001",
   BUSINESS_RULE = "SRV_002",
   RESOURCE_NOT_FOUND = "SRV_003",
@@ -55,7 +56,17 @@ export class ServiceError extends Error {
     Error.captureStackTrace(this, this.constructor)
   }
 
-  // 서비스 에러 팩토리 메서드들
+  //  권한 없음
+  static unauthorizedError({ functionName, message, cause, metadata }: ServiceErrorParams): ServiceError {
+    return new ServiceError({
+      errorCode: ServiceErrorCode.UNAUTHORIZED,
+      functionName,
+      message,
+      cause,
+      metadata,
+    })
+  }
+
   static validationError({ functionName, message, cause, metadata }: ServiceErrorParams): ServiceError {
     return new ServiceError({
       errorCode: ServiceErrorCode.VALIDATION,
