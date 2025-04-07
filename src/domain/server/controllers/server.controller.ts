@@ -5,7 +5,6 @@ import { ApiUtils } from "../../../utils/api/api.utils"
 import { BaseController } from "../../../utils/base/base-controller"
 import { stringToBoolean } from "../../../utils/data-convert.util"
 import { ContextLogger } from "../../../utils/logger/logger.custom"
-import { regNumberOnly } from "../../../utils/regex.utils"
 import { ServerQueryFilterDTO } from "../dto/query/server-query-filter.dto"
 import { SpecificServerFilterDTO } from "../dto/query/specific-server-query-filter.dto"
 import { ServerResponseFactory } from "../dto/response/server-response-factory"
@@ -106,17 +105,17 @@ export class ServerController extends BaseController {
       const filterOptions = this.extractFilterOptions({ query })
       ContextLogger.debug({ message: `적용된 필터 옵션`, meta: filterOptions })
 
-      //  identifierType 값과 parameter의 indefier 값이 일치하는지 확인
-      if (filterOptions.identifierType === "id" && !regNumberOnly.test(identifier)) {
-        throw ControllerError.badRequestError({
-          functionName: "getServer",
-          message: `Server ID는 숫자여야 합니다.`,
-          metadata: {
-            identifier,
-            identifierType: filterOptions.identifierType,
-          },
-        })
-      }
+      // //  identifierType 값과 parameter의 indefier 값이 일치하는지 확인
+      // if (filterOptions.identifierType === "id" && !regNumberOnly.test(identifier)) {
+      //   throw ControllerError.badRequestError({
+      //     functionName: "getServer",
+      //     message: `Server ID는 숫자여야 합니다.`,
+      //     metadata: {
+      //       identifier,
+      //       identifierType: filterOptions.identifierType,
+      //     },
+      //   })
+      // }
 
       // 서비스 호출
       let serverData

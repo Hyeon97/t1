@@ -292,7 +292,7 @@ export class ServerService extends BaseService {
       if (!regNumberOnly.test(id)) {
         throw ServiceError.validationError({
           functionName: "getServerById",
-          message: `서버 ID는 숫자만 포함해야 합니다. 입력값: '${id}'`,
+          message: `Server ID는 숫자만 포함해야 합니다. 입력값: '${id}'`,
           metadata: { id },
         })
       }
@@ -302,7 +302,7 @@ export class ServerService extends BaseService {
       if (!server) {
         throw ServiceError.resourceNotFoundError({
           functionName: "getServerById",
-          message: `ID가 '${id}'인 서버를 찾을 수 없습니다`,
+          message: `ID가 '${id}'인 Server를 찾을 수 없습니다`,
           metadata: { id },
         })
       }
@@ -327,7 +327,7 @@ export class ServerService extends BaseService {
       return this.handleServiceError({
         error,
         functionName: "getServerById",
-        message: `서버 ID '${id}'로 조회 중 오류가 발생했습니다`,
+        message: `Server ID '${id}'로 조회 중 오류가 발생했습니다`,
       })
     }
   }
