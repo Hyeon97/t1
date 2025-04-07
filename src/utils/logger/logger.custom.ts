@@ -1,4 +1,3 @@
-import { AppError } from "../../errors/AppError"
 import { asyncLocalStorage } from "../asyncContext"
 import { logger } from "./logger.util"
 
@@ -28,7 +27,7 @@ export class ContextLogger {
   /**
    * 에러 로그 - 에러 객체와 위치 정보 지원
    */
-  static error({ message, error, meta = {} }: { message: string; error?: AppError | Error; meta?: Record<string, any> }): void {
+  static error({ message, error, meta = {} }: { message: string; error?: Error; meta?: Record<string, any> }): void {
     let formattedMessage = this.formatMessage({ message })
 
     // AppError인 경우 위치 정보 추가 (errorLocation 속성이 있는 경우)
@@ -36,10 +35,10 @@ export class ContextLogger {
     //   formattedMessage += ` [at ${(error as any).errorLocation}]`
     // }
 
-    if (error && error instanceof AppError) {
-      const errorFunc = error?.stack?.split('\n')[1].trim().split(' ')[1]
-      formattedMessage += ` [at ${errorFunc}]`
-    }
+    // if (error) {
+    //   const errorFunc = error?.stack?.split("\n")[1].trim().split(" ")[1]
+    //   formattedMessage += ` [at ${errorFunc}]`
+    // }
 
     logger.error(formattedMessage, meta)
   }

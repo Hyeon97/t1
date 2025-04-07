@@ -26,7 +26,7 @@ export class BaseController {
   }): void => {
     //  controller 계층보다 더 아래인 계층에서 발생한 에러인 경우
     if (error instanceof ServiceError) {
-      throw ControllerError.fromServiceError({ error, functionName })
+      next(ControllerError.fromServiceError({ error, functionName }))
     }
     //  로깅
     ContextLogger.debug({
