@@ -4,7 +4,7 @@
 // import { ExtendedRequest } from "../../../../types/common/req.types"
 // import { ApiUtils } from "../../../../utils/api/api.utils"
 // import { ContextLogger } from "../../../../utils/logger/logger.custom"
-// import { BackupRegistService } from "../../services/backup.service"
+// import { BackupRegistService, BackupService } from "../../services/backup.service"
 // import { BackupRegistRequestBody } from "../../types/backup-regist.type"
 
 // export class BackupRegistController {

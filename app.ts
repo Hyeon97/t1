@@ -5,10 +5,8 @@ import "reflect-metadata"
 import { config } from "./src/config/config"
 import { ConfigManager } from "./src/config/config-manager"
 import { OpenApiConfig } from "./src/config/openapi-manager"
-import { AuthRoutes } from "./src/domain/auth/routes/auth.routes"
-import { validateToken } from "./src/domain/auth/validators/token.validators"
+import { BackupRoutes } from "./src/domain/backup/routes/backup.routes"
 import { ServerRoutes } from "./src/domain/server/routes/server.routes"
-import { ZdmRoutes } from "./src/domain/zdm/routes/zdm.routes"
 import { errorHandler, notFoundHandler } from "./src/errors/handler/error-handler"
 import { requestLogger } from "./src/middlewares/logging/requestLogger"
 import { logger, morganMiddleware } from "./src/utils/logger/logger.util"
@@ -71,6 +69,7 @@ class App {
       // this.app.use(`${config.apiPrefix}/token`, new AuthRoutes().router)
       // this.app.use(`${config.apiPrefix}/servers`, validateToken, new ServerRoutes().router)
       this.app.use(`${config.apiPrefix}/servers`, new ServerRoutes().router)
+      this.app.use(`${config.apiPrefix}/backups`, new BackupRoutes().router)
       // this.app.use(`${config.apiPrefix}/zdms`, validateToken, new ZdmRoutes().router)
 
       // OpenAPI 설정

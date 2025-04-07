@@ -1,32 +1,53 @@
-export class BackupInfoRepository extends CommonRepository {
-  protected readonly tableName = "job_backup_info"
+import { RepositoryConnectionTypeMap } from "../../../types/common/repository"
+import { BaseRepository } from "../../../utils/base/base-repository"
+import { ContextLogger } from "../../../utils/logger/logger.custom"
+import { BackupTypeMap } from "../types/backup-common.type"
+import { BackupFilterOptions } from "../types/backup-filter.type"
+import { BackupInfoTable } from "../types/db/job-backup-info"
+
+export class BackupInfoRepository extends BaseRepository {
+  constructor() {
+    super({
+      repositoryName: "BackupInfoRepository",
+      tableName: "job_backup_info",
+    })
+  }
 
   /**
    * 필터 옵션 적용
    */
-  private applyFilters(filterOptions: BackupFilterOptions): void {
-    //  mode 필터 적용
-    if (filterOptions.mode) {
-      this.addCondition({ condition: "nBackupType = ?", params: [BackupTypeMap.fromString[filterOptions.mode]] })
-    }
-    //  partition 필터 적용
-    if (filterOptions.partition) {
-      this.addCondition({ condition: "sDrive = ?", params: [filterOptions.partition] })
-    }
-    //  repositoryID 필터 적용
-    if (filterOptions.repositoryID) {
-      this.addCondition({ condition: "nRepositoryID = ?", params: [filterOptions.repositoryID] })
-    }
-    //  repositoryType 필터 적용
-    if (filterOptions.repositoryType) {
-      this.addCondition({
-        condition: "nRepositoryType = ?",
-        params: [RepositoryConnectionTypeMap.fromString(filterOptions.repositoryType)],
+  private applyFilters({ filterOptions }: { filterOptions: BackupFilterOptions }): void {
+    try {
+      //  mode 필터 적용
+      if (filterOptions.mode) {
+        this.addCondition({ condition: "nBackupType = ?", params: [BackupTypeMap.fromString({ str: filterOptions.mode })] })
+      }
+      //  partition 필터 적용
+      if (filterOptions.partition) {
+        this.addCondition({ condition: "sDrive = ?", params: [filterOptions.partition] })
+      }
+      //  repositoryID 필터 적용
+      if (filterOptions.repositoryID) {
+        this.addCondition({ condition: "nRepositoryID = ?", params: [filterOptions.repositoryID] })
+      }
+      //  repositoryType 필터 적용
+      if (filterOptions.repositoryType) {
+        this.addCondition({
+          condition: "nRepositoryType = ?",
+          params: [RepositoryConnectionTypeMap.fromString({ str: filterOptions.repositoryType })],
+        })
+      }
+      //  repositoryPath 필터 적용
+      if (filterOptions.repositoryPath) {
+        this.addCondition({ condition: "sRepositoryPath = ?", params: [filterOptions.repositoryPath] })
+      }
+      ContextLogger.debug({ message: `필터 옵션 적용됨` })
+    } catch (error) {
+      this.handleRepositoryError({
+        error,
+        functionName: "applyFilters",
+        message: "필터 옵션 적용 중 오류가 발생했습니다",
       })
-    }
-    //  repositoryPath 필터 적용
-    if (filterOptions.repositoryPath) {
-      this.addCondition({ condition: "sRepositoryPath = ?", params: [filterOptions.repositoryPath] })
     }
   }
 
@@ -36,14 +57,18 @@ export class BackupInfoRepository extends CommonRepository {
   async findAll({ filterOptions }: { filterOptions: BackupFilterOptions }): Promise<BackupInfoTable[]> {
     try {
       this.resetQueryState()
-      this.applyFilters(filterOptions)
+      this.applyFilters({ filterOptions })
 
       let query = `SELECT * FROM ${this.tableName}`
       query += this.buildWhereClause()
-      logger.debug(`실행 쿼리: ${query}, 파라미터: ${this.params.join(", ")}`)
-      return await executeQuery<BackupInfoTable>({ sql: query, params: this.params })
+
+      return await this.executeQuery<BackupInfoTable>({ sql: query, params: this.params, request: `${this.repositoryName}.findAll` })
     } catch (error) {
-      throw ApiError.databaseError({ message: "Backup Info 목록을 조회하는 중에 오류 발생했습니다" })
+      return this.handleRepositoryError({
+        error,
+        functionName: "findAll",
+        message: "Backup Info 조회 중 오류가 발생했습니다",
+      })
     }
   }
 
@@ -56,13 +81,17 @@ export class BackupInfoRepository extends CommonRepository {
         return []
       }
       this.resetQueryState()
-      this.applyFilters(filterOptions)
+      this.applyFilters({ filterOptions })
       const placeholders = jobNames.map(() => "?").join(",")
+
       const query = `SELECT * FROM ${this.tableName} WHERE sJobName IN (${placeholders})`
-      logger.debug(`Backup Info 정보 조회 쿼리: ${query}, 파라미터: ${jobNames.join(", ")}`)
-      return await executeQuery<BackupInfoTable>({ sql: query, params: jobNames })
+      return await this.executeQuery<BackupInfoTable>({ sql: query, params: jobNames, request: `${this.repositoryName}.findByJobNames`, })
     } catch (error) {
-      throw ApiError.databaseError({ message: "Backup Info 목록을 조회하는 중에 오류 발생했습니다" })
+      return this.handleRepositoryError({
+        error,
+        functionName: "findByJobNames",
+        message: "Backup Info 조회 중 오류가 발생했습니다",
+      })
     }
   }
 }

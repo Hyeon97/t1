@@ -8,12 +8,12 @@ import { RepositoryType } from "../../../../types/common/repository"
 import { BackupType } from "../../types/backup-common.type"
 import { BackupFilterOptions } from "../../types/backup-filter.type"
 
-export class BackupFilterDTO implements BackupFilterOptions {
+export class BackupQueryFilterDTO implements BackupFilterOptions {
   //  필터 옵션
   @IsOptional()
   @IsIn(["full", "inc", "smart"], { message: "mode는 'full', 'inc', 'smart'만 가능합니다" })
   mode?: BackupType
-
+  //  추가 정보
   @IsOptional()
   partition?: string
 
@@ -34,7 +34,7 @@ export class BackupFilterDTO implements BackupFilterOptions {
 
   @IsOptional()
   repositoryPath?: string
-  //  추가정보
+  //  상세 정보
   @IsOptional()
   @IsIn(["true"], { message: "detail은 'true'만 가능합니다" })
   detail?: string

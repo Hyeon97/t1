@@ -58,8 +58,8 @@ export const DEFAULT_VALUES_BACKUP_RESPONSE = {
   mode: "Unknown",
   result: "Unknown",
   schedule: {
-    basic: "Unassigned",
-    advanced: "Unassigned",
+    basic: "-",
+    advanced: "-",
   },
   repository: {
     id: "-",

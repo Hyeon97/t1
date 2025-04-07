@@ -3,27 +3,28 @@ import { ControllerError } from "../../../../errors/controller/controller-error"
 import { ExtendedRequest } from "../../../../types/common/req.types"
 import { ApiUtils } from "../../../../utils/api/api.utils"
 import { BaseController } from "../../../../utils/base/base-controller"
-import { ContextLogger } from "../../../../utils/logger/logger.custom"
-import { BackupFilterDTO } from "../../dto/query/backup-query-filter.dto"
-import { SpecificBackupFilterDTO } from "../../dto/query/specific-backup-filter.dto"
-import { BackupFilterOptions } from "../../types/backup-filter.type"
-import { BackupResponseFactory } from "../../dto/response/backup-response-factory"
 import { stringToBoolean } from "../../../../utils/data-convert.util"
+import { ContextLogger } from "../../../../utils/logger/logger.custom"
+import { BackupQueryFilterDTO } from "../../dto/query/backup-query-filter.dto"
+import { SpecificBackupFilterDTO } from "../../dto/query/specific-backup-filter.dto"
+import { BackupResponseFactory } from "../../dto/response/backup-response-factory"
+import { BackupService } from "../../services/backup.service"
+import { BackupFilterOptions } from "../../types/backup-filter.type"
 
 export class BackupController extends BaseController {
   private readonly backupService: BackupService
-  private readonly backupRegistService: BackupRegistService
+  // private readonly backupRegistService: BackupRegistService
 
-  constructor({ backupService, backupRegistService }: { backupService: BackupService; backupRegistService: BackupRegistService }) {
+  constructor({ backupService }: { backupService: BackupService }) {
     super({
       controllerName: "BackupController",
     })
     this.backupService = backupService
-    this.backupRegistService = backupRegistService
+    // this.backupRegistService = backupRegistService
   }
 
   //  Backup 조회 옵션 추출
-  private extractFilterOptions({ query }: { query: BackupFilterDTO | SpecificBackupFilterDTO }): BackupFilterOptions {
+  private extractFilterOptions({ query }: { query: BackupQueryFilterDTO | SpecificBackupFilterDTO }): BackupFilterOptions {
     try {
       const filterOptions: BackupFilterOptions = {
         //  필터
@@ -58,7 +59,7 @@ export class BackupController extends BaseController {
       ContextLogger.debug({ message: `Backup 작업 목록 조회 시작` })
 
       // 필터 옵션 추출
-      const query = req.query as unknown as BackupFilterDTO
+      const query = req.query as unknown as BackupQueryFilterDTO
       const filterOptions = this.extractFilterOptions({ query })
       ContextLogger.debug({ message: `적용된 필터 옵션`, meta: filterOptions })
 

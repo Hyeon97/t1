@@ -1,4 +1,6 @@
 import { BaseService } from "../../../utils/base/base-service"
+import { BackupInfoRepository } from "../repositories/backup-info.repository"
+import { BackupRepository } from "../repositories/backup.repository"
 import { BackupFilterOptions } from "../types/backup-filter.type"
 import { BackupDataResponse } from "../types/backup-response.type"
 import { BackupTable } from "../types/db/job-backup"
@@ -20,8 +22,7 @@ export class BackupService extends BaseService {
    */
   private combineBackupInfoData({ backups, backupInfos }: { backups: BackupTable[]; backupInfos: BackupInfoTable[] }): BackupDataResponse[] {
     try {
-      const backupMap = new Map<string, BackupDataResponse>()
-
+      const backupMap = new Map<string, Partial<BackupDataResponse>>()
       backups.forEach((backup) => {
         backupMap.set(backup.sJobName, { backup })
       })
@@ -32,7 +33,7 @@ export class BackupService extends BaseService {
           backup.info = info
         }
       })
-      return Array.from(backupMap.values()).filter((data) => data.backup && data.info)
+      return Array.from(backupMap.values()).filter((data): data is BackupDataResponse => !!data.backup && !!data.info)
     } catch (error) {
       return this.handleServiceError({
         error,
@@ -59,7 +60,7 @@ export class BackupService extends BaseService {
       }
 
       // 조회된 backup의 JobName 목록 추출
-      const jobNames = backups.map((backup) => backup.sJobName)
+      const jobNames = backups.map((backup: BackupTable) => backup.sJobName)
 
       // backup info 정보 조회
       const backupInfos = await this.backupInfoRepository.findByJobNames({
@@ -94,7 +95,7 @@ export class BackupService extends BaseService {
       }
 
       // 조회된 info의 JobName 목록 추출
-      const jobNames = backupInfos.map((info) => info.sJobName)
+      const jobNames = backupInfos.map((info: BackupInfoTable) => info.sJobName)
 
       // backup 정보 조회
       const backups = await this.backupRepository.findByJobNames({
