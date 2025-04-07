@@ -50,7 +50,7 @@ export class ServerController extends BaseController {
     } catch (error) {
       throw ControllerError.badRequestError({
         functionName: "extractFilterOptions",
-        message: "서버 필터 옵션을 추출하는 중 오류가 발생했습니다",
+        message: "Server 필터 옵션을 추출하는 중 오류가 발생했습니다",
         cause: error,
       })
     }
@@ -110,7 +110,7 @@ export class ServerController extends BaseController {
       if (filterOptions.identifierType === "id" && !regNumberOnly.test(identifier)) {
         throw ControllerError.badRequestError({
           functionName: "getServer",
-          message: `서버 ID는 숫자여야 합니다.`,
+          message: `Server ID는 숫자여야 합니다.`,
           metadata: {
             identifier,
             identifierType: filterOptions.identifierType,
@@ -137,7 +137,7 @@ export class ServerController extends BaseController {
         detail: stringToBoolean({ value: filterOptions?.detail }),
         serverData,
       })
-      ContextLogger.info({ message: `${identifierType}이(가) ${identifier}인 서버 정보 조회 완료. 상세 정보 포함: ${filterOptions.detail}` })
+      ContextLogger.info({ message: `${identifierType}이(가) ${identifier}인 Server 정보 조회 완료. 상세 정보 포함: ${filterOptions.detail}` })
 
       ApiUtils.success({ res, data: serverDTO, message: "Server information" })
     } catch (error) {
@@ -145,7 +145,7 @@ export class ServerController extends BaseController {
         next,
         error,
         functionName: "getServer",
-        message: "서버 정보 조회 중 오류가 발생했습니다",
+        message: "Server 정보 조회 중 오류가 발생했습니다",
       })
     }
   }
