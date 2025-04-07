@@ -1,7 +1,5 @@
 import { NextFunction, Request, Response } from "express"
 import { ApiError } from "../../../errors/ApiError"
-import { AppError } from "../../../errors/AppError"
-import { AuthError } from "../../../errors/domain-errors/AuthError"
 import { validationMiddleware } from "../../../middlewares/validation/validationMiddleware"
 import { ExtendedRequest } from "../../../types/common/req.types"
 import { ContextLogger } from "../../../utils/logger/logger.custom"

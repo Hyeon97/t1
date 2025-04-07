@@ -1,6 +1,5 @@
-import { AuthError } from "../../../errors/domain-errors/AuthError"
-import { UserError } from "../../../errors/domain-errors/UserError"
-import { handleServiceError } from "../../../errors/handler/integration-error-handler"
+import { ServiceError } from "../../../errors/service/service-error"
+import { BaseService } from "../../../utils/base/base-service"
 import { JwtUtil } from "../../../utils/jwt.utils"
 import { ContextLogger } from "../../../utils/logger/logger.custom"
 import { UserInfoRepository } from "../../user/repositories/user-info.repository"
@@ -8,10 +7,13 @@ import { UserTokenRepository } from "../../user/repositories/user-token.reposito
 import { TokenIssueBodyDTO } from "../dto/token.DTO"
 import { CreateTokenData, TokenDBInput, TokenVerifySuccessResult } from "../interface/token"
 
-export class TokenService {
+export class TokenService extends BaseService {
   private readonly userInfoRepository: UserInfoRepository
   private readonly userTokenRepository: UserTokenRepository
   constructor({ userInfoRepository, userTokenRepository }: { userInfoRepository: UserInfoRepository; userTokenRepository: UserTokenRepository }) {
+    super({
+      serviceName: "TokenService",
+    })
     this.userInfoRepository = userInfoRepository
     this.userTokenRepository = userTokenRepository
   }
@@ -28,7 +30,10 @@ export class TokenService {
       // const user = await this.userInfoRepository.findByEmailAndPassword({ email: input.email, password: input.password })
       // if (!user) {
       if (!user) {
-        throw new UserError.UserNotFound({ user: input.email, type: "Email" })
+        throw ServiceError.resourceNotFoundError({
+          functionName: "createToken",
+          message: `Mail이 '${input.email}'인 User를 찾을 수 없습니다`,
+        })
       }
 
       // 토큰 생성
@@ -48,18 +53,15 @@ export class TokenService {
       }
       await this.userTokenRepository.saveTokenInfo({ input: saveData })
       ContextLogger.debug({
-        message: `사용자 ${input.email}의 토큰이 생성되었습니다`,
+        message: `사용자 ${input.email}의 Token이 생성되었습니다`,
         meta: { expiresAt },
       })
       return { token, expiresAt }
     } catch (error) {
-      return handleServiceError({
+      return this.handleServiceError({
         error,
-        logErrorMessage: "토큰 생성 중 TokenService.createToken() 오류 발생",
-        apiErrorMessage: "토큰 생성 중 오류가 발생했습니다",
-        operation: "토큰 생성",
-        // processingStage: "생성",
-        errorCreator: (params) => new AuthError.DataProcessingError(params),
+        functionName: "createToken",
+        message: `토큰 생성 중 오류가 발생했습니다`,
       })
     }
   }
@@ -75,19 +77,19 @@ export class TokenService {
       const payload = JwtUtil.verifyToken({ token })
       if (!payload) {
         ContextLogger.warn({ message: "토큰 검증 실패" })
-        throw new AuthError.TokenVerificationFail()
+        throw ServiceError.unauthorizedError({
+          functionName: "verifyToken",
+          message: "토큰 검증 실패",
+        })
       }
 
       ContextLogger.debug({ message: `토큰 검증 성공 || User: ${payload.email}` })
       return payload
     } catch (error) {
-      return handleServiceError({
+      return this.handleServiceError({
         error,
-        logErrorMessage: "토큰 검증 중 TokenService.verifyToken() 오류 발생",
-        apiErrorMessage: "토큰 검증 중 오류가 발생했습니다",
-        operation: "토큰 검증",
-        // processingStage: "검증",
-        errorCreator: (params) => new AuthError.DataProcessingError(params),
+        functionName: "verifyToken",
+        message: `토큰 검증 중 오류가 발생했습니다`,
       })
     }
   }
