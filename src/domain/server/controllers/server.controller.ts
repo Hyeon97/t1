@@ -5,13 +5,12 @@ import { ApiUtils } from "../../../utils/api/api.utils"
 import { BaseController } from "../../../utils/base/base-controller"
 import { stringToBoolean } from "../../../utils/data-convert.util"
 import { ContextLogger } from "../../../utils/logger/logger.custom"
+import { regNumberOnly } from "../../../utils/regex.utils"
 import { ServerQueryFilterDTO } from "../dto/query/server-query-filter.dto"
 import { SpecificServerFilterDTO } from "../dto/query/specific-server-query-filter.dto"
 import { ServerResponseFactory } from "../dto/response/server-response-factory"
 import { ServerService } from "../services/server.service"
 import { ServerFilterOptions } from "../types/server-filter.type"
-import { regNumberOnly } from "../../../utils/regex.utils"
-import { ServiceError } from "../../../errors/service/service-error"
 
 export class ServerController extends BaseController {
   private readonly serverService: ServerService
