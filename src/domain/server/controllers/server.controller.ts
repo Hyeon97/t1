@@ -94,13 +94,13 @@ export class ServerController extends BaseController {
    */
   getServer = async (req: ExtendedRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
-      ContextLogger.debug({ message: `서버 정보 조회 시작` })
+      ContextLogger.debug({ message: `Server 정보 조회 시작` })
 
       //  파라미터 추출
       const { identifier } = req.params
       const query = req.query as unknown as SpecificServerFilterDTO
       const { identifierType } = query
-      ContextLogger.debug({ message: `서버 ${identifierType}로 정보 조회 요청: ${identifier}` })
+      ContextLogger.debug({ message: `Server ${identifierType}로 정보 조회 요청: ${identifier}` })
 
       // 필터 옵션 추출
       const filterOptions = this.extractFilterOptions({ query })
