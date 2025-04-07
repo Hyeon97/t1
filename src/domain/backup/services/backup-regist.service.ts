@@ -1,10 +1,12 @@
 // import { JobError } from "../../../errors/domain-errors/JobError"
 // import { handleServiceError } from "../../../errors/handler/integration-error-handler"
 // import { ContextLogger } from "../../../utils/logger/logger.custom"
+// import { ServerPartitionService } from "../../server/services/server-partition.service"
 // import { ServerService } from "../../server/services/server.service"
 // import { ServerBasicTable } from "../../server/types/db/server-basic"
 // import { ServerPartitionTable } from "../../server/types/db/server-partition"
 // import { BackupRegistRequestBody } from "../types/backup-regist.type"
+// import { BackupService } from "./backup.service"
 
 // export class BackupRegistService {
 //   private readonly serverService: ServerService
