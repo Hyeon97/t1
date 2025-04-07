@@ -1,14 +1,17 @@
-import { ZdmError } from "../../../errors/domain-errors/ZdmError"
-import { handleServiceError } from "../../../errors/handler/integration-error-handler"
+import { ServiceError } from "../../../errors/service/service-error"
+import { BaseService } from "../../../utils/base/base-service"
 import { ZdmRepository } from "../repositories/center-info.repository"
 import { ZdmRepositoryRepository } from "../repositories/center-repository.repository"
 import { ZdmRepositoryFilterOptions } from "../types/zdm-repository/zdm-repository-filter.type"
 import { ZdmRepositoryDataResponse } from "../types/zdm-repository/zdm-repository-response.type"
 
-export class ZdmRepositoryService {
+export class ZdmRepositoryService extends BaseService {
   private readonly zdmRepository: ZdmRepository
   private readonly zdmRepositoryRepository: ZdmRepositoryRepository
   constructor({ zdmRepository, zdmRepositoryRepository }: { zdmRepository: ZdmRepository; zdmRepositoryRepository: ZdmRepositoryRepository }) {
+    super({
+      serviceName: "ZdmRepositoryService",
+    })
     this.zdmRepository = zdmRepository
     this.zdmRepositoryRepository = zdmRepositoryRepository
   }
@@ -21,13 +24,10 @@ export class ZdmRepositoryService {
       const repos = await this.zdmRepositoryRepository.findAll({ filterOptions })
       return { items: repos }
     } catch (error) {
-      return handleServiceError({
+      return this.handleServiceError({
         error,
-        logErrorMessage: "ZDM Repository 정보 조회 중 ZdmService.getZdms() 오류 발생",
-        apiErrorMessage: "ZDM Repository 정보 조회 중 오류가 발생했습니다",
-        operation: "ZDM Repository 조회",
-        // processingStage: "조회",
-        errorCreator: (params) => new ZdmError.DataProcessingError(params),
+        functionName: "getRepositoryList",
+        message: "ZDM Repository 정보 목록 조회 중 오류가 발생했습니다",
       })
     }
   }
@@ -39,17 +39,18 @@ export class ZdmRepositoryService {
     try {
       const repos = await this.zdmRepositoryRepository.findById({ id, filterOptions })
       if (!repos) {
-        throw new ZdmError.ZdmRepositoryNotFound({ repo: id, type: "id" })
+        throw ServiceError.resourceNotFoundError({
+          functionName: "getRepositoryById",
+          message: `ID가 '${id}'인 ZDM Repository를 찾을 수 없습니다`,
+          metadata: { id },
+        })
       }
       return { items: [repos] }
     } catch (error) {
-      return handleServiceError({
+      return this.handleServiceError({
         error,
-        logErrorMessage: "ZDM Repository 정보 조회 중 ZdmRepositoryService.getRepositoryById() 오류 발생",
-        apiErrorMessage: "ZDM Repository 정보 조회 중 오류가 발생했습니다",
-        operation: "단일 ZDM Repository 조회",
-        // processingStage: "조회",
-        errorCreator: (params) => new ZdmError.DataProcessingError(params),
+        functionName: "getRepositoryById",
+        message: `ZDM Repository 정보 조회 중 오류가 발생했습니다`,
       })
     }
   }

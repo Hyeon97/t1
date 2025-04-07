@@ -1,5 +1,5 @@
-import { ZdmError } from "../../../errors/domain-errors/ZdmError"
-import { handleServiceError } from "../../../errors/handler/integration-error-handler"
+import { ServiceError } from "../../../errors/service/service-error"
+import { BaseService } from "../../../utils/base/base-service"
 import { ContextLogger } from "../../../utils/logger/logger.custom"
 import { regNumberOnly } from "../../../utils/regex.utils"
 import { ZdmDiskRepository } from "../repositories/center-info-disk.repository"
@@ -19,7 +19,7 @@ import { ZdmDataResponse } from "../types/zdm/zdm-response.type"
 type AdditionalInfoKey = "disks" | "networks" | "partitions" | "repositories"
 type ZdmDataPropertyKey = Exclude<keyof ZdmDataResponse, "zdm">
 
-export class ZdmService {
+export class ZdmService extends BaseService {
   private readonly zdmRepository: ZdmRepository
   private readonly zdmDiskRepository: ZdmDiskRepository
   private readonly zdmNetworkRepository: ZdmNetworkRepository
@@ -41,6 +41,9 @@ export class ZdmService {
     zdmRepositoryRepository: ZdmRepositoryRepository
     zdmZosRepositoryRepository: ZdmZosRepositoryRepository
   }) {
+    super({
+      serviceName: "ZdmService",
+    })
     this.zdmRepository = zdmRepository
     this.zdmDiskRepository = zdmDiskRepository
     this.zdmNetworkRepository = zdmNetworkRepository
@@ -225,13 +228,10 @@ export class ZdmService {
       })
       return result
     } catch (error) {
-      return handleServiceError({
+      return this.handleServiceError({
         error,
-        logErrorMessage: "ZDM 정보 조회 중 ZdmService.getZdms() 오류 발생",
-        apiErrorMessage: "ZDM 정보 조회 중 오류가 발생했습니다",
-        operation: "ZDM 조회",
-        // processingStage: "조회",
-        errorCreator: (params) => new ZdmError.DataProcessingError(params),
+        functionName: "getZdms",
+        message: "ZDM 정보 조회 중 오류가 발생했습니다",
       })
     }
   }
@@ -243,7 +243,10 @@ export class ZdmService {
     try {
       const zdm = await this.zdmRepository.findByZdmName({ name, filterOptions })
       if (!zdm) {
-        throw new ZdmError.ZdmNotFound({ zdm: name, type: "name" })
+        throw ServiceError.resourceNotFoundError({
+          functionName: "getZdmByName",
+          message: `이름이 '${name}'인 ZDM을 찾을 수 없습니다`,
+        })
       }
       const { disks, networks, partitions, repositories } = await this.getAdditionalInfo({ filterOptions, systemNames: [name] })
       // 데이터 조합
@@ -257,13 +260,10 @@ export class ZdmService {
 
       return result[0]
     } catch (error) {
-      return handleServiceError({
+      return this.handleServiceError({
         error,
-        logErrorMessage: "Zdm 정보 조회 중 ZdmService.getZdmByName() 오류 발생",
-        apiErrorMessage: "Zdm 정보 조회 중 오류가 발생했습니다",
-        operation: "단일 zdm 조회",
-        // processingStage: "조회",
-        errorCreator: (params) => new ZdmError.DataProcessingError(params),
+        functionName: "getZdmByName",
+        message: `ZDM 이름 '${name}'으로 조회 중 오류가 발생했습니다`,
       })
     }
   }
@@ -274,17 +274,19 @@ export class ZdmService {
   async getZdmById({ id, filterOptions }: { id: string; filterOptions: ZdmFilterOptions }): Promise<ZdmDataResponse> {
     try {
       if (!regNumberOnly.test(id)) {
-        throw new ZdmError.ZdmRequestParameterError({
-          message: `identifierType이 id인 경우 identifier값은 숫자만 가능합니다`,
-          details: {
-            identifierType: "id",
-            identifier: id,
-          },
+        throw ServiceError.validationError({
+          functionName: "getZdmById",
+          message: `ZDM ID는 숫자만 포함해야 합니다. 입력값: '${id}'`,
+          metadata: { id },
         })
       }
       const zdm = await this.zdmRepository.findByZdmId({ id: parseInt(id), filterOptions })
       if (!zdm) {
-        throw new ZdmError.ZdmNotFound({ zdm: id, type: "id" })
+        throw ServiceError.resourceNotFoundError({
+          functionName: "getZdmById",
+          message: `ID가 '${id}'인 ZDM을 찾을 수 없습니다`,
+          metadata: { id },
+        })
       }
       const { disks, networks, partitions, repositories } = await this.getAdditionalInfo({
         filterOptions,
@@ -302,13 +304,10 @@ export class ZdmService {
 
       return result[0]
     } catch (error) {
-      return handleServiceError({
+      return this.handleServiceError({
         error,
-        logErrorMessage: "Zdm 정보 조회 중 ZdmService.getZdmById() 오류 발생",
-        apiErrorMessage: "Zdm 정보 조회 중 오류가 발생했습니다",
-        operation: "단일 zdm 조회",
-        // processingStage: "조회",
-        errorCreator: (params) => new ZdmError.DataProcessingError(params),
+        functionName: "getZdmById",
+        message: `ZDM ID '${id}'로 조회 중 오류가 발생했습니다`,
       })
     }
   }

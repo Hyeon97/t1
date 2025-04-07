@@ -1,8 +1,8 @@
 import { NextFunction, Response } from "express"
-import { ZdmError } from "../../../errors/domain-errors/ZdmError"
-import { handleControllerError } from "../../../errors/handler/integration-error-handler"
+import { ControllerError } from "../../../errors/controller/controller-error"
 import { ExtendedRequest } from "../../../types/common/req.types"
 import { ApiUtils } from "../../../utils/api/api.utils"
+import { BaseController } from "../../../utils/base/base-controller"
 import { stringToBoolean } from "../../../utils/data-convert.util"
 import { ContextLogger } from "../../../utils/logger/logger.custom"
 import { SpecificZdmFilterDTO } from "../dto/query/zdm/specific-zdm-query-filter.dto"
@@ -11,9 +11,12 @@ import { ZdmResponseFactory } from "../dto/response/zdm-response-factory"
 import { ZdmService } from "../services/zdm.service"
 import { ZdmFilterOptions } from "../types/zdm/zdm-filter.type"
 
-export class ZdmController {
+export class ZdmController extends BaseController {
   private readonly zdmService: ZdmService
   constructor({ zdmService }: { zdmService: ZdmService }) {
+    super({
+      controllerName: "ZdmController",
+    })
     this.zdmService = zdmService
   }
 
@@ -21,22 +24,33 @@ export class ZdmController {
    * zdm 조회 옵션 추출
    */
   private extractFilterOptions({ query }: { query: ZdmQueryFilterDTO | SpecificZdmFilterDTO }): ZdmFilterOptions {
-    const filterOptions: ZdmFilterOptions = {
-      connection: query.connection || "",
-      activation: query.activation || "",
-      network: query.network ?? false,
-      disk: query.disk ?? false,
-      partition: query.partition ?? false,
-      repository: query.repository ?? false,
-      zosRepository: query.zosRepository ?? false,
-      detail: query.detail ?? false,
-    }
+    try {
+      const filterOptions: ZdmFilterOptions = {
+        //  필터
+        connection: query.connection || "",
+        activation: query.activation || "",
+        //  추가 정보
+        network: query.network ?? false,
+        disk: query.disk ?? false,
+        partition: query.partition ?? false,
+        repository: query.repository ?? false,
+        zosRepository: query.zosRepository ?? false,
+        //  상세 정보
+        detail: query.detail ?? false,
+      }
 
-    if (query instanceof SpecificZdmFilterDTO) {
-      filterOptions.identifierType = query.identifierType
-    }
+      if (query instanceof SpecificZdmFilterDTO) {
+        filterOptions.identifierType = query.identifierType
+      }
 
-    return filterOptions
+      return filterOptions
+    } catch (error) {
+      throw ControllerError.badRequestError({
+        functionName: "extractFilterOptions",
+        message: "ZDM 필터 옵션을 추출하는 중 오류가 발생했습니다",
+        cause: error,
+      })
+    }
   }
 
   /**
@@ -63,13 +77,11 @@ export class ZdmController {
 
       ApiUtils.success({ res, data: zdmsDTOs, message: "ZDM infomation list" })
     } catch (error) {
-      return handleControllerError({
+      this.handleControllerError({
         next,
         error,
-        logErrorMessage: "ZDM 목록 조회 중 ZdmController.getZDMs() 오류 발생",
-        apiErrorMessage: "ZDM 목록 조회 중 오류가 발생했습니다",
-        operation: "ZDM 조회",
-        errorCreator: (params) => new ZdmError.DataProcessingError(params),
+        functionName: "getZdms",
+        message: "ZDM 목록 조회 중 오류가 발생했습니다",
       })
     }
   }
@@ -104,9 +116,7 @@ export class ZdmController {
           filterOptions,
         })
       }
-      if (!zdmData) {
-        throw new ZdmError.ZdmNotFound({ zdm: identifier, type: identifierType })
-      }
+
       //  출력 가공
       const zdmDTO = ZdmResponseFactory.createFromEntity({
         detail: stringToBoolean({ value: filterOptions?.detail }),
@@ -116,13 +126,11 @@ export class ZdmController {
 
       ApiUtils.success({ res, data: zdmDTO, message: "ZDM information" })
     } catch (error) {
-      return handleControllerError({
+      this.handleControllerError({
         next,
         error,
-        logErrorMessage: "ZDM 정보 중 ZdmController.getZdm() 오류 발생",
-        apiErrorMessage: "ZDM 정보 중 오류가 발생했습니다",
-        operation: "단일 ZDM 조회",
-        errorCreator: (params) => new ZdmError.DataProcessingError(params),
+        functionName: "getZdm",
+        message: "ZDM 정보 조회 중 오류가 발생했습니다",
       })
     }
   }
