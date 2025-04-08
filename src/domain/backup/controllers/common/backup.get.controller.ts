@@ -13,14 +13,12 @@ import { BackupFilterOptions } from "../../types/backup-filter.type"
 
 export class BackupController extends BaseController {
   private readonly backupService: BackupService
-  // private readonly backupRegistService: BackupRegistService
 
   constructor({ backupService }: { backupService: BackupService }) {
     super({
       controllerName: "BackupController",
     })
     this.backupService = backupService
-    // this.backupRegistService = backupRegistService
   }
 
   //  Backup 조회 옵션 추출
