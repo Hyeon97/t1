@@ -1,5 +1,5 @@
-import { NextFunction, Request, Response } from "express"
-import { ApiError } from "../../../errors/ApiError"
+import { NextFunction, Response } from "express"
+import { ValidatorError } from "../../../errors/middleware/validator-error"
 import { validationMiddleware } from "../../../middlewares/validation/validationMiddleware"
 import { ExtendedRequest } from "../../../types/common/req.types"
 import { ContextLogger } from "../../../utils/logger/logger.custom"
@@ -19,34 +19,64 @@ export const validateToken = async (req: ExtendedRequest, res: Response, next: N
     // Authorization 헤더에서 토큰 추출
     const token = req.headers.authorization
     // if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    if (!token) {
-      throw new AuthError.TokenNotFound()
-    }
+    if (!token) { throw ValidatorError.tokenRequired({ functionName: "validateToken" }) }
+
 
     // 토큰 검증
-    const payload = await tokenService.verifyToken({ token })
+    try {
+      const payload = await tokenService.verifyToken({ token })
+      // 요청 객체에 사용자 정보 추가
+      req.user = {
+        id: payload.id,
+        email: payload.email,
+      }
+      next()
+    } catch (error) {
+      if (error instanceof Error && error.name === 'TokenExpiredError') {
+        throw ValidatorError.tokenExpired({
+          functionName: "validateToken",
+          cause: error
+        })
+      }
 
-    // 요청 객체에 사용자 정보 추가
-    req.user = {
-      id: payload.id,
-      email: payload.email,
+      throw ValidatorError.tokenInvalid({
+        functionName: "validateToken",
+        cause: error
+      })
     }
-    next()
+
   } catch (error) {
-    ContextLogger.error({ message: `인증 처리 중 오류: ${error instanceof Error ? error.message : "Unknown error"}` })
+    ContextLogger.debug({
+      message: `Token 검증 중 오류 발생`,
+      meta: {
+        error: error instanceof Error ? error.message : String(error),
+        path: req.path,
+        method: req.method
+      }
+    })
 
-    // AppError는 ApiError로 변환하여 처리
-    if (error instanceof AppError) {
-      next(error.toApiError())
-      return
-    }
-
-    // 이미 ApiError인 경우 그대로 사용
-    if (error instanceof ApiError) {
+    // 에러 변환 및 전달
+    if (error instanceof ValidatorError) {
       next(error)
-      return
+    } else {
+      next(ValidatorError.fromError({
+        error,
+        functionName: "validateToken",
+        message: 'Token 검증 중 오류 발생'
+      }))
     }
+    // // AppError는 ApiError로 변환하여 처리
+    // if (error instanceof AppError) {
+    //   next(error.toApiError())
+    //   return
+    // }
 
-    next(ApiError.internal({ message: "인증 처리 중 오류가 발생했습니다" }))
+    // // 이미 ApiError인 경우 그대로 사용
+    // if (error instanceof ApiError) {
+    //   next(error)
+    //   return
+    // }
+
+    // next(ApiError.internal({ message: "인증 처리 중 오류가 발생했습니다" }))
   }
 }

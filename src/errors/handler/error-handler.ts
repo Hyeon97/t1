@@ -4,12 +4,20 @@ import { ApiError } from "../ApiError"
 import { ControllerError } from "../controller/controller-error"
 import { ErrorCode } from "../error-codes"
 import { createUnifiedError, ErrorChainItem, ErrorLayer, ErrorResponse, RequestInfo, UnifiedError } from "../interfaces"
+import { ValidatorError } from "../middleware/validator-error"
 
 /**
  * 계층별 에러 코드를 API 에러 코드로 매핑
  */
 function mapToApiErrorCode(errorCode: string): ErrorCode {
   const codeMap: Record<string, ErrorCode> = {
+    // Validator 에러 코드 매핑
+    VALID_001: ErrorCode.VALIDATION_ERROR,
+    VALID_002: ErrorCode.UNAUTHORIZED,
+    VALID_003: ErrorCode.UNAUTHORIZED,
+    VALID_004: ErrorCode.UNAUTHORIZED,
+    VALID_005: ErrorCode.FORBIDDEN,
+
     // Controller 에러 코드 매핑
     CTRL_001: ErrorCode.VALIDATION_ERROR,
     CTRL_002: ErrorCode.UNAUTHORIZED,
@@ -49,6 +57,13 @@ function mapToApiErrorCode(errorCode: string): ErrorCode {
  */
 function getUserFriendlyMessage(errorCode: string): string {
   const messageMap: Record<string, string> = {
+    // Validator 에러 메시지
+    VALID_001: "입력값이 유효하지 않습니다",
+    VALID_002: "인증 토큰이 필요합니다",
+    VALID_003: "유효하지 않은 토큰입니다",
+    VALID_004: "만료된 토큰입니다",
+    VALID_005: "접근 권한이 없습니다",
+
     // Controller 에러 메시지
     CTRL_001: "입력값이 유효하지 않습니다",
     CTRL_002: "인증이 필요합니다",
@@ -84,8 +99,14 @@ function buildErrorChainFromError(err: Error): UnifiedError {
   let clientErrorCode = ErrorCode.INTERNAL_ERROR
   let errorChain: ErrorChainItem[] = []
 
-  // 컨트롤러 에러인 경우
-  if (err instanceof ControllerError) {
+  // ValidatorError 처리 추가
+  if (err instanceof ValidatorError) {
+    statusCode = err.statusCode
+    clientErrorCode = mapToApiErrorCode(err.errorChain[0].errorCode)
+    clientMessage = getUserFriendlyMessage(err.errorChain[0].errorCode)
+    errorChain = err.errorChain
+  }  // 컨트롤러 에러인 경우
+  else if (err instanceof ControllerError) {
     statusCode = err.statusCode
     clientErrorCode = mapToApiErrorCode(err.errorChain[0].errorCode)
     clientMessage = getUserFriendlyMessage(err.errorChain[0].errorCode)
