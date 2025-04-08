@@ -73,6 +73,7 @@ export type BackupTableInput = Pick<
  */
 export type BackupInfoTableInput = Pick<
   BackupInfoTable,
+  | "nID"
   | "nUserID"
   | "nCenterID"
   | "sSystemName"

@@ -105,6 +105,7 @@ export class BackupRegistService extends BaseService {
   }): BackupInfoTableInput {
     try {
       return {
+        nID: 0,
         nUserID: data.user as number,
         nCenterID: center.nID,
         sSystemName: server.sSystemName,
