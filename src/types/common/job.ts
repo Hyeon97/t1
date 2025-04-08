@@ -2,6 +2,14 @@
 //  작업 공통 사용 타입 정의  //
 //////////////////////////////
 
+import { VALID_JOB_AUTOSTART_VALUES } from "./const-value"
+
+/**
+ * 작업 공통 타입 정의
+ */
+//  작업 자동 시작
+export type AutoStartType = (typeof VALID_JOB_AUTOSTART_VALUES)[number]
+
 /**
  * 작업 진행 상태 정의
  */
@@ -17,4 +25,4 @@ export enum JobStatus {
 /**
  * 작업 결과 정의
  */
-export enum JobResult { }
+export enum JobResult {}
