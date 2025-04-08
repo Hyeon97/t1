@@ -2,6 +2,9 @@
 //  Backup 등록 관련 인터페이스 정의  //
 //////////////////////////////////////
 
+import { CompressionType } from "../../../types/common/compression"
+import { EncryptionType } from "../../../types/common/encryption"
+import { AutoStartType } from "../../../types/common/job"
 import { RepositoryType } from "../../../types/common/repository"
 import { BackupType } from "./backup-common.type"
 import { BackupTable } from "./db/job-backup"
@@ -18,6 +21,7 @@ export interface BackupRegistRequestRepository {
 
 /**
  * Backup 작업 등록시 main 양식
+ * excludeDir,excludePartition > 사용자 입력 타입: string | 내부 사용값 변환시: string[]
  */
 export interface BackupRegistRequestBody {
   //  필수
@@ -36,12 +40,13 @@ export interface BackupRegistRequestBody {
   }
   descroption?: string //  추가 설명
   rotation?: number //  작업 반복 횟수
-  compression?: string //  작업시 압축 여부
-  encryption?: string // 작업시 암호화 여부
-  excludeDir?: string //  작업 제외 디렉토리
+  compression?: CompressionType //  작업시 압축 여부
+  encryption?: EncryptionType // 작업시 암호화 여부
+  excludeDir?: string | string[] //  작업 제외 디렉토리 >> 추후 변경 가능 [{partition:"/", excludeDir:"/test1|/test2..."}]
+  excludePartition?: string | string[] //  작업 제외 파티션
   mail_event?: string //  작업 이벤트 수신 mail
   networkLimit?: number //  작업 네트워크 제한 속도
-  autoStart?: string //  자동 시작 여부
+  autoStart?: AutoStartType //  자동 시작 여부
 }
 
 /**

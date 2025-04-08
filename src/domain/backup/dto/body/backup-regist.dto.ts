@@ -3,14 +3,36 @@
 ///////////////////////////////
 
 import { Transform, Type } from "class-transformer"
-import { IsArray, IsEmail, IsIn, IsInt, IsNotEmpty, IsNumber, IsOptional, IsString, Max, Min, Validate, ValidateIf, ValidateNested } from "class-validator"
-import { VALID_COMPRESSION_VALUES, VALID_ENCRYPTION_VALUES, VALID_JOB_AUTOSTART_VALUES, VALID_JOB_TYPE_VALUES, VALID_REPOSITORY_VALUES } from "../../../../types/common/const-value"
+import {
+  IsArray,
+  IsEmail,
+  IsIn,
+  IsInt,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  Max,
+  Min,
+  Validate,
+  ValidateIf,
+  ValidateNested,
+} from "class-validator"
+import {
+  VALID_COMPRESSION_VALUES,
+  VALID_ENCRYPTION_VALUES,
+  VALID_JOB_AUTOSTART_VALUES,
+  VALID_JOB_TYPE_VALUES,
+  VALID_REPOSITORY_VALUES,
+} from "../../../../types/common/const-value"
 import { RepositoryType } from "../../../../types/common/repository"
 import { stringToNumber } from "../../../../utils/data-convert.util"
 import { IsEmailOrNumberConstraint } from "../../../../utils/dto.utils"
 import { BackupType } from "../../types/backup-common.type"
 import { BackupRegistRequestBody } from "../../types/backup-regist.type"
-
+import { AutoStartType } from "../../../../types/common/job"
+import { EncryptionType } from "../../../../types/common/encryption"
+import { CompressionType } from "../../../../types/common/compression"
 
 /**
  * 중첩 검증을 위한 별도 클래스
@@ -86,14 +108,17 @@ export class BackupRegistBodyDTO implements BackupRegistRequestBody {
 
   @IsOptional()
   @IsIn(VALID_COMPRESSION_VALUES, { message: `compression ${VALID_COMPRESSION_VALUES.join(", ")} 만 가능합니다` })
-  compression?: string = "use" //  작업시 압축 여부
+  compression?: CompressionType = "use" //  작업시 압축 여부
 
   @IsOptional()
   @IsIn(VALID_ENCRYPTION_VALUES, { message: `encryption은 ${VALID_ENCRYPTION_VALUES.join(", ")} 만 가능합니다` })
-  encryption?: string = "not use" // 작업시 암호화 여부
+  encryption?: EncryptionType = "not use" // 작업시 암호화 여부
 
   @IsOptional()
   excludeDir?: string = "" //  작업 제외 디렉토리
+
+  @IsOptional()
+  excludePartition?: string = "" //  작업 제외 파티션
 
   @IsOptional()
   @ValidateIf((o) => o.mail_event !== undefined && o.mail_event.trim() !== "")
@@ -108,5 +133,5 @@ export class BackupRegistBodyDTO implements BackupRegistRequestBody {
 
   @IsOptional()
   @IsIn(VALID_JOB_AUTOSTART_VALUES, { message: `autoStart은 ${VALID_JOB_AUTOSTART_VALUES.join(", ")} 만 가능합니다` })
-  autoStart?: string = "not use" //  자동 시작 여부
+  autoStart?: AutoStartType = "not use" //  자동 시작 여부
 }

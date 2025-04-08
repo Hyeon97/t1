@@ -1,4 +1,6 @@
 import { ServiceError } from "../../../errors/service/service-error"
+import { CompressionTypeMap } from "../../../types/common/compression"
+import { EncryptionTypeMap } from "../../../types/common/encryption"
 import { BaseService } from "../../../utils/base/base-service"
 import { ContextLogger } from "../../../utils/logger/logger.custom"
 import { ServerPartitionService } from "../../server/services/server-partition.service"
@@ -7,9 +9,17 @@ import { ServerBasicTable } from "../../server/types/db/server-basic"
 import { ServerPartitionTable } from "../../server/types/db/server-partition"
 import { ZdmRepositoryService } from "../../zdm/services/zdm.repository.service"
 import { ZdmService } from "../../zdm/services/zdm.service"
-import { BackupRegistRequestBody } from "../types/backup-regist.type"
+import { ZdmInfoTable } from "../../zdm/types/db/center-info"
+import { ZdmRepositoryTable } from "../../zdm/types/db/center-repository"
+import { ZdmRepositoryFilterOptions } from "../../zdm/types/zdm-repository/zdm-repository-filter.type"
+import { BackupTypeMap } from "../types/backup-common.type"
+import { BackupRegistRequestBody, BackupTableInput, BackupInfoTableInput, BackupRegistRequestRepository } from "../types/backup-regist.type"
 import { BackupService } from "./backup.service"
 
+interface BackupDataSet {
+  backupDataObject: BackupTableInput
+  backupInfoDataObject: BackupInfoTableInput
+}
 
 export class BackupRegistService extends BaseService {
   private readonly serverService: ServerService
@@ -43,44 +53,83 @@ export class BackupRegistService extends BaseService {
   /**
    * Backup Object 생성
    */
-  // private createBackupObject({ data }: { data: BackupRegistRequestBody }): BackupTableInput {
-  //   try {
-  //     return {
-  //       nUserID: data.nUserID,
-  //       nCenterID: data.nCenterID,
-  //       sSystemName: data.sSystemName,
-  //       sJobName: data.sJobName,
-  //       nJobID: data.nJobID,
-  //       nJobStatus: data.nJobStatus,
-  //       nScheduleID: data.nScheduleID,
-  //       nScheduleID_advanced: data.nScheduleID_advanced,
-  //       sJobResult: data.sJobResult,
-  //       sDescription: data.sDescription,
-  //       sStartTime: data.sStartTime,
-  //       sLastUpdateTime: data.sLastUpdateTime,
-  //     }
-  //   } catch (error: any) {
-  //     logger.debug("BackupRegistService.createBackupObject() 오류 발생")
-  //     throw JobError.getDataError({
-  //       message: error.message,
-  //       logMessage: ["Backup 정보 등록 중 BackupRegistService.createBackupObject() 오류 발생", error.logMessage],
-  //     })
-  //   }
-  // }
+  private createBackupObject({
+    data,
+    server,
+    center,
+  }: {
+    data: BackupRegistRequestBody
+    server: ServerBasicTable
+    center: ZdmInfoTable
+  }): BackupTableInput {
+    try {
+      return {
+        nUserID: data.user as number,
+        nCenterID: center.nID,
+        sSystemName: server.sSystemName,
+        sJobName: data.jobName || "",
+        nJobID: 0,
+        nJobStatus: data.autoStart === "use" ? 3 : 2,
+        nScheduleID: 0,
+        nScheduleID_advanced: 0,
+        sJobResult: "",
+        sDescription: data.descroption || "",
+        sStartTime: "",
+        sLastUpdateTime: "",
+      }
+    } catch (error) {
+      throw ServiceError.dataProcessingError({
+        functionName: "createBackupObject",
+        message: "[Backup 정보 등록] - Backup Object 생성 오류 발생",
+        cause: error,
+      })
+    }
+  }
 
   /**
    * Backup info Object 생성
    */
-  // private createBackupInfoObject({ data }: { data: BackupRegistRequestBody }): BackupInfoTableInput {
-  //   try {
-  //   } catch (error: any) {
-  //     logger.debug("BackupRegistService.createBackupInfoObject() 오류 발생")
-  //     throw JobError.getDataError({
-  //       message: error.message,
-  //       logMessage: ["Backup 정보 등록 중 BackupRegistService.createBackupObject() 오류 발생", error.logMessage],
-  //     })
-  //   }
-  // }
+  private createBackupInfoObject({
+    data,
+    server,
+    partition,
+    center,
+    repository,
+  }: {
+    data: BackupRegistRequestBody
+    server: ServerBasicTable
+    partition: ServerPartitionTable
+    center: ZdmInfoTable
+    repository: ZdmRepositoryTable
+  }): BackupInfoTableInput {
+    try {
+      return {
+        nUserID: data.user as number,
+        nCenterID: center.nID,
+        sSystemName: server.sSystemName,
+        sJobName: data.jobName || "",
+        nBackupType: BackupTypeMap.fromString({ str: data.type }),
+        nRotation: data.rotation ?? 1,
+        nCompression: data.compression === "use" ? 1 : 0,
+        nEncryption: data.encryption === "use" ? 1 : 0,
+        sDrive: partition.sLetter,
+        sExcludeDir: data.excludeDir as string, //  추후 수정 필요
+        nEmailEvent: 0,
+        sComment: "",
+        nRepositoryID: repository.nID,
+        nRepositoryType: repository.nType,
+        sRepositoryPath: repository.sRemotePath,
+        nNetworkLimit: data.networkLimit ?? 0,
+        sLastUpdateTime: "",
+      }
+    } catch (error) {
+      throw ServiceError.dataProcessingError({
+        functionName: "createBackupInfoObject",
+        message: "[Backup 정보 등록] - Backup Info Object 생성 오류 발생",
+        cause: error,
+      })
+    }
+  }
 
   /**
    *  서버 정보 가져오기
@@ -98,13 +147,8 @@ export class BackupRegistService extends BaseService {
       return this.handleServiceError({
         error,
         functionName: "getServerInfo",
-        message: "Backup 정보 등록 중 Server 정보 조회 중 오류 발생",
+        message: "[Backup 정보 등록] - Server 정보 조회 오류 발생",
       })
-      // throw new JobError.DataRetrievalError({
-      //   operation: "백업 등록",
-      //   dataType: "서버 정보",
-      //   reason: error instanceof Error ? error.message : String(error),
-      // })
     }
   }
 
@@ -119,7 +163,7 @@ export class BackupRegistService extends BaseService {
       return this.handleServiceError({
         error,
         functionName: "getServerPartitionList",
-        message: "Backup 정보 등록 중 Server Partition 정보 조회 중 오류 발생",
+        message: "[Backup 정보 등록] - Server Partition 정보 조회 오류 발생",
       })
     }
   }
@@ -127,54 +171,103 @@ export class BackupRegistService extends BaseService {
   /**
    * center 정보 가져오기
    */
-  // private async getCenterInfo({ center }: { center: number | string }): Promise<CenterInfoTable> {
-  //   try {
-  //     let centerInfo = null
-  //     if (typeof center === "number") {
-  //       centerInfo = await this.zdmService.getZDMById({ id: center, filterOptions: {} })
-  //     } else if (typeof center === "string") {
-  //       centerInfo = await this.zdmService.getZDMByName({ name: center, filterOptions: {} })
-  //     }
-  //     return centerInfo?.zdm!
-  //   } catch (error) {
-  //     ContextLogger.error({
-  //       message: "Backup 정보 등록 중 BackupRegistService.getCenterInfo() 오류 발생",
-  //       meta: { error: error instanceof Error ? error.message : String(error), },
-  //     })
-  //     if (error instanceof Error) {
-  //       throw new JobError.DataRetrievalError({
-  //         message: '작업 대상 Center 정보 조회중 에러 발생'
-  //       })
-  //     }
-  //     else throw error
-  //   }
-  // }
+  private async getCenterInfo({ center }: { center: number | string }): Promise<ZdmInfoTable> {
+    try {
+      let centerInfo = null
+      if (typeof center === "number") {
+        centerInfo = await this.zdmService.getZdmById({ id: String(center), filterOptions: {} })
+      } else if (typeof center === "string") {
+        centerInfo = await this.zdmService.getZdmByName({ name: center, filterOptions: {} })
+      }
+      return centerInfo?.zdm!
+    } catch (error) {
+      throw ServiceError.dataProcessingError({
+        functionName: "getCenterInfo",
+        message: "[Backup 정보 등록] - ZDM 정보 조회 오류 발생",
+        cause: error,
+      })
+    }
+  }
 
   /**
    * repository 정보 가져오기
    */
-  // private async getRepositoryInfo({ repository, center }: { repository: BackupRegistRequestRepository; center: CenterInfoTable }) {
-  //   try {
-  //     const filterOptions: ZDMRepositoryFilterOptions = {
-  //       center: center.nID,
-  //       type: repository.type || "",
-  //       path: repository.path || "",
-  //     }
-  //     const repositoryInfo = await this.zdmRepositoryService.getRepositoryById({ id: repository.id, filterOptions })
-  //     return repositoryInfo.items[0]
-  //   } catch (error) {
-  //     ContextLogger.error({
-  //       message: "Backup 정보 등록 중 BackupRegistService.getRepositoryInfo() 오류 발생",
-  //       meta: { error: error instanceof Error ? error.message : String(error), },
-  //     })
-  //     if (error instanceof Error) {
-  //       throw new JobError.DataRetrievalError({
-  //         message: '작업 대상 Center Repository 정보 조회중 에러 발생'
-  //       })
-  //     }
-  //     else throw error
-  //   }
-  // }
+  private async getRepositoryInfo({ repository, center }: { repository: BackupRegistRequestRepository; center: ZdmInfoTable }) {
+    try {
+      const filterOptions: ZdmRepositoryFilterOptions = {
+        center: center.nID,
+        type: repository.type || "",
+        path: repository.path || "",
+      }
+      const repositoryInfo = await this.zdmRepositoryService.getRepositoryById({ id: repository.id, filterOptions })
+      return repositoryInfo.items[0]
+    } catch (error) {
+      throw ServiceError.dataProcessingError({
+        functionName: "getRepositoryInfo",
+        message: "[Backup 정보 등록] - ZDM Repository 정보 조회 오류 발생",
+        cause: error,
+      })
+    }
+  }
+
+  /**
+   * 데이터 전처리(작업이름 중복 검사 or 자동생성)
+   */
+  private async preprocessJobName({ jobName }: { jobName: string }): Promise<string> {
+    try {
+      //  작업 이름이 없는경우 - 자동생성
+      //  작업 이름이 있는경우 - 중복검사 후 자동 idx 부여 or 증가
+      return ""
+    } catch (error) {
+      throw ServiceError.dataProcessingError({
+        functionName: "preprocessJobName",
+        message: "[Backup 정보 등록] - Backup JobName 정보 가공 오류 발생",
+        cause: error,
+      })
+    }
+  }
+
+  /**
+   * 데이터 전처리(제외 파티션)
+   */
+  private preprocessExcludePartitions({ excludePartition }: { excludePartition: string }): string[] {
+    try {
+      // 문자열을 '|'로 분리
+      const partitions = excludePartition.split("|")
+
+      // 빈 문자열 항목 제거 및 트림 처리
+      const validPartitions = partitions.map((partition) => partition.trim()).filter((partition) => partition.length > 0)
+
+      return validPartitions
+    } catch (error) {
+      throw ServiceError.dataProcessingError({
+        functionName: "preprocessExcludePartitions",
+        message: "[Backup 정보 등록] - Exclude Partition 정보 가공 오류 발생",
+        cause: error,
+      })
+    }
+  }
+
+  /**
+   * 데이터 전처리(작업제외 디렉토리)
+   */
+  private preprocessExcludeDir({ excludeDir }: { excludeDir: string }): string[] {
+    try {
+      // 문자열을 '|'로 분리
+      const dirs = excludeDir.split("|")
+
+      // 빈 문자열 항목 제거 및 트림 처리
+      const validPartitions = dirs.map((dir) => dir.trim()).filter((dir) => dir.length > 0)
+
+      return validPartitions
+    } catch (error) {
+      throw ServiceError.dataProcessingError({
+        functionName: "preprocessExcludeDir",
+        message: "[Backup 정보 등록] - Exclude Dir 정보 가공 오류 발생",
+        cause: error,
+      })
+    }
+  }
 
   /**
    *  Backup 작업 등록
@@ -187,56 +280,66 @@ export class BackupRegistService extends BaseService {
       const server = await this.getServerInfo({ server: data.server })
       //  파티션 정보 가져오기
       const partitionList = await this.getServerPartitionList({ server: server.sSystemName })
-      // //  center 정보 가져오기
-      // const center = await this.getCenterInfo({ center: data.center })
-      // //  repository 정보 가져오기
-      // const repository = await this.getRepositoryInfo({ repository: data.repository, center })
+      //  center 정보 가져오기
+      const center = await this.getCenterInfo({ center: data.center })
+      //  repository 정보 가져오기
+      const repository = await this.getRepositoryInfo({ repository: data.repository, center })
       //  schedule 정보 가져오기
-      const dataSet = []
-      //  사용자 지정 파티션만 등록
-      if (data.partition.length) {
-        data.partition.forEach((partition) => {
-          const partitionInfo = partitionList.find((item) => item.sLetter === partition)
-          if (!partitionInfo) {
-            throw ServiceError.badRequestError({
-              functionName: 'regist',
-              message: `파티션( ${partition} )이 서버( ${server.sSystemName} )에 존재하지 않습니다`,
-              metadata: {
-                partition,
-                server: server.sSystemName,
-              }
-            })
-          }
-          dataSet.push({
-            // nUserID: data.nUserID,
-            // nCenterID: data.center,
-            // sSystemName: server.sSystemName,
-            // sPartitionName: partition,
-            // nPartitionID: partitionInfo.nID,
-            // nRepositoryID: repository.nID,
-            // nScheduleID: data.nScheduleID,
-            // nScheduleID_advanced: data.nScheduleID_advanced,
-            // sJobName: data.sJobName,
-            // nJobID: data.nJobID,
-            // nJobStatus: data.nJobStatus,
-            // sJobResult: data.sJobResult,
-            // sDescription: data.sDescription,
-            // sStartTime: data.sStartTime,
-            // sLastUpdateTime: data.sLastUpdateTime,
+
+      //  데이터 전처리(작업이름 중복 검사 or 자동생성)
+      data.jobName = await this.preprocessJobName({ jobName: data.jobName || "" })
+      //  데이터 전처리(작업제외 파티션)
+      if (data.excludePartition) {
+        data.excludePartition = this.preprocessExcludePartitions({ excludePartition: data.excludePartition as string })
+      }
+      //  데이터 전처리(작업제외 디렉토리)
+      if (data.excludeDir) {
+        data.excludeDir = this.preprocessExcludeDir({ excludeDir: data.excludeDir as string })
+      }
+
+      const dataSet: BackupDataSet[] = []
+      // 처리할 파티션 목록 결정
+      const partitionsToProcess = data.partition.length
+        ? data.partition.map((partition) => {
+            const partitionInfo = partitionList.find((item) => item.sLetter === partition)
+
+            if (!partitionInfo) {
+              throw ServiceError.badRequestError({
+                functionName: "regist",
+                message: `파티션( ${partition} )이 서버( ${server.sSystemName} )에 존재하지 않습니다`,
+                metadata: {
+                  partition,
+                  server: server.sSystemName,
+                },
+              })
+            }
+
+            return partitionInfo
           })
+        : partitionList
+
+      // 제외 파티션이 아닌 것들만 필터링 후 데이터셋 생성
+      partitionsToProcess
+        .filter((partition) => !data.excludePartition?.includes(partition.sLetter))
+        .forEach((partition) => {
+          const backupDataObject = this.createBackupObject({ data, server, center })
+          const backupInfoDataObject = this.createBackupInfoObject({
+            data,
+            server,
+            partition,
+            center,
+            repository,
+          })
+          dataSet.push({ backupDataObject, backupInfoDataObject })
         })
-      }
-      //  해당 서버 파티션 전체 등록
-      else {
-        // console.dir(partitionList, { depth: null })
-      }
-      const backupInputObject = {}
-      const backupInfoInputObject = {}
+      ContextLogger.info({ message: `총 ${dataSet.length}개의 Backup 작업 등록 dataSet을 생성했습니다.` })
+      //  데이터 등록
+      //  결과 리턴
     } catch (error) {
       return this.handleServiceError({
         error,
         functionName: "regist",
-        message: `백업 정보 등록 중 오류가 발생했습니다`,
+        message: `백업 정보 등록 - 오류가 발생했습니다`,
       })
     }
   }
