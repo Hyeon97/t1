@@ -84,6 +84,7 @@ class App {
   }
 
   private setupErrorHandling(): void {
+
     // 404 에러 처리
     this.app.use(notFoundHandler)
 
