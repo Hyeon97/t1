@@ -45,6 +45,7 @@ export interface ErrorChainItem {
   functionName: string
   request?: string
   errorCode: string
+  statusCode?: number
   message: string
   details?: Record<string, any>
 }

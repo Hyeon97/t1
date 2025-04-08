@@ -52,6 +52,15 @@ export class ApiError extends Error {
     })
   }
 
+  static methodNotAllowed({ message, details }: ErrorIOptions): ApiError {
+    return new ApiError({
+      statusCode: 405,
+      message,
+      errorCode: ErrorCode.METHOD_NOT_ALLOWED,
+      details,
+    })
+  }
+
   static conflict({ message, details }: ErrorIOptions): ApiError {
     return new ApiError({
       statusCode: 409,

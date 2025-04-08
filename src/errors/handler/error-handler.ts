@@ -11,6 +11,10 @@ import { ValidatorError } from "../middleware/validator-error"
  */
 function mapToApiErrorCode(errorCode: string): ErrorCode {
   const codeMap: Record<string, ErrorCode> = {
+    // 공통 에러 코드 매핑
+    UNKNOWN_ERROR: ErrorCode.INTERNAL_ERROR,
+    METHOD_NOT_ALLOWED: ErrorCode.METHOD_NOT_ALLOWED,
+
     // Validator 에러 코드 매핑
     VALID_001: ErrorCode.VALIDATION_ERROR,
     VALID_002: ErrorCode.UNAUTHORIZED,
@@ -129,18 +133,37 @@ function buildErrorChainFromError(err: Error): UnifiedError {
   }
   // 일반 에러인 경우
   else {
-    errorChain = [
-      {
-        layer: "unknown" as ErrorLayer, // 타입 지정 (또는 "controller"로 처리)
-        functionName: "unknownFunction",
-        errorCode: "UNKNOWN_ERROR",
-        message: err.message || "알 수 없는 오류",
-        details: {
-          stack: err.stack,
-          name: err.name,
+    if (err.message.includes('method not allowed')) {
+      statusCode = 405
+      clientMessage = "HTTP method not allowed"
+      clientErrorCode = ErrorCode.METHOD_NOT_ALLOWED
+      errorChain = [
+        {
+          layer: "middleware" as ErrorLayer, // 타입 지정 (또는 "controller"로 처리)
+          functionName: "openApi",
+          errorCode: "METHOD_NOT_ALLOWED",
+          message: err.message || "HTTP method not allowed",
+          // details: {
+          //   stack: err.stack,
+          //   name: err.name,
+          // },
         },
-      },
-    ]
+      ]
+    }
+    else {
+      errorChain = [
+        {
+          layer: "unknown" as ErrorLayer, // 타입 지정 (또는 "controller"로 처리)
+          functionName: "unknownFunction",
+          errorCode: "UNKNOWN_ERROR",
+          message: err.message || "알 수 없는 오류",
+          details: {
+            stack: err.stack,
+            name: err.name,
+          },
+        },
+      ]
+    }
   }
 
   return createUnifiedError({
@@ -186,6 +209,8 @@ export const errorHandler = (err: Error, req: Request, res: Response, next: Next
       },
     })
   }
+
+  console.error(unifiedError)
 
   // 응답 생성
   const errorResponse: ErrorResponse = {
