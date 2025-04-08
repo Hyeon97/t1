@@ -1,4 +1,5 @@
 # 패키지 설치
+
 ```
 # 필수
 npm install express dotenv dotenv-expand
@@ -46,6 +47,7 @@ npm install -D @types/columnify
 ```
 
 # 실행
+
 ```
 # 개발
 npm run dev
@@ -58,7 +60,14 @@ mysql -u root -p < D:\STUDY\TS-Express2\db\test.sql
 ```
 
 # Github 동기화
+
 ```
-git fetch --prune origin 
+git fetch --prune origin
 git reset --hard origin/main
+```
+
+# 동작중인 서버 프로세스 강제종료
+
+```
+for /f "tokens=5" %a in ('netstat -ano ^| findstr :3000') do taskkill /f /pid %a
 ```
