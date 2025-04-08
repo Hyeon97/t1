@@ -81,13 +81,7 @@ export class ControllerError extends Error {
     })
   }
 
-  static authorizationError({
-    functionName,
-    message,
-    cause,
-
-    metadata,
-  }: Omit<ControllerErrorParams, "statusCode">): ControllerError {
+  static authorizationError({ functionName, message, cause, metadata, }: Omit<ControllerErrorParams, "statusCode">): ControllerError {
     return new ControllerError({
       errorCode: ControllerErrorCode.AUTHORIZATION,
       functionName,

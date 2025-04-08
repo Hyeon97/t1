@@ -210,8 +210,6 @@ export const errorHandler = (err: Error, req: Request, res: Response, next: Next
     })
   }
 
-  console.error(unifiedError)
-
   // 응답 생성
   const errorResponse: ErrorResponse = {
     success: false,
@@ -238,9 +236,14 @@ export const errorHandler = (err: Error, req: Request, res: Response, next: Next
       detail = unifiedError.errorChain[l - 1].details || {}
     }
 
-    errorResponse.error.details = {
-      message,
-      ...detail,
+    // 배열인지 확인
+    if (Array.isArray(detail)) {
+      errorResponse.error.details = detail
+    } else {
+      // 객체인 경우 스프레드 연산자 사용
+      errorResponse.error.details = {
+        ...detail,
+      }
     }
   }
 

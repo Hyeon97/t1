@@ -9,6 +9,7 @@ export enum ServiceErrorCode {
   DEPENDENCY = "SRV_004",
   DATA_PROCESSING = "SRV_005",
   TRANSACTION = "SRV_006",
+  BAD_REQUEST = "SRV_007"
 }
 
 export interface ServiceErrorParams {
@@ -62,6 +63,25 @@ export class ServiceError extends Error {
       errorCode: ServiceErrorCode.UNAUTHORIZED,
       functionName,
       message,
+      cause,
+      metadata,
+    })
+  }
+
+  /**
+   * 사용자의 잘못된 요청 처리
+   * 유효하지 않은 파라미터, 지원되지 않는 작업 등
+   */
+  static badRequestError({
+    functionName,
+    message,
+    cause,
+    metadata
+  }: ServiceErrorParams): ServiceError {
+    return new ServiceError({
+      errorCode: ServiceErrorCode.BAD_REQUEST,
+      functionName,
+      message: message || "잘못된 요청(값)입니다",
       cause,
       metadata,
     })
