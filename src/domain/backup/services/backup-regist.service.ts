@@ -16,6 +16,7 @@ import { BackupTypeMap } from "../types/backup-common.type"
 import { BackupRegistRequestBody, BackupTableInput, BackupInfoTableInput, BackupRegistRequestRepository } from "../types/backup-regist.type"
 import { BackupService } from "./backup.service"
 
+//  Backup Data 등록 DataSet 배열 Type
 interface BackupDataSet {
   backupDataObject: BackupTableInput
   backupInfoDataObject: BackupInfoTableInput
