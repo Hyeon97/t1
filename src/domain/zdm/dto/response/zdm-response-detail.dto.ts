@@ -3,7 +3,7 @@
 /////////////////////////////
 
 import { OSTypeMap } from "../../../../types/common/os"
-import { formatDiskSize } from "../../../../utils/data-convert.util"
+import { formatDiskSize } from "../../../../utils/data-convert.utils"
 import { DEFAULT_VALUES_ZDM_RESPONSE, ZdmDataResponse, ZdmResponseDetailFields } from "../../types/zdm/zdm-response.type"
 import { ZdmResponseBaseDTO } from "./zdm-response-base.dto"
 

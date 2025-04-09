@@ -2,7 +2,7 @@
 //  상세 서버 정보 응답 DTO  //
 //////////////////////////////
 
-import { formatDiskSize } from "../../../../utils/data-convert.util"
+import { formatDiskSize } from "../../../../utils/data-convert.utils"
 import { ServerResponseDetailFields, DEFAULT_VALUES_SERVER_RESPONSE, ServerDataResponse } from "../../types/server-response.type"
 import { ServerResponseBaseDTO } from "./server-response-base.dto"
 

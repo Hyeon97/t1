@@ -3,7 +3,7 @@
 //////////////////////
 
 import { DiskTypeMap } from "../../../../types/common/disk"
-import { formatDiskSize } from "../../../../utils/data-convert.util"
+import { formatDiskSize } from "../../../../utils/data-convert.utils"
 import { ServerDiskTable } from "../../types/db/server-disk"
 
 export class ServerDiskInfoDTO {

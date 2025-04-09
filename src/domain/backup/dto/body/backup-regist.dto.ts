@@ -26,7 +26,7 @@ import {
   VALID_REPOSITORY_VALUES,
 } from "../../../../types/common/const-value"
 import { RepositoryType } from "../../../../types/common/repository"
-import { stringToNumber } from "../../../../utils/data-convert.util"
+import { stringToNumber } from "../../../../utils/data-convert.utils"
 import { IsEmailOrNumberConstraint } from "../../../../utils/dto.utils"
 import { BackupType } from "../../types/backup-common.type"
 import { BackupRegistRequestBody } from "../../types/backup-regist.type"

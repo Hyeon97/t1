@@ -2,7 +2,7 @@
 //  ZDM 파티션 정보 DTO  //
 ///////////////////////////
 
-import { formatDiskSize } from "../../../../utils/data-convert.util"
+import { formatDiskSize } from "../../../../utils/data-convert.utils"
 import { ZdmInfoPartitionTable } from "../../types/db/center-info-partition"
 
 export class ZdmPartitionInfoDTO {

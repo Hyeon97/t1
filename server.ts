@@ -1,4 +1,4 @@
-import { EnvUtils } from "./src/utils/env.util"
+import { EnvUtils } from "./src/utils/env.utils"
 // 환경 변수 로드 및 초기화
 EnvUtils.initialize()
 // 환경 변수 로드 후에 다른 모듈 가져오기

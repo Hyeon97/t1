@@ -4,7 +4,7 @@
 
 import { OSTypeMap } from "../../../../types/common/os"
 import { RepositoryTypeMap } from "../../../../types/common/repository"
-import { formatDiskSize } from "../../../../utils/data-convert.util"
+import { formatDiskSize } from "../../../../utils/data-convert.utils"
 import { ZdmRepositoryTable } from "../../types/db/center-repository"
 import { ZdmRepositoryDataResponse } from "../../types/zdm-repository/zdm-repository-response.type"
 

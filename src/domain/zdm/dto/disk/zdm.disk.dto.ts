@@ -3,7 +3,7 @@
 //////////////////////////
 
 import { DiskTypeMap } from "../../../../types/common/disk"
-import { formatDiskSize } from "../../../../utils/data-convert.util"
+import { formatDiskSize } from "../../../../utils/data-convert.utils"
 import { ZdmInfoDiskTable } from "../../types/db/center-info-disk"
 
 export class ZdmDiskInfoDTO {

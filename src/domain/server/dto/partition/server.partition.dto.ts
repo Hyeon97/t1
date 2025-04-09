@@ -2,7 +2,7 @@
 //  파티션 정보 DTO  //
 //////////////////////
 
-import { formatDiskSize } from "../../../../utils/data-convert.util"
+import { formatDiskSize } from "../../../../utils/data-convert.utils"
 import { ServerPartitionTable } from "../../types/db/server-partition"
 
 export class ServerPartitionInfoDTO {
