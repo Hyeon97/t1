@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken"
 import { CreateTokenData, TokenVerifySuccessResult } from "../domain/auth/interface/token"
+import { UtilityError } from "../errors/utility/utility-error"
 
 export class JwtUtil {
   /**
@@ -21,12 +22,19 @@ export class JwtUtil {
    * JWT 토큰 생성
    */
   public static generateToken({ payload }: { payload: CreateTokenData }): string {
-    // 직접 타입 캐스팅을 하지 않고 일반 객체로 처리
-    const secret = this.getJwtSecret()
-    const options = { expiresIn: this.getJwtExpiresIn() }
+    try {
+      const secret = this.getJwtSecret()
+      const options = { expiresIn: this.getJwtExpiresIn() }
 
-    // any 타입을 사용하여 타입 오류 해결
-    return jwt.sign(payload as any, secret as any, options as any)
+      return jwt.sign(payload as any, secret as any, options as any)
+    } catch (error) {
+      throw UtilityError.jwtSignError({
+        functionName: "generateToken",
+        message: "JWT 토큰 생성 중 오류가 발생했습니다",
+        cause: error,
+        metadata: { payloadType: typeof payload },
+      })
+    }
   }
 
   /**
@@ -35,9 +43,27 @@ export class JwtUtil {
   public static verifyToken({ token }: { token: string }): TokenVerifySuccessResult | null {
     try {
       const secret = this.getJwtSecret()
-      const decoded = jwt.verify(token, secret) as unknown as TokenVerifySuccessResult
+      const decoded = jwt.verify(token, secret) as TokenVerifySuccessResult
       return decoded
     } catch (error) {
+      // JWT 에러 유형에 따른 구체적인 에러 처리
+      if (error instanceof jwt.TokenExpiredError) {
+        throw UtilityError.jwtVerifyError({
+          functionName: "verifyToken",
+          message: "만료된 토큰입니다",
+          cause: error,
+          metadata: { errorCode: "JWT_EXPIRED", expiredAt: error.expiredAt },
+        })
+      } else if (error instanceof jwt.JsonWebTokenError) {
+        throw UtilityError.jwtVerifyError({
+          functionName: "verifyToken",
+          message: "유효하지 않은 토큰입니다",
+          cause: error,
+          metadata: { errorCode: "JWT_INVALID" },
+        })
+      }
+
+      // 일반적인 에러 처리
       return null
     }
   }
