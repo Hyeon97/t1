@@ -35,7 +35,7 @@ export interface RequestInfo {
 /**
  * 에러 발생 계층 타입
  */
-export type ErrorLayer = "database" | "repository" | "service" | "controller" | "middleware" | "unknown"
+export type ErrorLayer = "database" | "repository" | "service" | "controller" | "middleware" | "utility" | "unknown"
 
 /**
  * 에러 체인 항목 인터페이스

@@ -1,23 +1,57 @@
-export interface ErrorDetails {
+import { createErrorChainItem, ErrorChainItem, ErrorLayer } from "../interfaces"
+
+export interface BaseErrorOptions {
+  errorCode: string
+  layer: ErrorLayer
   functionName: string
   message: string
   cause?: unknown
   metadata?: Record<string, any>
+  statusCode?: number
 }
 
+/**
+ * 모든 계층별 에러의 기본 클래스
+ * 에러 체인 관리를 위한 공통 기능 제공
+ */
 export class BaseError extends Error {
-  public readonly functionName: string
-  public readonly cause?: unknown
-  public readonly metadata?: Record<string, any>
+  public readonly errorChain: ErrorChainItem[]
+  public readonly statusCode?: number
 
-  constructor({ functionName, message, cause, metadata }: ErrorDetails) {
+  constructor({ errorCode, layer, functionName, message, cause, metadata, statusCode }: BaseErrorOptions) {
     super(message)
     this.name = this.constructor.name
-    this.functionName = functionName
-    this.cause = cause
-    this.metadata = metadata
+    this.statusCode = statusCode
+
+    // 상세 정보 구성
+    const details: Record<string, any> = { ...metadata }
+
+    // 에러 체인 생성
+    this.errorChain = [
+      createErrorChainItem({
+        layer,
+        functionName,
+        errorCode,
+        message,
+        details,
+      }),
+    ]
+
+    // 원인 에러의 체인 병합
+    if (cause instanceof BaseError) {
+      this.errorChain.push(...cause.errorChain)
+    } else if (cause instanceof Error && "errorChain" in cause && Array.isArray((cause as any).errorChain)) {
+      this.errorChain.push(...(cause as any).errorChain)
+    }
 
     // 스택 트레이스 보존
     Error.captureStackTrace(this, this.constructor)
+  }
+
+  /**
+   * 일반 에러를 현재 에러 타입으로 변환하는 추상 메서드
+   */
+  static fromError(params: { error: unknown; functionName: string; message: string }): BaseError {
+    throw new Error("이 메서드는 하위 클래스에서 구현해야 합니다")
   }
 }

@@ -1,58 +1,57 @@
-import { createErrorChainItem, ErrorChainItem, ErrorLayer } from "../interfaces"
+import { BaseError } from "../base/base-error"
+import { ErrorLayer } from "../interfaces"
 
-export enum UtilErrorCode {
-  DATA_PROCESSING = "UTIL_000",
+export enum UtilityErrorCode {
+  // 공통 에러 코드 정의
+  DATA_PROCESSING = "UTIL_001",
+  VALIDATION = "UTIL_002",
+  BUSINESS_RULE = "UTIL_003",
+  RESOURCE_NOT_FOUND = "UTIL_004",
+  DEPENDENCY = "UTIL_005",
+  TRANSACTION = "UTIL_006",
+  UNAUTHORIZED = "UTIL_007",
+  BAD_REQUEST = "UTIL_008",
+
+  // 환경 관련 에러 코드
+  ENV_CONFIG_ERROR = "UTIL_ENV_001",
+  ENV_FILE_NOT_FOUND = "UTIL_ENV_002",
+  ENV_PARSE_ERROR = "UTIL_ENV_003",
+
+  // JWT 관련 에러 코드
+  JWT_SIGN_ERROR = "UTIL_JWT_001",
+  JWT_VERIFY_ERROR = "UTIL_JWT_002",
+  JWT_EXPIRED = "UTIL_JWT_003",
+  JWT_INVALID = "UTIL_JWT_004",
+
+  // 기타 유틸리티 에러 코드 (추후 확장 가능)
+  FILE_OPERATION_ERROR = "UTIL_FILE_001",
+  NETWORK_ERROR = "UTIL_NET_001",
+  PARSING_ERROR = "UTIL_PARSE_001",
 }
 
-export interface UtilErrorParams {
+export interface UtilityErrorParams {
   functionName: string
   message: string
   cause?: unknown
   metadata?: Record<string, any>
 }
 
-export class UtilError extends Error {
-  public readonly errorChain: ErrorChainItem[]
-
-  constructor({ errorCode, functionName, message, cause, metadata }: UtilErrorParams & { errorCode: UtilErrorCode }) {
-    super(message)
-    this.name = this.constructor.name
-
-    // 상세 정보 구성
-    const details: Record<string, any> = { ...metadata }
-
-    // 에러 체인 생성
-    this.errorChain = [
-      createErrorChainItem({
-        layer: "service" as ErrorLayer,
-        functionName,
-        errorCode,
-        message,
-        details,
-      }),
-    ]
-
-    // 원인 에러의 체인 병합
-    if (cause instanceof RepositoryError) {
-      this.errorChain.push(...cause.errorChain)
-    } else if (cause instanceof UtilError) {
-      this.errorChain.push(...cause.errorChain)
-    }
-    // else if (cause instanceof Error) {
-    //   details.originalError = {
-    //     name: cause.name,
-    //     message: cause.message,
-    //   }
-    // }
-
-    // 스택 트레이스 보존
-    Error.captureStackTrace(this, this.constructor)
+export class UtilityError extends BaseError {
+  constructor({ errorCode, functionName, message, cause, metadata }: UtilityErrorParams & { errorCode: UtilityErrorCode }) {
+    super({
+      errorCode,
+      layer: "utility" as ErrorLayer, // utility 레이어용
+      functionName,
+      message,
+      cause,
+      metadata,
+    })
   }
 
-  //  권한 없음
-  static unauthorizedError({ functionName, message, cause, metadata }: UtilErrorParams): UtilError {
-    return new UtilError({
-      errorCode: UtilErrorCode.UNAUTHORIZED,
+  // 권한 없음
+  static unauthorizedError({ functionName, message, cause, metadata }: UtilityErrorParams): UtilityError {
+    return new UtilityError({
+      errorCode: UtilityErrorCode.UNAUTHORIZED,
       functionName,
       message,
       cause,
@@ -64,9 +63,9 @@ export class UtilError extends Error {
    * 사용자의 잘못된 요청 처리
    * 유효하지 않은 파라미터, 지원되지 않는 작업 등
    */
-  static badRequestError({ functionName, message, cause, metadata }: UtilErrorParams): UtilError {
-    return new UtilError({
-      errorCode: UtilErrorCode.BAD_REQUEST,
+  static badRequestError({ functionName, message, cause, metadata }: UtilityErrorParams): UtilityError {
+    return new UtilityError({
+      errorCode: UtilityErrorCode.BAD_REQUEST,
       functionName,
       message: message || "잘못된 요청(값)입니다",
       cause,
@@ -74,9 +73,9 @@ export class UtilError extends Error {
     })
   }
 
-  static validationError({ functionName, message, cause, metadata }: UtilErrorParams): UtilError {
-    return new UtilError({
-      errorCode: UtilErrorCode.VALIDATION,
+  static validationError({ functionName, message, cause, metadata }: UtilityErrorParams): UtilityError {
+    return new UtilityError({
+      errorCode: UtilityErrorCode.VALIDATION,
       functionName,
       message,
       cause,
@@ -84,9 +83,9 @@ export class UtilError extends Error {
     })
   }
 
-  static businessRuleError({ functionName, message, cause, metadata }: UtilErrorParams): UtilError {
-    return new UtilError({
-      errorCode: UtilErrorCode.BUSINESS_RULE,
+  static businessRuleError({ functionName, message, cause, metadata }: UtilityErrorParams): UtilityError {
+    return new UtilityError({
+      errorCode: UtilityErrorCode.BUSINESS_RULE,
       functionName,
       message,
       cause,
@@ -94,9 +93,9 @@ export class UtilError extends Error {
     })
   }
 
-  static resourceNotFoundError({ functionName, message, cause, metadata }: UtilErrorParams): UtilError {
-    return new UtilError({
-      errorCode: UtilErrorCode.RESOURCE_NOT_FOUND,
+  static resourceNotFoundError({ functionName, message, cause, metadata }: UtilityErrorParams): UtilityError {
+    return new UtilityError({
+      errorCode: UtilityErrorCode.RESOURCE_NOT_FOUND,
       functionName,
       message,
       cause,
@@ -104,9 +103,9 @@ export class UtilError extends Error {
     })
   }
 
-  static dependencyError({ functionName, message, cause, metadata }: UtilErrorParams): UtilError {
-    return new UtilError({
-      errorCode: UtilErrorCode.DEPENDENCY,
+  static dependencyError({ functionName, message, cause, metadata }: UtilityErrorParams): UtilityError {
+    return new UtilityError({
+      errorCode: UtilityErrorCode.DEPENDENCY,
       functionName,
       message,
       cause,
@@ -114,9 +113,9 @@ export class UtilError extends Error {
     })
   }
 
-  static dataProcessingError({ functionName, message, cause, metadata }: UtilErrorParams): UtilError {
-    return new UtilError({
-      errorCode: UtilErrorCode.DATA_PROCESSING,
+  static dataProcessingError({ functionName, message, cause, metadata }: UtilityErrorParams): UtilityError {
+    return new UtilityError({
+      errorCode: UtilityErrorCode.DATA_PROCESSING,
       functionName,
       message,
       cause,
@@ -124,9 +123,9 @@ export class UtilError extends Error {
     })
   }
 
-  static transactionError({ functionName, message, cause, metadata }: UtilErrorParams): UtilError {
-    return new UtilError({
-      errorCode: UtilErrorCode.TRANSACTION,
+  static transactionError({ functionName, message, cause, metadata }: UtilityErrorParams): UtilityError {
+    return new UtilityError({
+      errorCode: UtilityErrorCode.TRANSACTION,
       functionName,
       message,
       cause,
@@ -134,53 +133,63 @@ export class UtilError extends Error {
     })
   }
 
-  // Repository 에러를 Util 에러로 변환하는 팩토리 메서드
-  static fromRepositoryError({ error, functionName }: { error: RepositoryError; functionName: string }): UtilError {
-    // Repository 에러의 첫 번째 항목에서 정보 추출
-    const repoErrorItem = error.errorChain[0]
-
-    let serviceError: UtilError
-
-    switch (repoErrorItem.errorCode) {
-      case RepositoryErrorCode.ENTITY_NOT_FOUND:
-        serviceError = UtilError.resourceNotFoundError({
-          functionName,
-          message: `리소스를 찾을 수 없습니다`,
-          cause: error,
-        })
-        break
-      case RepositoryErrorCode.VALIDATION:
-        serviceError = UtilError.validationError({
-          functionName,
-          message: `데이터 유효성 검증 실패`,
-          cause: error,
-        })
-        break
-      default:
-        serviceError = UtilError.dependencyError({
-          functionName,
-          message: `Repository 작업 중 오류 발생`,
-          cause: error,
-          metadata: { originalCode: repoErrorItem.errorCode },
-        })
-    }
-
-    return serviceError
+  // 환경 설정 관련 에러
+  static envConfigError({ functionName, message, cause, metadata }: UtilityErrorParams): UtilityError {
+    return new UtilityError({
+      errorCode: UtilityErrorCode.ENV_CONFIG_ERROR,
+      functionName,
+      message,
+      cause,
+      metadata,
+    })
   }
 
-  // 일반 에러를 Util 에러로 변환하는 팩토리 메서드
-  static fromError({ error, functionName, message }: { error: unknown; functionName: string; message: string }): UtilError {
-    // 일반 에러 타입인 경우 UtilError로 변환
-    // 다른 타입인 경우 UtilError로 간주 ( 사전 필터링에서 다른 타입은 못들어 온다고 간주 )
+  static envFileNotFoundError({ functionName, message, cause, metadata }: UtilityErrorParams): UtilityError {
+    return new UtilityError({
+      errorCode: UtilityErrorCode.ENV_FILE_NOT_FOUND,
+      functionName,
+      message,
+      cause,
+      metadata,
+    })
+  }
+
+  // JWT 관련 에러
+  static jwtSignError({ functionName, message, cause, metadata }: UtilityErrorParams): UtilityError {
+    return new UtilityError({
+      errorCode: UtilityErrorCode.JWT_SIGN_ERROR,
+      functionName,
+      message,
+      cause,
+      metadata,
+    })
+  }
+
+  static jwtVerifyError({ functionName, message, cause, metadata }: UtilityErrorParams): UtilityError {
+    return new UtilityError({
+      errorCode: UtilityErrorCode.JWT_VERIFY_ERROR,
+      functionName,
+      message,
+      cause,
+      metadata,
+    })
+  }
+
+  // 일반 에러를 Utility 에러로 변환하는 팩토리 메서드
+  static fromError({ error, functionName, message }: { error: unknown; functionName: string; message: string }): UtilityError {
     if (error instanceof Error) {
-      const msg = message || error instanceof Error ? error.message : String(error)
-      return UtilError.dataProcessingError({
+      const msg = message || (error instanceof Error ? error.message : String(error))
+      return UtilityError.dataProcessingError({
         functionName,
-        message: msg || `Util 작업 중 예상치 못한 오류 발생: ${message}`,
+        message: msg || `Utility 작업 중 예상치 못한 오류 발생: ${message}`,
         cause: error,
       })
-    } else if (error instanceof RepositoryError) {
-      return UtilError.fromRepositoryError({ error, functionName })
-    } else return error as UtilError
+    } else {
+      return UtilityError.dataProcessingError({
+        functionName,
+        message: `Utility 작업 중 예상치 못한 오류 발생: ${message}`,
+        cause: error,
+      })
+    }
   }
 }

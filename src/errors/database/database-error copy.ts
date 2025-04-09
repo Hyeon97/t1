@@ -1,5 +1,4 @@
-import { BaseError } from "../base/base-error"
-import { ErrorLayer } from "../interfaces"
+import { createErrorChainItem, ErrorChainItem, ErrorLayer } from "../interfaces"
 
 export enum DatabaseErrorCode {
   CONNECTION_ERROR = "DB_001",
@@ -18,7 +17,9 @@ export interface DatabaseErrorParams {
   params?: any[]
 }
 
-export class DatabaseError extends BaseError {
+export class DatabaseError extends Error {
+  public readonly errorChain: ErrorChainItem[]
+
   constructor({
     errorCode,
     functionName = "-",
@@ -28,20 +29,29 @@ export class DatabaseError extends BaseError {
     query,
     params,
   }: DatabaseErrorParams & { errorCode: DatabaseErrorCode }) {
-    // 상세 정보 구성
+    super(message)
+    this.name = this.constructor.name
+
+    //  DB 에러 상세 정의
     const details: Record<string, any> = {}
     if (query) details.query = query
     if (params) details.params = params
-    if (request && request !== "-") details.request = request
+    if (cause) details.cause = cause instanceof Error ? cause.message : String(cause)
 
-    super({
-      errorCode,
-      layer: "database" as ErrorLayer,
-      functionName,
-      message,
-      cause,
-      metadata: details,
-    })
+    // 에러 체인 생성
+    this.errorChain = [
+      createErrorChainItem({
+        layer: "database" as ErrorLayer,
+        functionName,
+        request,
+        errorCode,
+        message,
+        details,
+      }),
+    ]
+
+    // 스택 트레이스 보존
+    Error.captureStackTrace(this, this.constructor)
   }
 
   // 구체적인 데이터베이스 에러 팩토리 메서드들
@@ -88,25 +98,5 @@ export class DatabaseError extends BaseError {
       message,
       cause,
     })
-  }
-
-  // 일반 에러를 Database 에러로 변환하는 팩토리 메서드
-  static fromError({ error, functionName = "-", message }: { error: unknown; functionName?: string; message: string }): DatabaseError {
-    if (error instanceof DatabaseError) {
-      return error
-    } else if (error instanceof Error) {
-      const msg = message || error.message
-      return DatabaseError.queryError({
-        functionName,
-        message: msg || `Database 작업 중 예상치 못한 오류 발생`,
-        cause: error,
-      })
-    } else {
-      return DatabaseError.queryError({
-        functionName,
-        message: message || `Database 작업 중 예상치 못한 오류 발생`,
-        cause: error,
-      })
-    }
   }
 }

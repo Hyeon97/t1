@@ -1,7 +1,5 @@
-import { BaseError } from "../base/base-error"
-import { ErrorLayer } from "../interfaces"
+import { createErrorChainItem, ErrorChainItem, ErrorLayer } from "../interfaces"
 import { RepositoryError, RepositoryErrorCode } from "../repository/repository-error"
-import { UtilityError, UtilityErrorCode } from "../utility/utility-error"
 
 export enum ServiceErrorCode {
   UNAUTHORIZED = "SRV_000",
@@ -21,16 +19,42 @@ export interface ServiceErrorParams {
   metadata?: Record<string, any>
 }
 
-export class ServiceError extends BaseError {
+export class ServiceError extends Error {
+  public readonly errorChain: ErrorChainItem[]
+
   constructor({ errorCode, functionName, message, cause, metadata }: ServiceErrorParams & { errorCode: ServiceErrorCode }) {
-    super({
-      errorCode,
-      layer: "service" as ErrorLayer,
-      functionName,
-      message,
-      cause,
-      metadata,
-    })
+    super(message)
+    this.name = this.constructor.name
+
+    // 상세 정보 구성
+    const details: Record<string, any> = { ...metadata }
+
+    // 에러 체인 생성
+    this.errorChain = [
+      createErrorChainItem({
+        layer: "service" as ErrorLayer,
+        functionName,
+        errorCode,
+        message,
+        details,
+      }),
+    ]
+
+    // 원인 에러의 체인 병합
+    if (cause instanceof RepositoryError) {
+      this.errorChain.push(...cause.errorChain)
+    } else if (cause instanceof ServiceError) {
+      this.errorChain.push(...cause.errorChain)
+    }
+    // else if (cause instanceof Error) {
+    //   details.originalError = {
+    //     name: cause.name,
+    //     message: cause.message,
+    //   }
+    // }
+
+    // 스택 트레이스 보존
+    Error.captureStackTrace(this, this.constructor)
   }
 
   //  권한 없음
@@ -152,67 +176,19 @@ export class ServiceError extends BaseError {
     return serviceError
   }
 
-  // Utility 에러를 Service 에러로 변환하는 팩토리 메서드
-  static fromUtilityError({ error, functionName }: { error: UtilityError; functionName: string }): ServiceError {
-    // Utility 에러의 첫 번째 항목에서 정보 추출
-    const utilErrorItem = error.errorChain[0]
-    const errorCode = utilErrorItem.errorCode
-
-    let serviceError: ServiceError
-
-    // 에러 유형에 따라 적절한 Service 에러 생성
-    if (errorCode.startsWith("UTIL_JWT")) {
-      serviceError = ServiceError.unauthorizedError({
-        functionName,
-        message: `인증 중 오류 발생: ${utilErrorItem.message}`,
-        cause: error,
-      })
-    } else if (errorCode === UtilityErrorCode.VALIDATION) {
-      serviceError = ServiceError.validationError({
-        functionName,
-        message: utilErrorItem.message,
-        cause: error,
-      })
-    } else if (errorCode === UtilityErrorCode.RESOURCE_NOT_FOUND) {
-      serviceError = ServiceError.resourceNotFoundError({
-        functionName,
-        message: utilErrorItem.message,
-        cause: error,
-      })
-    } else {
-      serviceError = ServiceError.dataProcessingError({
-        functionName,
-        message: `Utility 작업 중 오류 발생: ${utilErrorItem.message}`,
-        cause: error,
-        metadata: { originalCode: errorCode },
-      })
-    }
-
-    return serviceError
-  }
-
   // 일반 에러를 Service 에러로 변환하는 팩토리 메서드
   static fromError({ error, functionName, message }: { error: unknown; functionName: string; message: string }): ServiceError {
-    // 다른 에러 유형 처리
-    if (error instanceof RepositoryError) {
+    // 일반 에러 타입인 경우 ServiceError로 변환
+    // 다른 타입인 경우 ServiceError로 간주 ( 사전 필터링에서 다른 타입은 못들어 온다고 간주 )
+    if (error instanceof Error) {
+      const msg = message || error instanceof Error ? error.message : String(error)
+      return ServiceError.dataProcessingError({
+        functionName,
+        message: msg || `Service 작업 중 예상치 못한 오류 발생: ${message}`,
+        cause: error,
+      })
+    } else if (error instanceof RepositoryError) {
       return ServiceError.fromRepositoryError({ error, functionName })
-    } else if (error instanceof UtilityError) {
-      return ServiceError.fromUtilityError({ error, functionName })
-    } else if (error instanceof ServiceError) {
-      return error
-    } else if (error instanceof Error) {
-      const msg = message || error.message
-      return ServiceError.dataProcessingError({
-        functionName,
-        message: msg || `Service 작업 중 예상치 못한 오류 발생`,
-        cause: error,
-      })
-    } else {
-      return ServiceError.dataProcessingError({
-        functionName,
-        message: message || `Service 작업 중 예상치 못한 오류 발생`,
-        cause: error,
-      })
-    }
+    } else return error as ServiceError
   }
 }

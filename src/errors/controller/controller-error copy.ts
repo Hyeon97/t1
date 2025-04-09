@@ -1,7 +1,5 @@
-import { BaseError } from "../base/base-error"
-import { ErrorLayer } from "../interfaces"
+import { createErrorChainItem, ErrorChainItem, ErrorLayer } from "../interfaces"
 import { ServiceError, ServiceErrorCode } from "../service/service-error"
-import { UtilityError, UtilityErrorCode } from "../utility/utility-error"
 
 export enum ControllerErrorCode {
   VALIDATION = "CTRL_001",
@@ -20,20 +18,44 @@ export interface ControllerErrorParams {
   statusCode?: number
 }
 
-export class ControllerError extends BaseError {
+export class ControllerError extends Error {
+  public readonly errorChain: ErrorChainItem[]
   public readonly statusCode: number
 
   constructor({ errorCode, functionName, message, cause, statusCode = 500, metadata }: ControllerErrorParams & { errorCode: ControllerErrorCode }) {
-    super({
-      errorCode,
-      layer: "controller" as ErrorLayer,
-      functionName,
-      message,
-      cause,
-      metadata,
-      statusCode,
-    })
+    super(message)
+    this.name = this.constructor.name
     this.statusCode = statusCode
+
+    // 상세 정보 구성
+    const details: Record<string, any> = { ...metadata }
+
+    // 에러 체인 생성
+    this.errorChain = [
+      createErrorChainItem({
+        layer: "controller" as ErrorLayer,
+        functionName,
+        errorCode,
+        message,
+        details,
+      }),
+    ]
+
+    // 원인 에러의 체인 병합
+    if (cause instanceof ServiceError) {
+      this.errorChain.push(...cause.errorChain)
+    } else if (cause instanceof ControllerError) {
+      this.errorChain.push(...cause.errorChain)
+    }
+    // else if (cause instanceof Error) {
+    //   details.originalError = {
+    //     name: cause.name,
+    //     message: cause.message,
+    //   }
+    // }
+
+    // 스택 트레이스 보존
+    Error.captureStackTrace(this, this.constructor)
   }
 
   // Controller 에러 팩토리 메서드들
@@ -59,7 +81,7 @@ export class ControllerError extends BaseError {
     })
   }
 
-  static authorizationError({ functionName, message, cause, metadata }: Omit<ControllerErrorParams, "statusCode">): ControllerError {
+  static authorizationError({ functionName, message, cause, metadata, }: Omit<ControllerErrorParams, "statusCode">): ControllerError {
     return new ControllerError({
       errorCode: ControllerErrorCode.AUTHORIZATION,
       functionName,
@@ -132,13 +154,6 @@ export class ControllerError extends BaseError {
           cause: error,
         })
         break
-      case ServiceErrorCode.UNAUTHORIZED:
-        controllerError = ControllerError.authenticationError({
-          functionName,
-          message: `인증 실패`,
-          cause: error,
-        })
-        break
       default:
         controllerError = ControllerError.internalServerError({
           functionName,
@@ -151,72 +166,19 @@ export class ControllerError extends BaseError {
     return controllerError
   }
 
-  // Utility 에러를 Controller 에러로 직접 변환하는 팩토리 메서드
-  static fromUtilityError({ error, functionName }: { error: UtilityError; functionName: string }): ControllerError {
-    // Utility 에러의 첫 번째 항목에서 정보 추출
-    const utilErrorItem = error.errorChain[0]
-    const errorCode = utilErrorItem.errorCode
-
-    let controllerError: ControllerError
-
-    // JWT 관련 에러는 인증 에러로 처리
-    if (errorCode.startsWith("UTIL_JWT")) {
-      controllerError = ControllerError.authenticationError({
-        functionName,
-        message: `인증 필요: ${utilErrorItem.message}`,
-        cause: error,
-      })
-    }
-    // 유효성 검증 관련 에러
-    else if (errorCode === UtilityErrorCode.VALIDATION) {
-      controllerError = ControllerError.validationError({
-        functionName,
-        message: utilErrorItem.message,
-        cause: error,
-      })
-    }
-    // 리소스 찾기 관련 에러
-    else if (errorCode === UtilityErrorCode.RESOURCE_NOT_FOUND) {
-      controllerError = ControllerError.resourceNotFoundError({
-        functionName,
-        message: utilErrorItem.message,
-        cause: error,
-      })
-    }
-    // 그 외 에러는 서버 내부 에러로 처리
-    else {
-      controllerError = ControllerError.internalServerError({
-        functionName,
-        message: `서버 내부 오류: ${utilErrorItem.message}`,
-        cause: error,
-        metadata: { originalCode: errorCode },
-      })
-    }
-
-    return controllerError
-  }
-
   // 일반 에러를 Controller 에러로 변환하는 팩토리 메서드
   static fromError({ error, functionName, message }: { error: unknown; functionName: string; message: string }): ControllerError {
-    if (error instanceof ServiceError) {
-      return ControllerError.fromServiceError({ error, functionName })
-    } else if (error instanceof UtilityError) {
-      return ControllerError.fromUtilityError({ error, functionName })
-    } else if (error instanceof ControllerError) {
-      return error
-    } else if (error instanceof Error) {
-      const msg = message || error.message
+    // 일반 에러 타입인 경우 ControllerError로 변환
+    // 다른 타입인 경우 ControllerError로 간주 ( 사전 필터링에서 다른 타입은 못들어 온다고 간주 )
+    if (error instanceof Error) {
+      const msg = message || error instanceof Error ? error.message : String(error)
       return ControllerError.internalServerError({
         functionName,
         message: msg || `요청 처리 중 예상치 못한 오류가 발생했습니다`,
         cause: error,
       })
-    } else {
-      return ControllerError.internalServerError({
-        functionName,
-        message: message || `요청 처리 중 예상치 못한 오류가 발생했습니다`,
-        cause: error,
-      })
-    }
+    } else if (error instanceof ServiceError) {
+      return ControllerError.fromServiceError({ error, functionName })
+    } else return error as ControllerError
   }
 }
