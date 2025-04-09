@@ -145,7 +145,7 @@ export class DatabaseOperations {
     params?: any[]
     connection?: mysql.PoolConnection
     request?: string //  해당 함수 요청 상위 Layer 함수 이름
-  }): Promise<T[]> {
+  }): Promise<T> {
     try {
       const pool = DatabasePool.getInstance().getPool()
       const conn = connection || pool
@@ -167,7 +167,6 @@ export class DatabaseOperations {
       ContextLogger.debug({
         message: `SQL: ${pool.format(sql, params)}`,
       })
-      console.log(`request: ${request}`)
       const [rows] = await conn.execute(sql, params)
 
       const duration = Date.now() - startTime
@@ -179,7 +178,7 @@ export class DatabaseOperations {
         },
       })
 
-      return rows as T[]
+      return rows as T
     } catch (error: any) {
       //  로깅
       ContextLogger.debug({
@@ -284,9 +283,9 @@ export class DatabaseOperations {
     connection?: mysql.PoolConnection
     request?: string //  해당 함수 요청 상위 Layer 함수 이름
   }): Promise<T | null> {
-    const results = await this.executeQuery<T>({ sql, params, connection, request })
+    const results = await this.executeQuery<T[]>({ sql, params, connection, request })
     // 결과가 없으면 null 반환
-    return results.length ? results[0] : null
+    return results && results.length > 0 ? results[0] : null
   }
 }
 
@@ -413,7 +412,7 @@ export class TransactionManager {
   /**
    * 트랜잭션 내에서 쿼리 실행
    */
-  public async executeQuery<T>({ sql, params = [], request }: { sql: string; params?: any[]; request: string }): Promise<T[]> {
+  public async executeQuery<T>({ sql, params = [], request }: { sql: string; params?: any[]; request: string }): Promise<T> {
     if (!this.connection) {
       throw DatabaseError.transactionError({
         request,
