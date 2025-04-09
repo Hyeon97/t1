@@ -40,7 +40,6 @@ export class BaseService {
     callback,
   }: {
     callback: (transaction: TransactionManager) => Promise<T>
-    operationName: string
   }): Promise<T> {
     try {
       return await TransactionManager.execute({ callback })
