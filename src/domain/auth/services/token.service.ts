@@ -48,10 +48,16 @@ export class TokenService extends BaseService {
 
       // 토큰 저장
       const saveData: TokenDBInput = {
-        token,
-        mail: input.email,
+        sToken: token,
+        sMail: input.email,
+        sIssue_Date: "",
+        sLast_Use_Date: "",
       }
-      await this.userTokenRepository.saveTokenInfo({ input: saveData })
+      this.executeTransaction({
+        callback: async (transaction) => {
+          return this.userTokenRepository.saveTokenInfo({ saveData, transaction })
+        },
+      })
       ContextLogger.debug({
         message: `사용자 ${input.email}의 Token이 생성되었습니다`,
         meta: { expiresAt },

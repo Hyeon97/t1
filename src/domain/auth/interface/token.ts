@@ -20,8 +20,10 @@ export interface TokenIssueResponse {
  * 토큰 DB 저장 input 타입
  */
 export interface TokenDBInput {
-  token: string
-  mail: string
+  sToken: string
+  sMail: string
+  sIssue_Date: string
+  sLast_Use_Date: string
 }
 
 /**
