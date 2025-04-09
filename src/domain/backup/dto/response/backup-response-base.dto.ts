@@ -96,11 +96,11 @@ export class BackupResponseBaseDTO implements BackupResponseFields {
         path: info!.sRepositoryPath,
       },
       timestamp: {
-        start: backup.sStartTime,
+        start: backup.sStartTime as string,
         end: backup.sEndTime,
         elapsed: backup.sElapsedTime,
       },
-      lastUpdate: backup.sLastUpdateTime,
+      lastUpdate: backup.sLastUpdateTime as string,
     })
   }
 

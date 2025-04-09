@@ -1,0 +1,116 @@
+{
+  successful: [
+    {
+      dataSet: {
+        backupDataObject: {
+          nUserID: 1,
+          nCenterID: 6,
+          sSystemName: 'prd-web01 (172.25.0.11)',
+          sJobName: '',
+          nJobID: 75,
+          nJobStatus: 2,
+          nScheduleID: 0,
+          nScheduleID_advanced: 0,
+          sJobResult: '',
+          sDescription: '',
+          sStartTime: 'now()',
+          sLastUpdateTime: 'now()'
+        },
+        backupInfoDataObject: {
+          nID: 75,
+          nUserID: 1,
+          nCenterID: 6,
+          sSystemName: 'prd-web01 (172.25.0.11)',
+          sJobName: '',
+          nBackupType: 300,
+          nRotation: 1,
+          nCompression: 1,
+          nEncryption: 0,
+          sDrive: '/',
+          sExcludeDir: '',
+          nEmailEvent: 0,
+          sComment: '',
+          nRepositoryID: 14,
+          nRepositoryType: 21,
+          sRepositoryPath: '121.189.20.130:/ZConverter',
+          nNetworkLimit: 0
+        }
+      }
+    },
+    {
+      dataSet: {
+        backupDataObject: {
+          nUserID: 1,
+          nCenterID: 6,
+          sSystemName: 'prd-web01 (172.25.0.11)',
+          sJobName: '',
+          nJobID: 74,
+          nJobStatus: 2,
+          nScheduleID: 0,
+          nScheduleID_advanced: 0,
+          sJobResult: '',
+          sDescription: '',
+          sStartTime: 'now()',
+          sLastUpdateTime: 'now()'
+        },
+        backupInfoDataObject: {
+          nID: 74,
+          nUserID: 1,
+          nCenterID: 6,
+          sSystemName: 'prd-web01 (172.25.0.11)',
+          sJobName: '',
+          nBackupType: 300,
+          nRotation: 1,
+          nCompression: 1,
+          nEncryption: 0,
+          sDrive: '/boot',
+          sExcludeDir: '',
+          nEmailEvent: 0,
+          sComment: '',
+          nRepositoryID: 14,
+          nRepositoryType: 21,
+          sRepositoryPath: '121.189.20.130:/ZConverter',
+          nNetworkLimit: 0
+        }
+      }
+    },
+    {
+      dataSet: {
+        backupDataObject: {
+          nUserID: 1,
+          nCenterID: 6,
+          sSystemName: 'prd-web01 (172.25.0.11)',
+          sJobName: '',
+          nJobID: 76,
+          nJobStatus: 2,
+          nScheduleID: 0,
+          nScheduleID_advanced: 0,
+          sJobResult: '',
+          sDescription: '',
+          sStartTime: 'now()',
+          sLastUpdateTime: 'now()'
+        },
+        backupInfoDataObject: {
+          nID: 76,
+          nUserID: 1,
+          nCenterID: 6,
+          sSystemName: 'prd-web01 (172.25.0.11)',
+          sJobName: '',
+          nBackupType: 300,
+          nRotation: 1,
+          nCompression: 1,
+          nEncryption: 0,
+          sDrive: '/data',
+          sExcludeDir: '',
+          nEmailEvent: 0,
+          sComment: '',
+          nRepositoryID: 14,
+          nRepositoryType: 21,
+          sRepositoryPath: '121.189.20.130:/ZConverter',
+          nNetworkLimit: 0
+        }
+      }
+    }
+  ],
+  failed: []
+}

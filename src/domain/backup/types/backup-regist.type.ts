@@ -90,5 +90,4 @@ export type BackupInfoTableInput = Pick<
   | "nRepositoryType"
   | "sRepositoryPath"
   | "nNetworkLimit"
-  | "sLastUpdateTime"
 >

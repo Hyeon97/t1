@@ -29,6 +29,6 @@ export interface BackupInfoTable {
   nAutoRecoveryJobID: number //  자동복구 ID(job_recovery :nJobStatus 2)
   nNetworkLimit: number //  네트워크 제한(0: 제한없음)
   sOSVersion: string
-  sLastUpdateTime: string
+  sLastUpdateTime: string | Date
   nFlags: number
 }

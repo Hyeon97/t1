@@ -29,5 +29,6 @@ export const backupRegistService = new BackupRegistService({
   serverPartitionService,
   zdmService,
   zdmRepositoryService,
-  backupService,
+  backupRepository,
+  backupInfoRepository
 })

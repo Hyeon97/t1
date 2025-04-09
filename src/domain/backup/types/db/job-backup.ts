@@ -15,9 +15,9 @@ export interface BackupTable {
   nScheduleID_advanced: number
   sJobResult: string
   sDescription: string
-  sStartTime: string
+  sStartTime: string | Date
   sEndTime: string
   sElapsedTime: string
-  sLastUpdateTime: string
+  sLastUpdateTime: string | Date
   nFlags: number
 }

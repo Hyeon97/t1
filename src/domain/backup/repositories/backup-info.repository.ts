@@ -1,8 +1,11 @@
+import { ResultSetHeader } from "mysql2/promise"
+import { TransactionManager } from "../../../database/connection"
 import { RepositoryConnectionTypeMap } from "../../../types/common/repository"
-import { BaseRepository } from "../../../utils/base/base-repository"
+import { BaseRepository, SqlFieldOption } from "../../../utils/base/base-repository"
 import { ContextLogger } from "../../../utils/logger/logger.custom"
 import { BackupTypeMap } from "../types/backup-common.type"
 import { BackupFilterOptions } from "../types/backup-filter.type"
+import { BackupInfoTableInput } from "../types/backup-regist.type"
 import { BackupInfoTable } from "../types/db/job-backup-info"
 
 export class BackupInfoRepository extends BaseRepository {
@@ -62,7 +65,7 @@ export class BackupInfoRepository extends BaseRepository {
       let query = `SELECT * FROM ${this.tableName}`
       query += this.buildWhereClause()
 
-      return await this.executeQuery<BackupInfoTable>({ sql: query, params: this.params, request: `${this.repositoryName}.findAll` })
+      return await this.executeQuery<BackupInfoTable[]>({ sql: query, params: this.params, request: `${this.repositoryName}.findAll` })
     } catch (error) {
       return this.handleRepositoryError({
         error,
@@ -85,12 +88,35 @@ export class BackupInfoRepository extends BaseRepository {
       const placeholders = jobNames.map(() => "?").join(",")
 
       const query = `SELECT * FROM ${this.tableName} WHERE sJobName IN (${placeholders})`
-      return await this.executeQuery<BackupInfoTable>({ sql: query, params: jobNames, request: `${this.repositoryName}.findByJobNames`, })
+      return await this.executeQuery<BackupInfoTable[]>({ sql: query, params: jobNames, request: `${this.repositoryName}.findByJobNames`, })
     } catch (error) {
       return this.handleRepositoryError({
         error,
         functionName: "findByJobNames",
         message: "Backup Info 조회 중 오류가 발생했습니다",
+      })
+    }
+  }
+
+  /**
+   * Backup info 작업 정보 추가
+   */
+  async insertBackupInfo({ backupInfoData, transaction }: { backupInfoData: BackupInfoTableInput, transaction: TransactionManager }): Promise<ResultSetHeader> {
+    try {
+      // 시간 필드에 대한 SQL 함수 사용 옵션 정의
+      const sqlOptions: Record<string, SqlFieldOption> = {}
+
+      return await this.insert({
+        data: backupInfoData,
+        options: sqlOptions,
+        transaction,
+        request: `${this.repositoryName}.insertBackupInfo`
+      })
+    } catch (error) {
+      return this.handleRepositoryError({
+        error,
+        functionName: "insertBackupInfo",
+        message: "Backup 상세 정보 추가 중 오류가 발생했습니다"
       })
     }
   }

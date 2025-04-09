@@ -1,6 +1,6 @@
+import { TransactionManager } from "../../../database/connection"
 import { ServiceError } from "../../../errors/service/service-error"
-import { CompressionTypeMap } from "../../../types/common/compression"
-import { EncryptionTypeMap } from "../../../types/common/encryption"
+import { AutoStartType } from "../../../types/common/job"
 import { BaseService } from "../../../utils/base/base-service"
 import { ContextLogger } from "../../../utils/logger/logger.custom"
 import { ServerPartitionService } from "../../server/services/server-partition.service"
@@ -12,14 +12,20 @@ import { ZdmService } from "../../zdm/services/zdm.service"
 import { ZdmInfoTable } from "../../zdm/types/db/center-info"
 import { ZdmRepositoryTable } from "../../zdm/types/db/center-repository"
 import { ZdmRepositoryFilterOptions } from "../../zdm/types/zdm-repository/zdm-repository-filter.type"
+import { BackupInfoRepository } from "../repositories/backup-info.repository"
+import { BackupRepository } from "../repositories/backup.repository"
 import { BackupTypeMap } from "../types/backup-common.type"
-import { BackupRegistRequestBody, BackupTableInput, BackupInfoTableInput, BackupRegistRequestRepository } from "../types/backup-regist.type"
-import { BackupService } from "./backup.service"
+import { BackupInfoTableInput, BackupRegistRequestBody, BackupRegistRequestRepository, BackupTableInput } from "../types/backup-regist.type"
 
 //  Backup Data 등록 DataSet 배열 Type
 interface BackupDataSet {
   backupDataObject: BackupTableInput
   backupInfoDataObject: BackupInfoTableInput
+}
+//  Backup Data 등록 결과 
+interface BackupDataRegistResultSet {
+  successful: Array<{ dataSet: BackupDataSet, }>,
+  failed: Array<{ dataSet: BackupDataSet, error: Error }>
 }
 
 export class BackupRegistService extends BaseService {
@@ -27,19 +33,23 @@ export class BackupRegistService extends BaseService {
   private readonly serverPartitionService: ServerPartitionService
   private readonly zdmService: ZdmService
   private readonly zdmRepositoryService: ZdmRepositoryService
-  private readonly backupService: BackupService
+  private readonly backupRepository: BackupRepository
+  private readonly backupInfoRepository: BackupInfoRepository
+
   constructor({
     serverService,
     serverPartitionService,
     zdmService,
     zdmRepositoryService,
-    backupService,
+    backupRepository,
+    backupInfoRepository
   }: {
     serverService: ServerService
     serverPartitionService: ServerPartitionService
     zdmService: ZdmService
     zdmRepositoryService: ZdmRepositoryService
-    backupService: BackupService
+    backupRepository: BackupRepository
+    backupInfoRepository: BackupInfoRepository
   }) {
     super({
       serviceName: "BackupRegistService",
@@ -48,7 +58,8 @@ export class BackupRegistService extends BaseService {
     this.serverPartitionService = serverPartitionService
     this.zdmService = zdmService
     this.zdmRepositoryService = zdmRepositoryService
-    this.backupService = backupService
+    this.backupRepository = backupRepository
+    this.backupInfoRepository = backupInfoRepository
   }
 
   /**
@@ -65,7 +76,7 @@ export class BackupRegistService extends BaseService {
   }): BackupTableInput {
     try {
       return {
-        nUserID: data.user as number,
+        nUserID: (data.user ?? 1) as number,
         nCenterID: center.nID,
         sSystemName: server.sSystemName,
         sJobName: data.jobName || "",
@@ -75,8 +86,8 @@ export class BackupRegistService extends BaseService {
         nScheduleID_advanced: 0,
         sJobResult: "",
         sDescription: data.descroption || "",
-        sStartTime: "",
-        sLastUpdateTime: "",
+        sStartTime: "now()",
+        sLastUpdateTime: "now()",
       }
     } catch (error) {
       throw ServiceError.dataProcessingError({
@@ -106,7 +117,7 @@ export class BackupRegistService extends BaseService {
     try {
       return {
         nID: 0,
-        nUserID: data.user as number,
+        nUserID: (data.user ?? 1) as number,
         nCenterID: center.nID,
         sSystemName: server.sSystemName,
         sJobName: data.jobName || "",
@@ -122,7 +133,6 @@ export class BackupRegistService extends BaseService {
         nRepositoryType: repository.nType,
         sRepositoryPath: repository.sRemotePath,
         nNetworkLimit: data.networkLimit ?? 0,
-        sLastUpdateTime: "",
       }
     } catch (error) {
       throw ServiceError.dataProcessingError({
@@ -183,11 +193,16 @@ export class BackupRegistService extends BaseService {
       }
       return centerInfo?.zdm!
     } catch (error) {
-      throw ServiceError.dataProcessingError({
+      return this.handleServiceError({
+        error,
         functionName: "getCenterInfo",
         message: "[Backup 정보 등록] - ZDM 정보 조회 오류 발생",
-        cause: error,
       })
+      // throw ServiceError.dataProcessingError({
+      //   functionName: "getCenterInfo",
+      //   message: "[Backup 정보 등록] - ZDM 정보 조회 오류 발생",
+      //   cause: error,
+      // })
     }
   }
 
@@ -204,11 +219,16 @@ export class BackupRegistService extends BaseService {
       const repositoryInfo = await this.zdmRepositoryService.getRepositoryById({ id: repository.id, filterOptions })
       return repositoryInfo.items[0]
     } catch (error) {
-      throw ServiceError.dataProcessingError({
+      return this.handleServiceError({
+        error,
         functionName: "getRepositoryInfo",
         message: "[Backup 정보 등록] - ZDM Repository 정보 조회 오류 발생",
-        cause: error,
       })
+      // throw ServiceError.dataProcessingError({
+      //   functionName: "getRepositoryInfo",
+      //   message: "[Backup 정보 등록] - ZDM Repository 정보 조회 오류 발생",
+      //   cause: error,
+      // })
     }
   }
 
@@ -272,7 +292,123 @@ export class BackupRegistService extends BaseService {
   }
 
   /**
-   *  Backup 작업 등록
+ * Backup 데이터 세트 DB 등록
+ */
+  private async registerBackupDataSet({ dataSet, transaction }: { dataSet: BackupDataSet, transaction: TransactionManager }): Promise<BackupDataSet> {
+    try {
+      // 1. Backup 기본 정보 등록
+      const backupRegistResult = await this.backupRepository.insertBackup({
+        backupData: dataSet.backupDataObject,
+        transaction
+      })
+
+      // 2. Backup 객체 nJobID 설정
+      dataSet.backupDataObject.nJobID = backupRegistResult.insertId
+
+      // 3. Backup 객체 업데이트
+      const { sStartTime, sLastUpdateTime, ...backupDataWithoutTimeFields } = dataSet.backupDataObject
+      await this.backupRepository.updateBackup({
+        id: backupRegistResult.insertId,
+        transaction,
+        backupData: backupDataWithoutTimeFields
+      })
+
+      // 4. Backup info 객체에 ID 설정
+      dataSet.backupInfoDataObject.nID = backupRegistResult.insertId
+
+      // 5. Backup info 정보 등록
+      const backupInfoRegistResult = await this.backupInfoRepository.insertBackupInfo({
+        backupInfoData: dataSet.backupInfoDataObject,
+        transaction
+      })
+
+      return dataSet
+    } catch (error) {
+      throw ServiceError.dataProcessingError({
+        functionName: "registerBackupDataSet",
+        message: "[Backup 정보 등록] - Backup / Backup Info 정보 DB등록 중 오류 발생",
+        cause: error,
+      })
+    }
+  }
+
+  /**
+   * 여러 Backup 데이터 세트 병렬 등록
+   */
+  private async registerAllBackupDataSets({ dataSets }: { dataSets: BackupDataSet[] }): Promise<BackupDataRegistResultSet> {
+    const results = await Promise.allSettled(
+      dataSets.map(dataSet =>
+        this.executeTransaction({
+          callback: async (transaction) => {
+            return this.registerBackupDataSet({
+              dataSet,
+              transaction
+            })
+          },
+        })
+      )
+    )
+
+    const successful: Array<{ dataSet: BackupDataSet }> = []
+    const failed: Array<{ dataSet: BackupDataSet, error: Error }> = []
+
+    results.forEach((result, index) => {
+      if (result.status === 'fulfilled') {
+        successful.push({ dataSet: dataSets[index], })
+      } else {
+        failed.push({
+          dataSet: dataSets[index],
+          error: result.reason
+        })
+      }
+    })
+
+    return { successful, failed }
+  }
+
+  /**
+   * 결과 확인 및 출력 결과 가공
+   */
+  // BackupDataRegistResponse
+  private processResult({ data, autoStart }: { data: BackupDataRegistResultSet, autoStart: AutoStartType }) {
+    const returnObject: any[] = []
+    //  스케쥴 사용 여부
+    const useSchedule = ({ data }: { data: BackupTableInput }) => {
+      if (data.nScheduleID && data.nScheduleID_advanced) { return "Smart Schedule" }
+      else if (data.nScheduleID && !data.nScheduleID_advanced) { return "Increment Schedule" }
+      else if (!data.nScheduleID && data.nScheduleID_advanced) { return "Full Schedule" }
+      else return "-"
+    }
+    //  성공한 작업
+    data.successful.forEach((el) => {
+      const d = el.dataSet
+      returnObject.push({
+        state: 'success',
+        job_name: d.backupDataObject.sJobName,
+        partition: d.backupInfoDataObject.sDrive,
+        job_type: BackupTypeMap.toString({ value: d.backupInfoDataObject.nBackupType }),
+        auto_start: autoStart,
+        use_schedule: useSchedule({ data: d.backupDataObject })
+      })
+    })
+
+    //  실패한 작업
+    data.failed.forEach((el) => {
+      const d = el.dataSet
+      returnObject.push({
+        state: 'fail',
+        job_name: '-',
+        partition: d.backupInfoDataObject.sDrive,
+        job_type: '-',
+        auto_start: '-',
+        use_schedule: '-',
+      })
+    })
+    return returnObject
+  }
+
+  /**
+   *  Backup 작업 등록 Main
    */
   async regist({ data }: { data: BackupRegistRequestBody }) {
     try {
@@ -303,21 +439,21 @@ export class BackupRegistService extends BaseService {
       // 처리할 파티션 목록 결정
       const partitionsToProcess = data.partition.length
         ? data.partition.map((partition) => {
-            const partitionInfo = partitionList.find((item) => item.sLetter === partition)
+          const partitionInfo = partitionList.find((item) => item.sLetter === partition)
+          //  사용자 입력 파티션 검증
+          if (!partitionInfo) {
+            throw ServiceError.badRequestError({
+              functionName: "regist",
+              message: `[Backup 정보 등록] - 파티션( ${partition} )이 서버( ${server.sSystemName} )에 존재하지 않습니다`,
+              metadata: {
+                partition,
+                server: server.sSystemName,
+              },
+            })
+          }
 
-            if (!partitionInfo) {
-              throw ServiceError.badRequestError({
-                functionName: "regist",
-                message: `파티션( ${partition} )이 서버( ${server.sSystemName} )에 존재하지 않습니다`,
-                metadata: {
-                  partition,
-                  server: server.sSystemName,
-                },
-              })
-            }
-
-            return partitionInfo
-          })
+          return partitionInfo
+        })
         : partitionList
 
       // 제외 파티션이 아닌 것들만 필터링 후 데이터셋 생성
@@ -335,13 +471,47 @@ export class BackupRegistService extends BaseService {
           dataSet.push({ backupDataObject, backupInfoDataObject })
         })
       ContextLogger.info({ message: `총 ${dataSet.length}개의 Backup 작업 등록 dataSet을 생성했습니다.` })
-      //  데이터 등록
-      //  결과 리턴
+
+      // 데이터 등록
+      if (dataSet.length === 0) {
+        throw ServiceError.badRequestError({
+          functionName: "regist",
+          message: "[Backup 정보 등록] - 등록할 Backup 작업이 없습니다. 파티션 정보를 확인해주세요.",
+        })
+      }
+
+      const registrationResult = await this.registerAllBackupDataSets({ dataSets: dataSet })
+
+      ContextLogger.info({
+        message: `[Backup 정보 등록] - Backup 작업 등록 완료`,
+        meta: {
+          totalRequested: dataSet.length,
+          successful: registrationResult.successful.length,
+          failed: registrationResult.failed.length
+        }
+      })
+
+      // 일부 등록이 실패한 경우 경고 로깅
+      if (registrationResult.failed.length > 0) {
+        ContextLogger.warn({
+          message: `[Backup 정보 등록] - 일부 Backup 작업 등록에 실패했습니다`,
+          meta: {
+            failedCount: registrationResult.failed.length,
+            errors: registrationResult.failed.map(f => ({
+              partition: f.dataSet.backupInfoDataObject.sDrive,
+              errorMessage: f.error instanceof Error ? f.error.message : String(f.error)
+            }))
+          }
+        })
+      }
+
+      // 결과 리턴
+      return this.processResult({ data: registrationResult, autoStart: data.autoStart! })
     } catch (error) {
       return this.handleServiceError({
         error,
         functionName: "regist",
-        message: `백업 정보 등록 - 오류가 발생했습니다`,
+        message: `[Backup 정보 등록] - 오류가 발생했습니다`,
       })
     }
   }

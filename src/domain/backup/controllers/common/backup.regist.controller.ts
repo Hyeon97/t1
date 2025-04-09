@@ -38,10 +38,7 @@ export class BackupRegistController extends BaseController {
       const resultData = await this.backupRegistService.regist({ data })
 
       //  출력 가공
-      const result = {
-        backupName: "test backup name",
-      }
-      ApiUtils.success({ res, data: result, message: "Backup job data regist success" })
+      ApiUtils.success({ res, data: resultData, message: "Backup job data regist result" })
     } catch (error) {
       this.handleControllerError({
         next,

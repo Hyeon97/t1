@@ -87,3 +87,10 @@ export interface BackupDataResponse {
   backup: BackupTable
   info: BackupInfoTable
 }
+
+/**
+ * Backup 작업 등록 결과 서비스 리턴 타입
+ */
+export interface BackupDataRegistResponse {
+
+}

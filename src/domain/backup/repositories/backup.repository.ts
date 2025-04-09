@@ -1,6 +1,9 @@
-import { BaseRepository } from "../../../utils/base/base-repository"
+import { ResultSetHeader } from "mysql2/promise"
+import { TransactionManager } from "../../../database/connection"
+import { BaseRepository, SqlFieldOption } from "../../../utils/base/base-repository"
 import { ContextLogger } from "../../../utils/logger/logger.custom"
 import { BackupFilterOptions } from "../types/backup-filter.type"
+import { BackupTableInput } from "../types/backup-regist.type"
 import { BackupTable } from "../types/db/job-backup"
 
 export class BackupRepository extends BaseRepository {
@@ -44,7 +47,7 @@ export class BackupRepository extends BaseRepository {
       let query = `SELECT * FROM ${this.tableName}`
       query += this.buildWhereClause()
 
-      return await this.executeQuery<BackupTable>({ sql: query, params: this.params, request: `${this.repositoryName}.findAll` })
+      return await this.executeQuery<BackupTable[]>({ sql: query, params: this.params, request: `${this.repositoryName}.findAll` })
     } catch (error) {
       return this.handleRepositoryError({
         error,
@@ -70,12 +73,131 @@ export class BackupRepository extends BaseRepository {
 
       const query = `SELECT * FROM ${this.tableName} WHERE sJobName IN (${placeholders})`
 
-      return await this.executeQuery<BackupTable>({ sql: query, params: jobNames, request: `${this.repositoryName}.findByJobNames`, })
+      return await this.executeQuery<BackupTable[]>({ sql: query, params: jobNames, request: `${this.repositoryName}.findByJobNames`, })
     } catch (error) {
       return this.handleRepositoryError({
         error,
         functionName: "findByJobNames",
         message: `Backup 작업 이름으로 조회 중 오류가 발생했습니다`,
+      })
+    }
+  }
+
+  /**
+   * Backup 작업 정보 추가
+   */
+  async insertBackup({ backupData, transaction }: { backupData: BackupTableInput, transaction: TransactionManager }): Promise<ResultSetHeader> {
+    try {
+      // 시간 필드에 대한 SQL 함수 사용 옵션 정의
+      const sqlOptions: Record<string, SqlFieldOption> = {
+        sStartTime: { raw: 'now()' },
+        sLastUpdateTime: { raw: 'now()' }
+      }
+
+      return await this.insert({
+        data: backupData,
+        options: sqlOptions,
+        transaction,
+        request: `${this.repositoryName}.insertBackup`
+      })
+    } catch (error) {
+      return this.handleRepositoryError({
+        error,
+        functionName: "insertBackup",
+        message: "Backup 정보 추가 중 오류가 발생했습니다"
+      })
+    }
+  }
+
+  /**
+    * Backup 작업 정보 업데이트
+    */
+  async updateBackup({
+    id,
+    backupData,
+    transaction
+  }: {
+    id: number,
+    backupData: Partial<BackupTableInput>,
+    transaction: TransactionManager
+  }): Promise<boolean> {
+    try {
+      // sLastUpdateTime 필드를 현재 시간으로 자동 설정
+      const sqlOptions: Record<string, SqlFieldOption> = {
+        // sLastUpdateTime: { raw: 'now()' }
+      }
+
+      return await this.update({
+        data: backupData,
+        whereCondition: 'nID = ?',
+        whereParams: [id],
+        options: sqlOptions,
+        transaction,
+        request: `${this.repositoryName}.updateBackup`
+      })
+    } catch (error) {
+      return this.handleRepositoryError({
+        error,
+        functionName: "updateBackup",
+        message: `Backup 작업 정보 업데이트 중 오류가 발생했습니다`
+      })
+    }
+  }
+
+  /**
+   * Backup 작업 삭제
+   */
+  async deleteBackup({
+    id,
+    transaction
+  }: {
+    id: number,
+    transaction: TransactionManager
+  }): Promise<boolean> {
+    try {
+      return await this.delete({
+        whereCondition: 'nID = ?',
+        whereParams: [id],
+        transaction,
+        request: `${this.repositoryName}.deleteBackup`
+      })
+    } catch (error) {
+      return this.handleRepositoryError({
+        error,
+        functionName: "deleteBackup",
+        message: `Backup 작업 삭제 중 오류가 발생했습니다`
+      })
+    }
+  }
+
+  /**
+   * 여러 Backup 작업 삭제
+   */
+  async deleteBackupByIds({
+    ids,
+    transaction
+  }: {
+    ids: number[],
+    transaction: TransactionManager
+  }): Promise<boolean> {
+    try {
+      if (ids.length === 0) {
+        return false
+      }
+
+      const placeholders = ids.map(() => "?").join(",")
+
+      return await this.delete({
+        whereCondition: `nID IN (${placeholders})`,
+        whereParams: ids,
+        transaction,
+        request: `${this.repositoryName}.deleteBackupByIds`
+      })
+    } catch (error) {
+      return this.handleRepositoryError({
+        error,
+        functionName: "deleteBackupByIds",
+        message: `여러 Backup 작업 삭제 중 오류가 발생했습니다`
       })
     }
   }
