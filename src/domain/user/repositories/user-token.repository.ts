@@ -1,6 +1,7 @@
 import { ResultSetHeader } from "mysql2"
-import { BaseRepository } from "../../../utils/base/base-repository"
+import { BaseRepository, SqlFieldOption } from "../../../utils/base/base-repository"
 import { TokenDBInput } from "../../auth/interface/token"
+import { TransactionManager } from "../../../database/connection"
 
 export class UserTokenRepository extends BaseRepository {
   constructor() {
@@ -9,14 +10,30 @@ export class UserTokenRepository extends BaseRepository {
       tableName: "user_token",
     })
   }
+
   /**
    * token 정보 저장
    */
-  async saveTokenInfo({ input }: { input: TokenDBInput }): Promise<void> {
-    const fieldsList = ["sToken", "sMail", "sIssue_Date", "sLast_Use_Date"].join(", ")
-    const placeholders = ["?", "?", "now()", "now()"]
-    const query = `INSERT INTO ${this.tableName} (${fieldsList}) VALUES (${placeholders})`
-    const params = [input.token, input.mail]
-    await this.executeQuerySingle<ResultSetHeader>({ sql: query, params, request: "saveTokenInfo" })
+  async saveTokenInfo({ saveData, transaction }: { saveData: TokenDBInput; transaction: TransactionManager }): Promise<ResultSetHeader> {
+    try {
+      // 시간 필드에 대한 SQL 함수 사용 옵션 정의
+      const sqlOptions: Record<string, SqlFieldOption> = {
+        sIssue_Date: { raw: "now()" },
+        sLast_Use_Date: { raw: "now()" },
+      }
+
+      return await this.insert({
+        data: saveData,
+        options: sqlOptions,
+        transaction,
+        request: `${this.repositoryName}.saveTokenInfo`,
+      })
+    } catch (error) {
+      return this.handleRepositoryError({
+        error,
+        functionName: "saveTokenInfo",
+        message: "Token 정보 저장 중 오류가 발생했습니다",
+      })
+    }
   }
 }
