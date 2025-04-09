@@ -16,7 +16,7 @@ export class UserInfoRepository extends BaseRepository {
     try {
       const query = `SELECT * FROM ${this.tableName}`
 
-      return await this.executeQuery<UserInfoTable>({ sql: query, request: "findAll" })
+      return await this.executeQuery<UserInfoTable[]>({ sql: query, request: "findAll" })
     } catch (error) {
       ContextLogger.debug({
         message: `UserInfoRepository.findAll() 오류 발생`,

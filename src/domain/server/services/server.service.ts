@@ -191,7 +191,7 @@ export class ServerService extends BaseService {
               serverResponse[propertyName as ServerDataPropertyKey] = []
             }
             // 타입스크립트 타입 단언 필요
-            ;(serverResponse[propertyName] as any[]).push(item)
+            ; (serverResponse[propertyName] as any[]).push(item)
           }
         })
       }
@@ -252,7 +252,6 @@ export class ServerService extends BaseService {
     try {
       // 서버 기본 정보 조회
       const server = await this.serverBasicRepository.findByServerName({ name, filterOptions })
-
       // 서버가 존재하는지 확인
       if (!server) {
         throw ServiceError.resourceNotFoundError({

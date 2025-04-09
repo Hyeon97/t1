@@ -21,7 +21,7 @@ export class ZdmNetworkRepository extends BaseRepository {
       const placeholders = systemNames.map(() => "?").join(",")
       const query = `SELECT * FROM ${this.tableName} WHERE sSystemName IN (${placeholders})`
 
-      return await this.executeQuery<ZdmInfoNetworkTable>({ sql: query, params: systemNames, request: "findBySystemNames" })
+      return await this.executeQuery<ZdmInfoNetworkTable[]>({ sql: query, params: systemNames, request: "findBySystemNames" })
     } catch (error) {
       ContextLogger.debug({
         message: `ZdmNetworkRepository.findBySystemNames() 오류 발생`,

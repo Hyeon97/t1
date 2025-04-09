@@ -45,7 +45,7 @@ export class ZdmRepositoryRepository extends BaseRepository {
       this.applyFilters(filterOptions)
       let query = `SELECT * FROM ${this.tableName}`
       query += this.buildWhereClause()
-      return await this.executeQuery<ZdmRepositoryTable>({ sql: query, params: this.params, request: "findAll" })
+      return await this.executeQuery<ZdmRepositoryTable[]>({ sql: query, params: this.params, request: "findAll" })
     } catch (error) {
       ContextLogger.debug({
         message: `ZdmRepositoryRepository.findAll() 오류 발생`,
@@ -89,7 +89,7 @@ export class ZdmRepositoryRepository extends BaseRepository {
       }
       const placeholders = systemNames.map(() => "?").join(",")
       const query = `SELECT * FROM ${this.tableName} WHERE sSystemName IN (${placeholders})`
-      return await this.executeQuery<ZdmRepositoryTable>({ sql: query, params: systemNames, request: "findBySystemNames" })
+      return await this.executeQuery<ZdmRepositoryTable[]>({ sql: query, params: systemNames, request: "findBySystemNames" })
     } catch (error) {
       ContextLogger.debug({
         message: `ZdmRepositoryRepository.findBySystemNames() 오류 발생`,

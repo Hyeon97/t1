@@ -68,7 +68,7 @@ export class ServerBasicRepository extends BaseRepository {
       let query = `SELECT * FROM ${this.tableName}`
       query += this.buildWhereClause()
 
-      return await this.executeQuery<ServerBasicTable>({ sql: query, params: this.params, request: `${this.repositoryName}.findAll` })
+      return await this.executeQuery<ServerBasicTable[]>({ sql: query, params: this.params, request: `${this.repositoryName}.findAll` })
     } catch (error) {
       return this.handleRepositoryError({
         error,

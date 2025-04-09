@@ -21,7 +21,7 @@ export class ServerDiskRepository extends BaseRepository {
       const placeholders = systemNames.map(() => "?").join(",")
       const query = `SELECT * FROM ${this.tableName} WHERE sSystemName IN (${placeholders})`
 
-      return await this.executeQuery<ServerDiskTable>({ sql: query, params: systemNames, request: "findBySystemNames" })
+      return await this.executeQuery<ServerDiskTable[]>({ sql: query, params: systemNames, request: "findBySystemNames" })
     } catch (error) {
       return this.handleRepositoryError({
         error,
