@@ -70,6 +70,7 @@ export function createErrorChainItem({
   functionName,
   request,
   errorCode,
+  statusCode,
   message,
   details,
 }: {
@@ -77,6 +78,7 @@ export function createErrorChainItem({
   functionName: string
   request?: string
   errorCode: string
+  statusCode: number
   message: string
   details?: Record<string, any>
 }): ErrorChainItem {
@@ -85,6 +87,7 @@ export function createErrorChainItem({
     functionName,
     request,
     errorCode,
+    statusCode,
     message,
     details,
   }

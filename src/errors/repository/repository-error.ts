@@ -13,14 +13,16 @@ export enum RepositoryErrorCode {
 export interface RepositoryErrorParams {
   functionName: string
   message: string
+  statusCode?: number
   cause?: unknown
   metadata?: Record<string, any>
 }
 
 export class RepositoryError extends BaseError {
-  constructor({ errorCode, functionName, message, cause, metadata }: RepositoryErrorParams & { errorCode: RepositoryErrorCode }) {
+  constructor({ errorCode, functionName, message, cause, metadata, statusCode }: RepositoryErrorParams & { errorCode: RepositoryErrorCode }) {
     super({
       errorCode,
+      statusCode: 500,
       layer: "repository" as ErrorLayer,
       functionName,
       message,

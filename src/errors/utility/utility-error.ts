@@ -32,14 +32,16 @@ export enum UtilityErrorCode {
 export interface UtilityErrorParams {
   functionName: string
   message: string
+  statusCode?: number
   cause?: unknown
   metadata?: Record<string, any>
 }
 
 export class UtilityError extends BaseError {
-  constructor({ errorCode, functionName, message, cause, metadata }: UtilityErrorParams & { errorCode: UtilityErrorCode }) {
+  constructor({ errorCode, functionName, message, cause, metadata, statusCode }: UtilityErrorParams & { errorCode: UtilityErrorCode }) {
     super({
       errorCode,
+      statusCode: 500,
       layer: "utility" as ErrorLayer, // utility 레이어용
       functionName,
       message,

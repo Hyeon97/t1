@@ -1,10 +1,11 @@
 import { NextFunction, Request, Response } from "express"
 import { ContextLogger } from "../../utils/logger/logger.custom"
 import { ApiError } from "../ApiError"
-import { ControllerError } from "../controller/controller-error"
+import { BaseError } from "../base/base-error"
+
+import { ControllerError, ControllerErrorCode } from "../controller/controller-error"
 import { ErrorCode } from "../error-codes"
 import { createUnifiedError, ErrorChainItem, ErrorLayer, ErrorResponse, RequestInfo, UnifiedError } from "../interfaces"
-import { ValidatorError } from "../middleware/validator-error"
 
 /**
  * 계층별 에러 코드를 API 에러 코드로 매핑
@@ -21,6 +22,11 @@ function mapToApiErrorCode(errorCode: string): ErrorCode {
     VALID_003: ErrorCode.UNAUTHORIZED,
     VALID_004: ErrorCode.UNAUTHORIZED,
     VALID_005: ErrorCode.FORBIDDEN,
+    MID_VAL_001: ErrorCode.VALIDATION_ERROR,
+    MID_VAL_002: ErrorCode.UNAUTHORIZED,
+    MID_VAL_003: ErrorCode.UNAUTHORIZED,
+    MID_VAL_004: ErrorCode.UNAUTHORIZED,
+    MID_VAL_005: ErrorCode.FORBIDDEN,
 
     // Controller 에러 코드 매핑
     CTRL_001: ErrorCode.VALIDATION_ERROR,
@@ -31,12 +37,14 @@ function mapToApiErrorCode(errorCode: string): ErrorCode {
     CTRL_006: ErrorCode.INTERNAL_ERROR,
 
     // Service 에러 코드 매핑
+    SRV_000: ErrorCode.UNAUTHORIZED,
     SRV_001: ErrorCode.VALIDATION_ERROR,
     SRV_002: ErrorCode.BUSINESS_RULE_VIOLATION,
     SRV_003: ErrorCode.NOT_FOUND,
     SRV_004: ErrorCode.DEPENDENCY_ERROR,
     SRV_005: ErrorCode.DATA_PROCESSING_ERROR,
     SRV_006: ErrorCode.TRANSACTION_ERROR,
+    SRV_007: ErrorCode.BAD_REQUEST,
 
     // Repository 에러 코드 매핑
     REPO_001: ErrorCode.DATABASE_ERROR,
@@ -51,6 +59,18 @@ function mapToApiErrorCode(errorCode: string): ErrorCode {
     DB_003: ErrorCode.DATA_INTEGRITY_ERROR,
     DB_004: ErrorCode.NOT_FOUND,
     DB_005: ErrorCode.TRANSACTION_ERROR,
+
+    // Utility 에러 코드 매핑
+    UTIL_001: ErrorCode.DATA_PROCESSING_ERROR,
+    UTIL_002: ErrorCode.VALIDATION_ERROR,
+    UTIL_003: ErrorCode.BUSINESS_RULE_VIOLATION,
+    UTIL_004: ErrorCode.NOT_FOUND,
+    UTIL_007: ErrorCode.UNAUTHORIZED,
+    UTIL_008: ErrorCode.BAD_REQUEST,
+    UTIL_JWT_001: ErrorCode.INTERNAL_ERROR,
+    UTIL_JWT_002: ErrorCode.UNAUTHORIZED,
+    UTIL_JWT_003: ErrorCode.UNAUTHORIZED,
+    UTIL_JWT_004: ErrorCode.UNAUTHORIZED,
   }
 
   return codeMap[errorCode] || ErrorCode.INTERNAL_ERROR
@@ -67,6 +87,11 @@ function getUserFriendlyMessage(errorCode: string): string {
     VALID_003: "유효하지 않은 토큰입니다",
     VALID_004: "만료된 토큰입니다",
     VALID_005: "접근 권한이 없습니다",
+    MID_VAL_001: "입력값이 유효하지 않습니다",
+    MID_VAL_002: "인증 토큰이 필요합니다",
+    MID_VAL_003: "유효하지 않은 토큰입니다",
+    MID_VAL_004: "만료된 토큰입니다",
+    MID_VAL_005: "접근 권한이 없습니다",
 
     // Controller 에러 메시지
     CTRL_001: "입력값이 유효하지 않습니다",
@@ -77,25 +102,39 @@ function getUserFriendlyMessage(errorCode: string): string {
     CTRL_006: "서버 내부 오류가 발생했습니다",
 
     // Service 에러 메시지
+    SRV_000: "인증이 필요합니다",
     SRV_001: "데이터 검증에 실패했습니다",
     SRV_002: "비즈니스 규칙에 위배됩니다",
     SRV_003: "요청한 리소스를 찾을 수 없습니다",
     SRV_004: "종속 서비스에 접근할 수 없습니다",
     SRV_005: "데이터 처리 중 오류가 발생했습니다",
     SRV_006: "트랜잭션 처리 중 오류가 발생했습니다",
+    SRV_007: "잘못된 요청입니다",
 
     // Repository 및 Database 에러는 일반적인 메시지로 대체
     REPO_001: "데이터 액세스 중 오류가 발생했습니다",
     REPO_002: "데이터를 찾을 수 없습니다",
     DB_001: "데이터베이스 연결 오류가 발생했습니다",
     DB_002: "쿼리 실행 중 오류가 발생했습니다",
+
+    // Utility 에러 메시지
+    UTIL_001: "데이터 처리 중 오류가 발생했습니다",
+    UTIL_002: "데이터 검증에 실패했습니다",
+    UTIL_003: "비즈니스 규칙에 위배됩니다",
+    UTIL_004: "요청한 리소스를 찾을 수 없습니다",
+    UTIL_007: "인증이 필요합니다",
+    UTIL_008: "잘못된 요청입니다",
+    UTIL_JWT_001: "토큰 생성 중 오류가 발생했습니다",
+    UTIL_JWT_002: "토큰 검증에 실패했습니다",
+    UTIL_JWT_003: "만료된 토큰입니다",
+    UTIL_JWT_004: "유효하지 않은 토큰입니다",
   }
 
   return messageMap[errorCode] || "요청을 처리하는 중 오류가 발생했습니다"
 }
 
 /**
- * 에러로부터 에러 체인 구성
+ * 에러로부터 에러 체인 구성 및 HTTP 상태 코드 결정
  */
 function buildErrorChainFromError(err: Error): UnifiedError {
   let statusCode = 500
@@ -103,27 +142,27 @@ function buildErrorChainFromError(err: Error): UnifiedError {
   let clientErrorCode = ErrorCode.INTERNAL_ERROR
   let errorChain: ErrorChainItem[] = []
 
-  // ValidatorError 처리 추가
-  if (err instanceof ValidatorError) {
-    statusCode = err.statusCode
-    clientErrorCode = mapToApiErrorCode(err.errorChain[0].errorCode)
-    clientMessage = getUserFriendlyMessage(err.errorChain[0].errorCode)
-    errorChain = err.errorChain
-  }  // 컨트롤러 에러인 경우
-  else if (err instanceof ControllerError) {
-    statusCode = err.statusCode
-    clientErrorCode = mapToApiErrorCode(err.errorChain[0].errorCode)
-    clientMessage = getUserFriendlyMessage(err.errorChain[0].errorCode)
-    errorChain = err.errorChain
+  // BaseError 계열의 모든 에러 처리
+  if (err instanceof BaseError) {
+    statusCode = err.statusCode  // BaseError에서 statusCode 직접 가져옴
+
+    // 에러 체인이 있으면 사용
+    if (err.errorChain && err.errorChain.length > 0) {
+      errorChain = err.errorChain
+      clientErrorCode = mapToApiErrorCode(err.errorChain[0].errorCode)
+      clientMessage = getUserFriendlyMessage(err.errorChain[0].errorCode)
+    } else {
+      clientMessage = err.message
+    }
   }
-  // ApiError의 경우 (기존 에러 타입 지원)
+  // 이전 ApiError 타입 지원 (이전 코드와의 호환성)
   else if (err instanceof ApiError) {
     statusCode = err.statusCode
     clientErrorCode = err.errorCode
     clientMessage = err.message
     errorChain = [
       {
-        layer: "controller" as ErrorLayer, // 타입 지정
+        layer: "controller" as ErrorLayer,
         functionName: "handleRequest",
         errorCode: clientErrorCode,
         message: clientMessage,
@@ -139,21 +178,17 @@ function buildErrorChainFromError(err: Error): UnifiedError {
       clientErrorCode = ErrorCode.METHOD_NOT_ALLOWED
       errorChain = [
         {
-          layer: "middleware" as ErrorLayer, // 타입 지정 (또는 "controller"로 처리)
+          layer: "middleware" as ErrorLayer,
           functionName: "openApi",
           errorCode: "METHOD_NOT_ALLOWED",
           message: err.message || "HTTP method not allowed",
-          // details: {
-          //   stack: err.stack,
-          //   name: err.name,
-          // },
         },
       ]
     }
     else {
       errorChain = [
         {
-          layer: "unknown" as ErrorLayer, // 타입 지정 (또는 "controller"로 처리)
+          layer: "unknown" as ErrorLayer,
           functionName: "unknownFunction",
           errorCode: "UNKNOWN_ERROR",
           message: err.message || "알 수 없는 오류",
@@ -186,7 +221,7 @@ export const errorHandler = (err: Error, req: Request, res: Response, next: Next
     userId: (req as any).user?.id || "anonymous",
   }
 
-  // 에러 체인 구성
+  // 에러 체인 구성 및 HTTP 상태 코드 결정
   const unifiedError = buildErrorChainFromError(err)
 
   // 오류 심각도에 따른 로깅 레벨 조정
@@ -194,18 +229,18 @@ export const errorHandler = (err: Error, req: Request, res: Response, next: Next
     ContextLogger.error({
       message: `[${unifiedError.clientErrorCode}] ${unifiedError.clientMessage}`,
       meta: {
-        // errorId: unifiedError.errorId,
         request: requestInfo,
         errorChain: unifiedError.errorChain,
+        statusCode: unifiedError.statusCode
       },
     })
   } else if (unifiedError.statusCode >= 400) {
     ContextLogger.warn({
       message: `[${unifiedError.clientErrorCode}] ${unifiedError.clientMessage}`,
       meta: {
-        // errorId: unifiedError.errorId,
         request: requestInfo,
         errorChain: unifiedError.errorChain,
+        statusCode: unifiedError.statusCode
       },
     })
   }
@@ -216,7 +251,6 @@ export const errorHandler = (err: Error, req: Request, res: Response, next: Next
     error: {
       code: unifiedError.clientErrorCode,
       message: unifiedError.clientMessage,
-      // errorId: unifiedError.errorId,
     },
     timestamp: unifiedError.timestamp,
   }
@@ -230,7 +264,7 @@ export const errorHandler = (err: Error, req: Request, res: Response, next: Next
   } else {
     let message = ""
     let detail = {}
-    if (unifiedError.errorChain) {
+    if (unifiedError.errorChain && unifiedError.errorChain.length > 0) {
       const l = unifiedError.errorChain.length
       message = unifiedError.errorChain[l - 1].message
       detail = unifiedError.errorChain[l - 1].details || {}
@@ -247,6 +281,7 @@ export const errorHandler = (err: Error, req: Request, res: Response, next: Next
     }
   }
 
+  // 상태 코드와 함께 응답 반환
   res.status(unifiedError.statusCode).json(errorResponse)
 }
 
@@ -255,11 +290,19 @@ export const errorHandler = (err: Error, req: Request, res: Response, next: Next
  */
 export const notFoundHandler = (req: Request, res: Response, next: NextFunction) => {
   const message = `리소스를 찾을 수 없습니다: ${req.originalUrl}`
-  ContextLogger.warn({ message: `[404] ${message} - ${req.method}` })
-
-  const error = ApiError.notFound({
-    message,
-    details: { url: req.originalUrl },
+  ContextLogger.warn({
+    message: `[404] ${message} - ${req.method}`,
+    meta: { url: req.originalUrl }
   })
+
+  // 404 에러 생성 시 명시적으로 상태 코드 지정
+  const error = new ControllerError({
+    errorCode: ControllerErrorCode.RESOURCE_NOT_FOUND,
+    functionName: "notFoundHandler",
+    message,
+    statusCode: 404,
+    metadata: { url: req.originalUrl }
+  })
+
   next(error)
 }

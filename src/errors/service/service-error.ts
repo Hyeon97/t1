@@ -17,14 +17,16 @@ export enum ServiceErrorCode {
 export interface ServiceErrorParams {
   functionName: string
   message: string
+  statusCode?: number
   cause?: unknown
   metadata?: Record<string, any>
 }
 
 export class ServiceError extends BaseError {
-  constructor({ errorCode, functionName, message, cause, metadata }: ServiceErrorParams & { errorCode: ServiceErrorCode }) {
+  constructor({ errorCode, functionName, message, cause, metadata, statusCode, }: ServiceErrorParams & { errorCode: ServiceErrorCode }) {
     super({
       errorCode,
+      statusCode: 500,
       layer: "service" as ErrorLayer,
       functionName,
       message,
@@ -37,6 +39,7 @@ export class ServiceError extends BaseError {
   static unauthorizedError({ functionName, message, cause, metadata }: ServiceErrorParams): ServiceError {
     return new ServiceError({
       errorCode: ServiceErrorCode.UNAUTHORIZED,
+      statusCode: 401,
       functionName,
       message,
       cause,
@@ -51,6 +54,7 @@ export class ServiceError extends BaseError {
   static badRequestError({ functionName, message, cause, metadata }: ServiceErrorParams): ServiceError {
     return new ServiceError({
       errorCode: ServiceErrorCode.BAD_REQUEST,
+      statusCode: 400,
       functionName,
       message: message || "잘못된 요청(값)입니다",
       cause,
@@ -61,6 +65,7 @@ export class ServiceError extends BaseError {
   static validationError({ functionName, message, cause, metadata }: ServiceErrorParams): ServiceError {
     return new ServiceError({
       errorCode: ServiceErrorCode.VALIDATION,
+      statusCode: 400,
       functionName,
       message,
       cause,
@@ -71,6 +76,7 @@ export class ServiceError extends BaseError {
   static businessRuleError({ functionName, message, cause, metadata }: ServiceErrorParams): ServiceError {
     return new ServiceError({
       errorCode: ServiceErrorCode.BUSINESS_RULE,
+      statusCode: 422,
       functionName,
       message,
       cause,
@@ -81,6 +87,7 @@ export class ServiceError extends BaseError {
   static resourceNotFoundError({ functionName, message, cause, metadata }: ServiceErrorParams): ServiceError {
     return new ServiceError({
       errorCode: ServiceErrorCode.RESOURCE_NOT_FOUND,
+      statusCode: 404,
       functionName,
       message,
       cause,
@@ -91,6 +98,7 @@ export class ServiceError extends BaseError {
   static dependencyError({ functionName, message, cause, metadata }: ServiceErrorParams): ServiceError {
     return new ServiceError({
       errorCode: ServiceErrorCode.DEPENDENCY,
+      statusCode: 502,
       functionName,
       message,
       cause,
@@ -101,6 +109,7 @@ export class ServiceError extends BaseError {
   static dataProcessingError({ functionName, message, cause, metadata }: ServiceErrorParams): ServiceError {
     return new ServiceError({
       errorCode: ServiceErrorCode.DATA_PROCESSING,
+      statusCode: 500,
       functionName,
       message,
       cause,
@@ -111,6 +120,7 @@ export class ServiceError extends BaseError {
   static transactionError({ functionName, message, cause, metadata }: ServiceErrorParams): ServiceError {
     return new ServiceError({
       errorCode: ServiceErrorCode.TRANSACTION,
+      statusCode: 500,
       functionName,
       message,
       cause,

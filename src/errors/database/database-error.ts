@@ -12,6 +12,7 @@ export enum DatabaseErrorCode {
 export interface DatabaseErrorParams {
   functionName?: string
   message: string
+  statusCode?: number
   cause?: unknown
   request?: string
   query?: string
@@ -21,6 +22,7 @@ export interface DatabaseErrorParams {
 export class DatabaseError extends BaseError {
   constructor({
     errorCode,
+    statusCode,
     functionName = "-",
     request = "-",
     message,
@@ -36,6 +38,7 @@ export class DatabaseError extends BaseError {
 
     super({
       errorCode,
+      statusCode: 500,
       layer: "database" as ErrorLayer,
       functionName,
       message,

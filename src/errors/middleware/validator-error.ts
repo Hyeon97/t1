@@ -47,6 +47,7 @@ export class ValidatorError extends Error {
         layer: "middleware" as ErrorLayer, // "validator"에서 "middleware"로 변경
         functionName,
         errorCode,
+        statusCode,
         message,
         details
       })

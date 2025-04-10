@@ -7,7 +7,7 @@ export interface BaseErrorOptions {
   message: string
   cause?: unknown
   metadata?: Record<string, any>
-  statusCode?: number
+  statusCode: number  // 항상 HTTP 상태 코드를 필수로 받음
 }
 
 /**
@@ -16,9 +16,17 @@ export interface BaseErrorOptions {
  */
 export class BaseError extends Error {
   public readonly errorChain: ErrorChainItem[]
-  public readonly statusCode?: number
+  public readonly statusCode: number  // HTTP 상태 코드 추가
 
-  constructor({ errorCode, layer, functionName, message, cause, metadata, statusCode }: BaseErrorOptions) {
+  constructor({
+    errorCode,
+    layer,
+    functionName,
+    message,
+    cause,
+    metadata,
+    statusCode
+  }: BaseErrorOptions) {
     super(message)
     this.name = this.constructor.name
     this.statusCode = statusCode
@@ -32,15 +40,16 @@ export class BaseError extends Error {
         layer,
         functionName,
         errorCode,
+        statusCode,  // 에러 체인에도 상태 코드 포함
         message,
-        details,
-      }),
+        details
+      })
     ]
 
     // 원인 에러의 체인 병합
     if (cause instanceof BaseError) {
       this.errorChain.push(...cause.errorChain)
-    } else if (cause instanceof Error && "errorChain" in cause && Array.isArray((cause as any).errorChain)) {
+    } else if (cause instanceof Error && 'errorChain' in cause && Array.isArray((cause as any).errorChain)) {
       this.errorChain.push(...(cause as any).errorChain)
     }
 
