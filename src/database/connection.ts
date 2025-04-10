@@ -262,6 +262,7 @@ export class DatabaseOperations {
       })
 
       throw DatabaseError.queryError({
+        functionName: 'executeQuery',
         request,
         message: `쿼리 실행 오류`,
         cause: error,
@@ -415,6 +416,7 @@ export class TransactionManager {
   public async executeQuery<T>({ sql, params = [], request }: { sql: string; params?: any[]; request: string }): Promise<T> {
     if (!this.connection) {
       throw DatabaseError.transactionError({
+        functionName: 'executeQuery',
         request,
         message: "활성 트랜잭션이 없습니다",
       })
@@ -434,7 +436,8 @@ export class TransactionManager {
   public async executeQuerySingle<T>({ sql, params = [], request }: { sql: string; params?: any[]; request: string }): Promise<T | null> {
     if (!this.connection) {
       throw DatabaseError.transactionError({
-        request: "executeQuerySingle",
+        functionName: "executeQuerySingle",
+        request,
         message: "활성 트랜잭션이 없습니다",
       })
     }
