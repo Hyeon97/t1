@@ -1,125 +1,141 @@
-import { errorToString } from "../../utils/error.utils"
-import { BaseError } from "../base/base-error"
+import { BaseError, ErrorCode, ErrorLayer, ErrorParams } from ".."
 import { DatabaseError } from "../database/database-error"
-import { DatabaseErrorCode, RepositoryErrorCode, RepositoryErrorParams } from "../error-types"
 
 /**
  * 리포지토리 계층의 에러를 처리하는 클래스
  */
 export class RepositoryError extends BaseError {
-  constructor({
-    errorCode,
-    functionName,
-    message,
-    cause,
-    metadata,
-    statusCode = 500
-  }: RepositoryErrorParams & { errorCode: RepositoryErrorCode }) {
+  constructor(params: ErrorParams) {
     super({
-      errorCode,
-      layer: "repository",
-      functionName,
-      message,
-      cause,
-      metadata,
-      statusCode
+      ...params,
+      layer: ErrorLayer.REPOSITORY,
     })
   }
 
-  // 쿼리 실행 오류
-  static queryExecutionError({ functionName, message, cause, metadata, statusCode }: Omit<RepositoryErrorParams, "identifier">): RepositoryError {
-    return new RepositoryError({
-      errorCode: RepositoryErrorCode.QUERY_EXECUTION,
-      functionName,
-      message,
-      cause,
-      metadata,
-      statusCode: statusCode || 500
-    })
+  // 일반 에러를 현재 타입으로 변환
+  static fromError<T extends BaseError = RepositoryError>(
+    error: unknown,
+    params: Omit<ErrorParams, "errorCode" | "statusCode" | "cause"> & {
+      functionName: string
+      message: string
+      layer?: ErrorLayer
+    }
+  ): T {
+    // // 데이터베이스 에러 처리
+    // if (error instanceof DatabaseError) {
+    //   return RepositoryError.fromDatabaseError({ error, functionName })
+    // } else if (error instanceof RepositoryError) {
+    //   return error
+    // }
+    return BaseError.fromError(RepositoryError as any, error, {
+      ...params,
+      layer: ErrorLayer.REPOSITORY,
+    }) as unknown as T
   }
 
-  // 엔티티 찾기 실패
-  static notFoundError({ functionName, message, cause, metadata, statusCode }: RepositoryErrorParams): RepositoryError {
-    return new RepositoryError({
-      errorCode: RepositoryErrorCode.ENTITY_NOT_FOUND,
-      functionName,
-      message,
-      cause,
-      metadata,
-      statusCode: statusCode || 404
-    })
-  }
+  // 공통 에러 타입들 - BaseError의 팩토리 메서드 활용
 
-  // 데이터 매핑 오류
-  static dataMappingError({ functionName, message, cause, metadata, statusCode }: Omit<RepositoryErrorParams, "identifier">): RepositoryError {
-    return new RepositoryError({
-      errorCode: RepositoryErrorCode.DATA_MAPPING,
-      functionName,
-      message,
-      cause,
-      metadata,
-      statusCode: statusCode || 500
+  // 리소스 찾기 실패
+  static resourceNotFoundError<T extends BaseError = RepositoryError>(
+    constructor: new (params: ErrorParams) => T = RepositoryError as any,
+    params: Omit<ErrorParams, "errorCode" | "statusCode" | "layer"> = {
+      functionName: "",
+      message: "",
+    }
+  ): T {
+    return BaseError.notFound(constructor, {
+      ...params,
+      layer: ErrorLayer.REPOSITORY,
     })
   }
 
   // 유효성 검증 오류
-  static validationError({ functionName, message, cause, metadata, statusCode }: Omit<RepositoryErrorParams, "identifier">): RepositoryError {
-    return new RepositoryError({
-      errorCode: RepositoryErrorCode.VALIDATION,
-      functionName,
-      message,
-      cause,
-      metadata,
-      statusCode: statusCode || 400
+  static validationError<T extends BaseError = RepositoryError>(
+    constructor: new (params: ErrorParams) => T = RepositoryError as any,
+    params: Omit<ErrorParams, "errorCode" | "statusCode" | "layer"> = {
+      functionName: "",
+      message: "",
+    }
+  ): T {
+    return BaseError.validationError(constructor, {
+      ...params,
+      layer: ErrorLayer.REPOSITORY,
     })
   }
 
-  // 데이터베이스 에러를 Repository 에러로 변환하는 팩토리 메서드
-  static fromDatabaseError({ error, functionName }: { error: DatabaseError; functionName: string }): RepositoryError {
-    const dbErrorItem = error.errorChain[0]
-    const errorCode = dbErrorItem.errorCode as DatabaseErrorCode
-    const statusCode = dbErrorItem.statusCode
+  // 쿼리 실행 오류
+  static queryExecutionError(
+    params: Omit<ErrorParams, "errorCode" | "statusCode" | "layer"> = {
+      functionName: "",
+      message: "",
+    }
+  ): RepositoryError {
+    return BaseError.createFrom(RepositoryError, {
+      ...params,
+      layer: ErrorLayer.REPOSITORY,
+      errorCode: ErrorCode.QUERY_ERROR,
+      statusCode: 500,
+    })
+  }
 
-    switch (errorCode) {
-      case DatabaseErrorCode.DATA_INTEGRITY_ERROR:
-        return RepositoryError.validationError({
+  // 데이터 매핑 오류
+  static dataMappingError(
+    params: Omit<ErrorParams, "errorCode" | "statusCode" | "layer"> = {
+      functionName: "",
+      message: "",
+    }
+  ): RepositoryError {
+    return BaseError.createFrom(RepositoryError, {
+      ...params,
+      layer: ErrorLayer.REPOSITORY,
+      errorCode: ErrorCode.DATA_MAPPING_ERROR,
+      statusCode: 500,
+    })
+  }
+
+  // 데이터베이스 에러로부터 변환
+  static fromDatabaseError({ error, functionName }: { error: DatabaseError; functionName: string }): RepositoryError {
+    const originalErrorCode = error.errorCode
+
+    // 에러 코드에 따라 적절한 리포지토리 에러로 변환
+    switch (originalErrorCode) {
+      case ErrorCode.DATA_INTEGRITY_ERROR:
+        return RepositoryError.validationError(RepositoryError, {
           functionName,
           message: `데이터 무결성 오류`,
           cause: error,
-          statusCode
         })
-      case DatabaseErrorCode.RECORD_NOT_FOUND:
-        return RepositoryError.notFoundError({
+
+      case ErrorCode.NOT_FOUND:
+        return RepositoryError.resourceNotFoundError(RepositoryError, {
           functionName,
           message: `데이터를 찾을 수 없음`,
           cause: error,
-          statusCode
         })
+
+      case ErrorCode.CONNECTION_ERROR:
+        return RepositoryError.queryExecutionError({
+          functionName,
+          message: `데이터베이스 연결 오류`,
+          cause: error,
+          metadata: { originalErrorCode },
+        })
+
+      case ErrorCode.QUERY_ERROR:
+        return RepositoryError.queryExecutionError({
+          functionName,
+          message: `쿼리 실행 오류`,
+          cause: error,
+          metadata: { originalErrorCode },
+        })
+
       default:
         return RepositoryError.queryExecutionError({
           functionName,
           message: `데이터베이스 작업 중 오류 발생`,
           cause: error,
-          metadata: { originalCode: errorCode },
-          statusCode
+          metadata: { originalErrorCode },
         })
-    }
-  }
-
-  // 일반 에러를 Repository 에러로 변환하는 팩토리 메서드
-  static fromError({ error, functionName, message }: { error: unknown; functionName: string; message: string }): RepositoryError {
-    if (error instanceof DatabaseError) {
-      return RepositoryError.fromDatabaseError({ error, functionName })
-    } else if (error instanceof RepositoryError) {
-      return error
-    } else {
-      const errorMsg = message || (error instanceof Error ? error.message : errorToString(error))
-
-      return RepositoryError.queryExecutionError({
-        functionName,
-        message: errorMsg || `Repository 작업 중 예상치 못한 오류 발생`,
-        cause: error
-      })
     }
   }
 }

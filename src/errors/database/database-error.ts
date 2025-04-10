@@ -1,117 +1,138 @@
-import { errorToString } from "../../utils/error.utils"
-import { BaseError } from "../base/base-error"
-import { DatabaseErrorCode, DatabaseErrorParams } from "../error-types"
+import { BaseError, ErrorParams, ErrorCode, ErrorLayer } from ".."
 
 /**
  * 데이터베이스 계층의 에러를 처리하는 클래스
+ * 공통 팩토리 메서드를 상속받아 간소화
  */
 export class DatabaseError extends BaseError {
-  constructor({
-    errorCode,
-    functionName = "-",
-    message,
-    cause,
-    statusCode = 500, // 데이터베이스 에러는 기본적으로 서버 오류
-    request = "-",
-    query,
-    params
-  }: DatabaseErrorParams & { errorCode: DatabaseErrorCode }) {
-    // 상세 정보 구성
-    const details: Record<string, any> = {}
-    if (query) details.query = query
-    if (params) details.params = params
-    if (request && request !== "-") details.request = request
-
+  constructor(
+    params: ErrorParams & {
+      request?: string
+      query?: string
+      params?: any[]
+    }
+  ) {
+    const details: Record<string, any> = { ...(params.metadata || {}) }
+    if (params.query) details.query = params.query
+    if (params.params) details.params = params.params
+    if (params.request && params.request !== "-") details.request = params.request
     super({
-      errorCode,
-      layer: "database",
-      functionName,
-      message,
-      cause,
+      ...params,
+      layer: ErrorLayer.DATABASE,
       metadata: details,
-      statusCode
     })
   }
 
+  // 일반 에러를 현재 타입으로 변환
+  static fromError<T extends BaseError = DatabaseError>(error: unknown, params: Omit<ErrorParams, "errorCode" | "statusCode" | "cause">): T {
+    return BaseError.fromError(DatabaseError as any, error, {
+      ...params,
+      layer: ErrorLayer.DATABASE,
+    }) as unknown as T
+  }
+
   // 연결 오류
-  static connectionError({ functionName = "-", request = "-", message, cause, query, statusCode }: Omit<DatabaseErrorParams, "params">): DatabaseError {
-    return new DatabaseError({
-      errorCode: DatabaseErrorCode.CONNECTION_ERROR,
-      functionName,
-      request,
-      message,
-      cause,
-      query,
-      statusCode: statusCode || 500
+  static connectionError(
+    params: Omit<ErrorParams, "errorCode" | "statusCode" | "layer"> = {
+      functionName: "",
+      message: "",
+      request: "",
+      query: "",
+      params: [],
+    }
+  ): DatabaseError {
+    return BaseError.createFrom(DatabaseError, {
+      ...params,
+      request: params.request,
+      query: params.query,
+      params: params.params,
+      layer: ErrorLayer.DATABASE,
+      errorCode: ErrorCode.CONNECTION_ERROR,
+      statusCode: 500,
     })
   }
 
   // 쿼리 실행 오류
-  static queryError({ functionName = "-", request = "-", message, cause, query, params, statusCode }: DatabaseErrorParams): DatabaseError {
-    return new DatabaseError({
-      errorCode: DatabaseErrorCode.QUERY_ERROR,
-      functionName,
-      request,
-      message,
-      cause,
-      query,
-      params,
-      statusCode: statusCode || 500
+  static queryError(
+    params: Omit<ErrorParams, "errorCode" | "statusCode" | "layer"> = {
+      functionName: "",
+      message: "",
+      request: "",
+      query: "",
+      params: [],
+    }
+  ): DatabaseError {
+    return BaseError.createFrom(DatabaseError, {
+      ...params,
+      request: params.request,
+      query: params.query,
+      params: params.params,
+      layer: ErrorLayer.DATABASE,
+      errorCode: ErrorCode.QUERY_ERROR,
+      statusCode: 500,
     })
   }
 
   // 데이터 무결성 오류
-  static dataIntegrityError({ functionName = "-", request = "-", message, cause, query, params, statusCode }: DatabaseErrorParams): DatabaseError {
-    return new DatabaseError({
-      errorCode: DatabaseErrorCode.DATA_INTEGRITY_ERROR,
-      functionName,
-      request,
-      message,
-      cause,
-      query,
-      params,
-      statusCode: statusCode || 500
+  static dataIntegrityError(
+    params: Omit<ErrorParams, "errorCode" | "statusCode" | "layer"> = {
+      functionName: "",
+      message: "",
+      request: "",
+      query: "",
+      params: [],
+    }
+  ): DatabaseError {
+    return BaseError.createFrom(DatabaseError, {
+      ...params,
+      request: params.request,
+      query: params.query,
+      params: params.params,
+      layer: ErrorLayer.DATABASE,
+      errorCode: ErrorCode.DATA_INTEGRITY_ERROR,
+      statusCode: 500,
     })
   }
 
   // 레코드 찾기 실패
-  static recordNotFoundError({ functionName = "-", request = "-", message, cause, query, params, statusCode }: DatabaseErrorParams): DatabaseError {
-    return new DatabaseError({
-      errorCode: DatabaseErrorCode.RECORD_NOT_FOUND,
-      functionName,
-      request,
-      message,
-      cause,
-      query,
-      params,
-      statusCode: statusCode || 404
+  static recordNotFound(
+    params: Omit<ErrorParams, "errorCode" | "statusCode" | "layer"> = {
+      functionName: "",
+      message: "",
+      request: "",
+      query: "",
+      params: [],
+    }
+  ): DatabaseError {
+    return BaseError.createFrom(DatabaseError, {
+      ...params,
+      request: params.request,
+      query: params.query,
+      params: params.params,
+      layer: ErrorLayer.DATABASE,
+      errorCode: ErrorCode.NOT_FOUND,
+      statusCode: 404,
     })
   }
 
   // 트랜잭션 오류
-  static transactionError({ functionName = "-", request = "-", message, cause, statusCode }: Omit<DatabaseErrorParams, "query" | "params">): DatabaseError {
-    return new DatabaseError({
-      errorCode: DatabaseErrorCode.TRANSACTION_ERROR,
-      functionName,
-      request,
-      message,
-      cause,
-      statusCode: statusCode || 500
-    })
-  }
-
-  // 일반 에러를 Database 에러로 변환하는 팩토리 메서드
-  static fromError({ error, functionName = "-", message }: { error: unknown; functionName?: string; message: string }): DatabaseError {
-    if (error instanceof DatabaseError) {
-      return error
-    } else {
-      const errorMsg = message || (error instanceof Error ? error.message : errorToString(error))
-
-      return DatabaseError.queryError({
-        functionName,
-        message: errorMsg || `Database 작업 중 예상치 못한 오류 발생`,
-        cause: error
-      })
+  static transactionError(
+    params: Omit<ErrorParams, "errorCode" | "statusCode" | "layer"> = {
+      functionName: "",
+      message: "",
+      request: "",
+      query: "",
+      params: [],
     }
+  ): DatabaseError {
+    return BaseError.createFrom(DatabaseError, {
+      ...params,
+      request: params.request,
+      query: params.query,
+      params: params.params,
+      layer: ErrorLayer.DATABASE,
+      errorCode: ErrorCode.TRANSACTION_ERROR,
+      statusCode: 500,
+    })
   }
 }

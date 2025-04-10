@@ -1,5 +1,5 @@
 import { NextFunction, Response } from "express"
-import { ValidatorError } from "../../../errors/middleware/validator-error"
+import { ValidatorError, ErrorLayer } from "../../../errors"
 import { validationMiddleware } from "../../../middlewares/validation/validationMiddleware"
 import { ExtendedRequest } from "../../../types/common/req.types"
 import { ContextLogger } from "../../../utils/logger/logger.custom"
@@ -19,8 +19,9 @@ export const validateToken = async (req: ExtendedRequest, res: Response, next: N
     // Authorization 헤더에서 토큰 추출
     const token = req.headers.authorization
     // if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    if (!token) { throw ValidatorError.tokenRequired({ functionName: "validateToken" }) }
-
+    if (!token) {
+      throw ValidatorError.tokenRequired({ functionName: "validateToken", message: "Token이 없습니다" })
+    }
 
     // 토큰 검증
     try {
@@ -32,38 +33,39 @@ export const validateToken = async (req: ExtendedRequest, res: Response, next: N
       }
       next()
     } catch (error) {
-      if (error instanceof Error && error.name === 'TokenExpiredError') {
+      if (error instanceof Error && error.name === "TokenExpiredError") {
         throw ValidatorError.tokenExpired({
           functionName: "validateToken",
-          cause: error
+          message: "Token 만료됨",
         })
       }
 
       throw ValidatorError.tokenInvalid({
         functionName: "validateToken",
-        cause: error
+        message: "유효하지 않은 Token",
       })
     }
-
   } catch (error) {
     ContextLogger.debug({
       message: `Token 검증 중 오류 발생`,
       meta: {
         error: error instanceof Error ? error.message : String(error),
         path: req.path,
-        method: req.method
-      }
+        method: req.method,
+      },
     })
 
     // 에러 변환 및 전달
     if (error instanceof ValidatorError) {
       next(error)
     } else {
-      next(ValidatorError.fromError({
-        error,
-        functionName: "validateToken",
-        message: 'Token 검증 중 오류 발생'
-      }))
+      next(
+        ValidatorError.fromError<ValidatorError>(error, {
+          functionName: "validateToken",
+          message: "Token 검증 중 오류 발생",
+          layer: ErrorLayer.MIDDLEWARE,
+        })
+      )
     }
     // // AppError는 ApiError로 변환하여 처리
     // if (error instanceof AppError) {

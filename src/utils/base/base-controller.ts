@@ -2,6 +2,7 @@ import { NextFunction } from "express"
 import { ControllerError } from "../../errors/controller/controller-error"
 import { ContextLogger } from "../logger/logger.custom"
 import { ServiceError } from "../../errors/service/service-error"
+import { ErrorLayer } from "../../errors"
 
 export class BaseController {
   protected readonly controllerName: string
@@ -39,6 +40,6 @@ export class BaseController {
       return
     }
     //  그 외의 처리되지 않은 에러는 ControllerError로 변환하여 전송
-    next(ControllerError.fromError({ error, functionName, message }))
+    next(ControllerError.fromError<ControllerError>(error, { functionName, message, layer: ErrorLayer.CONTROLLER }))
   }
 }

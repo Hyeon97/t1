@@ -2,8 +2,8 @@ import { plainToInstance } from "class-transformer"
 import { validate as classValidate, ValidationError } from "class-validator"
 import { NextFunction, Request, Response } from "express"
 import "reflect-metadata"
-import { ApiError } from "../../errors/ApiError"
 import { logger } from "../../utils/logger/logger.util"
+import { ValidatorError, ApiError } from "../../errors"
 
 /**
  * OOP 방식의 검증 미들웨어 클래스
@@ -41,7 +41,10 @@ export class ValidationMiddleware {
           const errorMessages = this.extractValidationErrorMessages(errors)
 
           logger.warn(`[class-validator] 요청 유효성 검사 실패: ${errorMessages.join(", ")}`)
-          throw ApiError.validationError({ message: "요청 데이터 유효성 검사 실패", details: errorMessages })
+          throw ValidatorError.validationError(ValidatorError, {
+            functionName: "validateDTO",
+            message: "요청 데이터 유효성 검사 실패",
+          })
         }
 
         // 유효성 검사를 통과한 DTO 인스턴스로 요청 객체 업데이트
@@ -52,7 +55,12 @@ export class ValidationMiddleware {
           next(error)
         } else {
           logger.error("DTO 유효성 검사 중 오류 발생", error)
-          next(ApiError.internal({ message: "서버 내부 오류 발생했습니다" }))
+          next(
+            ValidatorError.internalError(ValidatorError, {
+              functionName: "validateDTO",
+              message: "서버 내부 오류 발생했습니다",
+            })
+          )
         }
       }
     }

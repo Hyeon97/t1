@@ -1,146 +1,127 @@
-import { errorToString } from "../../utils/error.utils"
-import { BaseError } from "../base/base-error"
 import { ControllerError } from "../controller/controller-error"
-import { ValidatorErrorCode, ValidatorErrorParams } from "../error-types"
+import { BaseError, ErrorParams, ErrorLayer, ErrorCode } from ".."
 
 /**
  * 검증 미들웨어 계층의 에러를 처리하는 클래스
  */
 export class ValidatorError extends BaseError {
-  constructor({
-    errorCode,
-    functionName,
-    message,
-    cause,
-    metadata,
-    statusCode = 400 // 기본적으로 클라이언트 오류
-  }: ValidatorErrorParams & { errorCode: ValidatorErrorCode }) {
+  constructor(params: ErrorParams) {
     // 메타데이터 설정
     const enhancedMetadata = {
       middlewareType: "validator",
-      ...metadata
+      ...params.metadata,
     }
-
     super({
-      errorCode,
-      layer: "middleware",
-      functionName,
-      message,
-      cause,
+      ...params,
+      layer: ErrorLayer.MIDDLEWARE,
       metadata: enhancedMetadata,
-      statusCode
     })
   }
 
-  // 유효성 검증 실패
-  static validationFailed({
-    functionName,
-    message,
-    cause,
-    metadata,
-    statusCode
-  }: ValidatorErrorParams): ValidatorError {
-    return new ValidatorError({
-      errorCode: ValidatorErrorCode.VALIDATION_FAILED,
-      functionName,
-      message,
-      cause,
-      statusCode: statusCode || 400,
-      metadata
+  // 일반 에러를 현재 타입으로 변환
+  static fromError<T extends BaseError = ValidatorError>(error: unknown, params: Omit<ErrorParams, "errorCode" | "statusCode" | "cause">): T {
+    if (error instanceof ValidatorError) {
+      return error as unknown as T
+    } else if (error instanceof ControllerError) {
+      return ValidatorError.validationError(ValidatorError, {
+        functionName: params.functionName,
+        message: error.message,
+      }) as unknown as T
+    } else {
+      return BaseError.fromError(ValidatorError as any, error, {
+        ...params,
+        layer: ErrorLayer.MIDDLEWARE,
+      }) as unknown as T
+    }
+  }
+
+  // 유효성 검증 오류
+  static validationError<T extends BaseError = ValidatorError>(
+    constructor: new (params: ErrorParams) => T = ValidatorError as any,
+    params: Omit<ErrorParams, "errorCode" | "statusCode" | "layer"> = {
+      functionName: "",
+      message: "",
+    }
+  ): T {
+    return BaseError.validationError(constructor, {
+      ...params,
+      layer: ErrorLayer.MIDDLEWARE,
     })
   }
 
   // 토큰 필요
-  static tokenRequired({
-    functionName,
-    message = "인증 토큰이 필요합니다",
-    cause,
-    metadata,
-    statusCode
-  }: Partial<ValidatorErrorParams> & { functionName: string }): ValidatorError {
-    return new ValidatorError({
-      errorCode: ValidatorErrorCode.TOKEN_REQUIRED,
-      functionName,
-      message,
-      cause,
-      statusCode: statusCode || 401,
-      metadata
+  static tokenRequired(
+    params: Omit<ErrorParams, "errorCode" | "statusCode" | "layer"> = {
+      functionName: "",
+      message: "",
+    }
+  ): ValidatorError {
+    return BaseError.createFrom(ValidatorError, {
+      ...params,
+      message: params.message || "Token이 없습니다",
+      layer: ErrorLayer.MIDDLEWARE,
+      errorCode: ErrorCode.UNAUTHORIZED,
+      statusCode: 401,
     })
   }
 
   // 유효하지 않은 토큰
-  static tokenInvalid({
-    functionName,
-    message = "유효하지 않은 토큰입니다",
-    cause,
-    metadata,
-    statusCode
-  }: Partial<ValidatorErrorParams> & { functionName: string }): ValidatorError {
-    return new ValidatorError({
-      errorCode: ValidatorErrorCode.TOKEN_INVALID,
-      functionName,
-      message,
-      cause,
-      statusCode: statusCode || 401,
-      metadata
+  static tokenInvalid(
+    params: Omit<ErrorParams, "errorCode" | "statusCode" | "layer"> = {
+      functionName: "",
+      message: "",
+    }
+  ): ValidatorError {
+    return BaseError.createFrom(ValidatorError, {
+      ...params,
+      message: params.message || "유효하지 않은 Token",
+      layer: ErrorLayer.MIDDLEWARE,
+      errorCode: ErrorCode.JWT_INVALID,
+      statusCode: 401,
     })
   }
 
   // 만료된 토큰
-  static tokenExpired({
-    functionName,
-    message = "만료된 토큰입니다",
-    cause,
-    metadata,
-    statusCode
-  }: Partial<ValidatorErrorParams> & { functionName: string }): ValidatorError {
-    return new ValidatorError({
-      errorCode: ValidatorErrorCode.TOKEN_EXPIRED,
-      functionName,
-      message,
-      cause,
-      statusCode: statusCode || 401,
-      metadata
+  static tokenExpired(
+    params: Omit<ErrorParams, "errorCode" | "statusCode" | "layer"> = {
+      functionName: "",
+      message: "",
+    }
+  ): ValidatorError {
+    return BaseError.createFrom(ValidatorError, {
+      ...params,
+      message: params.message || "Token 만료됨",
+      layer: ErrorLayer.MIDDLEWARE,
+      errorCode: ErrorCode.JWT_EXPIRED,
+      statusCode: 502,
     })
   }
 
   // 권한 없음
-  static permissionDenied({
-    functionName,
-    message = "접근 권한이 없습니다",
-    cause,
-    metadata,
-    statusCode
-  }: Partial<ValidatorErrorParams> & { functionName: string }): ValidatorError {
-    return new ValidatorError({
-      errorCode: ValidatorErrorCode.PERMISSION_DENIED,
-      functionName,
-      message,
-      cause,
-      statusCode: statusCode || 403,
-      metadata
+  static permissionDenied<T extends BaseError = ValidatorError>(
+    constructor: new (params: ErrorParams) => T = ValidatorError as any,
+    params: Omit<ErrorParams, "errorCode" | "statusCode" | "layer"> = {
+      functionName: "",
+      message: "",
+    }
+  ): T {
+    return BaseError.unauthorized(constructor, {
+      ...params,
+      layer: ErrorLayer.MIDDLEWARE,
     })
   }
 
-  // 일반 에러를 Validator 에러로 변환
-  static fromError({ error, functionName, message }: { error: unknown, functionName: string, message: string }): ValidatorError {
-    if (error instanceof ValidatorError) {
-      return error
-    } else if (error instanceof ControllerError) {
-      return ValidatorError.validationFailed({
-        functionName,
-        message: error.message,
-        cause: error,
-        statusCode: error.statusCode
-      })
-    } else {
-      const errorMsg = message || (error instanceof Error ? error.message : errorToString(error))
-
-      return ValidatorError.validationFailed({
-        functionName,
-        message: errorMsg || `Validator 작업 중 예상치 못한 오류 발생`,
-        cause: error
-      })
+  // 내부 오류
+  static internalError<T extends BaseError = ValidatorError>(
+    constructor: new (params: ErrorParams) => T = ValidatorError as any,
+    params: Omit<ErrorParams, "errorCode" | "statusCode" | "layer"> = {
+      functionName: "",
+      message: "",
     }
+  ): T {
+    return BaseError.internalError(constructor, {
+      ...params,
+      layer: ErrorLayer.MIDDLEWARE,
+    })
   }
 }

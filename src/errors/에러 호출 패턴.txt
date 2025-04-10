@@ -1,0 +1,21 @@
+// 1. 기본 호출 (가장 간단한 형태)
+throw ApiError.badRequest();
+
+// 2. 메시지만 제공
+throw ApiError.badRequest(ApiError, { 
+  message: "유효하지 않은 요청입니다" 
+});
+
+// 3. 메타데이터 포함
+throw ApiError.badRequest(ApiError, {
+  message: "유효하지 않은 요청입니다",
+  metadata: { field: "email", error: "형식이 잘못되었습니다" }
+});
+
+// 4. 완전한 커스터마이징
+throw ApiError.badRequest(ApiError, {
+  layer: ErrorLayer.CONTROLLER,
+  functionName: "validateUserInput",
+  message: "유효하지 않은 요청입니다",
+  metadata: { details: { field: "email" } }
+});

@@ -3,6 +3,7 @@ import { DatabaseOperations, TransactionManager } from "../../database/connectio
 import { DatabaseError } from "../../errors/database/database-error"
 import { RepositoryError } from "../../errors/repository/repository-error"
 import { ContextLogger } from "../logger/logger.custom"
+import { ErrorLayer } from "../../errors"
 
 /**
  * SQL 필드 타입 정의
@@ -13,17 +14,17 @@ export type SqlFieldValue = string | number | boolean | null | undefined | Date
  * SQL 필드 옵션 타입 정의
  */
 export interface SqlFieldOption {
-  raw?: string  // SQL 함수나 표현식을 직접 사용할 때
-  exclude?: boolean  // SQL 생성에서 제외할 필드
+  raw?: string // SQL 함수나 표현식을 직접 사용할 때
+  exclude?: boolean // SQL 생성에서 제외할 필드
 }
 
 /**
  * SQL 생성을 위한 유틸리티 클래스
  */
 export class SqlBuilder {
-  private fields: Map<string, SqlFieldValue> = new Map();
-  private rawFields: Map<string, string> = new Map();
-  private excludedFields: Set<string> = new Set();
+  private fields: Map<string, SqlFieldValue> = new Map()
+  private rawFields: Map<string, string> = new Map()
+  private excludedFields: Set<string> = new Set()
 
   /**
    * 데이터 객체와 옵션으로 SQL 빌더 초기화
@@ -100,8 +101,8 @@ export class SqlBuilder {
     })
 
     return {
-      sql: `INSERT INTO ${tableName} SET ${fieldParts.join(', ')}`,
-      params
+      sql: `INSERT INTO ${tableName} SET ${fieldParts.join(", ")}`,
+      params,
     }
   }
 
@@ -113,7 +114,7 @@ export class SqlBuilder {
 
     return {
       sql: `UPDATE ${tableName} SET ${setClauseSql} WHERE ${whereCondition}`,
-      params: [...setParams, ...whereParams]
+      params: [...setParams, ...whereParams],
     }
   }
 
@@ -140,8 +141,8 @@ export class SqlBuilder {
     })
 
     return {
-      sql: fieldParts.join(', '),
-      params
+      sql: fieldParts.join(", "),
+      params,
     }
   }
 }
@@ -195,7 +196,7 @@ export class BaseRepository {
   /**
    * SQL 빌더 가져오기
    */
-  protected getSqlBuilder({ data, options }: { data: Record<string, any>, options?: Record<string, SqlFieldOption> }): SqlBuilder {
+  protected getSqlBuilder({ data, options }: { data: Record<string, any>; options?: Record<string, SqlFieldOption> }): SqlBuilder {
     return new SqlBuilder(data, options)
   }
 
@@ -229,17 +230,17 @@ export class BaseRepository {
   }
 
   /**
-     * 일반적인 INSERT 쿼리 실행
-     */
+   * 일반적인 INSERT 쿼리 실행
+   */
   protected async insert<T extends Record<string, any>>({
     data,
     options,
     transaction,
-    request
+    request,
   }: {
-    data: T,
-    options?: Record<string, SqlFieldOption>,
-    transaction: TransactionManager,
+    data: T
+    options?: Record<string, SqlFieldOption>
+    transaction: TransactionManager
     request: string
   }): Promise<ResultSetHeader> {
     try {
@@ -251,36 +252,36 @@ export class BaseRepository {
       const result = await transaction.executeQuery<ResultSetHeader>({
         sql,
         params,
-        request
+        request,
       })
 
       return result
     } catch (error) {
-      const functionName = request.split('.').pop() || 'insert'
+      const functionName = request.split(".").pop() || "insert"
       return this.handleRepositoryError({
         error,
         functionName,
-        message: `${this.repositoryName} 데이터 추가 중 오류가 발생했습니다`
+        message: `${this.repositoryName} 데이터 추가 중 오류가 발생했습니다`,
       })
     }
   }
 
   /**
-     * 일반적인 UPDATE 쿼리 실행
-     */
+   * 일반적인 UPDATE 쿼리 실행
+   */
   protected async update<T extends Record<string, any>>({
     data,
     whereCondition,
     whereParams,
     options,
     transaction,
-    request
+    request,
   }: {
-    data: T,
-    whereCondition: string,
-    whereParams: any[],
-    options?: Record<string, SqlFieldOption>,
-    transaction: TransactionManager,
+    data: T
+    whereCondition: string
+    whereParams: any[]
+    options?: Record<string, SqlFieldOption>
+    transaction: TransactionManager
     request: string
   }): Promise<boolean> {
     try {
@@ -292,16 +293,16 @@ export class BaseRepository {
       const result = await transaction.executeQuery<{ affectedRows: number }>({
         sql,
         params,
-        request
+        request,
       })
 
       return (result?.affectedRows || 0) > 0
     } catch (error) {
-      const functionName = request.split('.').pop() || 'update'
+      const functionName = request.split(".").pop() || "update"
       return this.handleRepositoryError({
         error,
         functionName,
-        message: `${this.repositoryName} 데이터 업데이트 중 오류가 발생했습니다`
+        message: `${this.repositoryName} 데이터 업데이트 중 오류가 발생했습니다`,
       })
     }
   }
@@ -313,11 +314,11 @@ export class BaseRepository {
     whereCondition,
     whereParams,
     transaction,
-    request
+    request,
   }: {
-    whereCondition: string,
-    whereParams: any[],
-    transaction: TransactionManager,
+    whereCondition: string
+    whereParams: any[]
+    transaction: TransactionManager
     request: string
   }): Promise<boolean> {
     try {
@@ -327,20 +328,19 @@ export class BaseRepository {
       const result = await transaction.executeQuery<{ affectedRows: number }>({
         sql,
         params: whereParams,
-        request
+        request,
       })
 
       return (result?.affectedRows || 0) > 0
     } catch (error) {
-      const functionName = request.split('.').pop() || 'delete'
+      const functionName = request.split(".").pop() || "delete"
       return this.handleRepositoryError({
         error,
         functionName,
-        message: `${this.repositoryName} 데이터 삭제 중 오류가 발생했습니다`
+        message: `${this.repositoryName} 데이터 삭제 중 오류가 발생했습니다`,
       })
     }
   }
-
 
   /**
    * 에러 로깅 및 변환
@@ -362,6 +362,6 @@ export class BaseRepository {
       throw error
     }
     //  그 외의 처리되지 않은 에러는 RepositoryError로 변환하여 전송
-    throw RepositoryError.fromError({ error, functionName, message })
+    throw RepositoryError.fromError<RepositoryError>(error, { functionName, message, layer: ErrorLayer.REPOSITORY })
   }
 }

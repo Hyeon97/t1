@@ -74,6 +74,9 @@ export interface ErrorParams {
   statusCode?: number //  HTTP 상태 코드, API 응답에 사용됨
   cause?: unknown //  에러 원인 ( 에러 원본 )
   metadata?: Record<string, any> // 에러와 관련된 추가 정보 객체
+  request?: string // Database 에러에서 해당 쿼리 요청 함수 이름
+  query?: string // Database 에러 발생시 실행한 쿼리
+  params?: any[] // Database 에러 발생시 실행한 파라미터
 }
 
 // 에러 응답 인터페이스

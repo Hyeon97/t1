@@ -1,4 +1,4 @@
-import { ErrorChainItem, ErrorCode, ErrorLayer, UnifiedError } from "./error-types"
+import { ErrorChainItem, ErrorCode, ErrorLayer, UnifiedError } from "."
 
 /**
  * 에러 체인 항목 생성 함수
@@ -15,7 +15,7 @@ export function createErrorChainItem({
   layer: ErrorLayer
   functionName: string
   request?: string
-  errorCode: string
+  errorCode: ErrorCode
   statusCode: number
   message: string
   details?: Record<string, any>

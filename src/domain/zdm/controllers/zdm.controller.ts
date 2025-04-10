@@ -45,7 +45,7 @@ export class ZdmController extends BaseController {
 
       return filterOptions
     } catch (error) {
-      throw ControllerError.badRequestError({
+      throw ControllerError.badRequest(ControllerError, {
         functionName: "extractFilterOptions",
         message: "ZDM 필터 옵션을 추출하는 중 오류가 발생했습니다",
         cause: error,
