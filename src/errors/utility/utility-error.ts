@@ -1,5 +1,4 @@
-import { BaseError } from "../base/base-error"
-import { ErrorCode, ErrorLayer, ErrorParams } from "../error-types"
+import { BaseError, ErrorCode, ErrorLayer, ErrorParams } from ".."
 
 /**
  * 유틸리티 계층의 에러를 처리하는 클래스
