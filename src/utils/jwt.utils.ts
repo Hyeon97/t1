@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken"
 import { CreateTokenData, TokenVerifySuccessResult } from "../domain/auth/interface/token"
 import { UtilityError } from "../errors/utility/utility-error"
-import { ErrorCode } from "../errors"
+import { ErrorCode, ErrorLayer } from "../errors"
 
 export class JwtUtil {
   /**
@@ -41,7 +41,7 @@ export class JwtUtil {
   /**
    * JWT 토큰 검증
    */
-  public static verifyToken({ token }: { token: string }): TokenVerifySuccessResult | null {
+  public static verifyToken({ token }: { token: string }): TokenVerifySuccessResult {
     try {
       const secret = this.getJwtSecret()
       const decoded = jwt.verify(token, secret) as TokenVerifySuccessResult
@@ -51,21 +51,27 @@ export class JwtUtil {
       if (error instanceof jwt.TokenExpiredError) {
         throw UtilityError.jwtVerifyError({
           functionName: "verifyToken",
-          message: "만료된 토큰입니다",
+          message: "만료된 Token",
           errorCode: ErrorCode.JWT_EXPIRED,
           cause: error,
         })
       } else if (error instanceof jwt.JsonWebTokenError) {
         throw UtilityError.jwtVerifyError({
           functionName: "verifyToken",
-          message: "유효하지 않은 토큰입니다",
+          message: "유효하지 않은 Token",
           errorCode: ErrorCode.JWT_INVALID,
           cause: error,
         })
       }
-
       // 일반적인 에러 처리
-      return null
+      throw UtilityError.createFrom(UtilityError, {
+        functionName: "verifyToken",
+        message: "Token 검증 실패",
+        layer: ErrorLayer.UTILITY,
+        errorCode: ErrorCode.JWT_INVALID,
+        cause: error,
+        statusCode: 502,
+      })
     }
   }
 
