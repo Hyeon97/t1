@@ -1,4 +1,5 @@
 import { TransactionManager } from "../../database/connection"
+import { ErrorLayer } from "../../errors"
 import { RepositoryError } from "../../errors/repository/repository-error"
 import { ServiceError } from "../../errors/service/service-error"
 import { ContextLogger } from "../logger/logger.custom"
@@ -30,17 +31,13 @@ export class BaseService {
       throw error
     }
     //  그 외의 처리되지 않은 에러는 ServiceError로 변환하여 전송
-    throw ServiceError.fromError({ error, functionName, message })
+    throw ServiceError.fromError<ServiceError>(error, { functionName, message, layer: ErrorLayer.SERVICE })
   }
 
   /**
    * 트랜잭션 실행
    */
-  protected async executeTransaction<T>({
-    callback,
-  }: {
-    callback: (transaction: TransactionManager) => Promise<T>
-  }): Promise<T> {
+  protected async executeTransaction<T>({ callback }: { callback: (transaction: TransactionManager) => Promise<T> }): Promise<T> {
     try {
       return await TransactionManager.execute({ callback })
     } catch (error) {
@@ -75,26 +72,26 @@ export class BaseService {
   //   return entity
   // }
 
-  /**
-   * 비즈니스 규칙 검증
-   */
-  protected validateBusinessRule({
-    condition,
-    message,
-    functionName,
-    metadata,
-  }: {
-    condition: boolean
-    message: string
-    functionName: string
-    metadata?: Record<string, any>
-  }): void {
-    if (!condition) {
-      throw ServiceError.businessRuleError({
-        functionName,
-        message,
-        metadata,
-      })
-    }
-  }
+  // /**
+  //  * 비즈니스 규칙 검증
+  //  */
+  // protected validateBusinessRule({
+  //   condition,
+  //   message,
+  //   functionName,
+  //   metadata,
+  // }: {
+  //   condition: boolean
+  //   message: string
+  //   functionName: string
+  //   metadata?: Record<string, any>
+  // }): void {
+  //   if (!condition) {
+  //     throw ServiceError.businessRuleError({
+  //       functionName,
+  //       message,
+  //       metadata,
+  //     })
+  //   }
+  // }
 }
