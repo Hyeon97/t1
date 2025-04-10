@@ -39,7 +39,7 @@ export class ZdmRepositoryService extends BaseService {
     try {
       const repos = await this.zdmRepositoryRepository.findById({ id, filterOptions })
       if (!repos) {
-        throw ServiceError.resourceNotFoundError({
+        throw ServiceError.resourceNotFoundError(ServiceError, {
           functionName: "getRepositoryById",
           message: `ID가 '${id}'인 ZDM Repository를 찾을 수 없습니다`,
           metadata: { id },

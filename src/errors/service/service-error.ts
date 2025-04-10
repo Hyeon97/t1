@@ -1,217 +1,250 @@
-import { errorToString } from "../../utils/error.utils"
-import { BaseError } from "../base/base-error"
-import { RepositoryErrorCode, ServiceErrorCode, ServiceErrorParams, UtilityErrorCode } from "../error-types"
+import { BaseError, ErrorCode, ErrorLayer, ErrorParams } from ".."
 import { RepositoryError } from "../repository/repository-error"
-
 import { UtilityError } from "../utility/utility-error"
 
 /**
  * 서비스 계층의 에러를 처리하는 클래스
  */
 export class ServiceError extends BaseError {
-  constructor({
-    errorCode,
-    functionName,
-    message,
-    cause,
-    metadata,
-    statusCode = 500
-  }: ServiceErrorParams & { errorCode: ServiceErrorCode }) {
+  constructor(params: ErrorParams) {
     super({
-      errorCode,
-      layer: "service",
-      functionName,
-      message,
-      cause,
-      metadata,
-      statusCode
+      ...params,
+      layer: ErrorLayer.SERVICE,
+    })
+  }
+
+  // 일반 에러를 현재 타입으로 변환
+  static fromError<T extends BaseError = ServiceError>(
+    error: unknown,
+    params: Omit<ErrorParams, "errorCode" | "statusCode" | "cause"> & {
+      functionName: string
+      message: string
+      layer?: ErrorLayer
+    }
+  ): T {
+    return BaseError.fromError(ServiceError as any, error, {
+      ...params,
+      layer: ErrorLayer.SERVICE,
+    }) as unknown as T
+  }
+
+  // 공통 에러 타입들 - BaseError의 팩토리 메서드 활용
+
+  // 잘못된 요청
+  static badRequest<T extends BaseError = ServiceError>(
+    constructor: new (params: ErrorParams) => T = ServiceError as any,
+    params: Omit<ErrorParams, "errorCode" | "statusCode" | "layer"> = {
+      functionName: "",
+      message: "",
+    }
+  ): T {
+    return BaseError.badRequest(constructor, {
+      ...params,
+      layer: ErrorLayer.SERVICE,
     })
   }
 
   // 권한 없음
-  static unauthorizedError({ functionName, message, cause, metadata, statusCode }: ServiceErrorParams): ServiceError {
-    return new ServiceError({
-      errorCode: ServiceErrorCode.UNAUTHORIZED,
-      functionName,
-      message,
-      cause,
-      metadata,
-      statusCode: statusCode || 401
-    })
-  }
-
-  // 잘못된 요청 처리
-  static badRequestError({ functionName, message, cause, metadata, statusCode }: ServiceErrorParams): ServiceError {
-    return new ServiceError({
-      errorCode: ServiceErrorCode.BAD_REQUEST,
-      functionName,
-      message: message || "잘못된 요청(값)입니다",
-      cause,
-      metadata,
-      statusCode: statusCode || 400
+  static unauthorized<T extends BaseError = ServiceError>(
+    constructor: new (params: ErrorParams) => T = ServiceError as any,
+    params: Omit<ErrorParams, "errorCode" | "statusCode" | "layer"> = {
+      functionName: "",
+      message: "",
+    }
+  ): T {
+    return BaseError.unauthorized(constructor, {
+      ...params,
+      layer: ErrorLayer.SERVICE,
     })
   }
 
   // 유효성 검증 오류
-  static validationError({ functionName, message, cause, metadata, statusCode }: ServiceErrorParams): ServiceError {
-    return new ServiceError({
-      errorCode: ServiceErrorCode.VALIDATION,
-      functionName,
-      message,
-      cause,
-      metadata,
-      statusCode: statusCode || 400
+  static validationError<T extends BaseError = ServiceError>(
+    constructor: new (params: ErrorParams) => T = ServiceError as any,
+    params: Omit<ErrorParams, "errorCode" | "statusCode" | "layer"> = {
+      functionName: "",
+      message: "",
+    }
+  ): T {
+    return BaseError.validationError(constructor, {
+      ...params,
+      layer: ErrorLayer.SERVICE,
     })
   }
 
   // 비즈니스 규칙 오류
-  static businessRuleError({ functionName, message, cause, metadata, statusCode }: ServiceErrorParams): ServiceError {
-    return new ServiceError({
-      errorCode: ServiceErrorCode.BUSINESS_RULE,
-      functionName,
-      message,
-      cause,
-      metadata,
-      statusCode: statusCode || 422
+  static businessRuleError<T extends BaseError = ServiceError>(
+    constructor: new (params: ErrorParams) => T = ServiceError as any,
+    params: Omit<ErrorParams, "errorCode" | "statusCode" | "layer"> = {
+      functionName: "",
+      message: "",
+    }
+  ): T {
+    return BaseError.businessRuleViolation(constructor, {
+      ...params,
+      layer: ErrorLayer.SERVICE,
     })
   }
 
   // 리소스 찾기 실패
-  static resourceNotFoundError({ functionName, message, cause, metadata, statusCode }: ServiceErrorParams): ServiceError {
-    return new ServiceError({
-      errorCode: ServiceErrorCode.RESOURCE_NOT_FOUND,
-      functionName,
-      message,
-      cause,
-      metadata,
-      statusCode: statusCode || 404
+  static resourceNotFoundError<T extends BaseError = ServiceError>(
+    constructor: new (params: ErrorParams) => T = ServiceError as any,
+    params: Omit<ErrorParams, "errorCode" | "statusCode" | "layer"> = {
+      functionName: "",
+      message: "",
+    }
+  ): T {
+    return BaseError.notFound(constructor, {
+      ...params,
+      layer: ErrorLayer.SERVICE,
+    })
+  }
+
+  // 내부 오류
+  static internalError<T extends BaseError = ServiceError>(
+    constructor: new (params: ErrorParams) => T = ServiceError as any,
+    params: Omit<ErrorParams, "errorCode" | "statusCode" | "layer"> = {
+      functionName: "",
+      message: "",
+    }
+  ): T {
+    return BaseError.internalError(constructor, {
+      ...params,
+      layer: ErrorLayer.SERVICE,
     })
   }
 
   // 의존성 오류
-  static dependencyError({ functionName, message, cause, metadata, statusCode }: ServiceErrorParams): ServiceError {
-    return new ServiceError({
-      errorCode: ServiceErrorCode.DEPENDENCY,
-      functionName,
-      message,
-      cause,
-      metadata,
-      statusCode: statusCode || 502
+  static dependencyError(
+    params: Omit<ErrorParams, "errorCode" | "statusCode" | "layer"> = {
+      functionName: "",
+      message: "",
+    }
+  ): ServiceError {
+    return BaseError.createFrom(ServiceError, {
+      ...params,
+      layer: ErrorLayer.SERVICE,
+      errorCode: ErrorCode.DEPENDENCY_ERROR,
+      statusCode: 502,
     })
   }
 
   // 데이터 처리 오류
-  static dataProcessingError({ functionName, message, cause, metadata, statusCode }: ServiceErrorParams): ServiceError {
-    return new ServiceError({
-      errorCode: ServiceErrorCode.DATA_PROCESSING,
-      functionName,
-      message,
-      cause,
-      metadata,
-      statusCode: statusCode || 500
+  static dataProcessingError(
+    params: Omit<ErrorParams, "errorCode" | "statusCode" | "layer"> = {
+      functionName: "",
+      message: "",
+    }
+  ): ServiceError {
+    return BaseError.createFrom(ServiceError, {
+      ...params,
+      layer: ErrorLayer.SERVICE,
+      errorCode: ErrorCode.DATA_PROCESSING_ERROR,
+      statusCode: 500,
     })
   }
 
   // 트랜잭션 오류
-  static transactionError({ functionName, message, cause, metadata, statusCode }: ServiceErrorParams): ServiceError {
-    return new ServiceError({
-      errorCode: ServiceErrorCode.TRANSACTION,
-      functionName,
-      message,
-      cause,
-      metadata,
-      statusCode: statusCode || 500
+  static transactionError(
+    params: Omit<ErrorParams, "errorCode" | "statusCode" | "layer"> = {
+      functionName: "",
+      message: "",
+    }
+  ): ServiceError {
+    return BaseError.createFrom(ServiceError, {
+      ...params,
+      layer: ErrorLayer.SERVICE,
+      errorCode: ErrorCode.TRANSACTION_ERROR,
+      statusCode: 500,
     })
   }
 
-  // Repository 에러를 Service 에러로 변환하는 팩토리 메서드
-  static fromRepositoryError({ error, functionName }: { error: RepositoryError; functionName: string }): ServiceError {
-    // Repository 에러의 첫 번째 항목에서 정보 추출
-    const repoErrorItem = error.errorChain[0]
-    const errorCode = repoErrorItem.errorCode as RepositoryErrorCode
-    const statusCode = repoErrorItem.statusCode
+  // 다른 계층 에러로부터 변환
 
-    switch (errorCode) {
-      case RepositoryErrorCode.ENTITY_NOT_FOUND:
-        return ServiceError.resourceNotFoundError({
+  // Repository 에러로부터 변환
+  static fromRepositoryError({ error, functionName }: { error: RepositoryError; functionName: string }): ServiceError {
+    const originalErrorCode = error.errorCode
+
+    // 에러 코드에 따라 적절한 서비스 에러로 변환
+    switch (originalErrorCode) {
+      case ErrorCode.NOT_FOUND:
+        return ServiceError.resourceNotFoundError(ServiceError, {
           functionName,
           message: `리소스를 찾을 수 없습니다`,
           cause: error,
-          statusCode
         })
-      case RepositoryErrorCode.VALIDATION:
-        return ServiceError.validationError({
+
+      case ErrorCode.VALIDATION_ERROR:
+        return ServiceError.validationError(ServiceError, {
           functionName,
           message: `데이터 유효성 검증 실패`,
           cause: error,
-          statusCode
         })
-      default:
+
+      case ErrorCode.DATA_INTEGRITY_ERROR:
+        return ServiceError.businessRuleError(ServiceError, {
+          functionName,
+          message: `데이터 무결성 오류`,
+          cause: error,
+        })
+
+      case ErrorCode.DATABASE_ERROR:
+      case ErrorCode.QUERY_ERROR:
+      case ErrorCode.CONNECTION_ERROR:
         return ServiceError.dependencyError({
+          functionName,
+          message: `데이터베이스 작업 중 오류 발생`,
+          cause: error,
+          metadata: { originalErrorCode },
+        })
+
+      default:
+        return ServiceError.internalError(ServiceError, {
           functionName,
           message: `Repository 작업 중 오류 발생`,
           cause: error,
-          metadata: { originalCode: errorCode },
-          statusCode
+          metadata: { originalErrorCode },
         })
     }
   }
 
-  // Utility 에러를 Service 에러로 변환하는 팩토리 메서드
+  // Utility 에러로부터 변환
   static fromUtilityError({ error, functionName }: { error: UtilityError; functionName: string }): ServiceError {
-    // Utility 에러의 첫 번째 항목에서 정보 추출
-    const utilErrorItem = error.errorChain[0]
-    const errorCode = utilErrorItem.errorCode as UtilityErrorCode
-    const statusCode = utilErrorItem.statusCode
+    const originalErrorCode = error.errorCode
 
-    // 에러 유형에 따라 적절한 Service 에러 생성
-    if (errorCode.startsWith("UTIL_JWT")) {
-      return ServiceError.unauthorizedError({
-        functionName,
-        message: `인증 중 오류 발생: ${utilErrorItem.message}`,
-        cause: error,
-        statusCode
-      })
-    } else if (errorCode === UtilityErrorCode.VALIDATION) {
-      return ServiceError.validationError({
-        functionName,
-        message: utilErrorItem.message,
-        cause: error,
-        statusCode
-      })
-    } else if (errorCode === UtilityErrorCode.RESOURCE_NOT_FOUND) {
-      return ServiceError.resourceNotFoundError({
-        functionName,
-        message: utilErrorItem.message,
-        cause: error,
-        statusCode
-      })
-    } else {
-      return ServiceError.dataProcessingError({
-        functionName,
-        message: `Utility 작업 중 오류 발생: ${utilErrorItem.message}`,
-        cause: error,
-        metadata: { originalCode: errorCode },
-        statusCode
-      })
-    }
-  }
+    // 에러 코드에 따라 적절한 서비스 에러로 변환
+    switch (originalErrorCode) {
+      case ErrorCode.UNAUTHORIZED:
+      case ErrorCode.JWT_VERIFY_ERROR:
+      case ErrorCode.JWT_EXPIRED:
+      case ErrorCode.JWT_INVALID:
+        return ServiceError.unauthorized(ServiceError, {
+          functionName,
+          message: `인증 중 오류 발생: ${error.message}`,
+          cause: error,
+        })
 
-  // 일반 에러를 Service 에러로 변환하는 팩토리 메서드
-  static fromError({ error, functionName, message }: { error: unknown; functionName: string; message: string }): ServiceError {
-    if (error instanceof RepositoryError) {
-      return ServiceError.fromRepositoryError({ error, functionName })
-    } else if (error instanceof UtilityError) {
-      return ServiceError.fromUtilityError({ error, functionName })
-    } else if (error instanceof ServiceError) {
-      return error
-    } else {
-      const errorMsg = message || (error instanceof Error ? error.message : errorToString(error))
-      return ServiceError.dataProcessingError({
-        functionName,
-        message: errorMsg || `Service 작업 중 예상치 못한 오류 발생`,
-        cause: error
-      })
+      case ErrorCode.VALIDATION_ERROR:
+        return ServiceError.validationError(ServiceError, {
+          functionName,
+          message: error.message,
+          cause: error,
+        })
+
+      case ErrorCode.NOT_FOUND:
+        return ServiceError.resourceNotFoundError(ServiceError, {
+          functionName,
+          message: error.message,
+          cause: error,
+        })
+
+      default:
+        return ServiceError.internalError(ServiceError, {
+          functionName,
+          message: `Utility 작업 중 오류 발생: ${error.message}`,
+          cause: error,
+          metadata: { originalErrorCode },
+        })
     }
   }
 }

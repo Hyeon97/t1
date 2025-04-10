@@ -22,10 +22,10 @@ interface BackupDataSet {
   backupDataObject: BackupTableInput
   backupInfoDataObject: BackupInfoTableInput
 }
-//  Backup Data 등록 결과 
+//  Backup Data 등록 결과
 interface BackupDataRegistResultSet {
-  successful: Array<{ dataSet: BackupDataSet, }>,
-  failed: Array<{ dataSet: BackupDataSet, error: Error }>
+  successful: Array<{ dataSet: BackupDataSet }>
+  failed: Array<{ dataSet: BackupDataSet; error: Error }>
 }
 
 export class BackupRegistService extends BaseService {
@@ -42,7 +42,7 @@ export class BackupRegistService extends BaseService {
     zdmService,
     zdmRepositoryService,
     backupRepository,
-    backupInfoRepository
+    backupInfoRepository,
   }: {
     serverService: ServerService
     serverPartitionService: ServerPartitionService
@@ -292,14 +292,14 @@ export class BackupRegistService extends BaseService {
   }
 
   /**
- * Backup 데이터 세트 DB 등록
- */
-  private async registerBackupDataSet({ dataSet, transaction }: { dataSet: BackupDataSet, transaction: TransactionManager }): Promise<BackupDataSet> {
+   * Backup 데이터 세트 DB 등록
+   */
+  private async registerBackupDataSet({ dataSet, transaction }: { dataSet: BackupDataSet; transaction: TransactionManager }): Promise<BackupDataSet> {
     try {
       // 1. Backup 기본 정보 등록
       const backupRegistResult = await this.backupRepository.insertBackup({
         backupData: dataSet.backupDataObject,
-        transaction
+        transaction,
       })
 
       // 2. Backup 객체 nJobID 설정
@@ -310,7 +310,7 @@ export class BackupRegistService extends BaseService {
       await this.backupRepository.updateBackup({
         id: backupRegistResult.insertId,
         transaction,
-        backupData: backupDataWithoutTimeFields
+        backupData: backupDataWithoutTimeFields,
       })
 
       // 4. Backup info 객체에 ID 설정
@@ -319,7 +319,7 @@ export class BackupRegistService extends BaseService {
       // 5. Backup info 정보 등록
       const backupInfoRegistResult = await this.backupInfoRepository.insertBackupInfo({
         backupInfoData: dataSet.backupInfoDataObject,
-        transaction
+        transaction,
       })
 
       return dataSet
@@ -337,12 +337,12 @@ export class BackupRegistService extends BaseService {
    */
   private async registerAllBackupDataSets({ dataSets }: { dataSets: BackupDataSet[] }): Promise<BackupDataRegistResultSet> {
     const results = await Promise.allSettled(
-      dataSets.map(dataSet =>
+      dataSets.map((dataSet) =>
         this.executeTransaction({
           callback: async (transaction) => {
             return this.registerBackupDataSet({
               dataSet,
-              transaction
+              transaction,
             })
           },
         })
@@ -350,15 +350,15 @@ export class BackupRegistService extends BaseService {
     )
 
     const successful: Array<{ dataSet: BackupDataSet }> = []
-    const failed: Array<{ dataSet: BackupDataSet, error: Error }> = []
+    const failed: Array<{ dataSet: BackupDataSet; error: Error }> = []
 
     results.forEach((result, index) => {
-      if (result.status === 'fulfilled') {
-        successful.push({ dataSet: dataSets[index], })
+      if (result.status === "fulfilled") {
+        successful.push({ dataSet: dataSets[index] })
       } else {
         failed.push({
           dataSet: dataSets[index],
-          error: result.reason
+          error: result.reason,
         })
       }
     })
@@ -370,25 +370,28 @@ export class BackupRegistService extends BaseService {
    * 결과 확인 및 출력 결과 가공
    */
   // BackupDataRegistResponse
-  private processResult({ data, autoStart }: { data: BackupDataRegistResultSet, autoStart: AutoStartType }) {
+  private processResult({ data, autoStart }: { data: BackupDataRegistResultSet; autoStart: AutoStartType }) {
     const returnObject: any[] = []
     //  스케쥴 사용 여부
     const useSchedule = ({ data }: { data: BackupTableInput }) => {
-      if (data.nScheduleID && data.nScheduleID_advanced) { return "Smart Schedule" }
-      else if (data.nScheduleID && !data.nScheduleID_advanced) { return "Increment Schedule" }
-      else if (!data.nScheduleID && data.nScheduleID_advanced) { return "Full Schedule" }
-      else return "-"
+      if (data.nScheduleID && data.nScheduleID_advanced) {
+        return "Smart Schedule"
+      } else if (data.nScheduleID && !data.nScheduleID_advanced) {
+        return "Increment Schedule"
+      } else if (!data.nScheduleID && data.nScheduleID_advanced) {
+        return "Full Schedule"
+      } else return "-"
     }
     //  성공한 작업
     data.successful.forEach((el) => {
       const d = el.dataSet
       returnObject.push({
-        state: 'success',
+        state: "success",
         job_name: d.backupDataObject.sJobName,
         partition: d.backupInfoDataObject.sDrive,
         job_type: BackupTypeMap.toString({ value: d.backupInfoDataObject.nBackupType }),
         auto_start: autoStart,
-        use_schedule: useSchedule({ data: d.backupDataObject })
+        use_schedule: useSchedule({ data: d.backupDataObject }),
       })
     })
 
@@ -396,12 +399,12 @@ export class BackupRegistService extends BaseService {
     data.failed.forEach((el) => {
       const d = el.dataSet
       returnObject.push({
-        state: 'fail',
-        job_name: '-',
+        state: "fail",
+        job_name: "-",
         partition: d.backupInfoDataObject.sDrive,
-        job_type: '-',
-        auto_start: '-',
-        use_schedule: '-',
+        job_type: "-",
+        auto_start: "-",
+        use_schedule: "-",
       })
     })
     return returnObject
@@ -439,21 +442,21 @@ export class BackupRegistService extends BaseService {
       // 처리할 파티션 목록 결정
       const partitionsToProcess = data.partition.length
         ? data.partition.map((partition) => {
-          const partitionInfo = partitionList.find((item) => item.sLetter === partition)
-          //  사용자 입력 파티션 검증
-          if (!partitionInfo) {
-            throw ServiceError.badRequestError({
-              functionName: "regist",
-              message: `[Backup 정보 등록] - 파티션( ${partition} )이 서버( ${server.sSystemName} )에 존재하지 않습니다`,
-              metadata: {
-                partition,
-                server: server.sSystemName,
-              },
-            })
-          }
+            const partitionInfo = partitionList.find((item) => item.sLetter === partition)
+            //  사용자 입력 파티션 검증
+            if (!partitionInfo) {
+              throw ServiceError.badRequest(ServiceError, {
+                functionName: "regist",
+                message: `[Backup 정보 등록] - 파티션( ${partition} )이 서버( ${server.sSystemName} )에 존재하지 않습니다`,
+                metadata: {
+                  partition,
+                  server: server.sSystemName,
+                },
+              })
+            }
 
-          return partitionInfo
-        })
+            return partitionInfo
+          })
         : partitionList
 
       // 제외 파티션이 아닌 것들만 필터링 후 데이터셋 생성
@@ -474,7 +477,7 @@ export class BackupRegistService extends BaseService {
 
       // 데이터 등록
       if (dataSet.length === 0) {
-        throw ServiceError.badRequestError({
+        throw ServiceError.badRequest(ServiceError, {
           functionName: "regist",
           message: "[Backup 정보 등록] - 등록할 Backup 작업이 없습니다. 파티션 정보를 확인해주세요.",
         })
@@ -487,8 +490,8 @@ export class BackupRegistService extends BaseService {
         meta: {
           totalRequested: dataSet.length,
           successful: registrationResult.successful.length,
-          failed: registrationResult.failed.length
-        }
+          failed: registrationResult.failed.length,
+        },
       })
 
       // 일부 등록이 실패한 경우 경고 로깅
@@ -497,11 +500,11 @@ export class BackupRegistService extends BaseService {
           message: `[Backup 정보 등록] - 일부 Backup 작업 등록에 실패했습니다`,
           meta: {
             failedCount: registrationResult.failed.length,
-            errors: registrationResult.failed.map(f => ({
+            errors: registrationResult.failed.map((f) => ({
               partition: f.dataSet.backupInfoDataObject.sDrive,
-              errorMessage: f.error instanceof Error ? f.error.message : String(f.error)
-            }))
-          }
+              errorMessage: f.error instanceof Error ? f.error.message : String(f.error),
+            })),
+          },
         })
       }
 

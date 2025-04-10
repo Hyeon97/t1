@@ -30,7 +30,7 @@ export class TokenService extends BaseService {
       // const user = await this.userInfoRepository.findByEmailAndPassword({ email: input.email, password: input.password })
       // if (!user) {
       if (!user) {
-        throw ServiceError.resourceNotFoundError({
+        throw ServiceError.resourceNotFoundError(ServiceError, {
           functionName: "createToken",
           message: `Mail이 '${input.email}'인 User를 찾을 수 없습니다`,
         })
@@ -81,13 +81,6 @@ export class TokenService extends BaseService {
 
       // JWT 토큰 검증
       const payload = JwtUtil.verifyToken({ token })
-      if (!payload) {
-        ContextLogger.warn({ message: "토큰 검증 실패" })
-        throw ServiceError.unauthorizedError({
-          functionName: "verifyToken",
-          message: "토큰 검증 실패",
-        })
-      }
 
       ContextLogger.debug({ message: `토큰 검증 성공 || User: ${payload.email}` })
       return payload

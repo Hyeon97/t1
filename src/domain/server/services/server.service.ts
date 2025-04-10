@@ -191,7 +191,7 @@ export class ServerService extends BaseService {
               serverResponse[propertyName as ServerDataPropertyKey] = []
             }
             // 타입스크립트 타입 단언 필요
-            ; (serverResponse[propertyName] as any[]).push(item)
+            ;(serverResponse[propertyName] as any[]).push(item)
           }
         })
       }
@@ -254,7 +254,7 @@ export class ServerService extends BaseService {
       const server = await this.serverBasicRepository.findByServerName({ name, filterOptions })
       // 서버가 존재하는지 확인
       if (!server) {
-        throw ServiceError.resourceNotFoundError({
+        throw ServiceError.resourceNotFoundError(ServiceError, {
           functionName: "getServerByName",
           message: `이름이 '${name}'인 Server를 찾을 수 없습니다`,
         })
@@ -289,7 +289,7 @@ export class ServerService extends BaseService {
     try {
       // ID 형식 검증
       if (!regNumberOnly.test(id)) {
-        throw ServiceError.validationError({
+        throw ServiceError.validationError(ServiceError, {
           functionName: "getServerById",
           message: `Server ID는 숫자만 포함해야 합니다. 입력값: '${id}'`,
           metadata: { id },
@@ -299,7 +299,7 @@ export class ServerService extends BaseService {
       // 서버 기본 정보 조회
       const server = await this.serverBasicRepository.findByServerId({ id: parseInt(id), filterOptions })
       if (!server) {
-        throw ServiceError.resourceNotFoundError({
+        throw ServiceError.resourceNotFoundError(ServiceError, {
           functionName: "getServerById",
           message: `ID가 '${id}'인 Server를 찾을 수 없습니다`,
           metadata: { id },

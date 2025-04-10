@@ -21,7 +21,7 @@ export class UserService extends BaseService {
       ContextLogger.debug({ message: `이메일 ${email}로 사용자 조회` })
       const user = await this.userInfoRepository.findByEmail({ email })
       if (!user) {
-        throw ServiceError.resourceNotFoundError({
+        throw ServiceError.resourceNotFoundError(ServiceError, {
           functionName: "getUserByEmail",
           message: `Mail이 '${email}'인 User를 찾을 수 없습니다`,
         })

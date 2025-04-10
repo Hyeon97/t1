@@ -243,7 +243,7 @@ export class ZdmService extends BaseService {
     try {
       const zdm = await this.zdmRepository.findByZdmName({ name, filterOptions })
       if (!zdm) {
-        throw ServiceError.resourceNotFoundError({
+        throw ServiceError.resourceNotFoundError(ServiceError, {
           functionName: "getZdmByName",
           message: `이름이 '${name}'인 ZDM을 찾을 수 없습니다`,
         })
@@ -274,7 +274,7 @@ export class ZdmService extends BaseService {
   async getZdmById({ id, filterOptions }: { id: string; filterOptions: ZdmFilterOptions }): Promise<ZdmDataResponse> {
     try {
       if (!regNumberOnly.test(id)) {
-        throw ServiceError.validationError({
+        throw ServiceError.validationError(ServiceError, {
           functionName: "getZdmById",
           message: `ZDM ID는 숫자만 포함해야 합니다. 입력값: '${id}'`,
           metadata: { id },
@@ -282,7 +282,7 @@ export class ZdmService extends BaseService {
       }
       const zdm = await this.zdmRepository.findByZdmId({ id: parseInt(id), filterOptions })
       if (!zdm) {
-        throw ServiceError.resourceNotFoundError({
+        throw ServiceError.resourceNotFoundError(ServiceError, {
           functionName: "getZdmById",
           message: `ID가 '${id}'인 ZDM을 찾을 수 없습니다`,
           metadata: { id },

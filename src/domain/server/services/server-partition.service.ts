@@ -31,7 +31,7 @@ export class ServerPartitionService extends BaseService {
     try {
       const server = await this.serverBasicRepository.findByServerId({ id, filterOptions: {} })
       if (!server) {
-        throw ServiceError.resourceNotFoundError({
+        throw ServiceError.resourceNotFoundError(ServiceError, {
           functionName: "getServerById",
           message: `Server ID ${id}에 해당하는 Server를 찾을 수 없습니다.`,
         })
@@ -53,7 +53,7 @@ export class ServerPartitionService extends BaseService {
     try {
       const server = await this.serverBasicRepository.findByServerName({ name, filterOptions: {} })
       if (!server) {
-        throw ServiceError.resourceNotFoundError({
+        throw ServiceError.resourceNotFoundError(ServiceError, {
           functionName: "getServerByName",
           message: `Server Name ${name}에 해당하는 Server를 찾을 수 없습니다.`,
         })
