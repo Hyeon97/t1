@@ -10,7 +10,7 @@ import { validateToken } from "./src/domain/auth/validators/token.validators"
 import { BackupRoutes } from "./src/domain/backup/routes/backup.routes"
 import { ServerRoutes } from "./src/domain/server/routes/server.routes"
 import { ZdmRoutes } from "./src/domain/zdm/routes/zdm.routes"
-import { errorHandler, notFoundHandler } from "./src/errors/handler/error-handler"
+import { errorHandler, notFoundHandler } from "./src/errors"
 import { requestLogger } from "./src/middlewares/logging/requestLogger"
 import { logger, morganMiddleware } from "./src/utils/logger/logger.util"
 
@@ -26,6 +26,7 @@ class App {
     this.setupHealthCheck()
     this.setupRoutes()
     this.setupErrorHandling()
+    this.setOpenApi()
 
     // 서버 시작 로깅
     logger.info(`애플리케이션이 ${config.environment} 모드로 초기화되었습니다.`)
@@ -68,19 +69,11 @@ class App {
   }
 
   private async setupRoutes(): Promise<void> {
-    try {
-      this.app.use(`${config.apiPrefix}/token`, new AuthRoutes().router)
-      this.app.use(`${config.apiPrefix}/servers`, validateToken, new ServerRoutes().router)
-      this.app.use(`${config.apiPrefix}/servers`, validateToken, new ServerRoutes().router)
-      this.app.use(`${config.apiPrefix}/zdms`, validateToken, new ZdmRoutes().router)
-      this.app.use(`${config.apiPrefix}/backups`, new BackupRoutes().router)
-
-      // OpenAPI 설정
-      const openApiConfig = new OpenApiConfig()
-      await openApiConfig.setupOpenApi({ app: this.app as any })
-    } catch (error) {
-      logger.error("API 설정 실패", error)
-    }
+    this.app.use(`${config.apiPrefix}/token`, new AuthRoutes().router)
+    this.app.use(`${config.apiPrefix}/servers`, validateToken, new ServerRoutes().router)
+    this.app.use(`${config.apiPrefix}/servers`, validateToken, new ServerRoutes().router)
+    this.app.use(`${config.apiPrefix}/zdms`, validateToken, new ZdmRoutes().router)
+    this.app.use(`${config.apiPrefix}/backups`, new BackupRoutes().router)
   }
 
   private setupErrorHandling(): void {
@@ -92,6 +85,16 @@ class App {
     this.app.use(errorHandler)
 
     logger.info("에러 핸들러가 설정되었습니다.")
+  }
+
+  private async setOpenApi(): Promise<void> {
+    try {
+      // OpenAPI 설정
+      const openApiConfig = new OpenApiConfig()
+      await openApiConfig.setupOpenApi({ app: this.app as any })
+    } catch (error) {
+      logger.error("API 설정 실패", error)
+    }
   }
 }
 
