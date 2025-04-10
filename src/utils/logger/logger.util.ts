@@ -6,7 +6,10 @@ import DailyRotateFile from "winston-daily-rotate-file"
 import { config } from "../../config/config"
 
 // 로그 디렉토리 생성
-const logDir = config.logDir
+let logDir = config.logDir
+if (process.env.NODE_ENV === "development") {
+  logDir = path.join(logDir, "development")
+}
 if (!fs.existsSync(logDir)) {
   fs.mkdirSync(logDir, { recursive: true })
 }
@@ -40,9 +43,7 @@ const logFormat = winston.format.combine(
   winston.format.printf((info) => {
     const { timestamp, level, message, ...meta } = info
     // 메타데이터가 있으면 포함
-    const metaStr = Object.keys(meta).length
-      ? ` | ${JSON.stringify(meta)}`
-      : ''
+    const metaStr = Object.keys(meta).length ? ` | ${JSON.stringify(meta)}` : ""
     return `${timestamp} ${level}: ${message}${metaStr}`
   })
 )
@@ -54,16 +55,14 @@ const consoleFormat = winston.format.combine(
   winston.format.printf((info) => {
     const { timestamp, level, message, ...meta } = info
     // 메타데이터가 있으면 포함
-    const metaStr = Object.keys(meta).length
-      ? ` | ${JSON.stringify(meta)}`
-      : ''
+    const metaStr = Object.keys(meta).length ? ` | ${JSON.stringify(meta)}` : ""
     return `${timestamp} ${level}: ${message}${metaStr}`
   })
 )
 
 // 일별 로테이팅 파일 전송자 설정
 const fileRotateTransport = new DailyRotateFile({
-  filename: path.join(logDir, "/main/application-%DATE%.log"),
+  filename: path.join(logDir, `/main/application-%DATE%.log`),
   datePattern: "YYYY-MM-DD",
   maxFiles: "14d",
   maxSize: "20m",
@@ -73,7 +72,7 @@ const fileRotateTransport = new DailyRotateFile({
 
 // 에러 로그용 일별 로테이팅 파일 전송자 설정
 const errorFileRotateTransport = new DailyRotateFile({
-  filename: path.join(logDir, "/error/error-%DATE%.log"),
+  filename: path.join(logDir, `/error/error-%DATE%.log`),
   datePattern: "YYYY-MM-DD",
   maxFiles: "14d",
   maxSize: "20m",
@@ -110,4 +109,4 @@ export const stream: StreamOptions = {
 export const morganMiddleware = morgan(config.logFormat, { stream })
 
 // 로깅 초기화 메시지
-logger.info(`로그 시스템 초기화 완료 (${config.environment} 환경)`)
+logger.info(`로그 시스템 초기화 완료 (${config.environment} 환경) || 저장 경로 ${logDir}`)

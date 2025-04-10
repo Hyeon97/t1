@@ -11,7 +11,7 @@ import { BackupRoutes } from "./src/domain/backup/routes/backup.routes"
 import { ServerRoutes } from "./src/domain/server/routes/server.routes"
 import { ZdmRoutes } from "./src/domain/zdm/routes/zdm.routes"
 import { errorHandler, notFoundHandler } from "./src/errors"
-import { requestLogger } from "./src/middlewares/logging/requestLogger"
+import { asyncContextMiddleware } from "./src/middlewares/logging/asyncContextMiddleware"
 import { logger, morganMiddleware } from "./src/utils/logger/logger.util"
 
 class App {
@@ -34,7 +34,7 @@ class App {
 
   private configureMiddleware(): void {
     // 요청 ID 생성 및 로깅 미들웨어 (가장 먼저 등록)
-    this.app.use(requestLogger)
+    this.app.use(asyncContextMiddleware)
     // 로깅 미들웨어 등록 (가장 먼저 등록하여 모든 요청 로깅)
     this.app.use(morganMiddleware)
     // JSON 파싱
@@ -77,7 +77,6 @@ class App {
   }
 
   private setupErrorHandling(): void {
-
     // 404 에러 처리
     this.app.use(notFoundHandler)
 
