@@ -1,6 +1,11 @@
-import { createErrorChainItem, ErrorChainItem, ErrorCode, ErrorLayer, ErrorParams, errorToString } from ".."
+import { createErrorChainItem, errorToString } from ".."
+import { ErrorChainItem, ErrorCode, ErrorLayer, ErrorParams } from "../error-types"
 import { getStatusCodeFromErrorCode } from "../status-code-mapper"
 
+/**
+ * 모든 계층별 에러의 기본 클래스
+ * 에러 체인 관리 및 공통 팩토리 메서드 제공
+ */
 export class BaseError extends Error {
   public readonly errorChain: ErrorChainItem[]
   public readonly statusCode: number
@@ -8,15 +13,7 @@ export class BaseError extends Error {
   public readonly layer: ErrorLayer
   public readonly metadata?: Record<string, any>
 
-  constructor({
-    errorCode,
-    layer,
-    functionName,
-    message,
-    cause,
-    metadata,
-    statusCode
-  }: ErrorParams) {
+  constructor({ errorCode, layer, functionName, message, cause, metadata, statusCode }: ErrorParams) {
     super(message)
     this.name = this.constructor.name
     this.errorCode = errorCode
@@ -37,8 +34,8 @@ export class BaseError extends Error {
         errorCode,
         statusCode: this.statusCode,
         message,
-        details
-      })
+        details,
+      }),
     ]
 
     // 원인 에러 정보 추가 (단순화: 원본 에러만 추가)
@@ -50,7 +47,7 @@ export class BaseError extends Error {
         // 일반 Error인 경우 기본 정보 저장
         details.originalError = {
           name: cause.name,
-          message: cause.message
+          message: cause.message,
         }
       }
     }
@@ -67,7 +64,7 @@ export class BaseError extends Error {
   static createFrom<T extends BaseError>(
     constructor: new (params: ErrorParams) => T,
     params: Omit<ErrorParams, "errorCode" | "layer"> & {
-      errorCode: ErrorCode,
+      errorCode: ErrorCode
       layer: ErrorLayer
     }
   ): T {
@@ -75,114 +72,77 @@ export class BaseError extends Error {
   }
 
   // 400 Bad Request
-  static badRequest<T extends BaseError>(
-    constructor: new (params: ErrorParams) => T,
-    params: Omit<ErrorParams, "errorCode" | "statusCode"> & {
-      layer: ErrorLayer
-    }
-  ): T {
+  static badRequest<T extends BaseError>(constructor: new (params: ErrorParams) => T, params: Omit<ErrorParams, "errorCode" | "statusCode">): T {
     return new constructor({
       ...params,
       errorCode: ErrorCode.BAD_REQUEST,
-      statusCode: 400
+      statusCode: 400,
     })
   }
 
   // 401 Unauthorized
-  static unauthorized<T extends BaseError>(
-    constructor: new (params: ErrorParams) => T,
-    params: Omit<ErrorParams, "errorCode" | "statusCode"> & {
-      layer: ErrorLayer
-    }
-  ): T {
+  static unauthorized<T extends BaseError>(constructor: new (params: ErrorParams) => T, params: Omit<ErrorParams, "errorCode" | "statusCode">): T {
     return new constructor({
       ...params,
       errorCode: ErrorCode.UNAUTHORIZED,
-      statusCode: 401
+      statusCode: 401,
     })
   }
 
   // 403 Forbidden
-  static forbidden<T extends BaseError>(
-    constructor: new (params: ErrorParams) => T,
-    params: Omit<ErrorParams, "errorCode" | "statusCode"> & {
-      layer: ErrorLayer
-    }
-  ): T {
+  static forbidden<T extends BaseError>(constructor: new (params: ErrorParams) => T, params: Omit<ErrorParams, "errorCode" | "statusCode">): T {
     return new constructor({
       ...params,
       errorCode: ErrorCode.FORBIDDEN,
-      statusCode: 403
+      statusCode: 403,
     })
   }
 
   // 404 Not Found
-  static notFound<T extends BaseError>(
-    constructor: new (params: ErrorParams) => T,
-    params: Omit<ErrorParams, "errorCode" | "statusCode"> & {
-      layer: ErrorLayer
-    }
-  ): T {
+  static notFound<T extends BaseError>(constructor: new (params: ErrorParams) => T, params: Omit<ErrorParams, "errorCode" | "statusCode">): T {
     return new constructor({
       ...params,
       errorCode: ErrorCode.NOT_FOUND,
-      statusCode: 404
+      statusCode: 404,
     })
   }
 
   // 500 Internal Server Error
-  static internalError<T extends BaseError>(
-    constructor: new (params: ErrorParams) => T,
-    params: Omit<ErrorParams, "errorCode" | "statusCode"> & {
-      layer: ErrorLayer
-    }
-  ): T {
+  static internalError<T extends BaseError>(constructor: new (params: ErrorParams) => T, params: Omit<ErrorParams, "errorCode" | "statusCode">): T {
     return new constructor({
       ...params,
       errorCode: ErrorCode.INTERNAL_ERROR,
-      statusCode: 500
+      statusCode: 500,
     })
   }
 
   // 400 Validation Error
-  static validationError<T extends BaseError>(
-    constructor: new (params: ErrorParams) => T,
-    params: Omit<ErrorParams, "errorCode" | "statusCode"> & {
-      layer: ErrorLayer
-    }
-  ): T {
+  static validationError<T extends BaseError>(constructor: new (params: ErrorParams) => T, params: Omit<ErrorParams, "errorCode" | "statusCode">): T {
     return new constructor({
       ...params,
       errorCode: ErrorCode.VALIDATION_ERROR,
-      statusCode: 400
+      statusCode: 400,
     })
   }
 
   // 422 Business Rule Violation
   static businessRuleViolation<T extends BaseError>(
     constructor: new (params: ErrorParams) => T,
-    params: Omit<ErrorParams, "errorCode" | "statusCode"> & {
-      layer: ErrorLayer
-    }
+    params: Omit<ErrorParams, "errorCode" | "statusCode">
   ): T {
     return new constructor({
       ...params,
       errorCode: ErrorCode.BUSINESS_RULE_VIOLATION,
-      statusCode: 422
+      statusCode: 422,
     })
   }
 
   // 500 Database Error
-  static databaseError<T extends BaseError>(
-    constructor: new (params: ErrorParams) => T,
-    params: Omit<ErrorParams, "errorCode" | "statusCode"> & {
-      layer: ErrorLayer
-    }
-  ): T {
+  static databaseError<T extends BaseError>(constructor: new (params: ErrorParams) => T, params: Omit<ErrorParams, "errorCode" | "statusCode">): T {
     return new constructor({
       ...params,
       errorCode: ErrorCode.DATABASE_ERROR,
-      statusCode: 500
+      statusCode: 500,
     })
   }
 
@@ -190,19 +150,20 @@ export class BaseError extends Error {
   static fromError<T extends BaseError>(
     constructor: new (params: ErrorParams) => T,
     error: unknown,
-    params: Omit<ErrorParams, "errorCode" | "statusCode" | "message" | "cause"> & {
-      layer: ErrorLayer,
+    params: Omit<ErrorParams, "errorCode" | "statusCode" | "cause"> & {
+      layer: ErrorLayer
+      message?: string // message를 선택적 속성으로 포함
       errorCode?: ErrorCode
     }
   ): T {
-    const message = error instanceof Error ? error.message : errorToString(error)
+    const errorMessage = error instanceof Error ? error.message : errorToString(error)
 
     return new constructor({
       ...params,
-      message: params.message || message,
+      message: params.message || errorMessage,
       cause: error,
       errorCode: params.errorCode || ErrorCode.UNKNOWN_ERROR,
-      statusCode: error instanceof BaseError ? error.statusCode : 500
+      statusCode: error instanceof BaseError ? error.statusCode : 500,
     })
   }
 }
