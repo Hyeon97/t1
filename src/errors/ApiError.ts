@@ -1,21 +1,23 @@
-import { ErrorCode, ErrorIOptions, ErrorOptions } from "./error-types"
+import { BaseError, ErrorCode, ErrorLayer, ErrorOptions } from "."
 
-export class ApiError extends Error {
-  statusCode: number
-  errorCode: ErrorCode
+
+export class ApiError extends BaseError {
   details?: any
 
   constructor({ name, statusCode, message, errorCode, details }: ErrorOptions) {
-    super(message || "")
-    this.statusCode = statusCode
-    this.errorCode = errorCode
+    super({
+      errorCode,
+      layer: ErrorLayer.CONTROLLER, // API 에러는 컨트롤러 계층에서 발생한 것으로 간주
+      functionName: "apiRequest",
+      message: message || "",
+      statusCode
+    })
+
     this.details = details
     this.name = name || this.constructor.name
-    Error.captureStackTrace(this, this.constructor)
   }
-
   // 일반적인 에러 팩토리 메서드
-  static badRequest({ message, details }: ErrorIOptions): ApiError {
+  static badRequest({ message, details }: ErrorOptions): ApiError {
     return new ApiError({
       statusCode: 400,
       message,
@@ -24,7 +26,7 @@ export class ApiError extends Error {
     })
   }
 
-  static unauthorized({ message, details }: ErrorIOptions): ApiError {
+  static unauthorized({ message, details }: ErrorOptions): ApiError {
     return new ApiError({
       statusCode: 401,
       message,
@@ -33,7 +35,7 @@ export class ApiError extends Error {
     })
   }
 
-  static forbidden({ message, details }: ErrorIOptions): ApiError {
+  static forbidden({ message, details }: ErrorOptions): ApiError {
     return new ApiError({
       statusCode: 403,
       message,
@@ -42,7 +44,7 @@ export class ApiError extends Error {
     })
   }
 
-  static notFound({ message, details }: ErrorIOptions): ApiError {
+  static notFound({ message, details }: ErrorOptions): ApiError {
     return new ApiError({
       statusCode: 404,
       message,
@@ -51,7 +53,7 @@ export class ApiError extends Error {
     })
   }
 
-  static methodNotAllowed({ message, details }: ErrorIOptions): ApiError {
+  static methodNotAllowed({ message, details }: ErrorOptions): ApiError {
     return new ApiError({
       statusCode: 405,
       message,
@@ -60,7 +62,7 @@ export class ApiError extends Error {
     })
   }
 
-  static conflict({ message, details }: ErrorIOptions): ApiError {
+  static conflict({ message, details }: ErrorOptions): ApiError {
     return new ApiError({
       statusCode: 409,
       message,
@@ -69,7 +71,7 @@ export class ApiError extends Error {
     })
   }
 
-  static internal({ message, details }: ErrorIOptions): ApiError {
+  static internal({ message, details }: ErrorOptions): ApiError {
     return new ApiError({
       statusCode: 500,
       message,
@@ -79,7 +81,7 @@ export class ApiError extends Error {
   }
 
   // 서비스 이용 불가 오류
-  static serviceUnavailable({ message, details }: ErrorIOptions): ApiError {
+  static serviceUnavailable({ message, details }: ErrorOptions): ApiError {
     return new ApiError({
       statusCode: 503,
       message,
@@ -89,7 +91,7 @@ export class ApiError extends Error {
   }
 
   // 비즈니스 도메인 에러 팩토리 메서드
-  static validationError({ message, details }: ErrorIOptions): ApiError {
+  static validationError({ message, details }: ErrorOptions): ApiError {
     return new ApiError({
       statusCode: 400,
       message,
@@ -98,7 +100,7 @@ export class ApiError extends Error {
     })
   }
 
-  static resourceExists({ message, details }: ErrorIOptions): ApiError {
+  static resourceExists({ message, details }: ErrorOptions): ApiError {
     return new ApiError({
       statusCode: 409,
       message,
@@ -107,7 +109,7 @@ export class ApiError extends Error {
     })
   }
 
-  static databaseError({ message, details }: ErrorIOptions): ApiError {
+  static databaseError({ message, details }: ErrorOptions): ApiError {
     return new ApiError({
       statusCode: 500,
       message,
