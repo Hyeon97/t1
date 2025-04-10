@@ -1,5 +1,4 @@
-import { ErrorCode } from "./error-codes"
-import { ErrorIOptions, ErrorOptions } from "./interfaces"
+import { ErrorCode, ErrorIOptions, ErrorOptions } from "./error-types"
 
 export class ApiError extends Error {
   statusCode: number

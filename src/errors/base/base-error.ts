@@ -1,4 +1,6 @@
-import { createErrorChainItem, ErrorChainItem, ErrorLayer } from "../interfaces"
+import { ErrorChainItem, ErrorLayer } from "../error-types"
+import { createErrorChainItem } from "../interfaces"
+
 
 export interface BaseErrorOptions {
   errorCode: string
