@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken"
 import { CreateTokenData, TokenVerifySuccessResult } from "../domain/auth/interface/token"
 import { UtilityError } from "../errors/utility/utility-error"
+import { ErrorCode } from "../errors"
 
 export class JwtUtil {
   /**
@@ -51,15 +52,15 @@ export class JwtUtil {
         throw UtilityError.jwtVerifyError({
           functionName: "verifyToken",
           message: "만료된 토큰입니다",
+          errorCode: ErrorCode.JWT_EXPIRED,
           cause: error,
-          metadata: { errorCode: "JWT_EXPIRED", expiredAt: error.expiredAt },
         })
       } else if (error instanceof jwt.JsonWebTokenError) {
         throw UtilityError.jwtVerifyError({
           functionName: "verifyToken",
           message: "유효하지 않은 토큰입니다",
+          errorCode: ErrorCode.JWT_INVALID,
           cause: error,
-          metadata: { errorCode: "JWT_INVALID" },
         })
       }
 
