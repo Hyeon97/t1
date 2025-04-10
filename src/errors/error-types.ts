@@ -51,7 +51,7 @@ export enum ErrorCode {
   PARSING_ERROR = "PARSING_ERROR",
 
   // 기타
-  UNKNOWN_ERROR = "UNKNOWN_ERROR"
+  UNKNOWN_ERROR = "UNKNOWN_ERROR",
 }
 
 // 에러 발생 계층 타입
@@ -62,18 +62,18 @@ export enum ErrorLayer {
   CONTROLLER = "controller",
   MIDDLEWARE = "middleware",
   UTILITY = "utility",
-  UNKNOWN = "unknown"
+  UNKNOWN = "unknown",
 }
 
 // 기본 에러 파라미터 인터페이스
 export interface ErrorParams {
-  errorCode: ErrorCode
-  layer: ErrorLayer
-  functionName: string
-  message: string
-  statusCode?: number
-  cause?: unknown
-  metadata?: Record<string, any>
+  errorCode: ErrorCode // 서버 내부 에러 식별 코드
+  layer: ErrorLayer //  에러가 발생한 계층
+  functionName: string // 에러가 발생한 함수 이름
+  message: string //  에러 메세지
+  statusCode?: number //  HTTP 상태 코드, API 응답에 사용됨
+  cause?: unknown //  에러 원인 ( 에러 원본 )
+  metadata?: Record<string, any> // 에러와 관련된 추가 정보 객체
 }
 
 // 에러 응답 인터페이스
