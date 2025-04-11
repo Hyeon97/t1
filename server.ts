@@ -59,7 +59,7 @@ const startServer = async (): Promise<void> => {
       logger.info(`환경: ${environment}`)
     })
   } catch (error) {
-    logger.error("서버 시작 중 오류 발생했습니다:", error)
+    logger.error("서버 시작 중 오류 발생:", error)
     process.exit(1)
   }
 }
