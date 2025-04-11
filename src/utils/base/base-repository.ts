@@ -1,9 +1,8 @@
 import { ResultSetHeader } from "mysql2/promise"
 import { DatabaseOperations, TransactionManager } from "../../database/connection"
-import { DatabaseError } from "../../errors/database/database-error"
+import { DatabaseError } from "../../errors"
 import { RepositoryError } from "../../errors/repository/repository-error"
 import { ContextLogger } from "../logger/logger.custom"
-import { ErrorLayer } from "../../errors"
 
 /**
  * SQL 필드 타입 정의
@@ -207,8 +206,8 @@ export class BaseRepository {
     try {
       return await DatabaseOperations.executeQuery<T>({ sql, params, request })
     } catch (error) {
-      // if (error instanceof DatabaseError) {throw RepositoryError.fromDatabaseError({ error, functionName }) }
-      // throw RepositoryError.fromError({ error, functionName })
+      // if (error instanceof DatabaseError) {throw RepositoryError.fromDatabaseError({ error, method }) }
+      // throw RepositoryError.fromError({ error, method })
       //  순수 DB 관련 에러만 리턴
       throw error
     }
@@ -221,9 +220,9 @@ export class BaseRepository {
     try {
       return await DatabaseOperations.executeQuerySingle<T>({ sql, params, request })
     } catch (error) {
-      // if (error instanceof DatabaseError) {throw RepositoryError.fromDatabaseError({ error, functionName }) }
+      // if (error instanceof DatabaseError) {throw RepositoryError.fromDatabaseError({ error, method }) }
       // if (error instanceof RepositoryError) {throw error }
-      // throw RepositoryError.fromError({ error, functionName })
+      // throw RepositoryError.fromError({ error, method })
       //  순수 DB 관련 에러만 리턴
       throw error
     }
@@ -257,10 +256,10 @@ export class BaseRepository {
 
       return result
     } catch (error) {
-      const functionName = request.split(".").pop() || "insert"
+      const method = request.split(".").pop() || "insert"
       return this.handleRepositoryError({
         error,
-        functionName,
+        method,
         message: `${this.repositoryName} 데이터 추가 중 오류가 발생했습니다`,
       })
     }
@@ -298,10 +297,10 @@ export class BaseRepository {
 
       return (result?.affectedRows || 0) > 0
     } catch (error) {
-      const functionName = request.split(".").pop() || "update"
+      const method = request.split(".").pop() || "update"
       return this.handleRepositoryError({
         error,
-        functionName,
+        method,
         message: `${this.repositoryName} 데이터 업데이트 중 오류가 발생했습니다`,
       })
     }
@@ -333,35 +332,52 @@ export class BaseRepository {
 
       return (result?.affectedRows || 0) > 0
     } catch (error) {
-      const functionName = request.split(".").pop() || "delete"
+      const method = request.split(".").pop() || "delete"
       return this.handleRepositoryError({
         error,
-        functionName,
+        method,
         message: `${this.repositoryName} 데이터 삭제 중 오류가 발생했습니다`,
       })
     }
   }
 
   /**
-   * 에러 로깅 및 변환
+   * Repository 에러 처리
    */
-  protected handleRepositoryError({ error, functionName, message }: { error: unknown; functionName: string; message: string }): never {
-    //  repository 계층보다 더 아래인 계층에서 발생한 에러인 경우
+  protected handleRepositoryError({ error, method, message }: { error: unknown; method: string; message: string }): never {
+    // database layer에서 발생한 에러 처리
     if (error instanceof DatabaseError) {
-      throw RepositoryError.fromDatabaseError({ error, functionName })
+      throw RepositoryError.fromDatabaseError({ error, method })
     }
-    //  로깅
-    ContextLogger.debug({
-      message: `[Repository-Layer] ${this.repositoryName}.${functionName}() 오류 발생`,
-      meta: {
-        error: error instanceof Error ? error.message : String(error),
-      },
-    })
-    //  Repository 계층에서 발생한 처리된 에러인 경우 그냥 상위 계층으로 전송
-    if (error instanceof RepositoryError) {
-      throw error
+    //  repository layer에서 발생한 에러만 로깅
+    if (error instanceof Error && error instanceof RepositoryError) {
+      ContextLogger.debug({
+        message: `[Repository-Layer] ${this.repositoryName}.${method}() 오류 발생`,
+        meta: {
+          error: error instanceof Error ? error.message : String(error),
+        },
+      })
+    } else if (error instanceof Error && !(error instanceof RepositoryError)) {
+      //  일반 에러인 경우 Repository 에러로 변경
+      error = RepositoryError.fromError<RepositoryError>(error, { method, message })
     }
-    //  그 외의 처리되지 않은 에러는 RepositoryError로 변환하여 전송
-    throw RepositoryError.fromError<RepositoryError>(error, { functionName, message, layer: ErrorLayer.REPOSITORY })
+    throw error
+    // //  repository 계층보다 더 아래인 계층에서 발생한 에러인 경우
+    // if (error instanceof DatabaseError) {
+    //   throw RepositoryError.fromDatabaseError({ error, method })
+    // }
+    // //  로깅
+    // ContextLogger.debug({
+    //   message: `[Repository-Layer] ${this.repositoryName}.${method}() 오류 발생`,
+    //   meta: {
+    //     error: error instanceof Error ? error.message : String(error),
+    //   },
+    // })
+    // //  Repository 계층에서 발생한 처리된 에러인 경우 그냥 상위 계층으로 전송
+    // if (error instanceof RepositoryError) {
+    //   throw error
+    // }
+    // //  그 외의 처리되지 않은 에러는 RepositoryError로 변환하여 전송
+    // throw RepositoryError.fromError<RepositoryError>(error, { method, message, layer: ErrorLayer.REPOSITORY })
   }
 }

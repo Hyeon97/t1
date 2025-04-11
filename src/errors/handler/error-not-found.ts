@@ -13,9 +13,9 @@ export const notFoundHandler = (req: Request, res: Response, next: NextFunction)
     meta: { url: req.originalUrl },
   })
   // 404 에러 생성
-  const error = ApiError.notFound(undefined, { functionName: "notFoundHandler", message, layer: ErrorLayer.MIDDLEWARE })
+  const error = ApiError.notFound(undefined, { method: "notFoundHandler", message, layer: ErrorLayer.MIDDLEWARE })
   // ControllerError.resourceNotFoundError({
-  //   functionName: "notFoundHandler",
+  //   method: "notFoundHandler",
   //   message,
   //   metadata: { url: req.originalUrl }
   // })

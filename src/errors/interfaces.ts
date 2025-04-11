@@ -5,7 +5,7 @@ import { ErrorChainItem, ErrorCode, ErrorLayer, UnifiedError } from "."
  */
 export function createErrorChainItem({
   layer,
-  functionName,
+  method,
   request,
   errorCode,
   statusCode,
@@ -13,7 +13,7 @@ export function createErrorChainItem({
   details,
 }: {
   layer: ErrorLayer
-  functionName: string
+  method: string
   request?: string
   errorCode: ErrorCode
   statusCode: number
@@ -22,7 +22,7 @@ export function createErrorChainItem({
 }): ErrorChainItem {
   return {
     layer,
-    functionName,
+    method,
     request,
     errorCode,
     statusCode,

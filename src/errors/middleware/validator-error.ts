@@ -1,5 +1,5 @@
+import { BaseError, ErrorCode, ErrorLayer, ErrorParams } from ".."
 import { ControllerError } from "../controller/controller-error"
-import { BaseError, ErrorParams, ErrorLayer, ErrorCode } from ".."
 
 /**
  * 검증 미들웨어 계층의 에러를 처리하는 클래스
@@ -24,7 +24,7 @@ export class ValidatorError extends BaseError {
       return error as unknown as T
     } else if (error instanceof ControllerError) {
       return ValidatorError.validationError(ValidatorError, {
-        functionName: params.functionName,
+        method: params.method,
         message: error.message,
       }) as unknown as T
     } else {
@@ -39,7 +39,7 @@ export class ValidatorError extends BaseError {
   static validationError<T extends BaseError = ValidatorError>(
     constructor: new (params: ErrorParams) => T = ValidatorError as any,
     params: Omit<ErrorParams, "errorCode" | "statusCode" | "layer"> = {
-      functionName: "",
+      method: "",
       message: "",
     }
   ): T {
@@ -52,7 +52,7 @@ export class ValidatorError extends BaseError {
   // 토큰 필요
   static tokenRequired(
     params: Omit<ErrorParams, "errorCode" | "statusCode" | "layer"> = {
-      functionName: "",
+      method: "",
       message: "",
     }
   ): ValidatorError {
@@ -68,7 +68,7 @@ export class ValidatorError extends BaseError {
   // 유효하지 않은 토큰
   static tokenInvalid(
     params: Omit<ErrorParams, "errorCode" | "statusCode" | "layer"> = {
-      functionName: "",
+      method: "",
       message: "",
     }
   ): ValidatorError {
@@ -84,7 +84,7 @@ export class ValidatorError extends BaseError {
   // 만료된 토큰
   static tokenExpired(
     params: Omit<ErrorParams, "errorCode" | "statusCode" | "layer"> = {
-      functionName: "",
+      method: "",
       message: "",
     }
   ): ValidatorError {
@@ -101,7 +101,7 @@ export class ValidatorError extends BaseError {
   static permissionDenied<T extends BaseError = ValidatorError>(
     constructor: new (params: ErrorParams) => T = ValidatorError as any,
     params: Omit<ErrorParams, "errorCode" | "statusCode" | "layer"> = {
-      functionName: "",
+      method: "",
       message: "",
     }
   ): T {
@@ -115,7 +115,7 @@ export class ValidatorError extends BaseError {
   static internalError<T extends BaseError = ValidatorError>(
     constructor: new (params: ErrorParams) => T = ValidatorError as any,
     params: Omit<ErrorParams, "errorCode" | "statusCode" | "layer"> = {
-      functionName: "",
+      method: "",
       message: "",
     }
   ): T {

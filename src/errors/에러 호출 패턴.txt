@@ -15,7 +15,7 @@ throw ApiError.badRequest(ApiError, {
 // 4. 완전한 커스터마이징
 throw ApiError.badRequest(ApiError, {
   layer: ErrorLayer.CONTROLLER,
-  functionName: "validateUserInput",
+  method: "validateUserInput",
   message: "유효하지 않은 요청입니다",
   metadata: { details: { field: "email" } }
 });

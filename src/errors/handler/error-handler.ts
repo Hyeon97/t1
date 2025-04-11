@@ -1,31 +1,24 @@
 import { NextFunction, Request, Response } from "express"
+import { ApiError, BaseError, ErrorCode, ErrorLayer, ErrorResponse, getUserFriendlyMessage, RequestInfo } from ".."
 import { ContextLogger } from "../../utils/logger/logger.custom"
-import { ApiError, BaseError, ErrorCode, ErrorLayer, ErrorResponse, RequestInfo, UnifiedError, getUserFriendlyMessage } from ".."
-import { createUnifiedError } from "../interfaces"
 
 /**
  * 에러로부터 통합 에러 객체 생성
  */
-function buildUnifiedError(err: Error): UnifiedError {
+function buildUnifiedError(err: Error) {
   let statusCode = 500
   let clientMessage = "서버 내부 오류가 발생했습니다"
   let clientErrorCode = ErrorCode.INTERNAL_ERROR
   let errorChain: any[] = []
+  let detail = null
 
   // BaseError 계열의 모든 에러 처리 (모든 계층별 에러가 이를 상속함)
   if (err instanceof BaseError) {
     // 상태 코드를 직접 사용
     statusCode = err.statusCode
     clientErrorCode = err.errorCode
-
-    // 에러 체인 정보 사용
-    if (err.errorChain && err.errorChain.length > 0) {
-      errorChain = err.errorChain
-      // 사용자 친화적인 메시지 결정
-      clientMessage = getUserFriendlyMessage(err.errorCode)
-    } else {
-      clientMessage = err.message
-    }
+    clientMessage = `${err.message} || ${getUserFriendlyMessage({ errorCode: err.errorCode })} `
+    detail = err.metadata
   }
   // ApiError 호환성 유지
   else if (err instanceof ApiError) {
@@ -35,7 +28,7 @@ function buildUnifiedError(err: Error): UnifiedError {
     errorChain = [
       {
         layer: ErrorLayer.CONTROLLER,
-        functionName: "handleRequest",
+        method: "handleRequest",
         errorCode: clientErrorCode,
         statusCode: err.statusCode,
         message: clientMessage,
@@ -52,7 +45,7 @@ function buildUnifiedError(err: Error): UnifiedError {
       errorChain = [
         {
           layer: ErrorLayer.MIDDLEWARE,
-          functionName: "openApi",
+          method: "openApi",
           errorCode: ErrorCode.METHOD_NOT_ALLOWED,
           statusCode: 405,
           message: err.message || "HTTP method not allowed",
@@ -62,7 +55,7 @@ function buildUnifiedError(err: Error): UnifiedError {
       errorChain = [
         {
           layer: ErrorLayer.UNKNOWN,
-          functionName: "unknownFunction",
+          method: "unknownFunction",
           errorCode: ErrorCode.UNKNOWN_ERROR,
           statusCode: 500,
           message: err.message || "알 수 없는 오류",
@@ -75,12 +68,13 @@ function buildUnifiedError(err: Error): UnifiedError {
     }
   }
 
-  return createUnifiedError({
+  return {
     statusCode,
     clientMessage,
     clientErrorCode,
-    errorChain,
-  })
+    detail,
+    timestamp: new Date().toISOString(),
+  }
 }
 
 /**
@@ -94,28 +88,19 @@ export const errorHandler = (err: Error, req: Request, res: Response, next: Next
     ip: req.ip || "unknown",
     userId: (req as any).user?.id || "anonymous",
   }
-
+  // console.dir(err, { depth: null })
   // 통합 에러 객체 생성
   const unifiedError = buildUnifiedError(err)
+  // console.dir(unifiedError, { depth: null })
 
   // 오류 심각도에 따른 로깅 레벨 조정
   if (unifiedError.statusCode >= 500) {
     ContextLogger.error({
       message: `[${unifiedError.clientErrorCode}] ${unifiedError.clientMessage}`,
-      meta: {
-        request: requestInfo,
-        errorChain: unifiedError.errorChain,
-        statusCode: unifiedError.statusCode,
-      },
     })
   } else if (unifiedError.statusCode >= 400) {
     ContextLogger.warn({
       message: `[${unifiedError.clientErrorCode}] ${unifiedError.clientMessage}`,
-      meta: {
-        request: requestInfo,
-        errorChain: unifiedError.errorChain,
-        statusCode: unifiedError.statusCode,
-      },
     })
   }
 
@@ -133,26 +118,26 @@ export const errorHandler = (err: Error, req: Request, res: Response, next: Next
   if (process.env.NODE_ENV !== "production") {
     errorResponse.error.details = {
       statusCode: unifiedError.statusCode,
-      errorChain: unifiedError.errorChain,
+      ...unifiedError.detail
     }
   } else {
     // 프로덕션 환경에서는 제한된 세부 정보만 제공
-    if (unifiedError.errorChain && unifiedError.errorChain.length > 0) {
-      const lastError = unifiedError.errorChain[unifiedError.errorChain.length - 1]
-      const details = lastError.details || {}
+    // if (unifiedError.errorChain && unifiedError.errorChain.length > 0) {
+    //   const lastError = unifiedError.errorChain[unifiedError.errorChain.length - 1]
+    //   const details = lastError.details || {}
 
-      // 민감하지 않은 정보만 포함
-      if (Array.isArray(details)) {
-        errorResponse.error.details = details
-      } else {
-        // 민감한 정보 제거
-        const safeDetails = { ...details }
-        delete safeDetails.stack
-        delete safeDetails.cause
+    //   // 민감하지 않은 정보만 포함
+    //   if (Array.isArray(details)) {
+    //     errorResponse.error.details = details
+    //   } else {
+    //     // 민감한 정보 제거
+    //     const safeDetails = { ...details }
+    //     delete safeDetails.stack
+    //     delete safeDetails.cause
 
-        errorResponse.error.details = safeDetails
-      }
-    }
+    //     errorResponse.error.details = safeDetails
+    //   }
+    // }
   }
 
   // 상태 코드와 함께 응답 반환

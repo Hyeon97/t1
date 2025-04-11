@@ -1,5 +1,5 @@
-import { createErrorChainItem, errorToString } from ".."
-import { ErrorChainItem, ErrorCode, ErrorLayer, ErrorParams } from "../error-types"
+import { errorToString } from ".."
+import { ErrorCode, ErrorLayer, ErrorParams } from "../error-types"
 import { getStatusCodeFromErrorCode } from "../status-code-mapper"
 
 /**
@@ -7,50 +7,51 @@ import { getStatusCodeFromErrorCode } from "../status-code-mapper"
  * 에러 체인 관리 및 공통 팩토리 메서드 제공
  */
 export class BaseError extends Error {
-  public readonly errorChain: ErrorChainItem[]
+  // public readonly errorChain: ErrorChainItem[]
   public readonly statusCode: number
   public readonly errorCode: ErrorCode
-  public readonly layer: ErrorLayer
+  // public readonly layer: ErrorLayer
   public readonly metadata?: Record<string, any>
 
-  constructor({ errorCode, layer, functionName, message, cause, metadata, statusCode }: ErrorParams) {
+  constructor({ errorCode, layer, method, message, cause, metadata, statusCode }: ErrorParams) {
     super(message)
     this.name = this.constructor.name
     this.errorCode = errorCode
-    this.layer = layer
+    // this.layer = layer
 
     // 상태 코드가 명시적으로 제공되지 않은 경우 에러 코드에서 유추
     this.statusCode = statusCode || getStatusCodeFromErrorCode(errorCode)
-    this.metadata = metadata
+    this.metadata = { ...metadata, method, layer }
 
-    // 상세 정보 구성
-    const details: Record<string, any> = { ...metadata }
+    // // 상세 정보 구성
+    // const details: Record<string, any> = { ...metadata }
 
-    // 에러 체인 생성 (단순화: 원본 에러 + 현재 에러만 유지)
-    this.errorChain = [
-      createErrorChainItem({
-        layer,
-        functionName,
-        errorCode,
-        statusCode: this.statusCode,
-        message,
-        details,
-      }),
-    ]
 
-    // 원인 에러 정보 추가 (단순화: 원본 에러만 추가)
-    if (cause instanceof Error) {
-      if (cause instanceof BaseError) {
-        // 원인이 BaseError인 경우 원본 정보만 저장 (체인 누적 방지)
-        this.errorChain.push(cause.errorChain[0])
-      } else {
-        // 일반 Error인 경우 기본 정보 저장
-        details.originalError = {
-          name: cause.name,
-          message: cause.message,
-        }
-      }
-    }
+    // // 에러 체인 생성 (단순화: 원본 에러 + 현재 에러만 유지)
+    // this.errorChain = [
+    //   createErrorChainItem({
+    //     layer,
+    //     method,
+    //     errorCode,
+    //     statusCode: this.statusCode,
+    //     message,
+    //     details,
+    //   }),
+    // ]
+
+    // // 원인 에러 정보 추가 (단순화: 원본 에러만 추가)
+    // if (cause instanceof Error) {
+    //   if (cause instanceof BaseError) {
+    //     // 원인이 BaseError인 경우 원본 정보만 저장 (체인 누적 방지)
+    //     this.errorChain.push(cause.errorChain[0])
+    //   } else {
+    //     // 일반 Error인 경우 기본 정보 저장
+    //     details.originalError = {
+    //       name: cause.name,
+    //       message: cause.message,
+    //     }
+    //   }
+    // }
 
     // 스택 트레이스 보존
     Error.captureStackTrace(this, this.constructor)

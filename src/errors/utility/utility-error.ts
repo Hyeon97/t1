@@ -15,7 +15,7 @@ export class UtilityError extends BaseError {
   static fromError<T extends BaseError = UtilityError>(
     error: unknown,
     params: Omit<ErrorParams, "errorCode" | "statusCode" | "cause"> & {
-      functionName: string
+      method: string
       message: string
       layer?: ErrorLayer
     }
@@ -32,7 +32,7 @@ export class UtilityError extends BaseError {
   static badRequest<T extends BaseError = UtilityError>(
     constructor: new (params: ErrorParams) => T = UtilityError as any,
     params: Omit<ErrorParams, "errorCode" | "statusCode" | "layer"> = {
-      functionName: "",
+      method: "",
       message: "",
     }
   ): T {
@@ -46,7 +46,7 @@ export class UtilityError extends BaseError {
   static unauthorized<T extends BaseError = UtilityError>(
     constructor: new (params: ErrorParams) => T = UtilityError as any,
     params: Omit<ErrorParams, "errorCode" | "statusCode" | "layer"> = {
-      functionName: "",
+      method: "",
       message: "",
     }
   ): T {
@@ -60,7 +60,7 @@ export class UtilityError extends BaseError {
   static validationError<T extends BaseError = UtilityError>(
     constructor: new (params: ErrorParams) => T = UtilityError as any,
     params: Omit<ErrorParams, "errorCode" | "statusCode" | "layer"> = {
-      functionName: "",
+      method: "",
       message: "",
     }
   ): T {
@@ -74,7 +74,7 @@ export class UtilityError extends BaseError {
   static businessRuleError<T extends BaseError = UtilityError>(
     constructor: new (params: ErrorParams) => T = UtilityError as any,
     params: Omit<ErrorParams, "errorCode" | "statusCode" | "layer"> = {
-      functionName: "",
+      method: "",
       message: "",
     }
   ): T {
@@ -88,7 +88,7 @@ export class UtilityError extends BaseError {
   static resourceNotFoundError<T extends BaseError = UtilityError>(
     constructor: new (params: ErrorParams) => T = UtilityError as any,
     params: Omit<ErrorParams, "errorCode" | "statusCode" | "layer"> = {
-      functionName: "",
+      method: "",
       message: "",
     }
   ): T {
@@ -101,7 +101,7 @@ export class UtilityError extends BaseError {
   // 의존성 오류
   static dependencyError(
     params: Omit<ErrorParams, "errorCode" | "statusCode" | "layer"> = {
-      functionName: "",
+      method: "",
       message: "",
     }
   ): UtilityError {
@@ -116,7 +116,7 @@ export class UtilityError extends BaseError {
   // 데이터 처리 오류
   static dataProcessingError(
     params: Omit<ErrorParams, "errorCode" | "statusCode" | "layer"> = {
-      functionName: "",
+      method: "",
       message: "",
     }
   ): UtilityError {
@@ -131,7 +131,7 @@ export class UtilityError extends BaseError {
   // 트랜잭션 오류
   static transactionError(
     params: Omit<ErrorParams, "errorCode" | "statusCode" | "layer"> = {
-      functionName: "",
+      method: "",
       message: "",
     }
   ): UtilityError {
@@ -147,7 +147,7 @@ export class UtilityError extends BaseError {
   // 환경 설정 오류
   static envConfigError(
     params: Omit<ErrorParams, "errorCode" | "statusCode" | "layer"> = {
-      functionName: "",
+      method: "",
       message: "",
     }
   ): UtilityError {
@@ -162,7 +162,7 @@ export class UtilityError extends BaseError {
   // 환경 설정 파일 찾기 실패
   static envFileNotFoundError(
     params: Omit<ErrorParams, "errorCode" | "statusCode" | "layer"> = {
-      functionName: "",
+      method: "",
       message: "",
     }
   ): UtilityError {
@@ -178,7 +178,7 @@ export class UtilityError extends BaseError {
   // JWT 서명 오류
   static jwtSignError(
     params: Omit<ErrorParams, "errorCode" | "statusCode" | "layer"> = {
-      functionName: "",
+      method: "",
       message: "",
     }
   ): UtilityError {
@@ -193,7 +193,7 @@ export class UtilityError extends BaseError {
   // JWT 검증 오류
   static jwtVerifyError(
     params: Omit<ErrorParams, "statusCode" | "layer"> = {
-      functionName: "",
+      method: "",
       message: "",
       errorCode: ErrorCode.JWT_VERIFY_ERROR,
     }
@@ -209,7 +209,7 @@ export class UtilityError extends BaseError {
   // JWT 만료
   static jwtExpired(
     params: Omit<ErrorParams, "errorCode" | "statusCode" | "layer"> = {
-      functionName: "",
+      method: "",
       message: "",
     }
   ): UtilityError {
@@ -224,7 +224,7 @@ export class UtilityError extends BaseError {
   // JWT 유효하지 않음
   static jwtInvalid(
     params: Omit<ErrorParams, "errorCode" | "statusCode" | "layer"> = {
-      functionName: "",
+      method: "",
       message: "",
     }
   ): UtilityError {
@@ -240,7 +240,7 @@ export class UtilityError extends BaseError {
   // 파싱 오류
   static parsingError(
     params: Omit<ErrorParams, "errorCode" | "statusCode" | "layer"> = {
-      functionName: "",
+      method: "",
       message: "",
     }
   ): UtilityError {
@@ -255,7 +255,7 @@ export class UtilityError extends BaseError {
   // 파일 관련 작업 오류
   static fileOperationError(
     params: Omit<ErrorParams, "errorCode" | "statusCode" | "layer"> = {
-      functionName: "",
+      method: "",
       message: "",
     }
   ): UtilityError {

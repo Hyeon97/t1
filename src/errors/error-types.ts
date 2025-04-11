@@ -69,7 +69,7 @@ export enum ErrorLayer {
 export interface ErrorParams {
   errorCode: ErrorCode // 서버 내부 에러 식별 코드
   layer: ErrorLayer //  에러가 발생한 계층
-  functionName: string // 에러가 발생한 함수 이름
+  method: string // 에러가 발생한 함수 이름
   message: string //  에러 메세지
   statusCode?: number //  HTTP 상태 코드, API 응답에 사용됨
   cause?: unknown //  에러 원인 ( 에러 원본 )
@@ -102,7 +102,7 @@ export interface RequestInfo {
 // 에러 체인 항목 인터페이스
 export interface ErrorChainItem {
   layer: ErrorLayer
-  functionName: string
+  method: string
   request?: string
   errorCode: ErrorCode
   statusCode: number

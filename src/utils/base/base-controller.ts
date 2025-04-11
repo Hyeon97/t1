@@ -1,8 +1,7 @@
 import { NextFunction } from "express"
+import { RepositoryError, ServiceError } from "../../errors"
 import { ControllerError } from "../../errors/controller/controller-error"
 import { ContextLogger } from "../logger/logger.custom"
-import { ServiceError } from "../../errors/service/service-error"
-import { ErrorLayer } from "../../errors"
 
 export class BaseController {
   protected readonly controllerName: string
@@ -12,34 +11,35 @@ export class BaseController {
   }
 
   /**
-   * 컨트롤러 에러 처리
+   * Controller 에러 처리
    */
   protected handleControllerError = ({
     error,
     next,
-    functionName,
     message,
+    method
   }: {
     error: unknown
     next: NextFunction
-    functionName: string
     message: string
+    method: string
   }): void => {
-    //  controller 계층보다 더 아래인 계층에서 발생한 에러인 경우
-    if (error instanceof ServiceError) {
-      next(ControllerError.fromServiceError({ error, functionName }))
-    }
-    //  로깅
-    ContextLogger.debug({
-      message: `[Controller-Layer] ${this.controllerName}.${functionName}() 오류 발생`,
-      meta: { error: error instanceof Error ? error.message : String(error) },
-    })
-    //  controller 계층에서 발생한 처리된 에러인 경우 그냥 상위 계층으로 전송
-    if (error instanceof ControllerError) {
+    //  repository, service error는 바로 상위 계층으로
+    if (error instanceof RepositoryError || error instanceof ServiceError) {
       next(error)
-      return
     }
-    //  그 외의 처리되지 않은 에러는 ControllerError로 변환하여 전송
-    next(ControllerError.fromError<ControllerError>(error, { functionName, message, layer: ErrorLayer.CONTROLLER }))
+
+    //  controller layer에서 발생한 에러만 로깅
+    if (error instanceof ControllerError) {
+      ContextLogger.debug({
+        message: `[Controller-Layer] ${this.controllerName} () 오류 발생`,
+        meta: { error: error instanceof Error ? error.message : String(error) },
+      })
+    }
+    else if (error instanceof Error && !(error instanceof ControllerError)) {
+      error = ControllerError.fromError<ControllerError>(error, { method, message })
+    }
+    //  그외 계층에서 발생한 에러는 바로 상위 계층으로 전송
+    next(error)
   }
 }

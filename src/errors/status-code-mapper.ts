@@ -64,7 +64,7 @@ export function getStatusCodeFromErrorCode(errorCode: ErrorCode): number {
 /**
  * 사용자 친화적인 에러 메시지 가져오기
  */
-export function getUserFriendlyMessage(errorCode: ErrorCode): string {
+export function getUserFriendlyMessage({ errorCode }: { errorCode: ErrorCode }): string {
   const messageMap: Record<ErrorCode, string> = {
     // 클라이언트 에러
     BAD_REQUEST: "잘못된 요청입니다",

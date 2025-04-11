@@ -16,11 +16,7 @@ export class ServiceError extends BaseError {
   // 일반 에러를 현재 타입으로 변환
   static fromError<T extends BaseError = ServiceError>(
     error: unknown,
-    params: Omit<ErrorParams, "errorCode" | "statusCode" | "cause"> & {
-      functionName: string
-      message: string
-      layer?: ErrorLayer
-    }
+    params: Omit<ErrorParams, "layer" | "errorCode" | "statusCode" | "cause">
   ): T {
     return BaseError.fromError(ServiceError as any, error, {
       ...params,
@@ -34,7 +30,7 @@ export class ServiceError extends BaseError {
   static badRequest<T extends BaseError = ServiceError>(
     constructor: new (params: ErrorParams) => T = ServiceError as any,
     params: Omit<ErrorParams, "errorCode" | "statusCode" | "layer"> = {
-      functionName: "",
+      method: "",
       message: "",
     }
   ): T {
@@ -48,7 +44,7 @@ export class ServiceError extends BaseError {
   static unauthorized<T extends BaseError = ServiceError>(
     constructor: new (params: ErrorParams) => T = ServiceError as any,
     params: Omit<ErrorParams, "errorCode" | "statusCode" | "layer"> = {
-      functionName: "",
+      method: "",
       message: "",
     }
   ): T {
@@ -62,7 +58,7 @@ export class ServiceError extends BaseError {
   static validationError<T extends BaseError = ServiceError>(
     constructor: new (params: ErrorParams) => T = ServiceError as any,
     params: Omit<ErrorParams, "errorCode" | "statusCode" | "layer"> = {
-      functionName: "",
+      method: "",
       message: "",
     }
   ): T {
@@ -76,7 +72,7 @@ export class ServiceError extends BaseError {
   static businessRuleError<T extends BaseError = ServiceError>(
     constructor: new (params: ErrorParams) => T = ServiceError as any,
     params: Omit<ErrorParams, "errorCode" | "statusCode" | "layer"> = {
-      functionName: "",
+      method: "",
       message: "",
     }
   ): T {
@@ -90,7 +86,7 @@ export class ServiceError extends BaseError {
   static resourceNotFoundError<T extends BaseError = ServiceError>(
     constructor: new (params: ErrorParams) => T = ServiceError as any,
     params: Omit<ErrorParams, "errorCode" | "statusCode" | "layer"> = {
-      functionName: "",
+      method: "",
       message: "",
     }
   ): T {
@@ -104,7 +100,7 @@ export class ServiceError extends BaseError {
   static internalError<T extends BaseError = ServiceError>(
     constructor: new (params: ErrorParams) => T = ServiceError as any,
     params: Omit<ErrorParams, "errorCode" | "statusCode" | "layer"> = {
-      functionName: "",
+      method: "",
       message: "",
     }
   ): T {
@@ -117,7 +113,7 @@ export class ServiceError extends BaseError {
   // 의존성 오류
   static dependencyError(
     params: Omit<ErrorParams, "errorCode" | "statusCode" | "layer"> = {
-      functionName: "",
+      method: "",
       message: "",
     }
   ): ServiceError {
@@ -132,7 +128,7 @@ export class ServiceError extends BaseError {
   // 데이터 처리 오류
   static dataProcessingError(
     params: Omit<ErrorParams, "errorCode" | "statusCode" | "layer"> = {
-      functionName: "",
+      method: "",
       message: "",
     }
   ): ServiceError {
@@ -147,7 +143,7 @@ export class ServiceError extends BaseError {
   // 트랜잭션 오류
   static transactionError(
     params: Omit<ErrorParams, "errorCode" | "statusCode" | "layer"> = {
-      functionName: "",
+      method: "",
       message: "",
     }
   ): ServiceError {
@@ -162,28 +158,28 @@ export class ServiceError extends BaseError {
   // 다른 계층 에러로부터 변환
 
   // Repository 에러로부터 변환
-  static fromRepositoryError({ error, functionName }: { error: RepositoryError; functionName: string }): ServiceError {
+  static fromRepositoryError({ error, method }: { error: RepositoryError; method: string }): ServiceError {
     const originalErrorCode = error.errorCode
 
     // 에러 코드에 따라 적절한 서비스 에러로 변환
     switch (originalErrorCode) {
       case ErrorCode.NOT_FOUND:
         return ServiceError.resourceNotFoundError(ServiceError, {
-          functionName,
+          method,
           message: `리소스를 찾을 수 없습니다`,
           cause: error,
         })
 
       case ErrorCode.VALIDATION_ERROR:
         return ServiceError.validationError(ServiceError, {
-          functionName,
+          method,
           message: `데이터 유효성 검증 실패`,
           cause: error,
         })
 
       case ErrorCode.DATA_INTEGRITY_ERROR:
         return ServiceError.businessRuleError(ServiceError, {
-          functionName,
+          method,
           message: `데이터 무결성 오류`,
           cause: error,
         })
@@ -192,7 +188,7 @@ export class ServiceError extends BaseError {
       case ErrorCode.QUERY_ERROR:
       case ErrorCode.CONNECTION_ERROR:
         return ServiceError.dependencyError({
-          functionName,
+          method,
           message: `데이터베이스 작업 중 오류 발생`,
           cause: error,
           metadata: { originalErrorCode },
@@ -200,7 +196,7 @@ export class ServiceError extends BaseError {
 
       default:
         return ServiceError.internalError(ServiceError, {
-          functionName,
+          method,
           message: `Repository 작업 중 오류 발생`,
           cause: error,
           metadata: { originalErrorCode },
@@ -209,7 +205,7 @@ export class ServiceError extends BaseError {
   }
 
   // Utility 에러로부터 변환
-  static fromUtilityError({ error, functionName }: { error: UtilityError; functionName: string }): ServiceError {
+  static fromUtilityError({ error, method }: { error: UtilityError; method: string }): ServiceError {
     const originalErrorCode = error.errorCode
 
     // 에러 코드에 따라 적절한 서비스 에러로 변환
@@ -219,28 +215,28 @@ export class ServiceError extends BaseError {
       case ErrorCode.JWT_EXPIRED:
       case ErrorCode.JWT_INVALID:
         return ServiceError.unauthorized(ServiceError, {
-          functionName,
+          method,
           message: `인증 중 오류 발생: ${error.message}`,
           cause: error,
         })
 
       case ErrorCode.VALIDATION_ERROR:
         return ServiceError.validationError(ServiceError, {
-          functionName,
+          method,
           message: error.message,
           cause: error,
         })
 
       case ErrorCode.NOT_FOUND:
         return ServiceError.resourceNotFoundError(ServiceError, {
-          functionName,
+          method,
           message: error.message,
           cause: error,
         })
 
       default:
         return ServiceError.internalError(ServiceError, {
-          functionName,
+          method,
           message: `Utility 작업 중 오류 발생: ${error.message}`,
           cause: error,
           metadata: { originalErrorCode },

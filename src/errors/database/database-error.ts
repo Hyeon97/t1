@@ -1,4 +1,4 @@
-import { BaseError, ErrorParams, ErrorCode, ErrorLayer } from ".."
+import { BaseError, ErrorCode, ErrorLayer, ErrorParams } from ".."
 
 /**
  * 데이터베이스 계층의 에러를 처리하는 클래스
@@ -34,7 +34,7 @@ export class DatabaseError extends BaseError {
   // 연결 오류
   static connectionError(
     params: Omit<ErrorParams, "errorCode" | "statusCode" | "layer"> = {
-      functionName: "",
+      method: "",
       message: "",
       request: "",
       query: "",
@@ -55,7 +55,7 @@ export class DatabaseError extends BaseError {
   // 쿼리 실행 오류
   static queryError(
     params: Omit<ErrorParams, "errorCode" | "statusCode" | "layer"> = {
-      functionName: "",
+      method: "",
       message: "",
       request: "",
       query: "",
@@ -76,7 +76,7 @@ export class DatabaseError extends BaseError {
   // 데이터 무결성 오류
   static dataIntegrityError(
     params: Omit<ErrorParams, "errorCode" | "statusCode" | "layer"> = {
-      functionName: "",
+      method: "",
       message: "",
       request: "",
       query: "",
@@ -97,7 +97,7 @@ export class DatabaseError extends BaseError {
   // 레코드 찾기 실패
   static recordNotFound(
     params: Omit<ErrorParams, "errorCode" | "statusCode" | "layer"> = {
-      functionName: "",
+      method: "",
       message: "",
       request: "",
       query: "",
@@ -118,7 +118,7 @@ export class DatabaseError extends BaseError {
   // 트랜잭션 오류
   static transactionError(
     params: Omit<ErrorParams, "errorCode" | "statusCode" | "layer"> = {
-      functionName: "",
+      method: "",
       message: "",
       request: "",
       query: "",
