@@ -18,14 +18,6 @@ export class ControllerError extends BaseError {
     error: unknown,
     params: Omit<ErrorParams, "layer" | "errorCode" | "statusCode" | "cause">
   ): T {
-    // 다른 계층 에러 처리
-    // if (error instanceof ServiceError) {
-    //   return ControllerError.fromServiceError({ error, method })
-    // } else if (error instanceof UtilityError) {
-    //   return ControllerError.fromUtilityError({ error, method })
-    // } else if (error instanceof ControllerError) {
-    //   return error
-    // }
     return BaseError.fromError(ControllerError as any, error, {
       ...params,
       layer: ErrorLayer.CONTROLLER,

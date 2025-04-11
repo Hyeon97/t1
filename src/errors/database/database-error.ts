@@ -25,7 +25,7 @@ export class DatabaseError extends BaseError {
 
   // 일반 에러를 현재 타입으로 변환
   static fromError<T extends BaseError = DatabaseError>(error: unknown, params: Omit<ErrorParams, "errorCode" | "statusCode" | "cause">): T {
-    return BaseError.fromError(DatabaseError as any, error, {
+    return BaseError.fromError(DatabaseError, error, {
       ...params,
       layer: ErrorLayer.DATABASE,
     }) as unknown as T

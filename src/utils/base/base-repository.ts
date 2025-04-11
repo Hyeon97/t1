@@ -357,27 +357,10 @@ export class BaseRepository {
           error: error instanceof Error ? error.message : String(error),
         },
       })
-    } else if (error instanceof Error && !(error instanceof RepositoryError)) {
       //  일반 에러인 경우 Repository 에러로 변경
+    } else if (error instanceof Error && !(error instanceof RepositoryError)) {
       error = RepositoryError.fromError<RepositoryError>(error, { method, message })
     }
     throw error
-    // //  repository 계층보다 더 아래인 계층에서 발생한 에러인 경우
-    // if (error instanceof DatabaseError) {
-    //   throw RepositoryError.fromDatabaseError({ error, method })
-    // }
-    // //  로깅
-    // ContextLogger.debug({
-    //   message: `[Repository-Layer] ${this.repositoryName}.${method}() 오류 발생`,
-    //   meta: {
-    //     error: error instanceof Error ? error.message : String(error),
-    //   },
-    // })
-    // //  Repository 계층에서 발생한 처리된 에러인 경우 그냥 상위 계층으로 전송
-    // if (error instanceof RepositoryError) {
-    //   throw error
-    // }
-    // //  그 외의 처리되지 않은 에러는 RepositoryError로 변환하여 전송
-    // throw RepositoryError.fromError<RepositoryError>(error, { method, message, layer: ErrorLayer.REPOSITORY })
   }
 }

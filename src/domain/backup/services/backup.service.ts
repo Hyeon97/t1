@@ -23,7 +23,7 @@ export class BackupService extends BaseService {
    */
   private combineBackupInfoData({ backups, backupInfos }: { backups: BackupTable[]; backupInfos: BackupInfoTable[] }): BackupDataResponse[] {
     try {
-      asyncContextStorage.addOrder({ component: 'BackupService', method: 'combineBackupInfoData', state: 'start' })
+      asyncContextStorage.addOrder({ component: this.serviceName, method: "combineBackupInfoData", state: "start" })
       const backupMap = new Map<string, Partial<BackupDataResponse>>()
       backups.forEach((backup) => {
         backupMap.set(backup.sJobName, { backup })
@@ -35,13 +35,13 @@ export class BackupService extends BaseService {
           backup.info = info
         }
       })
-      asyncContextStorage.addOrder({ component: 'BackupService', method: 'combineBackupInfoData', state: 'end' })
+      asyncContextStorage.addOrder({ component: this.serviceName, method: "combineBackupInfoData", state: "end" })
       return Array.from(backupMap.values()).filter((data): data is BackupDataResponse => !!data.backup && !!data.info)
     } catch (error) {
       return this.handleServiceError({
         error,
         method: "combineBackupInfoData",
-        message: "Backup 데이터 조합 중 오류가 발생했습니다",
+        message: "[Backup 데이터 조합] - 오류가 발생했습니다",
       })
     }
   }
@@ -55,7 +55,7 @@ export class BackupService extends BaseService {
     filterOptions: BackupFilterOptions
   }): Promise<{ backups: BackupTable[]; backupInfos: BackupInfoTable[] }> {
     try {
-      asyncContextStorage.addOrder({ component: 'BackupService', method: 'getBackupsByBackupFirst', state: 'start' })
+      asyncContextStorage.addOrder({ component: this.serviceName, method: "getBackupsByBackupFirst", state: "start" })
       // Backup 기본 정보 조회
       const backups = await this.backupRepository.findAll({ filterOptions })
 
@@ -71,13 +71,13 @@ export class BackupService extends BaseService {
         jobNames,
         filterOptions,
       })
-      asyncContextStorage.addOrder({ component: 'BackupService', method: 'getBackupsByBackupFirst', state: 'end' })
+      asyncContextStorage.addOrder({ component: this.serviceName, method: "getBackupsByBackupFirst", state: "end" })
       return { backups, backupInfos }
     } catch (error) {
       return this.handleServiceError({
         error,
         method: "getBackupsByBackupFirst",
-        message: `Backup 정보 조회 중 오류가 발생했습니다`,
+        message: `[Backup 정보 조회] - 오류가 발생했습니다`,
       })
     }
   }
@@ -91,7 +91,7 @@ export class BackupService extends BaseService {
     filterOptions: BackupFilterOptions
   }): Promise<{ backups: BackupTable[]; backupInfos: BackupInfoTable[] }> {
     try {
-      asyncContextStorage.addOrder({ component: 'BackupService', method: 'getBackupsByInfoFirst', state: 'start' })
+      asyncContextStorage.addOrder({ component: this.serviceName, method: "getBackupsByInfoFirst", state: "start" })
       // BackupInfo 정보 조회
       const backupInfos = await this.backupInfoRepository.findAll({ filterOptions })
 
@@ -107,13 +107,13 @@ export class BackupService extends BaseService {
         jobNames,
         filterOptions,
       })
-      asyncContextStorage.addOrder({ component: 'BackupService', method: 'getBackupsByInfoFirst', state: 'end' })
+      asyncContextStorage.addOrder({ component: this.serviceName, method: "getBackupsByInfoFirst", state: "end" })
       return { backups, backupInfos }
     } catch (error) {
       return this.handleServiceError({
         error,
         method: "getBackupsByInfoFirst",
-        message: `Backup 정보 조회 중 오류가 발생했습니다`,
+        message: `[Backup 정보 조회] - 오류가 발생했습니다`,
       })
     }
   }
@@ -123,15 +123,14 @@ export class BackupService extends BaseService {
    */
   async getBackups({ filterOptions }: { filterOptions: BackupFilterOptions }): Promise<BackupDataResponse[]> {
     try {
-      asyncContextStorage.addService({ name: 'BackupService' })
-      asyncContextStorage.addOrder({ component: 'BackupService', method: 'getBackups', state: 'start' })
+      asyncContextStorage.addService({ name: this.serviceName })
+      asyncContextStorage.addOrder({ component: this.serviceName, method: "getBackups", state: "start" })
       // 필터 옵션 분리
       const { result, ...infoFilterOptions } = filterOptions
 
       // 필터 옵션 많은쪽 먼저 조회
       let backups: BackupTable[] = []
       let backupInfos: BackupInfoTable[] = []
-
       if (Object.keys(infoFilterOptions).length > 0 && !result) {
         // info 테이블 필터링이 있는 경우, 먼저 info 데이터를 조회하고 관련 backup만 가져옴
         const result = await this.getBackupsByInfoFirst({ filterOptions })
@@ -147,13 +146,13 @@ export class BackupService extends BaseService {
       // 데이터 조합
       const output = this.combineBackupInfoData({ backups, backupInfos })
 
-      asyncContextStorage.addOrder({ component: 'BackupService', method: 'getBackups', state: 'end' })
+      asyncContextStorage.addOrder({ component: this.serviceName, method: "getBackups", state: "end" })
       return output
     } catch (error) {
       return this.handleServiceError({
         error,
         method: "getBackups",
-        message: `Backup 정보 조회 중 오류가 발생했습니다`,
+        message: `[Backup 정보 조회] - 오류가 발생했습니다`,
       })
     }
   }

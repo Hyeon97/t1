@@ -20,15 +20,15 @@ export class BaseService {
     }
 
     //  service layer에서 발생한 에러만 로깅
-    if (error instanceof ServiceError) {
+    if (error instanceof Error && error instanceof ServiceError) {
       ContextLogger.info({
         message: `[Service-Layer] ${this.serviceName}.${method}() 오류 발생`,
         meta: {
           error: error instanceof Error ? error.message : String(error),
         },
       })
-    } else if (error instanceof Error && !(error instanceof ServiceError)) {
       //  일반 에러인 경우 Service 에러로 변경
+    } else if (error instanceof Error && !(error instanceof ServiceError)) {
       error = ServiceError.fromError<ServiceError>(error, { method, message })
     }
     throw error
@@ -41,11 +41,16 @@ export class BaseService {
     try {
       return await TransactionManager.execute({ callback })
     } catch (error) {
-      return this.handleServiceError({
-        error,
+      throw ServiceError.transactionError({
         method: "executeTransaction",
         message: `트랜잭션 실행 중 오류가 발생했습니다`,
+        cause: error,
       })
+      // return this.handleServiceError({
+      //   error,
+      //   method: "executeTransaction",
+      //   message: `트랜잭션 실행 중 오류가 발생했습니다`,
+      // })
     }
   }
 

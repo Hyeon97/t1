@@ -1,6 +1,7 @@
 import { TransactionManager } from "../../../database/connection"
 import { ServiceError } from "../../../errors/service/service-error"
 import { AutoStartType } from "../../../types/common/job"
+import { asyncContextStorage } from "../../../utils/AsyncContext"
 import { BaseService } from "../../../utils/base/base-service"
 import { ContextLogger } from "../../../utils/logger/logger.custom"
 import { ServerPartitionService } from "../../server/services/server-partition.service"
@@ -16,6 +17,7 @@ import { BackupInfoRepository } from "../repositories/backup-info.repository"
 import { BackupRepository } from "../repositories/backup.repository"
 import { BackupTypeMap } from "../types/backup-common.type"
 import { BackupInfoTableInput, BackupRegistRequestBody, BackupRegistRequestRepository, BackupTableInput } from "../types/backup-regist.type"
+import { BackupDataRegistResponse } from "../types/backup-response.type"
 
 //  Backup Data 등록 DataSet 배열 Type
 interface BackupDataSet {
@@ -75,7 +77,8 @@ export class BackupRegistService extends BaseService {
     center: ZdmInfoTable
   }): BackupTableInput {
     try {
-      return {
+      asyncContextStorage.addOrder({ component: this.serviceName, method: "createBackupObject", state: "start" })
+      const object = {
         nUserID: (data.user ?? 1) as number,
         nCenterID: center.nID,
         sSystemName: server.sSystemName,
@@ -89,6 +92,8 @@ export class BackupRegistService extends BaseService {
         sStartTime: "now()",
         sLastUpdateTime: "now()",
       }
+      asyncContextStorage.addOrder({ component: this.serviceName, method: "createBackupObject", state: "end" })
+      return object
     } catch (error) {
       throw ServiceError.dataProcessingError({
         method: "createBackupObject",
@@ -115,7 +120,8 @@ export class BackupRegistService extends BaseService {
     repository: ZdmRepositoryTable
   }): BackupInfoTableInput {
     try {
-      return {
+      asyncContextStorage.addOrder({ component: this.serviceName, method: "createBackupInfoObject", state: "start" })
+      const object = {
         nID: 0,
         nUserID: (data.user ?? 1) as number,
         nCenterID: center.nID,
@@ -134,6 +140,8 @@ export class BackupRegistService extends BaseService {
         sRepositoryPath: repository.sRemotePath,
         nNetworkLimit: data.networkLimit ?? 0,
       }
+      asyncContextStorage.addOrder({ component: this.serviceName, method: "createBackupInfoObject", state: "end" })
+      return object
     } catch (error) {
       throw ServiceError.dataProcessingError({
         method: "createBackupInfoObject",
@@ -148,12 +156,14 @@ export class BackupRegistService extends BaseService {
    */
   private async getServerInfo({ server }: { server: number | string }): Promise<ServerBasicTable> {
     try {
+      asyncContextStorage.addOrder({ component: this.serviceName, method: "getServerInfo", state: "start" })
       let serverInfo = null
       if (typeof server === "number") {
         serverInfo = await this.serverService.getServerById({ id: String(server), filterOptions: {} })
       } else if (typeof server === "string") {
         serverInfo = await this.serverService.getServerByName({ name: server, filterOptions: {} })
       }
+      asyncContextStorage.addOrder({ component: this.serviceName, method: "getServerInfo", state: "end" })
       return serverInfo?.server!
     } catch (error) {
       return this.handleServiceError({
@@ -169,7 +179,9 @@ export class BackupRegistService extends BaseService {
    */
   private async getServerPartitionList({ server }: { server: string }): Promise<ServerPartitionTable[]> {
     try {
+      asyncContextStorage.addOrder({ component: this.serviceName, method: "getServerPartitionList", state: "start" })
       const partitionList = await this.serverPartitionService.getPartitionListByServerName({ name: server })
+      asyncContextStorage.addOrder({ component: this.serviceName, method: "getServerPartitionList", state: "end" })
       return partitionList?.items!
     } catch (error) {
       return this.handleServiceError({
@@ -185,12 +197,14 @@ export class BackupRegistService extends BaseService {
    */
   private async getCenterInfo({ center }: { center: number | string }): Promise<ZdmInfoTable> {
     try {
+      asyncContextStorage.addOrder({ component: this.serviceName, method: "getCenterInfo", state: "start" })
       let centerInfo = null
       if (typeof center === "number") {
         centerInfo = await this.zdmService.getZdmById({ id: String(center), filterOptions: {} })
       } else if (typeof center === "string") {
         centerInfo = await this.zdmService.getZdmByName({ name: center, filterOptions: {} })
       }
+      asyncContextStorage.addOrder({ component: this.serviceName, method: "getCenterInfo", state: "end" })
       return centerInfo?.zdm!
     } catch (error) {
       return this.handleServiceError({
@@ -211,12 +225,14 @@ export class BackupRegistService extends BaseService {
    */
   private async getRepositoryInfo({ repository, center }: { repository: BackupRegistRequestRepository; center: ZdmInfoTable }) {
     try {
+      asyncContextStorage.addOrder({ component: this.serviceName, method: "getRepositoryInfo", state: "start" })
       const filterOptions: ZdmRepositoryFilterOptions = {
         center: center.nID,
         type: repository.type || "",
         path: repository.path || "",
       }
       const repositoryInfo = await this.zdmRepositoryService.getRepositoryById({ id: repository.id, filterOptions })
+      asyncContextStorage.addOrder({ component: this.serviceName, method: "getRepositoryInfo", state: "end" })
       return repositoryInfo.items[0]
     } catch (error) {
       return this.handleServiceError({
@@ -237,8 +253,10 @@ export class BackupRegistService extends BaseService {
    */
   private async preprocessJobName({ jobName }: { jobName: string }): Promise<string> {
     try {
+      asyncContextStorage.addOrder({ component: this.serviceName, method: "preprocessJobName", state: "start" })
       //  작업 이름이 없는경우 - 자동생성
       //  작업 이름이 있는경우 - 중복검사 후 자동 idx 부여 or 증가
+      asyncContextStorage.addOrder({ component: this.serviceName, method: "preprocessJobName", state: "end" })
       return ""
     } catch (error) {
       throw ServiceError.dataProcessingError({
@@ -254,12 +272,13 @@ export class BackupRegistService extends BaseService {
    */
   private preprocessExcludePartitions({ excludePartition }: { excludePartition: string }): string[] {
     try {
+      asyncContextStorage.addOrder({ component: this.serviceName, method: "preprocessExcludePartitions", state: "start" })
       // 문자열을 '|'로 분리
       const partitions = excludePartition.split("|")
 
       // 빈 문자열 항목 제거 및 트림 처리
       const validPartitions = partitions.map((partition) => partition.trim()).filter((partition) => partition.length > 0)
-
+      asyncContextStorage.addOrder({ component: this.serviceName, method: "preprocessExcludePartitions", state: "end" })
       return validPartitions
     } catch (error) {
       throw ServiceError.dataProcessingError({
@@ -275,12 +294,13 @@ export class BackupRegistService extends BaseService {
    */
   private preprocessExcludeDir({ excludeDir }: { excludeDir: string }): string[] {
     try {
+      asyncContextStorage.addOrder({ component: this.serviceName, method: "preprocessExcludeDir", state: "start" })
       // 문자열을 '|'로 분리
       const dirs = excludeDir.split("|")
 
       // 빈 문자열 항목 제거 및 트림 처리
       const validPartitions = dirs.map((dir) => dir.trim()).filter((dir) => dir.length > 0)
-
+      asyncContextStorage.addOrder({ component: this.serviceName, method: "preprocessExcludeDir", state: "end" })
       return validPartitions
     } catch (error) {
       throw ServiceError.dataProcessingError({
@@ -296,6 +316,7 @@ export class BackupRegistService extends BaseService {
    */
   private async registerBackupDataSet({ dataSet, transaction }: { dataSet: BackupDataSet; transaction: TransactionManager }): Promise<BackupDataSet> {
     try {
+      asyncContextStorage.addOrder({ component: this.serviceName, method: "registerBackupDataSet", state: "start" })
       // 1. Backup 기본 정보 등록
       const backupRegistResult = await this.backupRepository.insertBackup({
         backupData: dataSet.backupDataObject,
@@ -321,7 +342,7 @@ export class BackupRegistService extends BaseService {
         backupInfoData: dataSet.backupInfoDataObject,
         transaction,
       })
-
+      asyncContextStorage.addOrder({ component: this.serviceName, method: "registerBackupDataSet", state: "end" })
       return dataSet
     } catch (error) {
       throw ServiceError.dataProcessingError({
@@ -336,6 +357,7 @@ export class BackupRegistService extends BaseService {
    * 여러 Backup 데이터 세트 병렬 등록
    */
   private async registerAllBackupDataSets({ dataSets }: { dataSets: BackupDataSet[] }): Promise<BackupDataRegistResultSet> {
+    asyncContextStorage.addOrder({ component: this.serviceName, method: "registerAllBackupDataSets", state: "start" })
     const results = await Promise.allSettled(
       dataSets.map((dataSet) =>
         this.executeTransaction({
@@ -362,15 +384,15 @@ export class BackupRegistService extends BaseService {
         })
       }
     })
-
+    asyncContextStorage.addOrder({ component: this.serviceName, method: "registerAllBackupDataSets", state: "end" })
     return { successful, failed }
   }
 
   /**
    * 결과 확인 및 출력 결과 가공
    */
-  // BackupDataRegistResponse
-  private processResult({ data, autoStart }: { data: BackupDataRegistResultSet; autoStart: AutoStartType }) {
+  private processResult({ data, autoStart }: { data: BackupDataRegistResultSet; autoStart: AutoStartType }): BackupDataRegistResponse {
+    asyncContextStorage.addOrder({ component: this.serviceName, method: "processResult", state: "start" })
     const returnObject: any[] = []
     //  스케쥴 사용 여부
     const useSchedule = ({ data }: { data: BackupTableInput }) => {
@@ -407,6 +429,7 @@ export class BackupRegistService extends BaseService {
         use_schedule: "-",
       })
     })
+    asyncContextStorage.addOrder({ component: this.serviceName, method: "processResult", state: "end" })
     return returnObject
   }
 
@@ -415,6 +438,8 @@ export class BackupRegistService extends BaseService {
    */
   async regist({ data }: { data: BackupRegistRequestBody }) {
     try {
+      asyncContextStorage.addService({ name: this.serviceName })
+      asyncContextStorage.addOrder({ component: this.serviceName, method: "regist", state: "start" })
       ContextLogger.debug({ message: "Backup 작업 등록 시작", meta: { data } })
 
       //  server 정보 가져오기
@@ -442,24 +467,24 @@ export class BackupRegistService extends BaseService {
       // 처리할 파티션 목록 결정
       const partitionsToProcess = data.partition.length
         ? data.partition.map((partition) => {
-          const partitionInfo = partitionList.find((item) => item.sLetter === partition)
-          //  사용자 입력 파티션 검증
-          if (!partitionInfo) {
-            throw ServiceError.badRequest(ServiceError, {
-              method: "regist",
-              message: `[Backup 정보 등록] - 파티션( ${partition} )이 서버( ${server.sSystemName} )에 존재하지 않습니다`,
-              metadata: {
-                partition,
-                server: server.sSystemName,
-              },
-            })
-          }
+            const partitionInfo = partitionList.find((item) => item.sLetter === partition)
+            //  사용자 입력 파티션 검증
+            if (!partitionInfo) {
+              throw ServiceError.badRequest(ServiceError, {
+                method: "regist",
+                message: `[Backup 정보 등록] - 파티션( ${partition} )이 서버( ${server.sSystemName} )에 존재하지 않습니다`,
+                metadata: {
+                  partition,
+                  server: server.sSystemName,
+                },
+              })
+            }
 
-          return partitionInfo
-        })
+            return partitionInfo
+          })
         : partitionList
 
-      // 제외 파티션이 아닌 것들만 필터링 후 데이터셋 생성
+      // 제외 파티션이 아닌 것들만 필터링 후 dataSet 생성
       partitionsToProcess
         .filter((partition) => !data.excludePartition?.includes(partition.sLetter))
         .forEach((partition) => {
@@ -509,7 +534,10 @@ export class BackupRegistService extends BaseService {
       }
 
       // 결과 리턴
-      return this.processResult({ data: registrationResult, autoStart: data.autoStart! })
+      const result = this.processResult({ data: registrationResult, autoStart: data.autoStart! })
+
+      asyncContextStorage.addOrder({ component: this.serviceName, method: "regist", state: "end" })
+      return result
     } catch (error) {
       return this.handleServiceError({
         error,

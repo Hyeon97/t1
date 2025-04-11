@@ -25,46 +25,59 @@ function buildUnifiedError(err: Error) {
     statusCode = err.statusCode
     clientErrorCode = err.errorCode
     clientMessage = err.message
-    errorChain = [
-      {
-        layer: ErrorLayer.CONTROLLER,
-        method: "handleRequest",
-        errorCode: clientErrorCode,
-        statusCode: err.statusCode,
-        message: clientMessage,
-        details: err.details,
-      },
-    ]
+    detail = {
+      ...err.metadata,
+      ...err.details,
+    }
+    // errorChain = [
+    //   {
+    //     layer: ErrorLayer.CONTROLLER,
+    //     method: "handleRequest",
+    //     errorCode: clientErrorCode,
+    //     statusCode: err.statusCode,
+    //     message: clientMessage,
+    //     details: err.details,
+    //   },
+    // ]
   }
   // 일반 Error 객체
   else {
     if (err.message.includes("method not allowed")) {
       statusCode = 405
-      clientMessage = "허용되지 않은 메서드입니다"
+      clientMessage = err.message || "HTTP method not allowed"
       clientErrorCode = ErrorCode.METHOD_NOT_ALLOWED
-      errorChain = [
-        {
-          layer: ErrorLayer.MIDDLEWARE,
-          method: "openApi",
-          errorCode: ErrorCode.METHOD_NOT_ALLOWED,
-          statusCode: 405,
-          message: err.message || "HTTP method not allowed",
-        },
-      ]
+      detail = {
+        layer: ErrorLayer.MIDDLEWARE,
+      }
+      // errorChain = [
+      //   {
+      //     layer: ErrorLayer.MIDDLEWARE,
+      //     method: "openApi",
+      //     errorCode: ErrorCode.METHOD_NOT_ALLOWED,
+      //     statusCode: 405,
+      //     message: err.message || "HTTP method not allowed",
+      //   },
+      // ]
     } else {
-      errorChain = [
-        {
-          layer: ErrorLayer.UNKNOWN,
-          method: "unknownFunction",
-          errorCode: ErrorCode.UNKNOWN_ERROR,
-          statusCode: 500,
-          message: err.message || "알 수 없는 오류",
-          details: {
-            stack: err.stack,
-            name: err.name,
-          },
-        },
-      ]
+      ;(statusCode = 500),
+        (clientMessage = err.message || "알 수 없는 오류"),
+        (clientErrorCode = ErrorCode.UNKNOWN_ERROR),
+        (detail = {
+          layer: ErrorLayer.MIDDLEWARE,
+        })
+      // errorChain = [
+      //   {
+      //     layer: ErrorLayer.UNKNOWN,
+      //     method: "unknownFunction",
+      //     errorCode: ErrorCode.UNKNOWN_ERROR,
+      //     statusCode: 500,
+      //     message: err.message || "알 수 없는 오류",
+      //     details: {
+      //       stack: err.stack,
+      //       name: err.name,
+      //     },
+      //   },
+      // ]
     }
   }
 
@@ -118,14 +131,13 @@ export const errorHandler = (err: Error, req: Request, res: Response, next: Next
   if (process.env.NODE_ENV !== "production") {
     errorResponse.error.details = {
       statusCode: unifiedError.statusCode,
-      ...unifiedError.detail
+      ...unifiedError.detail,
     }
   } else {
     // 프로덕션 환경에서는 제한된 세부 정보만 제공
     // if (unifiedError.errorChain && unifiedError.errorChain.length > 0) {
     //   const lastError = unifiedError.errorChain[unifiedError.errorChain.length - 1]
     //   const details = lastError.details || {}
-
     //   // 민감하지 않은 정보만 포함
     //   if (Array.isArray(details)) {
     //     errorResponse.error.details = details
@@ -134,7 +146,6 @@ export const errorHandler = (err: Error, req: Request, res: Response, next: Next
     //     const safeDetails = { ...details }
     //     delete safeDetails.stack
     //     delete safeDetails.cause
-
     //     errorResponse.error.details = safeDetails
     //   }
     // }

@@ -1,6 +1,7 @@
 import mysql from "mysql2/promise"
 import { DatabaseError } from "../errors/database/database-error"
 import { ContextLogger } from "../utils/logger/logger.custom"
+import { asyncContextStorage } from "../utils/AsyncContext"
 
 /**
  * 데이터베이스 설정을 가져오는 함수
@@ -167,6 +168,7 @@ export class DatabaseOperations {
       ContextLogger.debug({
         message: `SQL: ${pool.format(sql, params)}`,
       })
+      asyncContextStorage.addSql({ query: pool.format(sql, params) })
       const [rows] = await conn.execute(sql, params)
 
       const duration = Date.now() - startTime
@@ -262,7 +264,7 @@ export class DatabaseOperations {
       })
 
       throw DatabaseError.queryError({
-        method: 'executeQuery',
+        method: "executeQuery",
         request,
         message: `쿼리 실행 오류`,
         cause: error,
@@ -416,7 +418,7 @@ export class TransactionManager {
   public async executeQuery<T>({ sql, params = [], request }: { sql: string; params?: any[]; request: string }): Promise<T> {
     if (!this.connection) {
       throw DatabaseError.transactionError({
-        method: 'executeQuery',
+        method: "executeQuery",
         request,
         message: "활성 트랜잭션이 없습니다",
       })

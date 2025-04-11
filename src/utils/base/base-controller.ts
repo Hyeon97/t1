@@ -17,7 +17,7 @@ export class BaseController {
     error,
     next,
     message,
-    method
+    method,
   }: {
     error: unknown
     next: NextFunction
@@ -30,16 +30,14 @@ export class BaseController {
     }
 
     //  controller layer에서 발생한 에러만 로깅
-    if (error instanceof ControllerError) {
+    if (error instanceof Error && error instanceof ControllerError) {
       ContextLogger.debug({
         message: `[Controller-Layer] ${this.controllerName} () 오류 발생`,
         meta: { error: error instanceof Error ? error.message : String(error) },
       })
-    }
-    else if (error instanceof Error && !(error instanceof ControllerError)) {
+    } else if (error instanceof Error && !(error instanceof ControllerError)) {
       error = ControllerError.fromError<ControllerError>(error, { method, message })
     }
-    //  그외 계층에서 발생한 에러는 바로 상위 계층으로 전송
     next(error)
   }
 }

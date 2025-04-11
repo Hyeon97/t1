@@ -17,14 +17,11 @@ export class RepositoryError extends BaseError {
     error: unknown,
     params: Omit<ErrorParams, "layer" | "errorCode" | "statusCode" | "cause">
   ): T {
-    // // 데이터베이스 에러 처리
-    // if (error instanceof DatabaseError) {
-    //   return RepositoryError.fromDatabaseError({ error, method })
-    // } else if (error instanceof RepositoryError) {
-    //   return error
-    // }
-    return BaseError.fromError(RepositoryError as any, error, {
+    let originMessage = error instanceof Error ? error.message : String(error)
+    if (params.message) originMessage = `${params.message} || ${originMessage}`
+    return BaseError.fromError(RepositoryError, error, {
       ...params,
+      message: originMessage,
       layer: ErrorLayer.REPOSITORY,
     }) as unknown as T
   }
