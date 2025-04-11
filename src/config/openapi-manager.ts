@@ -3,7 +3,8 @@ import fs from "fs"
 import path from "path"
 import swaggerUi from "swagger-ui-express"
 import { ContextLogger } from "../utils/logger/logger.custom"
-import { config } from "./config"
+// import { config } from "./config"
+import { configManager } from "./config-manager"
 import { generateOpenApiSpec } from "./openapi"
 
 export class OpenApiConfig {
@@ -56,7 +57,7 @@ export class OpenApiConfig {
       }
 
       // Swagger UI 설정 (JSON 문서 직접 사용)
-      app.use(`${config.apiPrefix}/docs`, swaggerUi.serve, swaggerUi.setup(swaggerDocument))
+      app.use(`${configManager.getApiPrefix()}/docs`, swaggerUi.serve, swaggerUi.setup(swaggerDocument))
 
       // OpenAPI Validator 미들웨어 설정
       const validatorMiddleware = middleware({
@@ -72,7 +73,7 @@ export class OpenApiConfig {
       }
 
       ContextLogger.info({
-        message: `OpenAPI 문서가 ${config.apiPrefix}/docs 에서 제공됩니다`,
+        message: `OpenAPI 문서가 ${configManager.getApiPrefix()}/docs 에서 제공됩니다`,
       })
     } catch (error) {
       ContextLogger.error({

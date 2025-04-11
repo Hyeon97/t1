@@ -2,8 +2,8 @@ import cors from "cors"
 import express, { Application } from "express"
 import helmet from "helmet"
 import "reflect-metadata"
-import { config } from "./src/config/config"
-import { ConfigManager } from "./src/config/config-manager"
+// import { ConfigManager } from "./src/config/config-manager"
+import { configManager } from "./src/config/config-manager"
 import { OpenApiConfig } from "./src/config/openapi-manager"
 import { AuthRoutes } from "./src/domain/auth/routes/auth.routes"
 import { validateToken } from "./src/domain/auth/validators/token.validators"
@@ -16,10 +16,9 @@ import { logger, morganMiddleware } from "./src/utils/logger/logger.util"
 
 class App {
   public app: Application
-
   constructor() {
     // 환경 설정 초기화
-    ConfigManager.getInstance().initialize()
+    configManager.initialize()
     //  기본 설정 초기화
     this.app = express()
     this.configureMiddleware()
@@ -29,7 +28,8 @@ class App {
     this.setupErrorHandling()
 
     // 서버 시작 로깅
-    logger.info(`애플리케이션이 ${config.environment} 모드로 초기화되었습니다.`)
+    logger.info(`애플리케이션이 ${configManager.getEnv()} 모드로 초기화되었습니다.`)
+    logger.info(`애플리케이션 logging level: ${configManager.getLogLevel()}.`)
   }
 
   private configureMiddleware(): void {
@@ -53,7 +53,7 @@ class App {
       logger.debug("루트 경로 요청 처리")
       res.json({
         message: "API 서버가 실행 중입니다",
-        environment: config.environment,
+        environment: configManager.getEnv(),
         timestamp: new Date().toISOString(),
       })
     })
@@ -69,11 +69,12 @@ class App {
   }
 
   private async setupRoutes(): Promise<void> {
-    this.app.use(`${config.apiPrefix}/token`, new AuthRoutes().router)
-    this.app.use(`${config.apiPrefix}/servers`, validateToken, new ServerRoutes().router)
-    this.app.use(`${config.apiPrefix}/servers`, validateToken, new ServerRoutes().router)
-    this.app.use(`${config.apiPrefix}/zdms`, validateToken, new ZdmRoutes().router)
-    this.app.use(`${config.apiPrefix}/backups`, new BackupRoutes().router)
+    const apiPrefix = configManager.getApiPrefix()
+    this.app.use(`${apiPrefix}/token`, new AuthRoutes().router)
+    this.app.use(`${apiPrefix}/servers`, validateToken, new ServerRoutes().router)
+    this.app.use(`${apiPrefix}/servers`, validateToken, new ServerRoutes().router)
+    this.app.use(`${apiPrefix}/zdms`, validateToken, new ZdmRoutes().router)
+    this.app.use(`${apiPrefix}/backups`, new BackupRoutes().router)
   }
 
   private setupErrorHandling(): void {

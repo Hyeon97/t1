@@ -2,7 +2,6 @@ import dotenv from "dotenv"
 import dotenvExpand from "dotenv-expand"
 import fs from "fs"
 import path from "path"
-import { Environment } from "./interface"
 
 /**
  * 중앙화된 환경 설정 관리 클래스
@@ -11,6 +10,11 @@ export class ConfigManager {
   private static instance: ConfigManager
   private readonly configs: Map<string, any> = new Map()
   private initialized = false
+
+  /**
+   * 생성자를 private으로 변경
+   */
+  private constructor() { }
 
   /**
    * 싱글톤 인스턴스 반환
@@ -54,6 +58,9 @@ export class ConfigManager {
       this.loadEnvFromNodeEnv()
     }
 
+    // API 설정 초기화
+    this.setupApiConfig()
+
     // NODE_ENV가 설정되지 않은 경우 기본값 설정
     if (!process.env.NODE_ENV) {
       process.env.NODE_ENV = "development"
@@ -68,6 +75,7 @@ export class ConfigManager {
 
     // 데이터베이스 설정 초기화
     this.setupDatabaseConfig()
+
 
     this.initialized = true
   }
@@ -138,38 +146,125 @@ export class ConfigManager {
   }
 
   /**
-   * 문자열 환경 변수 가져오기
+   * config 값 세팅
    */
-  public getEnvValue<T>({ key, defaultValue }: { key: string; defaultValue: T }): T {
-    return (process.env[key] as unknown as T) || defaultValue
+  private setupApiConfig(): void {
+    console.log("API 설정 초기화 중...")
+    this.configs.set("api", {
+      prefix: process.env.API_PREFIX || "/api",
+      port: parseInt(process.env.PORT || "3000"),
+      environment: process.env.NODE_ENV || "development",
+      logLevel: process.env.LOG_LEVEL || "info",
+      logDir: process.env.LOG_DIR || "logs",
+      logFormat: process.env.LOG_FORMAT || "combined"
+    })
+    console.log("API 설정 초기화 완료:", this.configs.get("api"))
+  }
+
+  public getApiConfig(): {
+    prefix: string
+    port: number
+    environment: string
+    logLevel: string
+    logDir: string
+    logFormat: string
+  } {
+    return this.getConfig<{
+      prefix: string
+      port: number
+      environment: string
+      logLevel: string
+      logDir: string
+      logFormat: string
+    }>({ key: "api" })
   }
 
   /**
-   * 숫자 환경 변수 가져오기
+   * API 접두사 가져오기
    */
-  public getNumberEnv({ key, defaultValue }: { key: string; defaultValue: number }): number {
-    const value = process.env[key]
-
-    if (value === undefined) {
-      return defaultValue
-    }
-
-    const parsed = parseInt(value, 10)
-    return isNaN(parsed) ? defaultValue : parsed
+  public getApiPrefix(): string {
+    return this.getApiConfig().prefix
   }
 
   /**
-   * 불리언 환경 변수 가져오기
+   * 서버 포트 가져오기
    */
-  public getBooleanEnv({ key, defaultValue }: { key: string; defaultValue: boolean }): boolean {
-    const value = process.env[key]
-
-    if (value === undefined) {
-      return defaultValue
-    }
-
-    return value.toLowerCase() === "true"
+  public getPort(): number {
+    return this.getApiConfig().port
   }
+
+  /**
+   * 애플리케이션 환경 가져오기
+   */
+  public getEnv(): string {
+    try {
+      const apiConfig = this.getConfig<any>({ key: "api" })
+      if (apiConfig && apiConfig.environment) {
+        return apiConfig.environment
+      }
+      // api 설정이 없거나 logLevel이 없는 경우 기본값 반환
+      return process.env.NODE_ENV || "development"
+    } catch (error) {
+      console.warn("로그 환경을 가져오는 중 오류 발생:", error)
+      // 오류 발생 시 기본값 반환
+      return "development"
+    }
+  }
+
+  /**
+   * 로그 레벨 가져오기
+   */
+  public getLogLevel(): string {
+    try {
+      const apiConfig = this.getConfig<any>({ key: "api" })
+      if (apiConfig && apiConfig.logLevel) {
+        return apiConfig.logLevel
+      }
+      // api 설정이 없거나 logLevel이 없는 경우 기본값 반환
+      return process.env.LOG_LEVEL || "info"
+    } catch (error) {
+      console.warn("로그 레벨을 가져오는 중 오류 발생:", error)
+      // 오류 발생 시 기본값 반환
+      return "info"
+    }
+  }
+
+  /**
+   * 로그 디렉토리 가져오기
+   */
+  public getLogDir(): string {
+    try {
+      const apiConfig = this.getConfig<any>({ key: "api" })
+      if (apiConfig && apiConfig.logDir) {
+        return apiConfig.logDir
+      }
+      // api 설정이 없거나 logDir이 없는 경우 기본값 반환
+      return process.env.LOG_DIR || "logs"
+    } catch (error) {
+      console.warn("로그 디렉토리를 가져오는 중 오류 발생:", error)
+      // 오류 발생 시 기본값 반환
+      return "logs"
+    }
+  }
+
+  /**
+   * 로그 포맷 가져오기
+   */
+  public getLogFormat(): string {
+    try {
+      const apiConfig = this.getConfig<any>({ key: "api" })
+      if (apiConfig && apiConfig.logFormat) {
+        return apiConfig.logFormat
+      }
+      // api 설정이 없거나 logDir이 없는 경우 기본값 반환
+      return process.env.LOG_FORMAT || "combined"
+    } catch (error) {
+      console.warn("로그 포멧 가져오는 중 오류 발생:", error)
+      // 오류 발생 시 기본값 반환
+      return "combined"
+    }
+  }
+
 
   /**
    * 설정 가져오기
@@ -178,13 +273,7 @@ export class ConfigManager {
     return this.configs.get(key)
   }
 
-  /**
-   * 현재 환경 반환
-   */
-  public getEnvironment(): Environment {
-    return this.getEnvValue<Environment>({
-      key: "NODE_ENV",
-      defaultValue: "development",
-    })
-  }
 }
+
+//  싱글톤 인스턴스 내보내기
+export const configManager = ConfigManager.getInstance()

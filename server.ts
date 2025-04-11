@@ -5,7 +5,8 @@ EnvUtils.initialize()
 import columnify from "columnify"
 import listEndpoints from "express-list-endpoints"
 import { app } from "./app"
-import { config } from "./src/config/config"
+// import { config } from "./src/config/config"
+import { configManager } from "./src/config/config-manager"
 import { DatabasePool } from "./src/database/connection"
 import { logger } from "./src/utils/logger/logger.util"
 
@@ -50,11 +51,12 @@ const startServer = async (): Promise<void> => {
     if (process.env.NODE_ENV === "development") {
       endPointLogging()
     }
-
     // 서버 시작
-    app.listen(config.port, () => {
-      logger.info(`서버가 http://localhost:${config.port} 에서 실행 중입니다`)
-      logger.info(`환경: ${config.environment}`)
+    const port = configManager.getPort()
+    const environment = configManager.getEnv()
+    app.listen(port, () => {
+      logger.info(`서버가 http://localhost:${port} 에서 실행 중입니다`)
+      logger.info(`환경: ${environment}`)
     })
   } catch (error) {
     logger.error("서버 시작 중 오류 발생했습니다:", error)
