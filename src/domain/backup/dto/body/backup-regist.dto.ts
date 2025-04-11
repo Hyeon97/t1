@@ -44,7 +44,7 @@ class RepositoryDto {
 
   @IsNotEmpty({ message: "repository.type이 누락되었습니다" })
   @IsIn(VALID_REPOSITORY_VALUES, {
-    message: `repository.type은 ${VALID_REPOSITORY_VALUES.join(", ")} 중 하나여야 합니다`,
+    message: `repository.type은 ${VALID_REPOSITORY_VALUES.join(", ")}중 하나여야 합니다`,
   })
   type!: RepositoryType
 
@@ -68,7 +68,7 @@ export class BackupRegistBodyDTO implements BackupRegistRequestBody {
 
   @IsNotEmpty({ message: "type이 누락되었습니다" })
   @IsIn(VALID_JOB_TYPE_VALUES, {
-    message: `type은 ${VALID_JOB_TYPE_VALUES.join(", ")} 중 하나여야 합니다`,
+    message: `type은 ${VALID_JOB_TYPE_VALUES.join(", ")}중 하나여야 합니다`,
   })
   type!: BackupType //  작업 타입
 

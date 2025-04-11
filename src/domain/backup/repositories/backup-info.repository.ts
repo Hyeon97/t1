@@ -7,6 +7,7 @@ import { BackupTypeMap } from "../types/backup-common.type"
 import { BackupFilterOptions } from "../types/backup-filter.type"
 import { BackupInfoTableInput } from "../types/backup-regist.type"
 import { BackupInfoTable } from "../types/db/job-backup-info"
+import { asyncContextStorage } from "../../../utils/AsyncContext"
 
 export class BackupInfoRepository extends BaseRepository {
   constructor() {
@@ -21,6 +22,7 @@ export class BackupInfoRepository extends BaseRepository {
    */
   private applyFilters({ filterOptions }: { filterOptions: BackupFilterOptions }): void {
     try {
+      asyncContextStorage.addOrder({ component: this.repositoryName, method: "applyFilters", state: "start" })
       //  mode 필터 적용
       if (filterOptions.mode) {
         this.addCondition({ condition: "nBackupType = ?", params: [BackupTypeMap.fromString({ str: filterOptions.mode })] })
@@ -45,11 +47,12 @@ export class BackupInfoRepository extends BaseRepository {
         this.addCondition({ condition: "sRepositoryPath = ?", params: [filterOptions.repositoryPath] })
       }
       ContextLogger.debug({ message: `필터 옵션 적용됨` })
+      asyncContextStorage.addOrder({ component: this.repositoryName, method: "applyFilters", state: "end" })
     } catch (error) {
       this.handleRepositoryError({
         error,
         method: "applyFilters",
-        message: "필터 옵션 적용 중 오류가 발생했습니다",
+        message: "[필터 옵션 적용] - 오류가 발생했습니다",
       })
     }
   }
@@ -59,18 +62,22 @@ export class BackupInfoRepository extends BaseRepository {
    */
   async findAll({ filterOptions }: { filterOptions: BackupFilterOptions }): Promise<BackupInfoTable[]> {
     try {
+      asyncContextStorage.addRepository({ name: this.repositoryName })
+      asyncContextStorage.addOrder({ component: this.repositoryName, method: "findAll", state: "start" })
       this.resetQueryState()
       this.applyFilters({ filterOptions })
 
       let query = `SELECT * FROM ${this.tableName}`
       query += this.buildWhereClause()
+      const result = await this.executeQuery<BackupInfoTable[]>({ sql: query, params: this.params, request: `${this.repositoryName}.findAll` })
 
-      return await this.executeQuery<BackupInfoTable[]>({ sql: query, params: this.params, request: `${this.repositoryName}.findAll` })
+      asyncContextStorage.addOrder({ component: this.repositoryName, method: "findAll", state: "end" })
+      return result
     } catch (error) {
       return this.handleRepositoryError({
         error,
         method: "findAll",
-        message: "Backup Info 조회 중 오류가 발생했습니다",
+        message: "[Backup Info 목록 조회] - 오류가 발생했습니다",
       })
     }
   }
@@ -80,20 +87,24 @@ export class BackupInfoRepository extends BaseRepository {
    */
   async findByJobNames({ jobNames, filterOptions }: { jobNames: string[]; filterOptions: BackupFilterOptions }): Promise<BackupInfoTable[]> {
     try {
+      asyncContextStorage.addRepository({ name: this.repositoryName })
+      asyncContextStorage.addOrder({ component: this.repositoryName, method: "findByJobNames", state: "start" })
       if (jobNames.length === 0) {
         return []
       }
       this.resetQueryState()
       this.applyFilters({ filterOptions })
       const placeholders = jobNames.map(() => "?").join(",")
-
       const query = `SELECT * FROM ${this.tableName} WHERE sJobName IN (${placeholders})`
-      return await this.executeQuery<BackupInfoTable[]>({ sql: query, params: jobNames, request: `${this.repositoryName}.findByJobNames`, })
+      const result = await this.executeQuery<BackupInfoTable[]>({ sql: query, params: jobNames, request: `${this.repositoryName}.findByJobNames` })
+
+      asyncContextStorage.addOrder({ component: this.repositoryName, method: "findByJobNames", state: "end" })
+      return result
     } catch (error) {
       return this.handleRepositoryError({
         error,
         method: "findByJobNames",
-        message: "Backup Info 조회 중 오류가 발생했습니다",
+        message: "[Backup Info 작업 이름으로 조회] - 오류가 발생했습니다",
       })
     }
   }
@@ -101,22 +112,32 @@ export class BackupInfoRepository extends BaseRepository {
   /**
    * Backup info 작업 정보 추가
    */
-  async insertBackupInfo({ backupInfoData, transaction }: { backupInfoData: BackupInfoTableInput, transaction: TransactionManager }): Promise<ResultSetHeader> {
+  async insertBackupInfo({
+    backupInfoData,
+    transaction,
+  }: {
+    backupInfoData: BackupInfoTableInput
+    transaction: TransactionManager
+  }): Promise<ResultSetHeader> {
     try {
+      asyncContextStorage.addRepository({ name: this.repositoryName })
+      asyncContextStorage.addOrder({ component: this.repositoryName, method: "insertBackupInfo", state: "start" })
       // 시간 필드에 대한 SQL 함수 사용 옵션 정의
       const sqlOptions: Record<string, SqlFieldOption> = {}
-
-      return await this.insert({
+      const result = await this.insert({
         data: backupInfoData,
         options: sqlOptions,
         transaction,
-        request: `${this.repositoryName}.insertBackupInfo`
+        request: `${this.repositoryName}.insertBackupInfo`,
       })
+
+      asyncContextStorage.addOrder({ component: this.repositoryName, method: "insertBackupInfo", state: "end" })
+      return result
     } catch (error) {
       return this.handleRepositoryError({
         error,
         method: "insertBackupInfo",
-        message: "Backup 상세 정보 추가 중 오류가 발생했습니다"
+        message: "[Backup Info 정보 추가] - 오류가 발생했습니다",
       })
     }
   }
