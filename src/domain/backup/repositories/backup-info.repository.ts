@@ -48,7 +48,7 @@ export class BackupInfoRepository extends BaseRepository {
     } catch (error) {
       this.handleRepositoryError({
         error,
-        functionName: "applyFilters",
+        method: "applyFilters",
         message: "필터 옵션 적용 중 오류가 발생했습니다",
       })
     }
@@ -69,7 +69,7 @@ export class BackupInfoRepository extends BaseRepository {
     } catch (error) {
       return this.handleRepositoryError({
         error,
-        functionName: "findAll",
+        method: "findAll",
         message: "Backup Info 조회 중 오류가 발생했습니다",
       })
     }
@@ -92,7 +92,7 @@ export class BackupInfoRepository extends BaseRepository {
     } catch (error) {
       return this.handleRepositoryError({
         error,
-        functionName: "findByJobNames",
+        method: "findByJobNames",
         message: "Backup Info 조회 중 오류가 발생했습니다",
       })
     }
@@ -115,7 +115,7 @@ export class BackupInfoRepository extends BaseRepository {
     } catch (error) {
       return this.handleRepositoryError({
         error,
-        functionName: "insertBackupInfo",
+        method: "insertBackupInfo",
         message: "Backup 상세 정보 추가 중 오류가 발생했습니다"
       })
     }

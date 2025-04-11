@@ -91,7 +91,7 @@ export class BackupRegistService extends BaseService {
       }
     } catch (error) {
       throw ServiceError.dataProcessingError({
-        functionName: "createBackupObject",
+        method: "createBackupObject",
         message: "[Backup 정보 등록] - Backup Object 생성 오류 발생",
         cause: error,
       })
@@ -136,7 +136,7 @@ export class BackupRegistService extends BaseService {
       }
     } catch (error) {
       throw ServiceError.dataProcessingError({
-        functionName: "createBackupInfoObject",
+        method: "createBackupInfoObject",
         message: "[Backup 정보 등록] - Backup Info Object 생성 오류 발생",
         cause: error,
       })
@@ -158,7 +158,7 @@ export class BackupRegistService extends BaseService {
     } catch (error) {
       return this.handleServiceError({
         error,
-        functionName: "getServerInfo",
+        method: "getServerInfo",
         message: "[Backup 정보 등록] - Server 정보 조회 오류 발생",
       })
     }
@@ -174,7 +174,7 @@ export class BackupRegistService extends BaseService {
     } catch (error) {
       return this.handleServiceError({
         error,
-        functionName: "getServerPartitionList",
+        method: "getServerPartitionList",
         message: "[Backup 정보 등록] - Server Partition 정보 조회 오류 발생",
       })
     }
@@ -195,11 +195,11 @@ export class BackupRegistService extends BaseService {
     } catch (error) {
       return this.handleServiceError({
         error,
-        functionName: "getCenterInfo",
+        method: "getCenterInfo",
         message: "[Backup 정보 등록] - ZDM 정보 조회 오류 발생",
       })
       // throw ServiceError.dataProcessingError({
-      //   functionName: "getCenterInfo",
+      //   method: "getCenterInfo",
       //   message: "[Backup 정보 등록] - ZDM 정보 조회 오류 발생",
       //   cause: error,
       // })
@@ -221,11 +221,11 @@ export class BackupRegistService extends BaseService {
     } catch (error) {
       return this.handleServiceError({
         error,
-        functionName: "getRepositoryInfo",
+        method: "getRepositoryInfo",
         message: "[Backup 정보 등록] - ZDM Repository 정보 조회 오류 발생",
       })
       // throw ServiceError.dataProcessingError({
-      //   functionName: "getRepositoryInfo",
+      //   method: "getRepositoryInfo",
       //   message: "[Backup 정보 등록] - ZDM Repository 정보 조회 오류 발생",
       //   cause: error,
       // })
@@ -242,7 +242,7 @@ export class BackupRegistService extends BaseService {
       return ""
     } catch (error) {
       throw ServiceError.dataProcessingError({
-        functionName: "preprocessJobName",
+        method: "preprocessJobName",
         message: "[Backup 정보 등록] - Backup JobName 정보 가공 오류 발생",
         cause: error,
       })
@@ -263,7 +263,7 @@ export class BackupRegistService extends BaseService {
       return validPartitions
     } catch (error) {
       throw ServiceError.dataProcessingError({
-        functionName: "preprocessExcludePartitions",
+        method: "preprocessExcludePartitions",
         message: "[Backup 정보 등록] - Exclude Partition 정보 가공 오류 발생",
         cause: error,
       })
@@ -284,7 +284,7 @@ export class BackupRegistService extends BaseService {
       return validPartitions
     } catch (error) {
       throw ServiceError.dataProcessingError({
-        functionName: "preprocessExcludeDir",
+        method: "preprocessExcludeDir",
         message: "[Backup 정보 등록] - Exclude Dir 정보 가공 오류 발생",
         cause: error,
       })
@@ -325,7 +325,7 @@ export class BackupRegistService extends BaseService {
       return dataSet
     } catch (error) {
       throw ServiceError.dataProcessingError({
-        functionName: "registerBackupDataSet",
+        method: "registerBackupDataSet",
         message: "[Backup 정보 등록] - Backup / Backup Info 정보 DB등록 중 오류 발생",
         cause: error,
       })
@@ -442,21 +442,21 @@ export class BackupRegistService extends BaseService {
       // 처리할 파티션 목록 결정
       const partitionsToProcess = data.partition.length
         ? data.partition.map((partition) => {
-            const partitionInfo = partitionList.find((item) => item.sLetter === partition)
-            //  사용자 입력 파티션 검증
-            if (!partitionInfo) {
-              throw ServiceError.badRequest(ServiceError, {
-                functionName: "regist",
-                message: `[Backup 정보 등록] - 파티션( ${partition} )이 서버( ${server.sSystemName} )에 존재하지 않습니다`,
-                metadata: {
-                  partition,
-                  server: server.sSystemName,
-                },
-              })
-            }
+          const partitionInfo = partitionList.find((item) => item.sLetter === partition)
+          //  사용자 입력 파티션 검증
+          if (!partitionInfo) {
+            throw ServiceError.badRequest(ServiceError, {
+              method: "regist",
+              message: `[Backup 정보 등록] - 파티션( ${partition} )이 서버( ${server.sSystemName} )에 존재하지 않습니다`,
+              metadata: {
+                partition,
+                server: server.sSystemName,
+              },
+            })
+          }
 
-            return partitionInfo
-          })
+          return partitionInfo
+        })
         : partitionList
 
       // 제외 파티션이 아닌 것들만 필터링 후 데이터셋 생성
@@ -478,7 +478,7 @@ export class BackupRegistService extends BaseService {
       // 데이터 등록
       if (dataSet.length === 0) {
         throw ServiceError.badRequest(ServiceError, {
-          functionName: "regist",
+          method: "regist",
           message: "[Backup 정보 등록] - 등록할 Backup 작업이 없습니다. 파티션 정보를 확인해주세요.",
         })
       }
@@ -513,7 +513,7 @@ export class BackupRegistService extends BaseService {
     } catch (error) {
       return this.handleServiceError({
         error,
-        functionName: "regist",
+        method: "regist",
         message: `[Backup 정보 등록] - 오류가 발생했습니다`,
       })
     }

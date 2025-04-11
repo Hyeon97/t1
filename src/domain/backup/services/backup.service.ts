@@ -1,3 +1,4 @@
+import { asyncContextStorage } from "../../../utils/AsyncContext"
 import { BaseService } from "../../../utils/base/base-service"
 import { BackupInfoRepository } from "../repositories/backup-info.repository"
 import { BackupRepository } from "../repositories/backup.repository"
@@ -22,6 +23,7 @@ export class BackupService extends BaseService {
    */
   private combineBackupInfoData({ backups, backupInfos }: { backups: BackupTable[]; backupInfos: BackupInfoTable[] }): BackupDataResponse[] {
     try {
+      asyncContextStorage.addOrder({ component: 'BackupService', method: 'combineBackupInfoData', state: 'start' })
       const backupMap = new Map<string, Partial<BackupDataResponse>>()
       backups.forEach((backup) => {
         backupMap.set(backup.sJobName, { backup })
@@ -33,11 +35,12 @@ export class BackupService extends BaseService {
           backup.info = info
         }
       })
+      asyncContextStorage.addOrder({ component: 'BackupService', method: 'combineBackupInfoData', state: 'end' })
       return Array.from(backupMap.values()).filter((data): data is BackupDataResponse => !!data.backup && !!data.info)
     } catch (error) {
       return this.handleServiceError({
         error,
-        functionName: "combineBackupInfoData",
+        method: "combineBackupInfoData",
         message: "Backup 데이터 조합 중 오류가 발생했습니다",
       })
     }
@@ -52,6 +55,7 @@ export class BackupService extends BaseService {
     filterOptions: BackupFilterOptions
   }): Promise<{ backups: BackupTable[]; backupInfos: BackupInfoTable[] }> {
     try {
+      asyncContextStorage.addOrder({ component: 'BackupService', method: 'getBackupsByBackupFirst', state: 'start' })
       // Backup 기본 정보 조회
       const backups = await this.backupRepository.findAll({ filterOptions })
 
@@ -67,12 +71,12 @@ export class BackupService extends BaseService {
         jobNames,
         filterOptions,
       })
-
+      asyncContextStorage.addOrder({ component: 'BackupService', method: 'getBackupsByBackupFirst', state: 'end' })
       return { backups, backupInfos }
     } catch (error) {
       return this.handleServiceError({
         error,
-        functionName: "getBackupsByBackupFirst",
+        method: "getBackupsByBackupFirst",
         message: `Backup 정보 조회 중 오류가 발생했습니다`,
       })
     }
@@ -87,6 +91,7 @@ export class BackupService extends BaseService {
     filterOptions: BackupFilterOptions
   }): Promise<{ backups: BackupTable[]; backupInfos: BackupInfoTable[] }> {
     try {
+      asyncContextStorage.addOrder({ component: 'BackupService', method: 'getBackupsByInfoFirst', state: 'start' })
       // BackupInfo 정보 조회
       const backupInfos = await this.backupInfoRepository.findAll({ filterOptions })
 
@@ -102,11 +107,12 @@ export class BackupService extends BaseService {
         jobNames,
         filterOptions,
       })
+      asyncContextStorage.addOrder({ component: 'BackupService', method: 'getBackupsByInfoFirst', state: 'end' })
       return { backups, backupInfos }
     } catch (error) {
       return this.handleServiceError({
         error,
-        functionName: "getBackupsByInfoFirst",
+        method: "getBackupsByInfoFirst",
         message: `Backup 정보 조회 중 오류가 발생했습니다`,
       })
     }
@@ -117,6 +123,8 @@ export class BackupService extends BaseService {
    */
   async getBackups({ filterOptions }: { filterOptions: BackupFilterOptions }): Promise<BackupDataResponse[]> {
     try {
+      asyncContextStorage.addService({ name: 'BackupService' })
+      asyncContextStorage.addOrder({ component: 'BackupService', method: 'getBackups', state: 'start' })
       // 필터 옵션 분리
       const { result, ...infoFilterOptions } = filterOptions
 
@@ -139,11 +147,12 @@ export class BackupService extends BaseService {
       // 데이터 조합
       const output = this.combineBackupInfoData({ backups, backupInfos })
 
+      asyncContextStorage.addOrder({ component: 'BackupService', method: 'getBackups', state: 'end' })
       return output
     } catch (error) {
       return this.handleServiceError({
         error,
-        functionName: "getBackups",
+        method: "getBackups",
         message: `Backup 정보 조회 중 오류가 발생했습니다`,
       })
     }

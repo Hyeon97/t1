@@ -1,5 +1,6 @@
 import { ResultSetHeader } from "mysql2/promise"
 import { TransactionManager } from "../../../database/connection"
+import { asyncContextStorage } from "../../../utils/AsyncContext"
 import { BaseRepository, SqlFieldOption } from "../../../utils/base/base-repository"
 import { ContextLogger } from "../../../utils/logger/logger.custom"
 import { BackupFilterOptions } from "../types/backup-filter.type"
@@ -18,6 +19,7 @@ export class BackupRepository extends BaseRepository {
    */
   private applyFilters({ filterOptions }: { filterOptions: BackupFilterOptions }): void {
     try {
+      asyncContextStorage.addOrder({ component: 'BackupRepository', method: 'applyFilters', state: 'start' })
       //  result 필터 적용
       if (filterOptions.result) {
         this.addCondition({ condition: "sJobResult = ?", params: [filterOptions.result] })
@@ -27,10 +29,11 @@ export class BackupRepository extends BaseRepository {
         this.addCondition({ condition: "nJobStatus = ?", params: [filterOptions.status] })
       }
       ContextLogger.debug({ message: `필터 옵션 적용됨` })
+      asyncContextStorage.addOrder({ component: 'BackupRepository', method: 'applyFilters', state: 'end' })
     } catch (error) {
       this.handleRepositoryError({
         error,
-        functionName: "applyFilters",
+        method: "applyFilters",
         message: "필터 옵션 적용 중 오류가 발생했습니다",
       })
     }
@@ -41,17 +44,22 @@ export class BackupRepository extends BaseRepository {
    */
   async findAll({ filterOptions }: { filterOptions: BackupFilterOptions }): Promise<BackupTable[]> {
     try {
+      asyncContextStorage.addRepository({ name: 'BackupRepository' })
+      asyncContextStorage.addOrder({ component: 'BackupRepository', method: 'findAll', state: 'start' })
+
       this.resetQueryState()
       this.applyFilters({ filterOptions })
 
       let query = `SELECT * FROM ${this.tableName}`
       query += this.buildWhereClause()
+      const result = await this.executeQuery<BackupTable[]>({ sql: query, params: this.params, request: `${this.repositoryName}.findAll` })
 
-      return await this.executeQuery<BackupTable[]>({ sql: query, params: this.params, request: `${this.repositoryName}.findAll` })
+      asyncContextStorage.addOrder({ component: 'BackupRepository', method: 'findAll', state: 'end' })
+      return result
     } catch (error) {
       return this.handleRepositoryError({
         error,
-        functionName: "findAll",
+        method: "findAll",
         message: "Backup 작업 목록 조회 중 오류가 발생했습니다",
       })
 
@@ -63,21 +71,23 @@ export class BackupRepository extends BaseRepository {
    */
   async findByJobNames({ jobNames, filterOptions }: { jobNames: string[]; filterOptions: BackupFilterOptions }): Promise<BackupTable[]> {
     try {
-      if (jobNames.length === 0) {
-        return []
-      }
-
+      asyncContextStorage.addRepository({ name: 'BackupRepository' })
+      asyncContextStorage.addOrder({ component: 'BackupRepository', method: 'findByJobNames', state: 'start' })
+      throw new Error('eeeeeesx')
+      if (jobNames.length === 0) { return [] }
       this.resetQueryState()
       this.applyFilters({ filterOptions })
+
       const placeholders = jobNames.map(() => "?").join(",")
-
       const query = `SELECT * FROM ${this.tableName} WHERE sJobName IN (${placeholders})`
+      const result = await this.executeQuery<BackupTable[]>({ sql: query, params: jobNames, request: `${this.repositoryName}.findByJobNames`, })
 
-      return await this.executeQuery<BackupTable[]>({ sql: query, params: jobNames, request: `${this.repositoryName}.findByJobNames`, })
+      asyncContextStorage.addOrder({ component: 'BackupRepository', method: 'findByJobNames', state: 'end' })
+      return result
     } catch (error) {
       return this.handleRepositoryError({
         error,
-        functionName: "findByJobNames",
+        method: "findByJobNames",
         message: `Backup 작업 이름으로 조회 중 오류가 발생했습니다`,
       })
     }
@@ -88,22 +98,22 @@ export class BackupRepository extends BaseRepository {
    */
   async insertBackup({ backupData, transaction }: { backupData: BackupTableInput, transaction: TransactionManager }): Promise<ResultSetHeader> {
     try {
+      asyncContextStorage.addRepository({ name: 'BackupRepository' })
+      asyncContextStorage.addOrder({ component: 'BackupRepository', method: 'insertBackup', state: 'start' })
+
       // 시간 필드에 대한 SQL 함수 사용 옵션 정의
       const sqlOptions: Record<string, SqlFieldOption> = {
         sStartTime: { raw: 'now()' },
         sLastUpdateTime: { raw: 'now()' }
       }
+      const result = await this.insert({ data: backupData, options: sqlOptions, transaction, request: `${this.repositoryName}.insertBackup` })
 
-      return await this.insert({
-        data: backupData,
-        options: sqlOptions,
-        transaction,
-        request: `${this.repositoryName}.insertBackup`
-      })
+      asyncContextStorage.addOrder({ component: 'BackupRepository', method: 'insertBackup', state: 'end' })
+      return result
     } catch (error) {
       return this.handleRepositoryError({
         error,
-        functionName: "insertBackup",
+        method: "insertBackup",
         message: "Backup 정보 추가 중 오류가 발생했습니다"
       })
     }
@@ -122,12 +132,14 @@ export class BackupRepository extends BaseRepository {
     transaction: TransactionManager
   }): Promise<boolean> {
     try {
+      asyncContextStorage.addRepository({ name: 'BackupRepository' })
+      asyncContextStorage.addOrder({ component: 'BackupRepository', method: 'updateBackup', state: 'start' })
+
       // sLastUpdateTime 필드를 현재 시간으로 자동 설정
       const sqlOptions: Record<string, SqlFieldOption> = {
         // sLastUpdateTime: { raw: 'now()' }
       }
-
-      return await this.update({
+      const result = await this.update({
         data: backupData,
         whereCondition: 'nID = ?',
         whereParams: [id],
@@ -135,10 +147,13 @@ export class BackupRepository extends BaseRepository {
         transaction,
         request: `${this.repositoryName}.updateBackup`
       })
+
+      asyncContextStorage.addOrder({ component: 'BackupRepository', method: 'updateBackup', state: 'end' })
+      return result
     } catch (error) {
       return this.handleRepositoryError({
         error,
-        functionName: "updateBackup",
+        method: "updateBackup",
         message: `Backup 작업 정보 업데이트 중 오류가 발생했습니다`
       })
     }
@@ -155,16 +170,22 @@ export class BackupRepository extends BaseRepository {
     transaction: TransactionManager
   }): Promise<boolean> {
     try {
-      return await this.delete({
+      asyncContextStorage.addRepository({ name: 'BackupRepository' })
+      asyncContextStorage.addOrder({ component: 'BackupRepository', method: 'deleteBackup', state: 'start' })
+
+      const result = await this.delete({
         whereCondition: 'nID = ?',
         whereParams: [id],
         transaction,
         request: `${this.repositoryName}.deleteBackup`
       })
+
+      asyncContextStorage.addOrder({ component: 'BackupRepository', method: 'deleteBackup', state: 'end' })
+      return result
     } catch (error) {
       return this.handleRepositoryError({
         error,
-        functionName: "deleteBackup",
+        method: "deleteBackup",
         message: `Backup 작업 삭제 중 오류가 발생했습니다`
       })
     }
@@ -181,22 +202,24 @@ export class BackupRepository extends BaseRepository {
     transaction: TransactionManager
   }): Promise<boolean> {
     try {
-      if (ids.length === 0) {
-        return false
-      }
+      asyncContextStorage.addRepository({ name: 'BackupRepository' })
+      asyncContextStorage.addOrder({ component: 'BackupRepository', method: 'deleteBackupByIds', state: 'start' })
 
+      if (ids.length === 0) { return false }
       const placeholders = ids.map(() => "?").join(",")
-
-      return await this.delete({
+      const result = await this.delete({
         whereCondition: `nID IN (${placeholders})`,
         whereParams: ids,
         transaction,
         request: `${this.repositoryName}.deleteBackupByIds`
       })
+
+      asyncContextStorage.addOrder({ component: 'BackupRepository', method: 'deleteBackupByIds', state: 'end' })
+      return result
     } catch (error) {
       return this.handleRepositoryError({
         error,
-        functionName: "deleteBackupByIds",
+        method: "deleteBackupByIds",
         message: `여러 Backup 작업 삭제 중 오류가 발생했습니다`
       })
     }

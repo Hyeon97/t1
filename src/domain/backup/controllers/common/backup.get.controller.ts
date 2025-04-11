@@ -2,6 +2,7 @@ import { NextFunction, Response } from "express"
 import { ControllerError } from "../../../../errors/controller/controller-error"
 import { ExtendedRequest } from "../../../../types/common/req.types"
 import { ApiUtils } from "../../../../utils/api/api.utils"
+import { asyncContextStorage } from "../../../../utils/AsyncContext"
 import { BaseController } from "../../../../utils/base/base-controller"
 import { stringToBoolean } from "../../../../utils/data-convert.utils"
 import { ContextLogger } from "../../../../utils/logger/logger.custom"
@@ -24,6 +25,7 @@ export class BackupController extends BaseController {
   //  Backup 조회 옵션 추출
   private extractFilterOptions({ query }: { query: BackupQueryFilterDTO | SpecificBackupFilterDTO }): BackupFilterOptions {
     try {
+      asyncContextStorage.addOrder({ component: 'BackupController', method: 'extractFilterOptions', state: 'start' })
       const filterOptions: BackupFilterOptions = {
         //  필터
         mode: query.mode || "",
@@ -39,10 +41,11 @@ export class BackupController extends BaseController {
       if (query instanceof SpecificBackupFilterDTO) {
         filterOptions.identifierType = query.identifierType
       }
+      asyncContextStorage.addOrder({ component: 'BackupController', method: 'extractFilterOptions', state: 'end' })
       return filterOptions
     } catch (error) {
       throw ControllerError.badRequest(ControllerError, {
-        functionName: "extractFilterOptions",
+        method: "extractFilterOptions",
         message: "Backup 필터 옵션을 추출하는 중 오류가 발생했습니다",
         cause: error,
       })
@@ -55,6 +58,8 @@ export class BackupController extends BaseController {
   getBackups = async (req: ExtendedRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
       ContextLogger.debug({ message: `Backup 작업 목록 조회 시작` })
+      asyncContextStorage.setController({ name: 'BackupController' })
+      asyncContextStorage.addOrder({ component: 'BackupController', method: 'getBackups', state: 'start' })
 
       // 필터 옵션 추출
       const query = req.query as unknown as BackupQueryFilterDTO
@@ -70,13 +75,13 @@ export class BackupController extends BaseController {
         backupsData,
       })
       ContextLogger.info({ message: `총 ${backupsData.length}개의 Backup 작업 정보를 조회했습니다. 상세 정보 포함: ${filterOptions.detail}` })
-
       ApiUtils.success({ res, data: backupsDTO, message: "Backup infomation list" })
+      asyncContextStorage.addOrder({ component: 'BackupController', method: 'getBackups', state: 'end' })
     } catch (error) {
       this.handleControllerError({
         next,
         error,
-        functionName: "getBackups",
+        method: "getBackups",
         message: "Backup 작업 목록 조회 중 오류가 발생했습니다",
       })
     }

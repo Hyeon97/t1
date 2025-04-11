@@ -1,6 +1,7 @@
 import { NextFunction, Response } from "express"
 import { ExtendedRequest } from "../../../../types/common/req.types"
 import { ApiUtils } from "../../../../utils/api/api.utils"
+import { asyncContextStorage } from "../../../../utils/AsyncContext"
 import { BaseController } from "../../../../utils/base/base-controller"
 import { ContextLogger } from "../../../../utils/logger/logger.custom"
 import { BackupRegistService } from "../../services/backup-regist.service"
@@ -25,6 +26,8 @@ export class BackupRegistController extends BaseController {
   regist = async (req: ExtendedRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
       ContextLogger.debug({ message: `Backup 작업 정보 등록 시작` })
+      asyncContextStorage.setController({ name: 'BackupRegistController' })
+      asyncContextStorage.addOrder({ component: 'BackupRegistController', method: 'regist', state: 'start' })
 
       //  user data 추출
       const userData = req.user
@@ -39,11 +42,12 @@ export class BackupRegistController extends BaseController {
 
       //  출력 가공
       ApiUtils.success({ res, data: resultData, message: "Backup job data regist result" })
+      asyncContextStorage.addOrder({ component: 'BackupRegistController', method: 'regist', state: 'end' })
     } catch (error) {
       this.handleControllerError({
         next,
         error,
-        functionName: "regist",
+        method: "regist",
         message: "Backup 작업 정보 등록 중 오류가 발생했습니다",
       })
     }

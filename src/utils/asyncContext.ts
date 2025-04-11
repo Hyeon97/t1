@@ -1,5 +1,6 @@
 import { AsyncLocalStorage } from "async_hooks"
 import { v4 as uuid } from "uuid"
+import { DateTimeUtils } from "./dayjs.utils"
 
 /**
  * 요청 정보 인터페이스
@@ -20,7 +21,7 @@ export interface TaskInfo {
   service: string[] // 작업에 사용된 서비스 이름들
   repository: string[] // 작업에 사용된 레포지토리 이름들
   sql: string[] // 작업에 사용된 SQL 쿼리문들
-  order: string[] // 작업에 실행된 함수 이름 순서
+  order: Record<string, any>[] // 작업에 실행된 함수 이름 순서
 }
 
 /**
@@ -154,7 +155,7 @@ export class AsyncContext {
     const store = this.storage.getStore()
     if (store?.task) {
       store.task.controller = name
-      store.task.order.push(`Controller:${name}`)
+      // store.task.order.push(`Controller:${name}`)
     }
   }
 
@@ -167,7 +168,7 @@ export class AsyncContext {
       if (!store.task.service.includes(name)) {
         store.task.service.push(name)
       }
-      store.task.order.push(`Service:${name}`)
+      // store.task.order.push(`Service:${name}`)
     }
   }
 
@@ -180,7 +181,7 @@ export class AsyncContext {
       if (!store.task.repository.includes(name)) {
         store.task.repository.push(name)
       }
-      store.task.order.push(`Repository:${name}`)
+      // store.task.order.push(`Repository:${name}`)
     }
   }
 
@@ -197,10 +198,17 @@ export class AsyncContext {
   /**
    * 실행 함수 순서 추가
    */
-  public addOrder({ functionName }: { functionName: string }): void {
+  public addOrder({ component, method, state }: { component: string, method: string, state: 'start' | 'end' }): void {
+    const now = DateTimeUtils.getLogTimestamp()
     const store = this.storage.getStore()
     if (store?.task) {
-      store.task.order.push(functionName)
+      // store.task.order.push(`[ ${now} ]${method}`)
+      store.task.order.push({
+        timestamp: now,
+        state,
+        component,
+        method
+      })
     }
   }
 
