@@ -134,7 +134,7 @@
 //   protected handleRepositoryError({
 //     error,
 //     method,
-//     message = "Repository 작업 중 오류가 발생했습니다",
+//     message = "Repository 작업 - 오류가 발생했습니다",
 //   }: {
 //     error: unknown
 //     method: string

@@ -1,5 +1,5 @@
 import { TransactionManager } from "../../database/connection"
-import { DatabaseError, RepositoryError } from "../../errors"
+import { DatabaseError, RepositoryError, UtilityError } from "../../errors"
 import { ServiceError } from "../../errors/service/service-error"
 import { ContextLogger } from "../logger/logger.custom"
 
@@ -15,7 +15,7 @@ export class BaseService {
    */
   protected handleServiceError({ error, method, message }: { error: unknown; method: string; message: string }): never {
     //  repository or database error는 바로 상위 계층으로
-    if (error instanceof RepositoryError || error instanceof DatabaseError) {
+    if (error instanceof RepositoryError || error instanceof DatabaseError || error instanceof UtilityError) {
       throw error
     }
 

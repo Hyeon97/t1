@@ -31,7 +31,7 @@ export class JwtUtil {
     } catch (error) {
       throw UtilityError.jwtSignError({
         method: "generateToken",
-        message: "JWT 토큰 생성 중 오류가 발생했습니다",
+        message: "[토큰 생성] - 오류가 발생했습니다",
         cause: error,
         metadata: { payloadType: typeof payload },
       })
@@ -51,14 +51,14 @@ export class JwtUtil {
       if (error instanceof jwt.TokenExpiredError) {
         throw UtilityError.jwtVerifyError({
           method: "verifyToken",
-          message: "만료된 Token",
+          message: "[토큰 검증] - 만료된 Token",
           errorCode: ErrorCode.JWT_EXPIRED,
           cause: error,
         })
       } else if (error instanceof jwt.JsonWebTokenError) {
         throw UtilityError.jwtVerifyError({
           method: "verifyToken",
-          message: "유효하지 않은 Token",
+          message: "[토큰 검증] - 유효하지 않은 Token",
           errorCode: ErrorCode.JWT_INVALID,
           cause: error,
         })
@@ -66,7 +66,7 @@ export class JwtUtil {
       // 일반적인 에러 처리
       throw UtilityError.createFrom(UtilityError, {
         method: "verifyToken",
-        message: "Token 검증 실패",
+        message: "[토큰 검증] - 검증 실패",
         layer: ErrorLayer.UTILITY,
         errorCode: ErrorCode.JWT_INVALID,
         cause: error,

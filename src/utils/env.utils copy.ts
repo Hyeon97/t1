@@ -59,7 +59,7 @@
 
 //         console.log(`환경 변수 파일 로드: ${envPath}`)
 //       } catch (error) {
-//         console.error(`환경 변수 파일 로드 중 오류 발생: ${error}`)
+//         console.error(`환경 변수 파일 로드 - 오류 발생: ${error}`)
 //         console.warn("기본 환경 변수를 사용합니다.")
 //       }
 //     } else {
