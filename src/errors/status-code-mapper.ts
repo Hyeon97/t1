@@ -1,6 +1,6 @@
 ////////////////////////////////////
 //  에러 코드와 HTTP 상태 코드 매핑  //
-//////////////////////////////////// 
+////////////////////////////////////
 
 import { ErrorCode } from "./error-types"
 
@@ -55,7 +55,7 @@ export function getStatusCodeFromErrorCode(errorCode: ErrorCode): number {
     PARSING_ERROR: 400,
 
     // 기타
-    UNKNOWN_ERROR: 500
+    UNKNOWN_ERROR: 500,
   }
 
   return statusCodeMap[errorCode] || 500
@@ -112,7 +112,7 @@ export function getUserFriendlyMessage({ errorCode }: { errorCode: ErrorCode }):
     SERVICE_UNAVAILABLE: "서비스를 일시적으로 사용할 수 없습니다",
 
     // 기타
-    UNKNOWN_ERROR: "알 수 없는 오류가 발생했습니다"
+    UNKNOWN_ERROR: "알 수 없는 오류가 발생했습니다",
   }
 
   return messageMap[errorCode] || "요청을 처리하는 중 오류가 발생했습니다"

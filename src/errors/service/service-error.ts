@@ -14,10 +14,7 @@ export class ServiceError extends BaseError {
   }
 
   // 일반 에러를 현재 타입으로 변환
-  static fromError<T extends BaseError = ServiceError>(
-    error: unknown,
-    params: Omit<ErrorParams, "layer" | "errorCode" | "statusCode" | "cause">
-  ): T {
+  static fromError<T extends BaseError = ServiceError>(error: unknown, params: Omit<ErrorParams, "layer" | "errorCode" | "statusCode" | "cause">): T {
     return BaseError.fromError(ServiceError as any, error, {
       ...params,
       layer: ErrorLayer.SERVICE,
@@ -197,7 +194,7 @@ export class ServiceError extends BaseError {
       default:
         return ServiceError.internalError(ServiceError, {
           method,
-          message: `Repository 작업 중 오류 발생`,
+          message: `Repository 작업 중중 오류 발생`,
           cause: error,
           metadata: { originalErrorCode },
         })
@@ -216,7 +213,7 @@ export class ServiceError extends BaseError {
       case ErrorCode.JWT_INVALID:
         return ServiceError.unauthorized(ServiceError, {
           method,
-          message: `인증 중 오류 발생: ${error.message}`,
+          message: `인증 중중 오류 발생: ${error.message}`,
           cause: error,
         })
 
