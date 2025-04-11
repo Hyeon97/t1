@@ -3,10 +3,11 @@ import morgan, { StreamOptions } from "morgan"
 import path from "path"
 import winston from "winston"
 import DailyRotateFile from "winston-daily-rotate-file"
-import { config } from "../../config/config"
+import { configManager } from "../../config/config-manager"
+// import { config } from "../../config/config"
 
 // 로그 디렉토리 생성
-let logDir = config.logDir
+let logDir = configManager.getLogDir()
 if (process.env.NODE_ENV === "development") {
   logDir = path.join(logDir, "development")
 }
@@ -67,7 +68,7 @@ const fileRotateTransport = new DailyRotateFile({
   maxFiles: "14d",
   maxSize: "20m",
   zippedArchive: true,
-  level: config.logLevel,
+  level: configManager.getLogLevel()
 })
 
 // 에러 로그용 일별 로테이팅 파일 전송자 설정
@@ -82,7 +83,7 @@ const errorFileRotateTransport = new DailyRotateFile({
 
 // Winston 로거 생성
 export const logger = winston.createLogger({
-  level: config.logLevel,
+  level: configManager.getLogLevel(),
   levels,
   format: logFormat,
   transports: [
@@ -106,7 +107,7 @@ export const stream: StreamOptions = {
 }
 
 // Morgan 미들웨어 생성 함수
-export const morganMiddleware = morgan(config.logFormat, { stream })
+export const morganMiddleware = morgan(configManager.getLogFormat(), { stream })
 
 // 로깅 초기화 메시지
-logger.info(`로그 시스템 초기화 완료 (${config.environment} 환경) || 저장 경로 ${logDir}`)
+logger.info(`로그 시스템 초기화 완료 (${configManager.getEnv()} 환경) || 저장 경로 ${logDir}`)
