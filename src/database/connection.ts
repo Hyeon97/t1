@@ -60,7 +60,7 @@ export class DatabasePool {
         },
       })
       throw DatabaseError.connectionError({
-        functionName: "testConnection",
+        method: "testConnection",
         message: `데이터베이스 연결 실패: ${msg}`,
         cause: error,
       })
@@ -93,7 +93,7 @@ export class DatabasePool {
         },
       })
       throw DatabaseError.connectionError({
-        functionName: "getConnection",
+        method: "getConnection",
         message: `데이터베이스 연결 가져오기 실패: ${msg}`,
         cause: error,
       })
@@ -192,7 +192,7 @@ export class DatabaseOperations {
         switch (error.code) {
           case "ER_DUP_ENTRY":
             throw DatabaseError.dataIntegrityError({
-              functionName: "executeQuery",
+              method: "executeQuery",
               request,
               message: `무결성 제약 조건 위반`,
               cause: error,
@@ -202,7 +202,7 @@ export class DatabaseOperations {
           case "ER_NO_REFERENCED_ROW":
           case "ER_ROW_IS_REFERENCED":
             throw DatabaseError.dataIntegrityError({
-              functionName: "executeQuery",
+              method: "executeQuery",
               request,
               message: `참조 무결성 위반`,
               cause: error,
@@ -211,7 +211,7 @@ export class DatabaseOperations {
             })
           case "ER_ACCESS_DENIED_ERROR":
             throw DatabaseError.connectionError({
-              functionName: "executeQuery",
+              method: "executeQuery",
               request,
               message: `데이터베이스 접근 거부`,
               cause: error,
@@ -220,7 +220,7 @@ export class DatabaseOperations {
           case "ER_PARSE_ERROR":
           case "ER_BAD_FIELD_ERROR":
             throw DatabaseError.queryError({
-              functionName: "executeQuery",
+              method: "executeQuery",
               request,
               message: `SQL 구문 오류`,
               cause: error,
@@ -229,7 +229,7 @@ export class DatabaseOperations {
             })
           case "ER_BAD_DB_ERROR":
             throw DatabaseError.connectionError({
-              functionName: "executeQuery",
+              method: "executeQuery",
               request,
               message: `데이터베이스를 찾을 수 없음`,
               cause: error,
@@ -238,14 +238,14 @@ export class DatabaseOperations {
           case "ER_LOCK_DEADLOCK":
           case "ER_LOCK_WAIT_TIMEOUT":
             throw DatabaseError.transactionError({
-              functionName: "executeQuery",
+              method: "executeQuery",
               request,
               message: `트랜잭션 오류`,
               cause: error,
             })
           default:
             throw DatabaseError.queryError({
-              functionName: "executeQuery",
+              method: "executeQuery",
               request,
               message: `쿼리 실행 오류(${error.code})`,
               cause: error,
@@ -262,7 +262,7 @@ export class DatabaseOperations {
       })
 
       throw DatabaseError.queryError({
-        functionName: 'executeQuery',
+        method: 'executeQuery',
         request,
         message: `쿼리 실행 오류`,
         cause: error,
@@ -323,7 +323,7 @@ export class TransactionManager {
         },
       })
       throw DatabaseError.transactionError({
-        functionName: "begin",
+        method: "begin",
         message: `트랜잭션 시작 실패: ${msg}`,
         cause: error,
       })
@@ -336,7 +336,7 @@ export class TransactionManager {
   public async commit(): Promise<void> {
     if (!this.connection) {
       throw DatabaseError.transactionError({
-        functionName: "commit",
+        method: "commit",
         message: "커밋할 활성 트랜잭션이 없습니다",
       })
     }
@@ -355,7 +355,7 @@ export class TransactionManager {
         },
       })
       throw DatabaseError.transactionError({
-        functionName: "commit",
+        method: "commit",
         message: `트랜잭션 커밋 실패: ${msg}`,
         cause: error,
       })
@@ -387,7 +387,7 @@ export class TransactionManager {
         },
       })
       throw DatabaseError.transactionError({
-        functionName: "rollback",
+        method: "rollback",
         message: `트랜잭션 롤백 실패: ${msg}`,
         cause: error,
       })
@@ -403,7 +403,7 @@ export class TransactionManager {
   public getConnection(): mysql.PoolConnection {
     if (!this.connection) {
       throw DatabaseError.transactionError({
-        functionName: "getConnection",
+        method: "getConnection",
         message: "활성 트랜잭션이 없습니다",
       })
     }
@@ -416,7 +416,7 @@ export class TransactionManager {
   public async executeQuery<T>({ sql, params = [], request }: { sql: string; params?: any[]; request: string }): Promise<T> {
     if (!this.connection) {
       throw DatabaseError.transactionError({
-        functionName: 'executeQuery',
+        method: 'executeQuery',
         request,
         message: "활성 트랜잭션이 없습니다",
       })
@@ -436,7 +436,7 @@ export class TransactionManager {
   public async executeQuerySingle<T>({ sql, params = [], request }: { sql: string; params?: any[]; request: string }): Promise<T | null> {
     if (!this.connection) {
       throw DatabaseError.transactionError({
-        functionName: "executeQuerySingle",
+        method: "executeQuerySingle",
         request,
         message: "활성 트랜잭션이 없습니다",
       })
