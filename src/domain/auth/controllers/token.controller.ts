@@ -4,6 +4,7 @@ import { BaseController } from "../../../utils/base/base-controller"
 import { ContextLogger } from "../../../utils/logger/logger.custom"
 import { TokenResponseDTO } from "../dto/token.DTO"
 import { TokenService } from "../services/token.service"
+import { asyncContextStorage } from "../../../utils/AsyncContext"
 
 export class TokenController extends BaseController {
   private readonly tokenService: TokenService
@@ -20,6 +21,8 @@ export class TokenController extends BaseController {
    */
   issueToken = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
+      asyncContextStorage.setController({ name: this.controllerName })
+      asyncContextStorage.addOrder({ component: this.controllerName, method: "issueToken", state: "start" })
       const { email, password } = req.body
       ContextLogger.debug({ message: `Token 발급 요청 || email: ${email}` })
 
@@ -38,12 +41,13 @@ export class TokenController extends BaseController {
         statusCode: 201,
         message: "Token이 성공적으로 발급되었습니다",
       })
+      asyncContextStorage.addOrder({ component: this.controllerName, method: "issueToken", state: "end" })
     } catch (error) {
       this.handleControllerError({
         next,
         error,
         method: "issueToken",
-        message: "Token 생성 중 오류가 발생했습니다",
+        message: "[Token 생성] - 오류가 발생했습니다",
       })
     }
   }

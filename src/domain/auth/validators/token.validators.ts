@@ -47,7 +47,7 @@ export const validateToken = async (req: ExtendedRequest, res: Response, next: N
     }
   } catch (error) {
     ContextLogger.debug({
-      message: `Token 검증 중 오류 발생`,
+      message: `Token 검증 - 오류 발생`,
       meta: {
         error: error instanceof Error ? error.message : String(error),
         path: req.path,
@@ -62,7 +62,7 @@ export const validateToken = async (req: ExtendedRequest, res: Response, next: N
       next(
         ValidatorError.fromError<ValidatorError>(error, {
           method: "validateToken",
-          message: "Token 검증 중 오류 발생",
+          message: "Token 검증 - 오류 발생",
           layer: ErrorLayer.MIDDLEWARE,
         })
       )
@@ -79,6 +79,6 @@ export const validateToken = async (req: ExtendedRequest, res: Response, next: N
     //   return
     // }
 
-    // next(ApiError.internal({ message: "인증 처리 중 오류가 발생했습니다" }))
+    // next(ApiError.internal({ message: "인증 처리 - 오류가 발생했습니다" }))
   }
 }

@@ -1,4 +1,5 @@
 import { ServiceError } from "../../../errors/service/service-error"
+import { asyncContextStorage } from "../../../utils/AsyncContext"
 import { BaseService } from "../../../utils/base/base-service"
 import { JwtUtil } from "../../../utils/jwt.utils"
 import { ContextLogger } from "../../../utils/logger/logger.custom"
@@ -23,6 +24,8 @@ export class TokenService extends BaseService {
    */
   async createToken({ input }: { input: TokenIssueBodyDTO }) {
     try {
+      asyncContextStorage.addService({ name: this.serviceName })
+      asyncContextStorage.addOrder({ component: this.serviceName, method: "createToken", state: "start" })
       ContextLogger.debug({ message: `토큰 생성 시작 - 이메일: ${input.email}` })
       //  사용자 조회
       const user = await this.userInfoRepository.findByEmail({ email: input.email })
@@ -62,12 +65,13 @@ export class TokenService extends BaseService {
         message: `사용자 ${input.email}의 Token이 생성되었습니다`,
         meta: { expiresAt },
       })
+      asyncContextStorage.addOrder({ component: this.serviceName, method: "createToken", state: "end" })
       return { token, expiresAt }
     } catch (error) {
       return this.handleServiceError({
         error,
         method: "createToken",
-        message: `토큰 생성 중 오류가 발생했습니다`,
+        message: `[Token 생성] - 오류가 발생했습니다`,
       })
     }
   }
@@ -77,18 +81,21 @@ export class TokenService extends BaseService {
    */
   async verifyToken({ token }: { token: string }): Promise<TokenVerifySuccessResult> {
     try {
+      asyncContextStorage.addService({ name: this.serviceName })
+      asyncContextStorage.addOrder({ component: this.serviceName, method: "verifyToken", state: "start" })
       ContextLogger.debug({ message: "토큰 검증 시작" })
 
       // JWT 토큰 검증
       const payload = JwtUtil.verifyToken({ token })
 
       ContextLogger.debug({ message: `토큰 검증 성공 || User: ${payload.email}` })
+      asyncContextStorage.addOrder({ component: this.serviceName, method: "verifyToken", state: "end" })
       return payload
     } catch (error) {
       return this.handleServiceError({
         error,
         method: "verifyToken",
-        message: `토큰 검증 중 오류가 발생했습니다`,
+        message: `[토큰 검증] - 오류가 발생했습니다`,
       })
     }
   }
