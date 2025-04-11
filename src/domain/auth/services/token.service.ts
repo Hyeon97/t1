@@ -31,7 +31,7 @@ export class TokenService extends BaseService {
       // if (!user) {
       if (!user) {
         throw ServiceError.resourceNotFoundError(ServiceError, {
-          functionName: "createToken",
+          method: "createToken",
           message: `Mail이 '${input.email}'인 User를 찾을 수 없습니다`,
         })
       }
@@ -66,7 +66,7 @@ export class TokenService extends BaseService {
     } catch (error) {
       return this.handleServiceError({
         error,
-        functionName: "createToken",
+        method: "createToken",
         message: `토큰 생성 중 오류가 발생했습니다`,
       })
     }
@@ -87,7 +87,7 @@ export class TokenService extends BaseService {
     } catch (error) {
       return this.handleServiceError({
         error,
-        functionName: "verifyToken",
+        method: "verifyToken",
         message: `토큰 검증 중 오류가 발생했습니다`,
       })
     }

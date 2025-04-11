@@ -22,7 +22,7 @@ export class UserService extends BaseService {
       const user = await this.userInfoRepository.findByEmail({ email })
       if (!user) {
         throw ServiceError.resourceNotFoundError(ServiceError, {
-          functionName: "getUserByEmail",
+          method: "getUserByEmail",
           message: `Mail이 '${email}'인 User를 찾을 수 없습니다`,
         })
       }
@@ -30,7 +30,7 @@ export class UserService extends BaseService {
     } catch (error) {
       return this.handleServiceError({
         error,
-        functionName: "getUserByEmail",
+        method: "getUserByEmail",
         message: `User 정보 조회 중 오류가 발생했습니다`,
       })
     }

@@ -40,7 +40,7 @@ export class EnvUtils {
       return this.execDir
     } catch (error) {
       throw UtilityError.envConfigError({
-        functionName: "initialize",
+        method: "initialize",
         message: "환경 변수 초기화 중 오류가 발생했습니다",
         cause: error,
         metadata: { execDir: this.execDir },
@@ -59,7 +59,7 @@ export class EnvUtils {
       this.loadEnvFile({ envPath })
     } catch (error) {
       throw UtilityError.envConfigError({
-        functionName: "loadEnvFromNodeEnv",
+        method: "loadEnvFromNodeEnv",
         message: "환경별 .env 파일 로드 중 오류가 발생했습니다",
         cause: error,
       })
@@ -78,7 +78,7 @@ export class EnvUtils {
         console.log(`환경 변수 파일 로드: ${envPath}`)
       } catch (error) {
         const utilityError = UtilityError.envConfigError({
-          functionName: "loadEnvFile",
+          method: "loadEnvFile",
           message: `환경 변수 파일 로드 중 오류 발생: ${error}`,
           cause: error,
           metadata: { envPath },
@@ -90,7 +90,7 @@ export class EnvUtils {
       }
     } else {
       const utilityError = UtilityError.envFileNotFoundError({
-        functionName: "loadEnvFile",
+        method: "loadEnvFile",
         message: `환경 변수 파일을 찾을 수 없습니다: ${envPath}`,
         metadata: { envPath },
       })

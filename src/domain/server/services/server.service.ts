@@ -191,7 +191,7 @@ export class ServerService extends BaseService {
               serverResponse[propertyName as ServerDataPropertyKey] = []
             }
             // 타입스크립트 타입 단언 필요
-            ;(serverResponse[propertyName] as any[]).push(item)
+            ; (serverResponse[propertyName] as any[]).push(item)
           }
         })
       }
@@ -206,7 +206,7 @@ export class ServerService extends BaseService {
     } catch (error) {
       return this.handleServiceError({
         error,
-        functionName: "combineServerData",
+        method: "combineServerData",
         message: "Server 데이터 조합 중 오류가 발생했습니다",
       })
     }
@@ -239,7 +239,7 @@ export class ServerService extends BaseService {
     } catch (error) {
       return this.handleServiceError({
         error,
-        functionName: "getServers",
+        method: "getServers",
         message: "Server 정보 목록 조회 중 오류가 발생했습니다",
       })
     }
@@ -255,7 +255,7 @@ export class ServerService extends BaseService {
       // 서버가 존재하는지 확인
       if (!server) {
         throw ServiceError.resourceNotFoundError(ServiceError, {
-          functionName: "getServerByName",
+          method: "getServerByName",
           message: `이름이 '${name}'인 Server를 찾을 수 없습니다`,
         })
       }
@@ -276,7 +276,7 @@ export class ServerService extends BaseService {
     } catch (error) {
       return this.handleServiceError({
         error,
-        functionName: "getServerByName",
+        method: "getServerByName",
         message: `Server 이름 '${name}'으로 조회 중 오류가 발생했습니다`,
       })
     }
@@ -290,7 +290,7 @@ export class ServerService extends BaseService {
       // ID 형식 검증
       if (!regNumberOnly.test(id)) {
         throw ServiceError.validationError(ServiceError, {
-          functionName: "getServerById",
+          method: "getServerById",
           message: `Server ID는 숫자만 포함해야 합니다. 입력값: '${id}'`,
           metadata: { id },
         })
@@ -300,7 +300,7 @@ export class ServerService extends BaseService {
       const server = await this.serverBasicRepository.findByServerId({ id: parseInt(id), filterOptions })
       if (!server) {
         throw ServiceError.resourceNotFoundError(ServiceError, {
-          functionName: "getServerById",
+          method: "getServerById",
           message: `ID가 '${id}'인 Server를 찾을 수 없습니다`,
           metadata: { id },
         })
@@ -325,7 +325,7 @@ export class ServerService extends BaseService {
     } catch (error) {
       return this.handleServiceError({
         error,
-        functionName: "getServerById",
+        method: "getServerById",
         message: `Server ID '${id}'로 조회 중 오류가 발생했습니다`,
       })
     }

@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken"
 import { CreateTokenData, TokenVerifySuccessResult } from "../domain/auth/interface/token"
-import { UtilityError } from "../errors/utility/utility-error"
 import { ErrorCode, ErrorLayer } from "../errors"
+import { UtilityError } from "../errors/utility/utility-error"
 
 export class JwtUtil {
   /**
@@ -30,7 +30,7 @@ export class JwtUtil {
       return jwt.sign(payload as any, secret as any, options as any)
     } catch (error) {
       throw UtilityError.jwtSignError({
-        functionName: "generateToken",
+        method: "generateToken",
         message: "JWT 토큰 생성 중 오류가 발생했습니다",
         cause: error,
         metadata: { payloadType: typeof payload },
@@ -50,14 +50,14 @@ export class JwtUtil {
       // JWT 에러 유형에 따른 구체적인 에러 처리
       if (error instanceof jwt.TokenExpiredError) {
         throw UtilityError.jwtVerifyError({
-          functionName: "verifyToken",
+          method: "verifyToken",
           message: "만료된 Token",
           errorCode: ErrorCode.JWT_EXPIRED,
           cause: error,
         })
       } else if (error instanceof jwt.JsonWebTokenError) {
         throw UtilityError.jwtVerifyError({
-          functionName: "verifyToken",
+          method: "verifyToken",
           message: "유효하지 않은 Token",
           errorCode: ErrorCode.JWT_INVALID,
           cause: error,
@@ -65,7 +65,7 @@ export class JwtUtil {
       }
       // 일반적인 에러 처리
       throw UtilityError.createFrom(UtilityError, {
-        functionName: "verifyToken",
+        method: "verifyToken",
         message: "Token 검증 실패",
         layer: ErrorLayer.UTILITY,
         errorCode: ErrorCode.JWT_INVALID,

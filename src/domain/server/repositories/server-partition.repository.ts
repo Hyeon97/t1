@@ -28,7 +28,7 @@ export class ServerPartitionRepository extends BaseRepository {
     } catch (error) {
       this.handleRepositoryError({
         error,
-        functionName: "applyFilters",
+        method: "applyFilters",
         message: "Server Partition 필터 옵션 적용 중 오류가 발생했습니다",
       })
     }
@@ -49,7 +49,7 @@ export class ServerPartitionRepository extends BaseRepository {
     } catch (error) {
       return this.handleRepositoryError({
         error,
-        functionName: "findAll",
+        method: "findAll",
         message: "모든 파티션 정보 조회 중 오류가 발생했습니다",
       })
     }
@@ -71,7 +71,7 @@ export class ServerPartitionRepository extends BaseRepository {
     } catch (error) {
       return this.handleRepositoryError({
         error,
-        functionName: "findBySystemNames",
+        method: "findBySystemNames",
         message: "시스템 이름으로 파티션 정보 조회 중 오류가 발생했습니다",
       })
     }
@@ -93,7 +93,7 @@ export class ServerPartitionRepository extends BaseRepository {
     } catch (error) {
       return this.handleRepositoryError({
         error,
-        functionName: "findByServerName",
+        method: "findByServerName",
         message: `서버 이름(${name})으로 파티션 정보 조회 중 오류가 발생했습니다`,
       })
     }

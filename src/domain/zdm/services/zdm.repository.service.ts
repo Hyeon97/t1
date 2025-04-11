@@ -26,7 +26,7 @@ export class ZdmRepositoryService extends BaseService {
     } catch (error) {
       return this.handleServiceError({
         error,
-        functionName: "getRepositoryList",
+        method: "getRepositoryList",
         message: "ZDM Repository 정보 목록 조회 중 오류가 발생했습니다",
       })
     }
@@ -40,7 +40,7 @@ export class ZdmRepositoryService extends BaseService {
       const repos = await this.zdmRepositoryRepository.findById({ id, filterOptions })
       if (!repos) {
         throw ServiceError.resourceNotFoundError(ServiceError, {
-          functionName: "getRepositoryById",
+          method: "getRepositoryById",
           message: `ID가 '${id}'인 ZDM Repository를 찾을 수 없습니다`,
           metadata: { id },
         })
@@ -49,7 +49,7 @@ export class ZdmRepositoryService extends BaseService {
     } catch (error) {
       return this.handleServiceError({
         error,
-        functionName: "getRepositoryById",
+        method: "getRepositoryById",
         message: `ZDM Repository 정보 조회 중 오류가 발생했습니다`,
       })
     }

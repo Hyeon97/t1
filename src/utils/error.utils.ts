@@ -5,7 +5,7 @@ import { ErrorChainItem, ErrorCode, ErrorLayer, UnifiedError, getUserFriendlyMes
  */
 export function createErrorChainItem({
   layer,
-  functionName,
+  method,
   request,
   errorCode,
   statusCode,
@@ -13,7 +13,7 @@ export function createErrorChainItem({
   details,
 }: {
   layer: ErrorLayer
-  functionName: string
+  method: string
   request?: string
   errorCode: ErrorCode
   statusCode: number
@@ -22,7 +22,7 @@ export function createErrorChainItem({
 }): ErrorChainItem {
   return {
     layer,
-    functionName,
+    method,
     request,
     errorCode,
     statusCode,
@@ -64,7 +64,7 @@ export function getClientMessageFromErrorChain(errorChain: ErrorChainItem[]): st
 
   // 가장 상위 계층의 에러 코드로부터 메시지 추출
   const topError = errorChain[0]
-  return getUserFriendlyMessage(topError.errorCode)
+  return getUserFriendlyMessage({ errorCode: topError.errorCode })
 }
 
 /**
@@ -82,8 +82,8 @@ export function hasErrorChain(obj: unknown): obj is { errorChain: ErrorChainItem
 /**
  * 에러 메시지 포맷팅 함수
  */
-export function formatErrorMessage(layer: ErrorLayer, functionName: string, message: string): string {
-  return `[${layer.toString().toUpperCase()}] ${functionName}(): ${message}`
+export function formatErrorMessage(layer: ErrorLayer, method: string, message: string): string {
+  return `[${layer.toString().toUpperCase()}] ${method}(): ${message}`
 }
 
 /**

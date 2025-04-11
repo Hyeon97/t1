@@ -33,7 +33,7 @@ export class ZdmRepositoryController extends BaseController {
       return filterOptions
     } catch (error) {
       throw ControllerError.badRequest(ControllerError, {
-        functionName: "extractFilterOptions",
+        method: "extractFilterOptions",
         message: "ZDM 필터 옵션을 추출하는 중 오류가 발생했습니다",
         cause: error,
       })
@@ -64,7 +64,7 @@ export class ZdmRepositoryController extends BaseController {
       this.handleControllerError({
         next,
         error,
-        functionName: "getRepositories",
+        method: "getRepositories",
         message: "ZDM Repository 목록 조회 중 오류가 발생했습니다",
       })
     }

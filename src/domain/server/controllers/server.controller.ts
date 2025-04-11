@@ -48,7 +48,7 @@ export class ServerController extends BaseController {
       return filterOptions
     } catch (error) {
       throw ControllerError.badRequest(ControllerError, {
-        functionName: "extractFilterOptions",
+        method: "extractFilterOptions",
         message: "Server 필터 옵션을 추출하는 중 오류가 발생했습니다",
         cause: error,
       })
@@ -82,7 +82,7 @@ export class ServerController extends BaseController {
       this.handleControllerError({
         next,
         error,
-        functionName: "getServers",
+        method: "getServers",
         message: "Server 목록 조회 중 오류가 발생했습니다",
       })
     }
@@ -108,7 +108,7 @@ export class ServerController extends BaseController {
       // //  identifierType 값과 parameter의 indefier 값이 일치하는지 확인
       // if (filterOptions.identifierType === "id" && !regNumberOnly.test(identifier)) {
       //   throw ControllerError.badRequest(ControllerError, {
-      //     functionName: "getServer",
+      //     method: "getServer",
       //     message: `Server ID는 숫자여야 합니다.`,
       //     metadata: {
       //       identifier,
@@ -143,7 +143,7 @@ export class ServerController extends BaseController {
       this.handleControllerError({
         next,
         error,
-        functionName: "getServer",
+        method: "getServer",
         message: "Server 정보 조회 중 오류가 발생했습니다",
       })
     }

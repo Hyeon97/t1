@@ -195,7 +195,7 @@ export class ZdmService extends BaseService {
             zdmResponse[propertyName as ZdmDataPropertyKey] = []
           }
           // 타입스크립트 타입 단언 필요
-          ;(zdmResponse[propertyName] as any[]).push(item)
+          ; (zdmResponse[propertyName] as any[]).push(item)
         }
       })
     }
@@ -230,7 +230,7 @@ export class ZdmService extends BaseService {
     } catch (error) {
       return this.handleServiceError({
         error,
-        functionName: "getZdms",
+        method: "getZdms",
         message: "ZDM 정보 조회 중 오류가 발생했습니다",
       })
     }
@@ -244,7 +244,7 @@ export class ZdmService extends BaseService {
       const zdm = await this.zdmRepository.findByZdmName({ name, filterOptions })
       if (!zdm) {
         throw ServiceError.resourceNotFoundError(ServiceError, {
-          functionName: "getZdmByName",
+          method: "getZdmByName",
           message: `이름이 '${name}'인 ZDM을 찾을 수 없습니다`,
         })
       }
@@ -262,7 +262,7 @@ export class ZdmService extends BaseService {
     } catch (error) {
       return this.handleServiceError({
         error,
-        functionName: "getZdmByName",
+        method: "getZdmByName",
         message: `ZDM 이름 '${name}'으로 조회 중 오류가 발생했습니다`,
       })
     }
@@ -275,7 +275,7 @@ export class ZdmService extends BaseService {
     try {
       if (!regNumberOnly.test(id)) {
         throw ServiceError.validationError(ServiceError, {
-          functionName: "getZdmById",
+          method: "getZdmById",
           message: `ZDM ID는 숫자만 포함해야 합니다. 입력값: '${id}'`,
           metadata: { id },
         })
@@ -283,7 +283,7 @@ export class ZdmService extends BaseService {
       const zdm = await this.zdmRepository.findByZdmId({ id: parseInt(id), filterOptions })
       if (!zdm) {
         throw ServiceError.resourceNotFoundError(ServiceError, {
-          functionName: "getZdmById",
+          method: "getZdmById",
           message: `ID가 '${id}'인 ZDM을 찾을 수 없습니다`,
           metadata: { id },
         })
@@ -306,7 +306,7 @@ export class ZdmService extends BaseService {
     } catch (error) {
       return this.handleServiceError({
         error,
-        functionName: "getZdmById",
+        method: "getZdmById",
         message: `ZDM ID '${id}'로 조회 중 오류가 발생했습니다`,
       })
     }

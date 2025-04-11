@@ -25,7 +25,7 @@ export class ServerDiskRepository extends BaseRepository {
     } catch (error) {
       return this.handleRepositoryError({
         error,
-        functionName: "findBySystemNames",
+        method: "findBySystemNames",
         message: "시스템 이름으로 디스크 정보 조회 중 오류가 발생했습니다",
       })
     }

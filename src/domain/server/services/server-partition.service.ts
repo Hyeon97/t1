@@ -32,7 +32,7 @@ export class ServerPartitionService extends BaseService {
       const server = await this.serverBasicRepository.findByServerId({ id, filterOptions: {} })
       if (!server) {
         throw ServiceError.resourceNotFoundError(ServiceError, {
-          functionName: "getServerById",
+          method: "getServerById",
           message: `Server ID ${id}에 해당하는 Server를 찾을 수 없습니다.`,
         })
       }
@@ -40,7 +40,7 @@ export class ServerPartitionService extends BaseService {
     } catch (error) {
       return this.handleServiceError({
         error,
-        functionName: "getServerById",
+        method: "getServerById",
         message: "Server 정보 조회 중 오류가 발생했습니다",
       })
     }
@@ -54,7 +54,7 @@ export class ServerPartitionService extends BaseService {
       const server = await this.serverBasicRepository.findByServerName({ name, filterOptions: {} })
       if (!server) {
         throw ServiceError.resourceNotFoundError(ServiceError, {
-          functionName: "getServerByName",
+          method: "getServerByName",
           message: `Server Name ${name}에 해당하는 Server를 찾을 수 없습니다.`,
         })
       }
@@ -62,7 +62,7 @@ export class ServerPartitionService extends BaseService {
     } catch (error) {
       return this.handleServiceError({
         error,
-        functionName: "getServerByName",
+        method: "getServerByName",
         message: "Server 정보 조회 중 오류가 발생했습니다",
       })
     }
@@ -82,7 +82,7 @@ export class ServerPartitionService extends BaseService {
     } catch (error) {
       return this.handleServiceError({
         error,
-        functionName: "getPartitionList",
+        method: "getPartitionList",
         message: "Server Partition 조회 중 오류가 발생했습니다",
       })
     }
@@ -101,7 +101,7 @@ export class ServerPartitionService extends BaseService {
     } catch (error) {
       return this.handleServiceError({
         error,
-        functionName: "getPartitionListByServerId",
+        method: "getPartitionListByServerId",
         message: "Server Partition 조회 중 오류가 발생했습니다",
       })
     }
@@ -117,7 +117,7 @@ export class ServerPartitionService extends BaseService {
     } catch (error) {
       return this.handleServiceError({
         error,
-        functionName: "getPartitionListByServerName",
+        method: "getPartitionListByServerName",
         message: "Server Partition 조회 중 오류가 발생했습니다",
       })
     }

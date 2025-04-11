@@ -51,7 +51,7 @@ export class ServerBasicRepository extends BaseRepository {
     } catch (error) {
       this.handleRepositoryError({
         error,
-        functionName: "applyFilters",
+        method: "applyFilters",
         message: "필터 옵션 적용 중 오류가 발생했습니다",
       })
     }
@@ -72,7 +72,7 @@ export class ServerBasicRepository extends BaseRepository {
     } catch (error) {
       return this.handleRepositoryError({
         error,
-        functionName: "findAll",
+        method: "findAll",
         message: "서버 목록 조회 중 오류가 발생했습니다",
       })
     }
@@ -98,7 +98,7 @@ export class ServerBasicRepository extends BaseRepository {
     } catch (error) {
       return this.handleRepositoryError({
         error,
-        functionName: "findByServerName",
+        method: "findByServerName",
         message: `서버 이름(${name})으로 조회 중 오류가 발생했습니다`,
       })
     }
@@ -124,7 +124,7 @@ export class ServerBasicRepository extends BaseRepository {
     } catch (error) {
       return this.handleRepositoryError({
         error,
-        functionName: "findByServerId",
+        method: "findByServerId",
         message: `서버 ID(${id})로 조회 중 오류가 발생했습니다`,
       })
     }

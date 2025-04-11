@@ -1,7 +1,7 @@
 import { ResultSetHeader } from "mysql2"
+import { TransactionManager } from "../../../database/connection"
 import { BaseRepository, SqlFieldOption } from "../../../utils/base/base-repository"
 import { TokenDBInput } from "../../auth/interface/token"
-import { TransactionManager } from "../../../database/connection"
 
 export class UserTokenRepository extends BaseRepository {
   constructor() {
@@ -31,7 +31,7 @@ export class UserTokenRepository extends BaseRepository {
     } catch (error) {
       return this.handleRepositoryError({
         error,
-        functionName: "saveTokenInfo",
+        method: "saveTokenInfo",
         message: "Token 정보 저장 중 오류가 발생했습니다",
       })
     }

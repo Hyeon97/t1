@@ -42,7 +42,7 @@ export class TokenController extends BaseController {
       this.handleControllerError({
         next,
         error,
-        functionName: "issueToken",
+        method: "issueToken",
         message: "Token 생성 중 오류가 발생했습니다",
       })
     }

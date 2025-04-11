@@ -1,5 +1,5 @@
 import { NextFunction, Response } from "express"
-import { ValidatorError, ErrorLayer } from "../../../errors"
+import { ErrorLayer, ValidatorError } from "../../../errors"
 import { validationMiddleware } from "../../../middlewares/validation/validationMiddleware"
 import { ExtendedRequest } from "../../../types/common/req.types"
 import { ContextLogger } from "../../../utils/logger/logger.custom"
@@ -20,7 +20,7 @@ export const validateToken = async (req: ExtendedRequest, res: Response, next: N
     const token = req.headers.authorization
     // if (!authHeader || !authHeader.startsWith("Bearer ")) {
     if (!token) {
-      throw ValidatorError.tokenRequired({ functionName: "validateToken", message: "Token이 없습니다" })
+      throw ValidatorError.tokenRequired({ method: "validateToken", message: "Token이 없습니다" })
     }
 
     // 토큰 검증
@@ -35,13 +35,13 @@ export const validateToken = async (req: ExtendedRequest, res: Response, next: N
     } catch (error) {
       if (error instanceof Error && error.name === "TokenExpiredError") {
         throw ValidatorError.tokenExpired({
-          functionName: "validateToken",
+          method: "validateToken",
           message: "Token 만료됨",
         })
       }
 
       throw ValidatorError.tokenInvalid({
-        functionName: "validateToken",
+        method: "validateToken",
         message: "유효하지 않은 Token",
       })
     }
@@ -61,7 +61,7 @@ export const validateToken = async (req: ExtendedRequest, res: Response, next: N
     } else {
       next(
         ValidatorError.fromError<ValidatorError>(error, {
-          functionName: "validateToken",
+          method: "validateToken",
           message: "Token 검증 중 오류 발생",
           layer: ErrorLayer.MIDDLEWARE,
         })

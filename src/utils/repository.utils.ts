@@ -63,14 +63,14 @@
 //       if (error instanceof DatabaseError) {
 //         throw RepositoryError.fromDatabaseError({
 //           error,
-//           functionName: "executeQuery",
+//           method: "executeQuery",
 //           entityName: this.entityName,
 //         })
 //       }
 
 //       throw RepositoryError.fromError({
 //         error,
-//         functionName: "executeQuery",
+//         method: "executeQuery",
 //         entityName: this.entityName,
 //       })
 //     }
@@ -82,12 +82,12 @@
 //   protected async executeQuerySingle<T>({
 //     sql,
 //     params = [],
-//     functionName,
+//     method,
 //     errorOnNotFound = false,
 //   }: {
 //     sql: string
 //     params?: any[]
-//     functionName: string
+//     method: string
 //     errorOnNotFound?: boolean
 //   }): Promise<T | null> {
 //     try {
@@ -99,7 +99,7 @@
 
 //       if (errorOnNotFound && !result) {
 //         throw RepositoryError.NotFoundError({
-//           functionName,
+//           method,
 //           message: `${this.entityName} 엔티티를 찾을 수 없습니다`,
 //           entityName: this.entityName,
 //           metadata: { query: sql, params },
@@ -111,7 +111,7 @@
 //       if (error instanceof DatabaseError) {
 //         throw RepositoryError.fromDatabaseError({
 //           error,
-//           functionName,
+//           method,
 //           entityName: this.entityName,
 //         })
 //       }
@@ -122,7 +122,7 @@
 
 //       throw RepositoryError.fromError({
 //         error,
-//         functionName,
+//         method,
 //         entityName: this.entityName,
 //       })
 //     }
@@ -133,15 +133,15 @@
 //    */
 //   protected handleRepositoryError({
 //     error,
-//     functionName,
+//     method,
 //     message = "Repository 작업 중 오류가 발생했습니다",
 //   }: {
 //     error: unknown
-//     functionName: string
+//     method: string
 //     message?: string
 //   }): never {
 //     ContextLogger.error({
-//       message: `${functionName} 함수에서 Repository 오류 발생: ${error instanceof Error ? error.message : String(error)}`,
+//       message: `${method} 함수에서 Repository 오류 발생: ${error instanceof Error ? error.message : String(error)}`,
 //       meta: {
 //         entity: this.entityName,
 //         error,
@@ -151,7 +151,7 @@
 //     if (error instanceof DatabaseError) {
 //       throw RepositoryError.fromDatabaseError({
 //         error,
-//         functionName,
+//         method,
 //         entityName: this.entityName,
 //       })
 //     }
@@ -162,7 +162,7 @@
 
 //     throw RepositoryError.fromError({
 //       error,
-//       functionName,
+//       method,
 //       entityName: this.entityName,
 //     })
 //   }
