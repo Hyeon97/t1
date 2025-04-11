@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express"
+import { asyncContextStorage } from "../../utils/AsyncContext"
 import { ContextLogger } from "../../utils/logger/logger.custom"
-import { asyncContextStorage } from "./AsyncContext"
 
 export const asyncContextMiddleware = (req: Request, res: Response, next: NextFunction): void => {
   // AsyncLocalStorage에 요청 ID와 시작 시간 저장

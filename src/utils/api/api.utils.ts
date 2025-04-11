@@ -1,6 +1,6 @@
-import { asyncContextStorage } from "../../middlewares/logging/AsyncContext"
-import { ApiResponseDTO } from "./api.DTO"
 import { Response } from "express"
+import { asyncContextStorage } from "../AsyncContext"
+import { ApiResponseDTO } from "./api.DTO"
 
 interface SuccessResponseOptions<T> {
   res: Response
@@ -23,9 +23,9 @@ export class ApiUtils {
    * 성공 응답 생성
    */
   static success<T>({ res, data, statusCode = 200, message }: SuccessResponseOptions<T>): Response {
-    const context = asyncContextStorage.getContext()
+    const taskId = asyncContextStorage.getTaskID()
     const response: ApiResponseDTO<T> = {
-      requestID: context?.task!.id || "-",
+      requestID: taskId || "-",
       message,
       success: true,
       data,
@@ -40,9 +40,9 @@ export class ApiUtils {
    */
   static error({ res, error, statusCode }: ErrorResponseOptions): Response {
     const errorMessage = Array.isArray(error) ? error.join(", ") : error
-    const context = asyncContextStorage.getContext()
+    const taskId = asyncContextStorage.getTaskID()
     const response: ApiResponseDTO<null> = {
-      requestID: context?.task!.id || "-",
+      requestID: taskId || "-",
       success: false,
       error: errorMessage,
       timestamp: new Date().toISOString(),

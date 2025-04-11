@@ -1,4 +1,4 @@
-import { asyncLocalStorage } from "../asyncContext"
+import { asyncContextStorage } from "../AsyncContext"
 import { logger } from "./logger.util"
 
 export class ContextLogger {
@@ -6,14 +6,14 @@ export class ContextLogger {
    * 요청 ID를 로그 메시지에 포함하는 형식을 생성
    */
   private static formatMessage({ message }: { message: string }): string {
-    const context = asyncLocalStorage.getStore()
+    const taskId = asyncContextStorage.getTaskID()
 
-    if (!context || !context.requestId) {
+    if (!taskId) {
       return message
     }
 
     // 메시지 앞에 요청 ID 추가
-    return `[${context.requestId}] ${message}`
+    return `[${taskId}] ${message}`
   }
 
   /**

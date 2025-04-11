@@ -25,8 +25,8 @@ class App {
     this.configureMiddleware()
     this.setupHealthCheck()
     this.setupRoutes()
-    this.setupErrorHandling()
     this.setOpenApi()
+    this.setupErrorHandling()
 
     // 서버 시작 로깅
     logger.info(`애플리케이션이 ${config.environment} 모드로 초기화되었습니다.`)
