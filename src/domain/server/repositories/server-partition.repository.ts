@@ -1,4 +1,6 @@
+import { asyncContextStorage } from "../../../utils/AsyncContext"
 import { BaseRepository } from "../../../utils/base/base-repository"
+import { ContextLogger } from "../../../utils/logger/logger.custom"
 import { ServerPartitionTable } from "../types/db/server-partition"
 import { ServerPartitionFilterOptions } from "../types/server-partition-filter.type"
 
@@ -15,6 +17,7 @@ export class ServerPartitionRepository extends BaseRepository {
    */
   private applyFilters(filterOptions: ServerPartitionFilterOptions): void {
     try {
+      asyncContextStorage.addOrder({ component: this.repositoryName, method: "applyFilters", state: "start" })
       //  server 필터 적용
       //  두번째 조건은 findByServerName함수로 인한 중복 처리 방지
       if (filterOptions.server && !this.conditions.includes("sSystemName = ?")) {
@@ -25,11 +28,13 @@ export class ServerPartitionRepository extends BaseRepository {
         //   this.addCondition({ condition: "sSystemName = ?", params: [filterOptions.server] })
         // }
       }
+      ContextLogger.debug({ message: `필터 옵션 적용됨` })
+      asyncContextStorage.addOrder({ component: this.repositoryName, method: "applyFilters", state: "end" })
     } catch (error) {
       this.handleRepositoryError({
         error,
         method: "applyFilters",
-        message: "Server Partition 필터 옵션 적용 중 오류가 발생했습니다",
+        message: "[필터 옵션 적용] - 오류가 발생했습니다",
       })
     }
   }
@@ -39,18 +44,21 @@ export class ServerPartitionRepository extends BaseRepository {
    */
   async findAll({ filterOptions }: { filterOptions: ServerPartitionFilterOptions }): Promise<ServerPartitionTable[]> {
     try {
+      asyncContextStorage.addRepository({ name: this.repositoryName })
+      asyncContextStorage.addOrder({ component: this.repositoryName, method: "findAll", state: "start" })
       this.resetQueryState()
       this.applyFilters(filterOptions)
 
-      let query = `SELECT * FROM ${this.tableName}`
-      query += this.buildWhereClause()
+      const query = `SELECT * FROM ${this.tableName} ${this.buildWhereClause()}`
+      const result = await this.executeQuery<ServerPartitionTable[]>({ sql: query, params: this.params, request: "findAll" })
 
-      return await this.executeQuery<ServerPartitionTable[]>({ sql: query, params: this.params, request: "findAll" })
+      asyncContextStorage.addOrder({ component: this.repositoryName, method: "findAll", state: "end" })
+      return result
     } catch (error) {
       return this.handleRepositoryError({
         error,
         method: "findAll",
-        message: "모든 파티션 정보 조회 중 오류가 발생했습니다",
+        message: "[모든 파티션 정보 조회] - 오류가 발생했습니다",
       })
     }
   }
@@ -60,19 +68,23 @@ export class ServerPartitionRepository extends BaseRepository {
    */
   async findBySystemNames({ systemNames }: { systemNames: string[] }): Promise<ServerPartitionTable[]> {
     try {
+      asyncContextStorage.addRepository({ name: this.repositoryName })
+      asyncContextStorage.addOrder({ component: this.repositoryName, method: "findBySystemNames", state: "start" })
       if (systemNames.length === 0) {
         return []
       }
 
       const placeholders = systemNames.map(() => "?").join(",")
       const query = `SELECT * FROM ${this.tableName} WHERE sSystemName IN (${placeholders})`
+      const result = await this.executeQuery<ServerPartitionTable[]>({ sql: query, params: systemNames, request: "findBySystemNames" })
 
-      return await this.executeQuery<ServerPartitionTable[]>({ sql: query, params: systemNames, request: "findBySystemNames" })
+      asyncContextStorage.addOrder({ component: this.repositoryName, method: "findBySystemNames", state: "end" })
+      return result
     } catch (error) {
       return this.handleRepositoryError({
         error,
         method: "findBySystemNames",
-        message: "시스템 이름으로 파티션 정보 조회 중 오류가 발생했습니다",
+        message: "[시스템 이름으로 파티션 정보 조회] - 오류가 발생했습니다",
       })
     }
   }
@@ -82,19 +94,22 @@ export class ServerPartitionRepository extends BaseRepository {
    */
   async findByServerName({ name, filterOptions }: { name: string; filterOptions: ServerPartitionFilterOptions }): Promise<ServerPartitionTable[]> {
     try {
+      asyncContextStorage.addRepository({ name: this.repositoryName })
+      asyncContextStorage.addOrder({ component: this.repositoryName, method: "findByServerName", state: "start" })
       this.resetQueryState()
       this.addCondition({ condition: "sSystemName = ?", params: [name] })
       this.applyFilters(filterOptions)
 
-      let query = `SELECT * FROM ${this.tableName}`
-      query += this.buildWhereClause()
+      const query = `SELECT * FROM ${this.tableName} ${this.buildWhereClause()}`
+      const result = await this.executeQuery<ServerPartitionTable[]>({ sql: query, params: this.params, request: "findByServerName" })
 
-      return await this.executeQuery<ServerPartitionTable[]>({ sql: query, params: this.params, request: "findByServerName" })
+      asyncContextStorage.addOrder({ component: this.repositoryName, method: "findByServerName", state: "end" })
+      return result
     } catch (error) {
       return this.handleRepositoryError({
         error,
         method: "findByServerName",
-        message: `서버 이름(${name})으로 파티션 정보 조회 중 오류가 발생했습니다`,
+        message: `[서버 이름으로 파티션 정보 조회] - 오류가 발생했습니다`,
       })
     }
   }

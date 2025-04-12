@@ -1,4 +1,5 @@
 import { ServiceError } from "../../../errors/service/service-error"
+import { asyncContextStorage } from "../../../utils/AsyncContext"
 import { BaseService } from "../../../utils/base/base-service"
 import { ContextLogger } from "../../../utils/logger/logger.custom"
 import { regNumberOnly } from "../../../utils/regex.utils"
@@ -51,6 +52,7 @@ export class ServerService extends BaseService {
    */
   private async getAdditionalInfo({ filterOptions, systemNames = [] }: { filterOptions: ServerFilterOptions; systemNames?: string[] }) {
     try {
+      asyncContextStorage.addOrder({ component: this.serviceName, method: "getAdditionalInfo", state: "start" })
       // 시스템 이름이 없거나 빈 배열이면 빈 결과 반환
       if (!systemNames.length) {
         return {
@@ -79,25 +81,25 @@ export class ServerService extends BaseService {
           condition: !!filterOptions.disk,
           type: "disks",
           repository: this.serverDiskRepository,
-          errorMessage: "디스크 정보 조회 중 오류 발생",
+          errorMessage: "디스크 정보 조회 - 오류 발생",
         },
         {
           condition: !!filterOptions.network,
           type: "networks",
           repository: this.serverNetworkRepository,
-          errorMessage: "네트워크 정보 조회 중 오류 발생",
+          errorMessage: "네트워크 정보 조회 - 오류 발생",
         },
         {
           condition: !!filterOptions.partition,
           type: "partitions",
           repository: this.serverPartitionRepository,
-          errorMessage: "파티션 정보 조회 중 오류 발생",
+          errorMessage: "파티션 정보 조회 - 오류 발생",
         },
         {
           condition: !!filterOptions.repository,
           type: "repositories",
           repository: this.serverRepositoryRepository,
-          errorMessage: "레포지토리 정보 조회 중 오류 발생",
+          errorMessage: "레포지토리 정보 조회 - 오류 발생",
         },
       ]
 
@@ -137,11 +139,11 @@ export class ServerService extends BaseService {
           additionalInfo[result.type] = result.data
         }
       })
-
+      asyncContextStorage.addOrder({ component: this.serviceName, method: "getAdditionalInfo", state: "end" })
       return additionalInfo
     } catch (error) {
       ContextLogger.error({
-        message: "추가 Server 정보 조회 중 오류 발생",
+        message: "추가 Server 정보 조회 - 오류 발생",
         meta: {
           error: error instanceof Error ? error.message : String(error),
           systemNames,
@@ -175,6 +177,7 @@ export class ServerService extends BaseService {
     repositories?: ServerRepositoryTable[]
   }): ServerDataResponse[] {
     try {
+      asyncContextStorage.addOrder({ component: this.serviceName, method: "combineServerData", state: "start" })
       const serverMap = new Map<string, ServerDataResponse>()
 
       // 서버 기본 정보로 맵 초기화
@@ -191,7 +194,7 @@ export class ServerService extends BaseService {
               serverResponse[propertyName as ServerDataPropertyKey] = []
             }
             // 타입스크립트 타입 단언 필요
-            ; (serverResponse[propertyName] as any[]).push(item)
+            ;(serverResponse[propertyName] as any[]).push(item)
           }
         })
       }
@@ -201,13 +204,13 @@ export class ServerService extends BaseService {
       addRelatedData({ items: networks, propertyName: "network" })
       addRelatedData({ items: partitions, propertyName: "partition" })
       addRelatedData({ items: repositories, propertyName: "repository" })
-
+      asyncContextStorage.addOrder({ component: this.serviceName, method: "combineServerData", state: "end" })
       return Array.from(serverMap.values())
     } catch (error) {
       return this.handleServiceError({
         error,
         method: "combineServerData",
-        message: "Server 데이터 조합 중 오류가 발생했습니다",
+        message: "[Server 데이터 조합] - 오류가 발생했습니다",
       })
     }
   }
@@ -217,7 +220,8 @@ export class ServerService extends BaseService {
    */
   async getServers({ filterOptions }: { filterOptions: ServerFilterOptions }): Promise<ServerDataResponse[]> {
     try {
-      ContextLogger.debug({ message: `모든 Server 정보 조회`, meta: { filterOptions } })
+      asyncContextStorage.addService({ name: this.serviceName })
+      asyncContextStorage.addOrder({ component: this.serviceName, method: "getServers", state: "start" })
 
       // 기본 서버 정보 조회
       const servers = await this.serverBasicRepository.findAll({ filterOptions })
@@ -234,13 +238,13 @@ export class ServerService extends BaseService {
         partitions,
         repositories,
       })
-
+      asyncContextStorage.addOrder({ component: this.serviceName, method: "getServers", state: "end" })
       return result
     } catch (error) {
       return this.handleServiceError({
         error,
         method: "getServers",
-        message: "Server 정보 목록 조회 중 오류가 발생했습니다",
+        message: "[Server 정보 목록 조회] - 오류가 발생했습니다",
       })
     }
   }
@@ -250,6 +254,9 @@ export class ServerService extends BaseService {
    */
   async getServerByName({ name, filterOptions }: { name: string; filterOptions: ServerFilterOptions }): Promise<ServerDataResponse> {
     try {
+      asyncContextStorage.addService({ name: this.serviceName })
+      asyncContextStorage.addOrder({ component: this.serviceName, method: "getServerByName", state: "start" })
+
       // 서버 기본 정보 조회
       const server = await this.serverBasicRepository.findByServerName({ name, filterOptions })
       // 서버가 존재하는지 확인
@@ -271,13 +278,13 @@ export class ServerService extends BaseService {
         partitions,
         repositories,
       })
-
+      asyncContextStorage.addOrder({ component: this.serviceName, method: "getServerByName", state: "end" })
       return result[0]
     } catch (error) {
       return this.handleServiceError({
         error,
         method: "getServerByName",
-        message: `Server 이름 '${name}'으로 조회 중 오류가 발생했습니다`,
+        message: `[Server 이름으로 조회] - 오류가 발생했습니다`,
       })
     }
   }
@@ -287,6 +294,9 @@ export class ServerService extends BaseService {
    */
   async getServerById({ id, filterOptions }: { id: string; filterOptions: ServerFilterOptions }): Promise<ServerDataResponse> {
     try {
+      asyncContextStorage.addService({ name: this.serviceName })
+      asyncContextStorage.addOrder({ component: this.serviceName, method: "getServerById", state: "start" })
+
       // ID 형식 검증
       if (!regNumberOnly.test(id)) {
         throw ServiceError.validationError(ServiceError, {
@@ -320,13 +330,13 @@ export class ServerService extends BaseService {
         partitions,
         repositories,
       })
-
+      asyncContextStorage.addOrder({ component: this.serviceName, method: "getServerById", state: "end" })
       return result[0]
     } catch (error) {
       return this.handleServiceError({
         error,
         method: "getServerById",
-        message: `Server ID '${id}'로 조회 중 오류가 발생했습니다`,
+        message: `[Server ID로 조회] - 오류가 발생했습니다`,
       })
     }
   }

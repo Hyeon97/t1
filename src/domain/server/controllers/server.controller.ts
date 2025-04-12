@@ -10,6 +10,7 @@ import { SpecificServerFilterDTO } from "../dto/query/specific-server-query-filt
 import { ServerResponseFactory } from "../dto/response/server-response-factory"
 import { ServerService } from "../services/server.service"
 import { ServerFilterOptions } from "../types/server-filter.type"
+import { asyncContextStorage } from "../../../utils/AsyncContext"
 
 export class ServerController extends BaseController {
   private readonly serverService: ServerService
@@ -26,6 +27,7 @@ export class ServerController extends BaseController {
    */
   private extractFilterOptions({ query }: { query: SpecificServerFilterDTO | ServerQueryFilterDTO }): ServerFilterOptions {
     try {
+      asyncContextStorage.addOrder({ component: this.controllerName, method: "extractFilterOptions", state: "start" })
       const filterOptions: ServerFilterOptions = {
         //  필터
         mode: query.mode || "",
@@ -44,12 +46,12 @@ export class ServerController extends BaseController {
       if (query instanceof SpecificServerFilterDTO) {
         filterOptions.identifierType = query.identifierType
       }
-
+      asyncContextStorage.addOrder({ component: this.controllerName, method: "extractFilterOptions", state: "end" })
       return filterOptions
     } catch (error) {
       throw ControllerError.badRequest(ControllerError, {
         method: "extractFilterOptions",
-        message: "Server 필터 옵션을 추출하는 중 오류가 발생했습니다",
+        message: "[Server 필터 옵션 추출] - 오류가 발생했습니다",
         cause: error,
       })
     }
@@ -61,6 +63,8 @@ export class ServerController extends BaseController {
   getServers = async (req: ExtendedRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
       ContextLogger.debug({ message: `Server 목록 조회 시작` })
+      asyncContextStorage.setController({ name: this.controllerName })
+      asyncContextStorage.addOrder({ component: this.controllerName, method: "getServers", state: "start" })
 
       // 필터 옵션 추출
       const query = req.query as unknown as ServerQueryFilterDTO
@@ -76,14 +80,14 @@ export class ServerController extends BaseController {
         serversData,
       })
       ContextLogger.info({ message: `총 ${serversData.length}개의 Server 정보를 조회했습니다. 상세 정보 포함: ${filterOptions.detail}` })
-
       ApiUtils.success({ res, data: serversDTOs, message: "Server infomation list" })
+      asyncContextStorage.addOrder({ component: this.controllerName, method: "getServers", state: "end" })
     } catch (error) {
       this.handleControllerError({
         next,
         error,
         method: "getServers",
-        message: "Server 목록 조회 중 오류가 발생했습니다",
+        message: "[Server 목록 조회] - 오류가 발생했습니다",
       })
     }
   }
@@ -94,7 +98,8 @@ export class ServerController extends BaseController {
   getServer = async (req: ExtendedRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
       ContextLogger.debug({ message: `Server 정보 조회 시작` })
-
+      asyncContextStorage.setController({ name: this.controllerName })
+      asyncContextStorage.addOrder({ component: this.controllerName, method: "getServer", state: "start" })
       //  파라미터 추출
       const { identifier } = req.params
       const query = req.query as unknown as SpecificServerFilterDTO
@@ -105,7 +110,7 @@ export class ServerController extends BaseController {
       const filterOptions = this.extractFilterOptions({ query })
       ContextLogger.debug({ message: `적용된 필터 옵션`, meta: filterOptions })
 
-      // //  identifierType 값과 parameter의 indefier 값이 일치하는지 확인
+      // //  identifierType 값과 parameter의 indefier 값이 일치지 확인
       // if (filterOptions.identifierType === "id" && !regNumberOnly.test(identifier)) {
       //   throw ControllerError.badRequest(ControllerError, {
       //     method: "getServer",
@@ -137,14 +142,14 @@ export class ServerController extends BaseController {
         serverData,
       })
       ContextLogger.info({ message: `${identifierType}이(가) ${identifier}인 Server 정보 조회 완료. 상세 정보 포함: ${filterOptions.detail}` })
-
       ApiUtils.success({ res, data: serverDTO, message: "Server information" })
+      asyncContextStorage.addOrder({ component: this.controllerName, method: "getServer", state: "end" })
     } catch (error) {
       this.handleControllerError({
         next,
         error,
         method: "getServer",
-        message: "Server 정보 조회 중 오류가 발생했습니다",
+        message: "[Server 정보 조회] - 오류가 발생했습니다",
       })
     }
   }

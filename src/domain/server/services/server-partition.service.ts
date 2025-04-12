@@ -41,7 +41,7 @@ export class ServerPartitionService extends BaseService {
       return this.handleServiceError({
         error,
         method: "getServerById",
-        message: "Server 정보 조회 중 오류가 발생했습니다",
+        message: "Server 정보 조회 - 오류가 발생했습니다",
       })
     }
   }
@@ -63,7 +63,7 @@ export class ServerPartitionService extends BaseService {
       return this.handleServiceError({
         error,
         method: "getServerByName",
-        message: "Server 정보 조회 중 오류가 발생했습니다",
+        message: "Server 정보 조회 - 오류가 발생했습니다",
       })
     }
   }
@@ -83,7 +83,7 @@ export class ServerPartitionService extends BaseService {
       return this.handleServiceError({
         error,
         method: "getPartitionList",
-        message: "Server Partition 조회 중 오류가 발생했습니다",
+        message: "Server Partition 조회 - 오류가 발생했습니다",
       })
     }
   }
@@ -102,7 +102,7 @@ export class ServerPartitionService extends BaseService {
       return this.handleServiceError({
         error,
         method: "getPartitionListByServerId",
-        message: "Server Partition 조회 중 오류가 발생했습니다",
+        message: "Server Partition 조회 - 오류가 발생했습니다",
       })
     }
   }
@@ -118,7 +118,7 @@ export class ServerPartitionService extends BaseService {
       return this.handleServiceError({
         error,
         method: "getPartitionListByServerName",
-        message: "Server Partition 조회 중 오류가 발생했습니다",
+        message: "Server Partition 조회 - 오류가 발생했습니다",
       })
     }
   }
