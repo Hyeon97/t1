@@ -14,7 +14,7 @@ export class ConfigManager {
   /**
    * 생성자를 private으로 변경
    */
-  private constructor() { }
+  private constructor() {}
 
   /**
    * 싱글톤 인스턴스 반환
@@ -75,7 +75,6 @@ export class ConfigManager {
 
     // 데이터베이스 설정 초기화
     this.setupDatabaseConfig()
-
 
     this.initialized = true
   }
@@ -156,7 +155,7 @@ export class ConfigManager {
       environment: process.env.NODE_ENV || "development",
       logLevel: process.env.LOG_LEVEL || "info",
       logDir: process.env.LOG_DIR || "logs",
-      logFormat: process.env.LOG_FORMAT || "combined"
+      logFormat: process.env.LOG_FORMAT || "combined",
     })
     console.log("API 설정 초기화 완료:", this.configs.get("api"))
   }
@@ -265,14 +264,12 @@ export class ConfigManager {
     }
   }
 
-
   /**
    * 설정 가져오기
    */
   public getConfig<T>({ key }: { key: string }): T {
     return this.configs.get(key)
   }
-
 }
 
 //  싱글톤 인스턴스 내보내기

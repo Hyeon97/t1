@@ -77,7 +77,7 @@ export class OpenApiConfig {
       })
     } catch (error) {
       ContextLogger.error({
-        message: "OpenAPI 설정 초기화 중 오류 발생",
+        message: "[OpenAPI 설정 초기화] - 오류 발생",
         error: error instanceof Error ? error : undefined,
       })
       // Validator 오류는 서버 시작을 중단시키지 않도록 함
