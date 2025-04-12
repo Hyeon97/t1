@@ -1,6 +1,6 @@
 import { ServiceError } from "../../../errors/service/service-error"
+import { asyncContextStorage } from "../../../utils/AsyncContext"
 import { BaseService } from "../../../utils/base/base-service"
-import { ContextLogger } from "../../../utils/logger/logger.custom"
 import { UserInfoRepository } from "../repositories/user-info.repository"
 import { UserInfoTable } from "../types/db/user_info"
 
@@ -18,7 +18,9 @@ export class UserService extends BaseService {
    */
   async getUserByEmail({ email }: { email: string }): Promise<UserInfoTable> {
     try {
-      ContextLogger.debug({ message: `이메일 ${email}로 사용자 조회` })
+      asyncContextStorage.addService({ name: this.serviceName })
+      asyncContextStorage.addOrder({ component: this.serviceName, method: "getUserByEmail", state: "start" })
+
       const user = await this.userInfoRepository.findByEmail({ email })
       if (!user) {
         throw ServiceError.resourceNotFoundError(ServiceError, {
@@ -26,12 +28,13 @@ export class UserService extends BaseService {
           message: `Mail이 '${email}'인 User를 찾을 수 없습니다`,
         })
       }
+      asyncContextStorage.addOrder({ component: this.serviceName, method: "getUserByEmail", state: "end" })
       return user
     } catch (error) {
       return this.handleServiceError({
         error,
         method: "getUserByEmail",
-        message: `User 정보 조회 중 오류가 발생했습니다`,
+        message: `User 정보 조회 - 오류가 발생했습니다`,
       })
     }
   }
