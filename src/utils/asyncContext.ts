@@ -1,6 +1,6 @@
 import { AsyncLocalStorage } from "async_hooks"
 import { v4 as uuid } from "uuid"
-import { DateTimeUtils } from "./dayjs.utils"
+import { DateTimeUtils } from "./Dayjs.utils"
 
 /**
  * 요청 정보 인터페이스
@@ -76,11 +76,11 @@ export class AsyncContext {
     const initialContext: Partial<Context> = {
       request: req
         ? {
-          method: req.method || "",
-          url: req.originalUrl || req.url || "",
-          query: req.query || null,
-          body: req.body || null,
-        }
+            method: req.method || "",
+            url: req.originalUrl || req.url || "",
+            query: req.query || null,
+            body: req.body || null,
+          }
         : { method: "", url: "", query: null, body: null },
       task: {
         id: taskId,
@@ -198,7 +198,7 @@ export class AsyncContext {
   /**
    * 실행 함수 순서 추가
    */
-  public addOrder({ component, method, state }: { component: string, method: string, state: 'start' | 'end' }): void {
+  public addOrder({ component, method, state }: { component: string; method: string; state: "start" | "end" }): void {
     const now = DateTimeUtils.getLogTimestamp()
     const store = this.storage.getStore()
     if (store?.task) {
@@ -207,7 +207,7 @@ export class AsyncContext {
         timestamp: now,
         state,
         component,
-        method
+        method,
       })
     }
   }

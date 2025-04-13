@@ -17,7 +17,7 @@ export const asyncContextMiddleware = (req: Request, res: Response, next: NextFu
         message: `Request completed: ${req.method} ${req.url} - Status: ${res.statusCode}, Duration: ${timestamp!.duration}`,
       })
       const context = asyncContextStorage.getContext()
-      ContextLogger.info({
+      ContextLogger.debug({
         message: JSON.stringify(context, null, 2),
       })
     })

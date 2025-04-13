@@ -68,7 +68,7 @@ const fileRotateTransport = new DailyRotateFile({
   maxFiles: "14d",
   maxSize: "20m",
   zippedArchive: true,
-  level: configManager.getLogLevel()
+  level: configManager.getLogLevel(),
 })
 
 // 에러 로그용 일별 로테이팅 파일 전송자 설정

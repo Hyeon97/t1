@@ -9,6 +9,7 @@ import { app } from "./app"
 import { configManager } from "./src/config/config-manager"
 import { DatabasePool } from "./src/database/connection"
 import { logger } from "./src/utils/logger/logger.util"
+import { ContextLogger } from "./src/utils/logger/logger.custom"
 
 //  엔드포인트 로깅
 const endPointLogging = () => {
@@ -59,7 +60,12 @@ const startServer = async (): Promise<void> => {
       logger.info(`환경: ${environment}`)
     })
   } catch (error) {
-    logger.error("서버 시작 중 오류 발생:", error)
+    ContextLogger.error({
+      message: `서버 시작 중 오류 발생`,
+      meta: {
+        error,
+      },
+    })
     process.exit(1)
   }
 }
