@@ -1,6 +1,5 @@
+import { asyncContextStorage } from "../../../utils/AsyncContext"
 import { BaseRepository } from "../../../utils/base/base-repository"
-import { ContextLogger } from "../../../utils/logger/logger.custom"
-import { logger } from "../../../utils/logger/logger.util"
 import { ZdmInfoTable } from "../types/db/center-info"
 import { ZdmFilterOptions } from "../types/zdm/zdm-filter.type"
 
@@ -14,27 +13,32 @@ export class ZdmRepository extends BaseRepository {
   /**
    * 필터 옵션 적용
    */
-  private applyFilters({ filterOptions }: { filterOptions: ZdmFilterOptions }): void { }
+  private applyFilters({ filterOptions }: { filterOptions: ZdmFilterOptions }): void {
+    asyncContextStorage.addOrder({ component: this.repositoryName, method: "applyFilters", state: "start" })
+    asyncContextStorage.addOrder({ component: this.repositoryName, method: "applyFilters", state: "end" })
+  }
 
   /**
    *  모든 ZDM 조회
    */
   async findAll({ filterOptions }: { filterOptions: ZdmFilterOptions }): Promise<ZdmInfoTable[]> {
     try {
+      asyncContextStorage.addRepository({ name: this.repositoryName })
+      asyncContextStorage.addOrder({ component: this.repositoryName, method: "findAll", state: "start" })
       this.resetQueryState()
       this.applyFilters({ filterOptions })
 
-      let query = `SELECT * FROM ${this.tableName}`
-      query += this.buildWhereClause()
-      return await this.executeQuery<ZdmInfoTable[]>({ sql: query, params: this.params, request: "findAll" })
+      const query = `SELECT * FROM ${this.tableName} ${this.buildWhereClause()}`
+      const result = await this.executeQuery<ZdmInfoTable[]>({ sql: query, params: this.params, request: "findAll" })
+
+      asyncContextStorage.addOrder({ component: this.repositoryName, method: "findAll", state: "end" })
+      return result
     } catch (error) {
-      ContextLogger.debug({
-        message: `ZdmRepository.findAll() 오류 발생`,
-        meta: {
-          error: error instanceof Error ? error.message : String(error),
-        },
+      return this.handleRepositoryError({
+        error,
+        method: "findAll",
+        message: "[ZDM 목록 조회] - 오류가 발생했습니다",
       })
-      throw error
     }
   }
 
@@ -43,21 +47,23 @@ export class ZdmRepository extends BaseRepository {
    */
   async findByZdmName({ name, filterOptions }: { name: string; filterOptions: ZdmFilterOptions }): Promise<ZdmInfoTable | null> {
     try {
+      asyncContextStorage.addRepository({ name: this.repositoryName })
+      asyncContextStorage.addOrder({ component: this.repositoryName, method: "findByZdmName", state: "start" })
       this.resetQueryState()
       this.addCondition({ condition: "sZdmName = ?", params: [name] })
       this.applyFilters({ filterOptions })
 
-      let query = `SELECT * FROM ${this.tableName}`
-      query += this.buildWhereClause()
-      return await this.executeQuerySingle<ZdmInfoTable>({ sql: query, params: this.params, request: "findByZdmName" })
+      const query = `SELECT * FROM ${this.tableName} ${this.buildWhereClause()}`
+      const result = await this.executeQuerySingle<ZdmInfoTable>({ sql: query, params: this.params, request: "findByZdmName" })
+
+      asyncContextStorage.addOrder({ component: this.repositoryName, method: "findByZdmName", state: "end" })
+      return result
     } catch (error) {
-      ContextLogger.debug({
-        message: `ZdmRepository.findByZDMName() 오류 발생`,
-        meta: {
-          error: error instanceof Error ? error.message : String(error),
-        },
+      return this.handleRepositoryError({
+        error,
+        method: "findByZdmName",
+        message: `[ZDM 이름으로 조회] - 오류가 발생했습니다`,
       })
-      throw error
     }
   }
 
@@ -66,22 +72,23 @@ export class ZdmRepository extends BaseRepository {
    */
   async findByZdmId({ id, filterOptions }: { id: number; filterOptions: ZdmFilterOptions }): Promise<ZdmInfoTable | null> {
     try {
+      asyncContextStorage.addRepository({ name: this.repositoryName })
+      asyncContextStorage.addOrder({ component: this.repositoryName, method: "findByZdmId", state: "start" })
       this.resetQueryState()
       this.addCondition({ condition: "nID = ?", params: [id] })
       this.applyFilters({ filterOptions })
 
-      let query = `SELECT * FROM ${this.tableName}`
-      query += this.buildWhereClause()
-      logger.debug(`실행 쿼리: ${query}, 파라미터: ${this.params.join(", ")}`)
-      return await this.executeQuerySingle<ZdmInfoTable>({ sql: query, params: this.params, request: "findByZdmId" })
+      const query = `SELECT * FROM ${this.tableName} ${this.buildWhereClause()}`
+      const result = await this.executeQuerySingle<ZdmInfoTable>({ sql: query, params: this.params, request: "findByZdmId" })
+
+      asyncContextStorage.addOrder({ component: this.repositoryName, method: "findByZdmId", state: "end" })
+      return result
     } catch (error) {
-      ContextLogger.debug({
-        message: `ZdmRepository.findByZDMId() 오류 발생`,
-        meta: {
-          error: error instanceof Error ? error.message : String(error),
-        },
+      return this.handleRepositoryError({
+        error,
+        method: "findByZdmId",
+        message: `[ZDM ID로 조회] - 오류가 발생했습니다`,
       })
-      throw error
     }
   }
 }

@@ -8,6 +8,7 @@ import { ZdmRepositoryFilterDTO } from "../dto/query/zdm-repository/zdm-reposito
 import { ZdmRepositoryInfoDTO } from "../dto/repository/zdm.repository.dto"
 import { ZdmRepositoryService } from "../services/zdm.repository.service"
 import { ZdmRepositoryFilterOptions } from "../types/zdm-repository/zdm-repository-filter.type"
+import { asyncContextStorage } from "../../../utils/AsyncContext"
 
 export class ZdmRepositoryController extends BaseController {
   private readonly zdmRepositoryService: ZdmRepositoryService
@@ -22,6 +23,7 @@ export class ZdmRepositoryController extends BaseController {
    */
   private extractFilterOptions({ query }: { query: ZdmRepositoryFilterDTO }): ZdmRepositoryFilterOptions {
     try {
+      asyncContextStorage.addOrder({ component: this.controllerName, method: "extractFilterOptions", state: "start" })
       const filterOptions: ZdmRepositoryFilterOptions = {
         //  필터
         type: query.type || "",
@@ -30,11 +32,12 @@ export class ZdmRepositoryController extends BaseController {
         // identifierType: query.identifierType || "",
         center: query.center || "",
       }
+      asyncContextStorage.addOrder({ component: this.controllerName, method: "extractFilterOptions", state: "end" })
       return filterOptions
     } catch (error) {
       throw ControllerError.badRequest(ControllerError, {
         method: "extractFilterOptions",
-        message: "ZDM 필터 옵션을 추출하는 중 오류가 발생했습니다",
+        message: "[ZDM 필터 옵션 추출] - 오류가 발생했습니다",
         cause: error,
       })
     }
@@ -45,6 +48,8 @@ export class ZdmRepositoryController extends BaseController {
    */
   getRepositories = async (req: ExtendedRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
+      asyncContextStorage.setController({ name: this.controllerName })
+      asyncContextStorage.addOrder({ component: this.controllerName, method: "getRepositories", state: "start" })
       ContextLogger.debug({ message: `ZDM Repository 목록 조회 시작` })
 
       // 필터 옵션 추출
@@ -58,14 +63,14 @@ export class ZdmRepositoryController extends BaseController {
       //  출력 가공
       const repositoriesDTO = ZdmRepositoryInfoDTO.fromEntities({ repositories })
       ContextLogger.info({ message: `총 ${repositoriesDTO.length}개의 ZDM Repository 정보를 조회했습니다` })
-
       ApiUtils.success({ res, data: repositoriesDTO, message: "ZDM Repository infomation list" })
+      asyncContextStorage.addOrder({ component: this.controllerName, method: "getRepositories", state: "end" })
     } catch (error) {
       this.handleControllerError({
         next,
         error,
         method: "getRepositories",
-        message: "ZDM Repository 목록 조회 중 오류가 발생했습니다",
+        message: "[ZDM Repository 목록 조회] - 오류가 발생했습니다",
       })
     }
   }

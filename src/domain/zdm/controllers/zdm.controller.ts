@@ -10,6 +10,7 @@ import { ZdmQueryFilterDTO } from "../dto/query/zdm/zdm-query-filter.dto"
 import { ZdmResponseFactory } from "../dto/response/zdm-response-factory"
 import { ZdmService } from "../services/zdm.service"
 import { ZdmFilterOptions } from "../types/zdm/zdm-filter.type"
+import { asyncContextStorage } from "../../../utils/AsyncContext"
 
 export class ZdmController extends BaseController {
   private readonly zdmService: ZdmService
@@ -25,6 +26,7 @@ export class ZdmController extends BaseController {
    */
   private extractFilterOptions({ query }: { query: ZdmQueryFilterDTO | SpecificZdmFilterDTO }): ZdmFilterOptions {
     try {
+      asyncContextStorage.addOrder({ component: this.controllerName, method: "extractFilterOptions", state: "start" })
       const filterOptions: ZdmFilterOptions = {
         //  필터
         connection: query.connection || "",
@@ -42,12 +44,12 @@ export class ZdmController extends BaseController {
       if (query instanceof SpecificZdmFilterDTO) {
         filterOptions.identifierType = query.identifierType
       }
-
+      asyncContextStorage.addOrder({ component: this.controllerName, method: "extractFilterOptions", state: "end" })
       return filterOptions
     } catch (error) {
       throw ControllerError.badRequest(ControllerError, {
         method: "extractFilterOptions",
-        message: "ZDM 필터 옵션을 추출하는 중 오류가 발생했습니다",
+        message: "[ZDM 필터 옵션 추출] - 오류가 발생했습니다",
         cause: error,
       })
     }
@@ -59,6 +61,8 @@ export class ZdmController extends BaseController {
   getZdms = async (req: ExtendedRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
       ContextLogger.debug({ message: `ZDM 목록 조회 시작` })
+      asyncContextStorage.setController({ name: this.controllerName })
+      asyncContextStorage.addOrder({ component: this.controllerName, method: "getZdms", state: "start" })
 
       // 필터 옵션 추출
       const query = req.query as unknown as ZdmQueryFilterDTO
@@ -74,14 +78,14 @@ export class ZdmController extends BaseController {
         zdmsData,
       })
       ContextLogger.info({ message: `총 ${zdmsData.length}개의 ZDM 정보를 조회했습니다. 상세 정보 포함: ${filterOptions.detail}` })
-
       ApiUtils.success({ res, data: zdmsDTOs, message: "ZDM infomation list" })
+      asyncContextStorage.addOrder({ component: this.controllerName, method: "getZdms", state: "end" })
     } catch (error) {
       this.handleControllerError({
         next,
         error,
         method: "getZdms",
-        message: "ZDM 목록 조회 중 오류가 발생했습니다",
+        message: "[ZDM 목록 조회] - 오류가 발생했습니다",
       })
     }
   }
@@ -92,7 +96,8 @@ export class ZdmController extends BaseController {
   getZdm = async (req: ExtendedRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
       ContextLogger.debug({ message: `ZDM 정보 조회 시작` })
-
+      asyncContextStorage.setController({ name: this.controllerName })
+      asyncContextStorage.addOrder({ component: this.controllerName, method: "getZdm", state: "start" })
       //  파라미터 추출
       const { identifier } = req.params
       const query = req.query as unknown as SpecificZdmFilterDTO
@@ -123,14 +128,14 @@ export class ZdmController extends BaseController {
         zdmData,
       })
       ContextLogger.info({ message: `${identifierType}이(가) ${identifier}인 ZDM 정보 조회 완료. 상세 정보 포함: ${filterOptions.detail}` })
-
       ApiUtils.success({ res, data: zdmDTO, message: "ZDM information" })
+      asyncContextStorage.addOrder({ component: this.controllerName, method: "getZdm", state: "end" })
     } catch (error) {
       this.handleControllerError({
         next,
         error,
         method: "getZdm",
-        message: "ZDM 정보 조회 중 오류가 발생했습니다",
+        message: "[ZDM 정보 조회] - 오류가 발생했습니다",
       })
     }
   }

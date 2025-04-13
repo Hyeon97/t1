@@ -1,4 +1,5 @@
 import { ServiceError } from "../../../errors/service/service-error"
+import { asyncContextStorage } from "../../../utils/AsyncContext"
 import { BaseService } from "../../../utils/base/base-service"
 import { ZdmRepository } from "../repositories/center-info.repository"
 import { ZdmRepositoryRepository } from "../repositories/center-repository.repository"
@@ -21,13 +22,17 @@ export class ZdmRepositoryService extends BaseService {
    */
   async getRepositoryList({ filterOptions }: { filterOptions: ZdmRepositoryFilterOptions }): Promise<ZdmRepositoryDataResponse> {
     try {
+      asyncContextStorage.addService({ name: this.serviceName })
+      asyncContextStorage.addOrder({ component: this.serviceName, method: "getRepositoryList", state: "start" })
+
       const repos = await this.zdmRepositoryRepository.findAll({ filterOptions })
+      asyncContextStorage.addOrder({ component: this.serviceName, method: "getRepositoryList", state: "end" })
       return { items: repos }
     } catch (error) {
       return this.handleServiceError({
         error,
         method: "getRepositoryList",
-        message: "ZDM Repository 정보 목록 조회 중 오류가 발생했습니다",
+        message: "[ZDM Repository 정보 목록 조회] - 오류가 발생했습니다",
       })
     }
   }
@@ -37,6 +42,9 @@ export class ZdmRepositoryService extends BaseService {
    */
   async getRepositoryById({ id, filterOptions }: { id: number; filterOptions: ZdmRepositoryFilterOptions }): Promise<ZdmRepositoryDataResponse> {
     try {
+      asyncContextStorage.addService({ name: this.serviceName })
+      asyncContextStorage.addOrder({ component: this.serviceName, method: "getRepositoryById", state: "start" })
+
       const repos = await this.zdmRepositoryRepository.findById({ id, filterOptions })
       if (!repos) {
         throw ServiceError.resourceNotFoundError(ServiceError, {
@@ -45,12 +53,13 @@ export class ZdmRepositoryService extends BaseService {
           metadata: { id },
         })
       }
+      asyncContextStorage.addOrder({ component: this.serviceName, method: "getRepositoryById", state: "end" })
       return { items: [repos] }
     } catch (error) {
       return this.handleServiceError({
         error,
         method: "getRepositoryById",
-        message: `ZDM Repository 정보 조회 중 오류가 발생했습니다`,
+        message: `[ZDM Repository 정보 조회] - 오류가 발생했습니다`,
       })
     }
   }
