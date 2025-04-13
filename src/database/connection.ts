@@ -2,22 +2,8 @@ import mysql from "mysql2/promise"
 import { DatabaseError } from "../errors/database/database-error"
 import { ContextLogger } from "../utils/logger/logger.custom"
 import { asyncContextStorage } from "../utils/AsyncContext"
-
-/**
- * 데이터베이스 설정을 가져오는 함수
- */
-const getDbConfig = () => {
-  return {
-    host: process.env.DB_HOST || "localhost",
-    user: process.env.DB_USER || "root",
-    password: process.env.DB_PASSWORD || "",
-    database: process.env.DB_NAME || "test_database",
-    port: parseInt(process.env.DB_PORT || "3306", 10),
-    connectionLimit: parseInt(process.env.DB_CONNECTION_LIMIT || "10", 10),
-    waitForConnections: true,
-    queueLimit: 0,
-  }
-}
+import { configManager } from "../config/config-manager"
+import { logger } from "../utils/logger/logger.util"
 
 /**
  * 데이터베이스 연결 풀 (싱글톤 패턴)
@@ -27,7 +13,25 @@ export class DatabasePool {
   private pool: mysql.Pool
 
   private constructor() {
-    this.pool = mysql.createPool(getDbConfig())
+    try {
+      // configManager에서 DB 설정 가져오기
+      const dbConfig = configManager.getDatabaseConfig()
+      this.pool = mysql.createPool(dbConfig)
+      logger.info("데이터베이스 풀 생성 완료")
+    } catch (error) {
+      logger.error("데이터베이스 풀 생성 실패. 환경 변수에서 기본 설정을 사용합니다.", { error })
+      // 기본 설정으로 풀 생성
+      this.pool = mysql.createPool({
+        host: process.env.DB_HOST || "localhost",
+        user: process.env.DB_USER || "root",
+        password: process.env.DB_PASSWORD || "",
+        database: process.env.DB_NAME || "test_database",
+        port: parseInt(process.env.DB_PORT || "3306", 10),
+        connectionLimit: parseInt(process.env.DB_CONNECTION_LIMIT || "10", 10),
+        waitForConnections: true,
+        queueLimit: 0,
+      })
+    }
   }
 
   /**
@@ -103,32 +107,6 @@ export class DatabasePool {
 }
 
 /**
- * 민감한 데이터 검사 유틸리티 함수
- */
-// const containsSensitiveData = ({ sql, params }: { sql: string; params: any[] }): boolean => {
-//   const sensitiveKeywords = ["password", "token", "secret", "credit_card", "ssn"]
-
-//   // SQL 문에 민감한 키워드가 있는지 확인
-//   if (sensitiveKeywords.some((keyword) => sql.toLowerCase().includes(keyword))) {
-//     return true
-//   }
-
-//   // 매개변수에 민감한 키워드가 있는지 확인
-//   if (
-//     params.some((param) => {
-//       if (typeof param === "string") {
-//         return sensitiveKeywords.some((keyword) => param.includes(keyword))
-//       }
-//       return false
-//     })
-//   ) {
-//     return true
-//   }
-
-//   return false
-// }
-
-/**
  * 데이터베이스 작업 클래스
  * Repository 계층에서 사용되는 기본 데이터베이스 작업 메소드 제공
  */
@@ -151,19 +129,6 @@ export class DatabaseOperations {
       const pool = DatabasePool.getInstance().getPool()
       const conn = connection || pool
       const startTime = Date.now()
-
-      // // 민감한 데이터 로깅 방지
-      // const isSensitive = containsSensitiveData({ sql, params })
-
-      // if (!isSensitive) {
-      //   ContextLogger.debug({
-      //     message: `SQL: ${pool.format(sql, params)}`,
-      //   })
-      // } else {
-      //   ContextLogger.debug({
-      //     message: `SQL: [민감한 데이터 포함 - 로깅 제한]`,
-      //   })
-      // }
 
       ContextLogger.debug({
         message: `SQL: ${pool.format(sql, params)}`,

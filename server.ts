@@ -1,15 +1,26 @@
-import { EnvUtils } from "./src/utils/env.utils"
-// 환경 변수 로드 및 초기화
-EnvUtils.initialize()
-// 환경 변수 로드 후에 다른 모듈 가져오기
+// ==========================================
+// 환경 변수, 설정 초기화
+// ==========================================
+import { configManager } from "./src/config/config-manager"
+
+// 설정 관리자 초기화 (환경 변수 로드 포함)
+console.log("=== [ 환경 변수 및 설정 로드 ] ===")
+configManager.initialize()
+console.log("=== [ 환경 변수 및 설정 로드 완료 ] ===")
+
+// ==========================================
+// 로거 초기화 (환경 변수와 설정 의존)
+// ==========================================
+import { logger } from "./src/utils/logger/logger.util"
+import { ContextLogger } from "./src/utils/logger/logger.custom"
+
+// ==========================================
+// 나머지 모듈 및 의존성 임포트
+// ==========================================
 import columnify from "columnify"
 import listEndpoints from "express-list-endpoints"
 import { app } from "./app"
-// import { config } from "./src/config/config"
-import { configManager } from "./src/config/config-manager"
 import { DatabasePool } from "./src/database/connection"
-import { logger } from "./src/utils/logger/logger.util"
-import { ContextLogger } from "./src/utils/logger/logger.custom"
 
 //  엔드포인트 로깅
 const endPointLogging = () => {
@@ -52,9 +63,11 @@ const startServer = async (): Promise<void> => {
     if (process.env.NODE_ENV === "development") {
       endPointLogging()
     }
+
     // 서버 시작
     const port = configManager.getPort()
     const environment = configManager.getEnv()
+
     app.listen(port, () => {
       logger.info(`서버가 http://localhost:${port} 에서 실행 중입니다`)
       logger.info(`환경: ${environment}`)

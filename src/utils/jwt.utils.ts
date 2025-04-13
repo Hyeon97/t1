@@ -2,21 +2,32 @@ import jwt from "jsonwebtoken"
 import { CreateTokenData, TokenVerifySuccessResult } from "../domain/auth/interface/token"
 import { ErrorCode, ErrorLayer } from "../errors"
 import { UtilityError } from "../errors/utility/utility-error"
+import { configManager } from "../config/config-manager"
+import { logger } from "./logger/logger.util"
 
 export class JwtUtil {
   /**
    * JWT 시크릿 키 가져오기
    */
   private static getJwtSecret(): string {
-    // ConfigManager가 초기화되지 않은 경우를 대비해 환경변수 직접 사용
-    return process.env.JWT_SECRET || "z1c@o3n$v5e^r7t*e9r)A9P*I7S^e5r$v3e@r1"
+    try {
+      return configManager.getJwtConfig().secret
+    } catch (error) {
+      logger.warn("JWT 시크릿 키를 ConfigManager에서 가져오는 데 실패했습니다. 기본값을 사용합니다.", { error })
+      return process.env.JWT_SECRET || "z1c@o3n$v5e^r7t*e9r)A9P*I7S^e5r$v3e@r1"
+    }
   }
 
   /**
    * JWT 만료 시간 가져오기
    */
   private static getJwtExpiresIn(): string {
-    return process.env.JWT_EXPIRES_IN || "1h"
+    try {
+      return configManager.getJwtConfig().expiresIn
+    } catch (error) {
+      logger.warn("JWT 만료 시간을 ConfigManager에서 가져오는 데 실패했습니다. 기본값을 사용합니다.", { error })
+      return process.env.JWT_EXPIRES_IN || "1h"
+    }
   }
 
   /**

@@ -1,5 +1,4 @@
 import { Router } from "express"
-import { asyncContextMiddleware } from "../../../middlewares/logging/asyncContextMiddleware"
 import { tokenController } from "../controllers/controller-registry"
 import { validateTokenIssueBody } from "../validators/token.validators"
 
@@ -13,6 +12,6 @@ export class AuthRoutes {
 
   private tokenRoutes(): void {
     //  token 발급
-    this.router.post("/issue", asyncContextMiddleware, validateTokenIssueBody, tokenController.issueToken)
+    this.router.post("/issue", validateTokenIssueBody, tokenController.issueToken)
   }
 }

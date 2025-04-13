@@ -2,14 +2,67 @@ import dotenv from "dotenv"
 import dotenvExpand from "dotenv-expand"
 import fs from "fs"
 import path from "path"
+import { DateTimeUtils } from "../utils/Dayjs.utils"
 
 /**
  * 중앙화된 환경 설정 관리 클래스
+ * 환경 변수 로드 및 설정 관리를 담당하는 클래스
  */
 export class ConfigManager {
   private static instance: ConfigManager
   private readonly configs: Map<string, any> = new Map()
   private initialized = false
+
+  // 환경 관련 속성
+  private static readonly isPackaged = "pkg" in process
+  private static readonly execDir = ConfigManager.isPackaged ? path.dirname(process.execPath) : process.cwd()
+
+  private logMessage({
+    message,
+    level = "info",
+    highlightParts = [],
+  }: {
+    message: string
+    level?: "info" | "warn" | "error"
+    highlightParts?: string[]
+  }): void {
+    const timestamp = new Date().toISOString().replace("T", " ").substring(0, 19)
+
+    // level에 따른 색상 코드 선택
+    let colorCode: string
+    switch (level) {
+      case "warn":
+        colorCode = "\x1b[33m" // 노란색
+        break
+      case "error":
+        colorCode = "\x1b[31m" // 빨간색
+        break
+      default:
+        colorCode = "\x1b[32m" // 초록색 (info)
+    }
+
+    // 하이라이트할 부분이 있으면 각 부분을 level에 맞는 색상으로 변경
+    let formattedMessage = message
+    if (highlightParts.length > 0) {
+      highlightParts.forEach((part) => {
+        if (formattedMessage.includes(part)) {
+          formattedMessage = formattedMessage.replace(part, `${colorCode}${part}\x1b[0m`)
+        }
+      })
+    }
+
+    // 로그 레벨에 따라 적절한 콘솔 메서드 사용
+    switch (level) {
+      case "warn":
+        console.warn(`${timestamp} [WARN] ${formattedMessage}`)
+        break
+      case "error":
+        console.error(`${timestamp} [ERROR] ${formattedMessage}`)
+        break
+      default:
+        console.log(`${timestamp} [INFO] ${formattedMessage}`)
+    }
+  }
 
   /**
    * 생성자를 private으로 변경
@@ -29,15 +82,15 @@ export class ConfigManager {
   /**
    * 패키징 여부 확인
    */
-  private get isPackaged(): boolean {
-    return "pkg" in process
+  public isPackaged(): boolean {
+    return ConfigManager.isPackaged
   }
 
   /**
    * 실행 디렉토리 반환
    */
-  private get execDir(): string {
-    return this.isPackaged ? path.dirname(process.execPath) : process.cwd()
+  public getExecDir(): string {
+    return ConfigManager.execDir
   }
 
   /**
@@ -48,27 +101,33 @@ export class ConfigManager {
       return
     }
 
+    this.logMessage({ message: `ConfigManager 초기화 시작...`, highlightParts: [`ConfigManager 초기화 시작...`] })
+
     // 패키징 환경에 따라 다른 환경 변수 파일 로드
-    if (this.isPackaged) {
+    if (ConfigManager.isPackaged) {
       // 패키징된 환경: apiENV 파일 사용
-      const envPath = path.join(this.execDir, "apiENV")
+      const envPath = path.join(ConfigManager.execDir, "apiENV")
       this.loadEnvFile({ envPath })
     } else {
       // 개발 환경: NODE_ENV에 따른 .env 파일 사용
       this.loadEnvFromNodeEnv()
     }
 
-    // API 설정 초기화
-    this.setupApiConfig()
-
     // NODE_ENV가 설정되지 않은 경우 기본값 설정
     if (!process.env.NODE_ENV) {
       process.env.NODE_ENV = "development"
-      console.log("NODE_ENV가 설정되지 않아 기본값 'development'로 설정합니다.")
+      this.logMessage({
+        message: `NODE_ENV가 설정되지 않아 기본값 'development'로 설정합니다.`,
+        level: "warn",
+        highlightParts: [`NODE_ENV가 설정되지 않아 기본값 'development'로 설정합니다.`],
+      })
     }
 
     // 실행 정보 로깅
     this.logEnvironmentInfo()
+
+    // API 설정 초기화
+    this.setupApiConfig()
 
     // JWT 설정 초기화
     this.setupJwtConfig()
@@ -77,6 +136,14 @@ export class ConfigManager {
     this.setupDatabaseConfig()
 
     this.initialized = true
+    this.logMessage({ message: `ConfigManager 초기화 완료`, highlightParts: [`ConfigManager 초기화 완료`] })
+  }
+
+  /**
+   * 초기화 상태 확인
+   */
+  public isInitialized(): boolean {
+    return this.initialized
   }
 
   /**
@@ -85,7 +152,6 @@ export class ConfigManager {
   private loadEnvFromNodeEnv(): void {
     const nodeEnv = process.env.NODE_ENV || "development"
     const envPath = path.resolve(process.cwd(), "env", `.env.${nodeEnv}`)
-    console.log(`envPath: ${envPath}`)
     this.loadEnvFile({ envPath })
   }
 
@@ -98,7 +164,7 @@ export class ConfigManager {
         const envConfig = dotenv.config({ path: envPath })
         dotenvExpand.expand(envConfig)
 
-        console.log(`환경 변수 파일 로드: ${envPath}`)
+        this.logMessage({ message: `환경 변수 파일 로드: ${envPath}`, highlightParts: [`환경 변수 파일 로드: ${envPath}`] })
       } catch (error) {
         console.error(`환경 변수 파일 로드 중 오류 발생: ${error}`)
         console.warn("기본 환경 변수를 사용합니다.")
@@ -113,9 +179,21 @@ export class ConfigManager {
    * 현재 환경 정보 로깅
    */
   private logEnvironmentInfo(): void {
-    console.log(`실행 모드: ${this.isPackaged ? "패키징됨" : "개발"}`)
-    console.log(`실행 디렉토리: ${this.execDir}`)
-    console.log(`환경: ${process.env.NODE_ENV}`)
+    this.logMessage({
+      message: `실행 모드: ${ConfigManager.isPackaged ? "패키징됨" : "개발"}`,
+      highlightParts: [`실행 모드: ${ConfigManager.isPackaged ? "패키징됨" : "개발"}`],
+    })
+    this.logMessage({ message: `실행 디렉토리: ${ConfigManager.execDir}`, highlightParts: [`실행 디렉토리: ${ConfigManager.execDir}`] })
+    this.logMessage({ message: `환경: ${process.env.NODE_ENV}`, highlightParts: [`환경: ${process.env.NODE_ENV}`] })
+  }
+
+  /**
+   * 초기화 상태 확인 및 필요시 초기화
+   */
+  private ensureInitialized(): void {
+    if (!this.initialized) {
+      this.initialize()
+    }
   }
 
   /**
@@ -145,19 +223,26 @@ export class ConfigManager {
   }
 
   /**
-   * config 값 세팅
+   * API config 값 세팅
    */
   private setupApiConfig(): void {
-    console.log("API 설정 초기화 중...")
+    this.logMessage({
+      message: `API 설정 초기화 중...`,
+      highlightParts: [`API 설정 초기화 중...`],
+    })
     this.configs.set("api", {
       prefix: process.env.API_PREFIX || "/api",
-      port: parseInt(process.env.PORT || "3000"),
+      port: parseInt(process.env.PORT || "3000", 10),
       environment: process.env.NODE_ENV || "development",
       logLevel: process.env.LOG_LEVEL || "info",
       logDir: process.env.LOG_DIR || "logs",
       logFormat: process.env.LOG_FORMAT || "combined",
     })
-    console.log("API 설정 초기화 완료:", this.configs.get("api"))
+    this.logMessage({
+      message: `API 설정 초기화 완료`,
+      highlightParts: [`API 설정 초기화 완료`],
+    })
+    console.dir(this.configs.get("api"))
   }
 
   public getApiConfig(): {
@@ -168,6 +253,7 @@ export class ConfigManager {
     logDir: string
     logFormat: string
   } {
+    this.ensureInitialized()
     return this.getConfig<{
       prefix: string
       port: number
@@ -182,6 +268,7 @@ export class ConfigManager {
    * API 접두사 가져오기
    */
   public getApiPrefix(): string {
+    this.ensureInitialized()
     return this.getApiConfig().prefix
   }
 
@@ -189,6 +276,7 @@ export class ConfigManager {
    * 서버 포트 가져오기
    */
   public getPort(): number {
+    this.ensureInitialized()
     return this.getApiConfig().port
   }
 
@@ -196,16 +284,15 @@ export class ConfigManager {
    * 애플리케이션 환경 가져오기
    */
   public getEnv(): string {
+    this.ensureInitialized()
     try {
       const apiConfig = this.getConfig<any>({ key: "api" })
       if (apiConfig && apiConfig.environment) {
         return apiConfig.environment
       }
-      // api 설정이 없거나 logLevel이 없는 경우 기본값 반환
       return process.env.NODE_ENV || "development"
     } catch (error) {
-      console.warn("로그 환경을 가져오는 중 오류 발생:", error)
-      // 오류 발생 시 기본값 반환
+      console.warn("환경 정보를 가져오는 중 오류 발생:", error)
       return "development"
     }
   }
@@ -214,16 +301,15 @@ export class ConfigManager {
    * 로그 레벨 가져오기
    */
   public getLogLevel(): string {
+    this.ensureInitialized()
     try {
       const apiConfig = this.getConfig<any>({ key: "api" })
       if (apiConfig && apiConfig.logLevel) {
         return apiConfig.logLevel
       }
-      // api 설정이 없거나 logLevel이 없는 경우 기본값 반환
       return process.env.LOG_LEVEL || "info"
     } catch (error) {
       console.warn("로그 레벨을 가져오는 중 오류 발생:", error)
-      // 오류 발생 시 기본값 반환
       return "info"
     }
   }
@@ -232,16 +318,15 @@ export class ConfigManager {
    * 로그 디렉토리 가져오기
    */
   public getLogDir(): string {
+    this.ensureInitialized()
     try {
       const apiConfig = this.getConfig<any>({ key: "api" })
       if (apiConfig && apiConfig.logDir) {
         return apiConfig.logDir
       }
-      // api 설정이 없거나 logDir이 없는 경우 기본값 반환
       return process.env.LOG_DIR || "logs"
     } catch (error) {
       console.warn("로그 디렉토리를 가져오는 중 오류 발생:", error)
-      // 오류 발생 시 기본값 반환
       return "logs"
     }
   }
@@ -250,16 +335,15 @@ export class ConfigManager {
    * 로그 포맷 가져오기
    */
   public getLogFormat(): string {
+    this.ensureInitialized()
     try {
       const apiConfig = this.getConfig<any>({ key: "api" })
       if (apiConfig && apiConfig.logFormat) {
         return apiConfig.logFormat
       }
-      // api 설정이 없거나 logDir이 없는 경우 기본값 반환
       return process.env.LOG_FORMAT || "combined"
     } catch (error) {
-      console.warn("로그 포멧 가져오는 중 오류 발생:", error)
-      // 오류 발생 시 기본값 반환
+      console.warn("로그 포맷을 가져오는 중 오류 발생:", error)
       return "combined"
     }
   }
@@ -268,9 +352,26 @@ export class ConfigManager {
    * 설정 가져오기
    */
   public getConfig<T>({ key }: { key: string }): T {
+    this.ensureInitialized()
     return this.configs.get(key)
+  }
+
+  /**
+   * 데이터베이스 설정 가져오기
+   */
+  public getDatabaseConfig(): any {
+    this.ensureInitialized()
+    return this.getConfig<any>({ key: "database" })
+  }
+
+  /**
+   * JWT 설정 가져오기
+   */
+  public getJwtConfig(): { secret: string; expiresIn: string } {
+    this.ensureInitialized()
+    return this.getConfig<{ secret: string; expiresIn: string }>({ key: "jwt" })
   }
 }
 
-//  싱글톤 인스턴스 내보내기
+// 싱글톤 인스턴스 내보내기
 export const configManager = ConfigManager.getInstance()
