@@ -67,6 +67,7 @@ export class ServerBasicRepository extends BaseRepository {
     try {
       asyncContextStorage.addRepository({ name: this.repositoryName })
       asyncContextStorage.addOrder({ component: this.repositoryName, method: "findAll", state: "start" })
+
       this.resetQueryState()
       this.applyFilters({ filterOptions })
 
@@ -91,6 +92,7 @@ export class ServerBasicRepository extends BaseRepository {
     try {
       asyncContextStorage.addRepository({ name: this.repositoryName })
       asyncContextStorage.addOrder({ component: this.repositoryName, method: "findByServerName", state: "start" })
+
       this.resetQueryState()
       this.addCondition({ condition: "sSystemName = ?", params: [name] })
       this.applyFilters({ filterOptions })
@@ -120,6 +122,7 @@ export class ServerBasicRepository extends BaseRepository {
     try {
       asyncContextStorage.addRepository({ name: this.repositoryName })
       asyncContextStorage.addOrder({ component: this.repositoryName, method: "findByServerId", state: "start" })
+
       this.resetQueryState()
       this.addCondition({ condition: "nID = ?", params: [id] })
       this.applyFilters({ filterOptions })

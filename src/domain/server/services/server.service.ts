@@ -151,6 +151,8 @@ export class ServerService extends BaseService {
       })
 
       // 오류가 발생해도 빈 결과를 반환하여 기본 서버 정보라도 제공
+      // 그렇기 때문에 로깅상에선 종료로 표기
+      asyncContextStorage.addOrder({ component: this.serviceName, method: "getAdditionalInfo", state: "end" })
       return {
         disks: [] as ServerDiskTable[],
         networks: [] as ServerNetworkTable[],
