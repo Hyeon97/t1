@@ -1,0 +1,44 @@
+- [ 작업 등록 요청 객체 ]
+```
+{
+  //  필수
+  center: number | string //  number: 센터 ID, string: 센터 name
+  server: number | string //  number: 작업 서버 ID, string: 작업 서버 name
+  type: BackupType //  작업 타입
+  partition: string[] // 작업 파티션
+  //  작업 사용 레포지토리
+  repository: BackupRegistRequestRepository
+  //  선택
+  jobName?: string //  작업 이름
+  user?: string | number //  number: user ID, string: user mail
+  schedule?: {
+    full?: number //  등록시에는 zdm에 등록된 schedule ID
+    inc?: number //  등록시에는 zdm에 등록된 schedule ID
+  }
+  descroption?: string //  추가 설명
+  rotation?: number //  작업 반복 횟수
+  compression?: CompressionType //  작업시 압축 여부
+  encryption?: EncryptionType // 작업시 암호화 여부
+  excludeDir?: string | string[] //  작업 제외 디렉토리 >> 추후 변경 가능 [{partition:"/", excludeDir:"/test1|/test2..."}]
+  excludePartition?: string | string[] //  작업 제외 파티션
+  mail_event?: string //  작업 이벤트 수신 mail
+  networkLimit?: number //  작업 네트워크 제한 속도
+  autoStart?: AutoStartType //  자동 시작 여부
+}
+
+```
+* 작업 등록 기준
+  - partition
+* 작업 이름
+  - 파티션별 개별 작업 이름 부여
+  - 사용자가 지정한 작업 이름이 없는경우 자동으로 {SERVER_NAME}_{PARTITION_NAME}_{IDX} 부여
+    - SERVER_NAME: IP주소를 제외한 앞부분 \
+    - PARTITION_NAME: 자동변환 ( '/'는 ROOT로 변환 나머지는 /를 '_'로 변환 )
+    - IDX: 기존에 자동생성 or 사용자가 입력한 작업 이름이 존재하는 경우 idx값 +1
+  - 사용자가 지정한 작업 이름이 존재하는 경우 >> _{idx}에서 idx값 +1
+* 작업 제외 디렉토리
+  - 현재는 string 형식으로 입력받음 > 내부에서 split()을 사용 string[]로 변환하여 동작
+    - 파티션을 구분하지 않고 전체 파티션에서 동일한 이름을 가진 디렉토리 모두 제외
+  - > 추후 [{partition:"/", excludeDir:"/test1|/test2..."}] 형식으로 변경
+    - 만약 문자열로 들어오면 기존 처럼 전체 파티션에서 동일한 이름을 가진 디렉토리 모두 제외하는 방식으로
+    - 객체 배열로 들어오는 경우에는 파티션 별 디렉토리 제외 하는 방식으로
