@@ -2,7 +2,7 @@
 //  ZDM 공통 사용 type 정의  //
 //////////////////////////////
 
-import { VALID_ACTIVATION_VALUES, VALID_STATE_VALUES } from "../../../types/common/const-value"
+import { VALID_CENTER_ACTIVATION_VALUES, VALID_STATE_VALUES } from "../../../types/common/const-value"
 
 /**
  * ZDM 조회 타입
@@ -53,7 +53,7 @@ export const ZdmModeMap = {
 /**
  * ZDM 활성화 상태 정의
  */
-export type ZDMActivationType = (typeof VALID_ACTIVATION_VALUES)[number]
+export type ZDMActivationType = (typeof VALID_CENTER_ACTIVATION_VALUES)[number]
 export enum ZDMActivationEnum {
   ACTIVATE = "ok",
   INACTIVATE = "fail",

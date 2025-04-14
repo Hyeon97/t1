@@ -125,6 +125,7 @@ export class BackupService extends BaseService {
     try {
       asyncContextStorage.addService({ name: this.serviceName })
       asyncContextStorage.addOrder({ component: this.serviceName, method: "getBackups", state: "start" })
+
       // 필터 옵션 분리
       const { result, ...infoFilterOptions } = filterOptions
 

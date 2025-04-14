@@ -12,6 +12,7 @@ import { ZdmRoutes } from "./src/domain/zdm/routes/zdm.routes"
 import { errorHandler, notFoundHandler } from "./src/errors"
 import { asyncContextMiddleware } from "./src/middlewares/logging/asyncContextMiddleware"
 import { logger, morganMiddleware } from "./src/utils/logger/logger.util"
+import { ScheduleRoutes } from "./src/domain/schedule/routes/schedule.routes"
 
 class App {
   public app: Application
@@ -74,6 +75,7 @@ class App {
     this.app.use(`${apiPrefix}/servers`, validateToken, new ServerRoutes().router)
     this.app.use(`${apiPrefix}/zdms`, validateToken, new ZdmRoutes().router)
     this.app.use(`${apiPrefix}/backups`, new BackupRoutes().router)
+    this.app.use(`${apiPrefix}/schedules`, new ScheduleRoutes().router)
   }
 
   private setupErrorHandling(): void {

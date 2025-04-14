@@ -39,26 +39,25 @@ export class ValidationMiddleware {
         if (errors.length > 0) {
           // 재귀적으로 중첩된 에러 메시지를 포함하여 처리
           const errorMessages = this.extractValidationErrorMessages(errors)
-
           logger.warn(`[class-validator] 요청 유효성 검사 실패: ${errorMessages.join(", ")}`)
           throw ValidatorError.validationError(ValidatorError, {
             method: "validateDTO",
-            message: "요청 데이터 유효성 검사 실패",
+            message: errorMessages.join("||"),
           })
         }
 
         // 유효성 검사를 통과한 DTO 인스턴스로 요청 객체 업데이트
         req[source] = dtoInstance
         next()
-      } catch (error) {
-        if (error instanceof ApiError) {
+      } catch (error: any) {
+        logger.error("DTO 유효성 검사 중 오류 발생", error)
+        if (error instanceof ApiError || error instanceof ValidatorError) {
           next(error)
         } else {
-          logger.error("DTO 유효성 검사 중 오류 발생", error)
           next(
             ValidatorError.internalError(ValidatorError, {
               method: "validateDTO",
-              message: "서버 내부 오류 발생했습니다",
+              message: "서버 내부 오류 발생",
             })
           )
         }

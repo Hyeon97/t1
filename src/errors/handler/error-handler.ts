@@ -10,15 +10,24 @@ function buildUnifiedError(err: Error) {
   let clientMessage = "서버 내부 오류가 발생했습니다"
   let clientErrorCode = ErrorCode.INTERNAL_ERROR
   let errorChain: any[] = []
-  let detail = null
+  let detail = null //  일반 사용자
+  let log_debug = null //  디버깅
 
   // BaseError 계열의 모든 에러 처리 (모든 계층별 에러가 이를 상속함)
   if (err instanceof BaseError) {
     // 상태 코드를 직접 사용
     statusCode = err.statusCode
     clientErrorCode = err.errorCode
-    clientMessage = `${err.message} || ${getUserFriendlyMessage({ errorCode: err.errorCode })} `
-    detail = err.metadata
+    if (err.message.includes("||")) {
+      //  validator 에서 넘어온 에러메시지
+      clientMessage = `${getUserFriendlyMessage({ errorCode: err.errorCode })}`
+      detail = { cause: err.message.split("||") }
+      log_debug = { cause: err.message.split("||"), ...err.metadata }
+    } else {
+      clientMessage = `${getUserFriendlyMessage({ errorCode: err.errorCode })}`
+      detail = { cause: err.message }
+      log_debug = { cause: err.message, ...err.metadata }
+    }
   }
   // ApiError 호환성 유지
   else if (err instanceof ApiError) {
@@ -26,6 +35,10 @@ function buildUnifiedError(err: Error) {
     clientErrorCode = err.errorCode
     clientMessage = err.message
     detail = {
+      ...err.metadata,
+      ...err.details,
+    }
+    log_debug = {
       ...err.metadata,
       ...err.details,
     }
@@ -44,9 +57,10 @@ function buildUnifiedError(err: Error) {
   else {
     if (err.message.includes("method not allowed")) {
       statusCode = 405
-      clientMessage = err.message || "HTTP method not allowed"
+      clientMessage = "HTTP method not allowed"
       clientErrorCode = ErrorCode.METHOD_NOT_ALLOWED
-      detail = {
+      detail = { cause: err.message }
+      log_debug = {
         layer: ErrorLayer.MIDDLEWARE,
       }
       // errorChain = [
@@ -60,11 +74,13 @@ function buildUnifiedError(err: Error) {
       // ]
     } else {
       ;(statusCode = 500),
-        (clientMessage = err.message || "알 수 없는 오류"),
+        (clientMessage = "알 수 없는 오류"),
         (clientErrorCode = ErrorCode.UNKNOWN_ERROR),
-        (detail = {
+        (detail = { cause: err.message }),
+        (log_debug = {
           layer: ErrorLayer.MIDDLEWARE,
         })
+
       // errorChain = [
       //   {
       //     layer: ErrorLayer.UNKNOWN,
@@ -87,6 +103,7 @@ function buildUnifiedError(err: Error) {
     clientErrorCode,
     detail,
     timestamp: new Date().toISOString(),
+    log_debug,
   }
 }
 
@@ -123,15 +140,16 @@ export const errorHandler = (err: Error, req: Request, res: Response, next: Next
     error: {
       code: unifiedError.clientErrorCode,
       message: unifiedError.clientMessage,
+      details: unifiedError.detail,
     },
     timestamp: unifiedError.timestamp,
   }
 
   // 개발 환경에서만 세부 정보 추가
   if (process.env.NODE_ENV !== "production") {
-    errorResponse.error.details = {
+    errorResponse.debug = {
       statusCode: unifiedError.statusCode,
-      ...unifiedError.detail,
+      ...unifiedError.log_debug,
     }
   } else {
     // 프로덕션 환경에서는 제한된 세부 정보만 제공

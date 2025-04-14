@@ -89,6 +89,7 @@ export interface ErrorResponse {
     stack?: string
   }
   timestamp: string
+  debug?: any
 }
 
 // 요청 정보 인터페이스
