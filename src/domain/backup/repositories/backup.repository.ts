@@ -95,6 +95,31 @@ export class BackupRepository extends BaseRepository {
   }
 
   /**
+   * 특정 작업 조회 ( by JobName Use Like )
+   */
+  async findByJobNameUseLike({ jobName, filterOptions }: { jobName: string; filterOptions: BackupFilterOptions }): Promise<BackupTable[]> {
+    try {
+      asyncContextStorage.addRepository({ name: this.repositoryName })
+      asyncContextStorage.addOrder({ component: this.repositoryName, method: "findByJobNameUseLike", state: "start" })
+
+      this.resetQueryState()
+      this.applyFilters({ filterOptions })
+
+      const query = `SELECT * FROM ${this.tableName} WHERE sJobName LIKE '%${jobName}%'`
+      const result = await this.executeQuery<BackupTable[]>({ sql: query, params: [jobName], request: `${this.repositoryName}.findByJobNameUseLike` })
+
+      asyncContextStorage.addOrder({ component: this.repositoryName, method: "findByJobNameUseLike", state: "end" })
+      return result
+    } catch (error) {
+      return this.handleRepositoryError({
+        error,
+        method: "findByJobNameUseLike",
+        message: `[Backup 작업 이름으로 조회] - 오류가 발생했습니다`,
+      })
+    }
+  }
+
+  /**
    * Backup 작업 정보 추가
    */
   async insertBackup({ backupData, transaction }: { backupData: BackupTableInput; transaction: TransactionManager }): Promise<ResultSetHeader> {

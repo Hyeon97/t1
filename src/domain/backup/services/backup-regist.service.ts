@@ -3,6 +3,7 @@ import { ServiceError } from "../../../errors/service/service-error"
 import { AutoStartType } from "../../../types/common/job"
 import { asyncContextStorage } from "../../../utils/AsyncContext"
 import { BaseService } from "../../../utils/base/base-service"
+import { jobUtils } from "../../../utils/job/job.utils"
 import { ContextLogger } from "../../../utils/logger/logger.custom"
 import { ServerPartitionService } from "../../server/services/server-partition.service"
 import { ServerService } from "../../server/services/server.service"
@@ -67,7 +68,7 @@ export class BackupRegistService extends BaseService {
   /**
    * Backup Object 생성
    */
-  private createBackupObject({
+  private async createBackupObject({
     data,
     server,
     center,
@@ -75,14 +76,14 @@ export class BackupRegistService extends BaseService {
     data: BackupRegistRequestBody
     server: ServerBasicTable
     center: ZdmInfoTable
-  }): BackupTableInput {
+  }): Promise<BackupTableInput> {
     try {
       asyncContextStorage.addOrder({ component: this.serviceName, method: "createBackupObject", state: "start" })
       const object = {
         nUserID: (data.user ?? 1) as number,
         nCenterID: center.nID,
         sSystemName: server.sSystemName,
-        sJobName: data.jobName || "",
+        sJobName: data.jobName || '',
         nJobID: 0,
         nJobStatus: data.autoStart === "use" ? 3 : 2,
         nScheduleID: 0,
@@ -212,11 +213,6 @@ export class BackupRegistService extends BaseService {
         method: "getCenterInfo",
         message: "[Backup 정보 등록] - ZDM 정보 조회 오류 발생",
       })
-      // throw ServiceError.dataProcessingError({
-      //   method: "getCenterInfo",
-      //   message: "[Backup 정보 등록] - ZDM 정보 조회 오류 발생",
-      //   cause: error,
-      // })
     }
   }
 
@@ -240,32 +236,61 @@ export class BackupRegistService extends BaseService {
         method: "getRepositoryInfo",
         message: "[Backup 정보 등록] - ZDM Repository 정보 조회 오류 발생",
       })
-      // throw ServiceError.dataProcessingError({
-      //   method: "getRepositoryInfo",
-      //   message: "[Backup 정보 등록] - ZDM Repository 정보 조회 오류 발생",
-      //   cause: error,
-      // })
     }
   }
 
-  /**
-   * 데이터 전처리(작업이름 중복 검사 or 자동생성)
-   */
-  private async preprocessJobName({ jobName }: { jobName: string }): Promise<string> {
-    try {
-      asyncContextStorage.addOrder({ component: this.serviceName, method: "preprocessJobName", state: "start" })
-      //  작업 이름이 없는경우 - 자동생성
-      //  작업 이름이 있는경우 - 중복검사 후 자동 idx 부여 or 증가
-      asyncContextStorage.addOrder({ component: this.serviceName, method: "preprocessJobName", state: "end" })
-      return ""
-    } catch (error) {
-      throw ServiceError.dataProcessingError({
-        method: "preprocessJobName",
-        message: "[Backup 정보 등록] - Backup JobName 정보 가공 오류 발생",
-        cause: error,
-      })
-    }
-  }
+  // /**
+  //  * 작업 이름 생성 - 파티션 값 변환
+  //  */
+  // private chPartitionName({ server, partition }: { server: ServerBasicTable, partition: string }): string {
+  //   try {
+  //     const os = OSTypeMap.toString({ value: server.nOS })
+  //     let changedDrivePath = ''
+  //     if (os === 'Window') {
+  //       //  윈도우 에서 드라이브 이름끝 :으로 끝나는거 제거
+  //       changedDrivePath = partition.replaceAll(':', '')
+  //     }
+  //     else if (os === 'Linux') {
+  //       changedDrivePath = partition === '/' ? '_ROOT' : partition.replaceAll('/', '_')
+  //     }
+  //     return changedDrivePath
+  //   } catch (error) {
+  //     throw ServiceError.dataProcessingError({
+  //       method: "chPartitionName",
+  //       message: "[Backup 정보 등록] - Backup JobName 정보 가공 오류 발생",
+  //       cause: error,
+  //     })
+  //   }
+  // }
+
+  // /**
+  //  * 데이터 전처리(작업이름 중복 검사 or 자동생성)
+  //  */
+  // private async preprocessJobName({ jobName, server, partition }: { jobName: string, server: ServerBasicTable, partition: string }): Promise<{ jName: string, idx: number }> {
+  //   try {
+  //     let jName = ''
+  //     asyncContextStorage.addOrder({ component: this.serviceName, method: "preprocessJobName", state: "start" })
+  //     //  작업 이름이 없는경우 - 자동생성 ( + 파티션 이름 변환 )
+  //     if (!jobName) {
+  //       jName = `${server.sSystemName}${this.chPartitionName({ server, partition })}`
+  //     }
+  //     //  작업 이름이 있는경우 - 사용자 입력 작업 이름 + 파티션 이름 변환
+  //     else if (jobName) {
+  //       jName = `${jobName}${this.chPartitionName({ server, partition })}`
+  //     }
+  //     //  해당 작업 이름으로 등록된 작업 유뮤 조회
+  //     //  등록된 작업 수 === 자동 idx 추가 
+  //     const idx = await (await this.backupRepository.findByJobNameUseLike({ jobName: jName, filterOptions: {} })).length
+  //     asyncContextStorage.addOrder({ component: this.serviceName, method: "preprocessJobName", state: "end" })
+  //     return { jName: `${jName}_idx`, idx }
+  //   } catch (error) {
+  //     throw ServiceError.dataProcessingError({
+  //       method: "preprocessJobName",
+  //       message: "[Backup 정보 등록] - Backup JobName 정보 가공 오류 발생",
+  //       cause: error,
+  //     })
+  //   }
+  // }
 
   /**
    * 데이터 전처리(제외 파티션)
@@ -452,8 +477,6 @@ export class BackupRegistService extends BaseService {
       const repository = await this.getRepositoryInfo({ repository: data.repository, center })
       //  schedule 정보 가져오기
 
-      //  데이터 전처리(작업이름 중복 검사 or 자동생성)
-      data.jobName = await this.preprocessJobName({ jobName: data.jobName || "" })
       //  데이터 전처리(작업제외 파티션)
       if (data.excludePartition) {
         data.excludePartition = this.preprocessExcludePartitions({ excludePartition: data.excludePartition as string })
@@ -467,37 +490,47 @@ export class BackupRegistService extends BaseService {
       // 처리할 파티션 목록 결정
       const partitionsToProcess = data.partition.length
         ? data.partition.map((partition) => {
-            const partitionInfo = partitionList.find((item) => item.sLetter === partition)
-            //  사용자 입력 파티션 검증
-            if (!partitionInfo) {
-              throw ServiceError.badRequest(ServiceError, {
-                method: "regist",
-                message: `[Backup 정보 등록] - 파티션( ${partition} )이 서버( ${server.sSystemName} )에 존재하지 않습니다`,
-                metadata: {
-                  partition,
-                  server: server.sSystemName,
-                },
-              })
-            }
+          const partitionInfo = partitionList.find((item) => item.sLetter === partition)
+          //  사용자 입력 파티션 검증
+          if (!partitionInfo) {
+            throw ServiceError.badRequest(ServiceError, {
+              method: "regist",
+              message: `[Backup 정보 등록] - 파티션( ${partition} )이 서버( ${server.sSystemName} )에 존재하지 않습니다`,
+              metadata: {
+                partition,
+                server: server.sSystemName,
+              },
+            })
+          }
 
-            return partitionInfo
-          })
+          return partitionInfo
+        })
         : partitionList
 
       // 제외 파티션이 아닌 것들만 필터링 후 dataSet 생성
-      partitionsToProcess
-        .filter((partition) => !data.excludePartition?.includes(partition.sLetter))
-        .forEach((partition) => {
-          const backupDataObject = this.createBackupObject({ data, server, center })
-          const backupInfoDataObject = this.createBackupInfoObject({
-            data,
-            server,
-            partition,
-            center,
-            repository,
+      let maxIdx = 0
+      await Promise.all(
+        partitionsToProcess
+          .filter((partition) => !data.excludePartition?.includes(partition.sLetter))
+          .map(async (partition: ServerPartitionTable) => {
+            // const jobNameResult = await this.preprocessJobName({ jobName: data.jobName || '', server: server, partition: partition.sLetter })
+            const jobNameResult = await jobUtils.preprocessJobName({
+              jobName: data.jobName || '', server: server, partition: partition.sLetter, type: 'Backup', repository: this.backupRepository
+            })
+            data.jobName = jobNameResult.jName
+            maxIdx = Math.max(maxIdx, jobNameResult.idx)
+            const backupDataObject = await this.createBackupObject({ data, server, center })
+            const backupInfoDataObject = this.createBackupInfoObject({
+              data,
+              server,
+              partition,
+              center,
+              repository,
+            })
+            dataSet.push({ backupDataObject, backupInfoDataObject })
           })
-          dataSet.push({ backupDataObject, backupInfoDataObject })
-        })
+      )
+
       ContextLogger.info({ message: `총 ${dataSet.length}개의 Backup 작업 등록 dataSet을 생성했습니다.` })
 
       // 데이터 등록
@@ -507,6 +540,12 @@ export class BackupRegistService extends BaseService {
           message: "[Backup 정보 등록] - 등록할 Backup 작업이 없습니다. 파티션 정보를 확인해주세요.",
         })
       }
+
+      //  dataSet 등록전 작업 이름 최종 수정
+      dataSet.map((el) => {
+        const sjobName = el.backupDataObject.sJobName.replace('_idx', `_${maxIdx}`)
+        el.backupDataObject.sJobName = el.backupInfoDataObject.sJobName = sjobName
+      })
 
       const registrationResult = await this.registerAllBackupDataSets({ dataSets: dataSet })
 
