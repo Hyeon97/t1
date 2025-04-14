@@ -1,0 +1,14 @@
+/**
+ * [2025/04/06] 기준 1차 처리 완료
+ * connection.ts     
+   - transaction 관련 처리 필요
+ * database-error.ts   확인 완료
+ * repository-error.ts 확인 완료
+ * base-repository.ts  확인 완료
+ *
+ * service-error.ts    확인 완료
+ * base-service.ts     확인 완료
+ *
+ * controller-error.ts 확인 완료
+ * base-controller.ts  확인 완료
+ */
