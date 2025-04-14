@@ -2,7 +2,6 @@ import dotenv from "dotenv"
 import dotenvExpand from "dotenv-expand"
 import fs from "fs"
 import path from "path"
-import { DateTimeUtils } from "../utils/Dayjs.utils"
 
 /**
  * 중앙화된 환경 설정 관리 클래스
@@ -67,7 +66,7 @@ export class ConfigManager {
   /**
    * 생성자를 private으로 변경
    */
-  private constructor() {}
+  private constructor() { }
 
   /**
    * 싱글톤 인스턴스 반환
@@ -166,12 +165,28 @@ export class ConfigManager {
 
         this.logMessage({ message: `환경 변수 파일 로드: ${envPath}`, highlightParts: [`환경 변수 파일 로드: ${envPath}`] })
       } catch (error) {
-        console.error(`환경 변수 파일 로드 중 오류 발생: ${error}`)
-        console.warn("기본 환경 변수를 사용합니다.")
+        this.logMessage({
+          message: `환경 변수 파일 로드 중 오류 발생: ${error}`,
+          level: "error",
+          highlightParts: [`환경 변수 파일 로드 중 오류 발생: ${error}`],
+        })
+        this.logMessage({
+          message: "기본 환경 변수를 사용합니다.",
+          level: "warn",
+          highlightParts: ["기본 환경 변수를 사용합니다."],
+        })
       }
     } else {
-      console.warn(`환경 변수 파일을 찾을 수 없습니다: ${envPath}`)
-      console.warn("기본 환경 변수를 사용합니다.")
+      this.logMessage({
+        message: `환경 변수 파일을 찾을 수 없습니다: ${envPath}`,
+        level: "warn",
+        highlightParts: [`환경 변수 파일을 찾을 수 없습니다: ${envPath}`],
+      })
+      this.logMessage({
+        message: `기본 환경 변수를 사용합니다.`,
+        level: "warn",
+        highlightParts: [`기본 환경 변수를 사용합니다.`],
+      })
     }
   }
 
@@ -292,7 +307,11 @@ export class ConfigManager {
       }
       return process.env.NODE_ENV || "development"
     } catch (error) {
-      console.warn("환경 정보를 가져오는 중 오류 발생:", error)
+      this.logMessage({
+        message: `환경 정보를 가져오는 중 오류 발생: ${error}`,
+        level: "warn",
+        highlightParts: [`환경 정보를 가져오는 중 오류 발생: ${error}`],
+      })
       return "development"
     }
   }
@@ -309,7 +328,11 @@ export class ConfigManager {
       }
       return process.env.LOG_LEVEL || "info"
     } catch (error) {
-      console.warn("로그 레벨을 가져오는 중 오류 발생:", error)
+      this.logMessage({
+        message: `로그 레벨을 가져오는 중 오류 발생: ${error}`,
+        level: "warn",
+        highlightParts: [`로그 레벨을 가져오는 중 오류 발생: ${error}`],
+      })
       return "info"
     }
   }
@@ -326,7 +349,11 @@ export class ConfigManager {
       }
       return process.env.LOG_DIR || "logs"
     } catch (error) {
-      console.warn("로그 디렉토리를 가져오는 중 오류 발생:", error)
+      this.logMessage({
+        message: `로그 디렉토리를 가져오는 중 오류 발생: ${error}`,
+        level: "warn",
+        highlightParts: [`로그 디렉토리를 가져오는 중 오류 발생: ${error}`],
+      })
       return "logs"
     }
   }
@@ -343,7 +370,11 @@ export class ConfigManager {
       }
       return process.env.LOG_FORMAT || "combined"
     } catch (error) {
-      console.warn("로그 포맷을 가져오는 중 오류 발생:", error)
+      this.logMessage({
+        message: `로그 포맷을 가져오는 중 오류 발생: ${error}`,
+        level: "warn",
+        highlightParts: [`로그 포맷을 가져오는 중 오류 발생: ${error}`],
+      })
       return "combined"
     }
   }
