@@ -28,7 +28,10 @@
   - 필터링 가능 ( mode, partition, repositoryID, repositoryPath, repositoryType )
     [구현필요] ( status, resuslt )
 - backup 작업 등록 
-  - schedule 관련 동작 필요함
+  - 작업 동작 확인
+    [구현필요] schedule 정보 추가 등록
+- {구현중}backup 작업 삭제
+  - 삭제기준 jobName, id, systemName 각각의 엔드포인트 생성, 필터링도 공통 처리하는 방식으로 진행
 
 [ schedule ]
 - 전체 조회

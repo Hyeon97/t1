@@ -6,6 +6,7 @@ import { serverPartitionService, serverService } from "../../server/services/ser
 import { zdmRepositoryService, zdmService } from "../../zdm/services/service-registry"
 import { BackupInfoRepository } from "../repositories/backup-info.repository"
 import { BackupRepository } from "../repositories/backup.repository"
+import { BackupDeleteService } from "./backup-delete.service"
 import { BackupRegistService } from "./backup-regist.service"
 import { BackupService } from "./backup.service"
 
@@ -30,5 +31,10 @@ export const backupRegistService = new BackupRegistService({
   zdmService,
   zdmRepositoryService,
   backupRepository,
-  backupInfoRepository
+  backupInfoRepository,
+})
+//  Backup 정보 삭제 Service
+export const backupDeleteService = new BackupDeleteService({
+  backupRepository,
+  backupInfoRepository,
 })
