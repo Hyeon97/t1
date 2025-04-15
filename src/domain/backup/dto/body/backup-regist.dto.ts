@@ -18,6 +18,7 @@ import {
   ValidateIf,
   ValidateNested,
 } from "class-validator"
+import { CompressionType } from "../../../../types/common/compression"
 import {
   VALID_COMPRESSION_VALUES,
   VALID_ENCRYPTION_VALUES,
@@ -25,19 +26,18 @@ import {
   VALID_JOB_TYPE_VALUES,
   VALID_REPOSITORY_VALUES,
 } from "../../../../types/common/const-value"
+import { EncryptionType } from "../../../../types/common/encryption"
+import { AutoStartType } from "../../../../types/common/job"
 import { RepositoryType } from "../../../../types/common/repository"
 import { stringToNumber } from "../../../../utils/data-convert.utils"
 import { IsEmailOrNumberConstraint } from "../../../../utils/dto.utils"
 import { BackupType } from "../../types/backup-common.type"
 import { BackupRegistRequestBody } from "../../types/backup-regist.type"
-import { AutoStartType } from "../../../../types/common/job"
-import { EncryptionType } from "../../../../types/common/encryption"
-import { CompressionType } from "../../../../types/common/compression"
 
 /**
  * 중첩 검증을 위한 별도 클래스
  */
-class RepositoryDto {
+class RepositoryDTO {
   @IsNotEmpty({ message: "repository.id가 누락되었습니다" })
   @IsNumber({}, { message: "repository.id는 숫자만 가능 합니다" })
   id!: number
@@ -78,9 +78,9 @@ export class BackupRegistBodyDTO implements BackupRegistRequestBody {
 
   //  작업 사용 레포지토리
   @ValidateNested({ message: "repository 객체의 형식이 올바르지 않습니다" })
-  @Type(() => RepositoryDto)
+  @Type(() => RepositoryDTO)
   @IsNotEmpty({ message: "repository가 누락되었습니다" })
-  repository!: RepositoryDto
+  repository!: RepositoryDTO
 
   //  선택
   @IsOptional()

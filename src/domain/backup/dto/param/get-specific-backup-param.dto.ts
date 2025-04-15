@@ -4,7 +4,7 @@
 
 import { IsNotEmpty, IsString } from "class-validator"
 
-export class SpecificBackupParamDTO {
+export class SpecificBackupGetParamDTO {
   @IsString()
   @IsNotEmpty({ message: "Backup 식별자는 필수입니다" })
   identifier!: string

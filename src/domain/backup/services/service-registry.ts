@@ -4,7 +4,9 @@
 
 import { serverPartitionService, serverService } from "../../server/services/service-registry"
 import { zdmRepositoryService, zdmService } from "../../zdm/services/service-registry"
+import { BackupHistoryRepository } from "../repositories/backup-history"
 import { BackupInfoRepository } from "../repositories/backup-info.repository"
+import { BackupLogRepository } from "../repositories/backup-log-event"
 import { BackupRepository } from "../repositories/backup.repository"
 import { BackupDeleteService } from "./backup-delete.service"
 import { BackupRegistService } from "./backup-regist.service"
@@ -15,6 +17,8 @@ import { BackupService } from "./backup.service"
  */
 const backupRepository = new BackupRepository()
 const backupInfoRepository = new BackupInfoRepository()
+const backupLogRepository = new BackupLogRepository()
+const backupHistoryRepository = new BackupHistoryRepository()
 
 /**
  * 서비스 인스턴스 생성 및 의존성 주입
@@ -37,4 +41,6 @@ export const backupRegistService = new BackupRegistService({
 export const backupDeleteService = new BackupDeleteService({
   backupRepository,
   backupInfoRepository,
+  backupLogRepository,
+  backupHistoryRepository
 })

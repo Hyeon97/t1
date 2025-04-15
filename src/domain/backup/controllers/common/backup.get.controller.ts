@@ -6,8 +6,8 @@ import { asyncContextStorage } from "../../../../utils/AsyncContext"
 import { BaseController } from "../../../../utils/base/base-controller"
 import { stringToBoolean } from "../../../../utils/data-convert.utils"
 import { ContextLogger } from "../../../../utils/logger/logger.custom"
-import { BackupQueryFilterDTO } from "../../dto/query/backup-query-filter.dto"
-import { SpecificBackupFilterDTO } from "../../dto/query/specific-backup-filter.dto"
+import { BackupGetQueryDTO } from "../../dto/query/get-backup-filter.dto"
+import { SpecificBackupGetQueryDTO } from "../../dto/query/get-specific-backup-filter.dto"
 import { BackupResponseFactory } from "../../dto/response/backup-response-factory"
 import { BackupService } from "../../services/backup.service"
 import { BackupFilterOptions } from "../../types/backup-filter.type"
@@ -23,7 +23,7 @@ export class BackupController extends BaseController {
   }
 
   //  Backup 조회 옵션 추출
-  private extractFilterOptions({ query }: { query: BackupQueryFilterDTO | SpecificBackupFilterDTO }): BackupFilterOptions {
+  private extractFilterOptions({ query }: { query: BackupGetQueryDTO | SpecificBackupGetQueryDTO }): BackupFilterOptions {
     try {
       asyncContextStorage.addOrder({ component: this.controllerName, method: "extractFilterOptions", state: "start" })
       const filterOptions: BackupFilterOptions = {
@@ -38,7 +38,7 @@ export class BackupController extends BaseController {
         //  상세 정보
         detail: query.detail ?? false,
       }
-      if (query instanceof SpecificBackupFilterDTO) {
+      if (query instanceof SpecificBackupGetQueryDTO) {
         filterOptions.identifierType = query.identifierType
       }
       asyncContextStorage.addOrder({ component: this.controllerName, method: "extractFilterOptions", state: "end" })
@@ -62,7 +62,7 @@ export class BackupController extends BaseController {
       asyncContextStorage.addOrder({ component: this.controllerName, method: "getBackups", state: "start" })
 
       // 필터 옵션 추출
-      const query = req.query as unknown as BackupQueryFilterDTO
+      const query = req.query as unknown as BackupGetQueryDTO
       const filterOptions = this.extractFilterOptions({ query })
       ContextLogger.debug({ message: `적용된 필터 옵션`, meta: filterOptions })
 

@@ -1,6 +1,6 @@
 import { Router } from "express"
-import { backupController, backupRegistController } from "../controllers/controller-registry"
-import { validateBackupListQuery, validateBackupRegistBody } from "../validators/backup.validators"
+import { backupController, backupDeleteController, backupRegistController } from "../controllers/controller-registry"
+import { validateBackupDeleteQuery, validateBackupListQuery, validateBackupRegistBody } from "../validators/backup.validators"
 
 export class BackupRoutes {
   public router: Router
@@ -17,6 +17,8 @@ export class BackupRoutes {
     // this.router.get("/:identifier", validateSpecificBackupParams, validateSpecificBackupQuery, backupController.getBackup)
     //  특정 조건으로 삭제 ( 기준 : Backup name | Backup id )
     // this.router.delete("/:identifier")
+    //  Backup 작업 삭제
+    this.router.delete("/", validateBackupDeleteQuery, backupDeleteController.delete)
     //  Backup 작업 등록
     this.router.post("/", validateBackupRegistBody, backupRegistController.regist)
   }

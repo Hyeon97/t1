@@ -50,8 +50,7 @@ export class BackupRepository extends BaseRepository {
       this.resetQueryState()
       this.applyFilters({ filterOptions })
 
-      let query = `SELECT * FROM ${this.tableName}`
-      query += this.buildWhereClause()
+      const query = `SELECT * FROM ${this.tableName} ${this.buildWhereClause()}`
       const result = await this.executeQuery<BackupTable[]>({ sql: query, params: this.params, request: `${this.repositoryName}.findAll` })
 
       asyncContextStorage.addOrder({ component: this.repositoryName, method: "findAll", state: "end" })
@@ -140,7 +139,7 @@ export class BackupRepository extends BaseRepository {
       return this.handleRepositoryError({
         error,
         method: "insertBackup",
-        message: "[Backup 정보 추가] - 오류가 발생했습니다",
+        message: "[Backup 작업 정보 추가] - 오류가 발생했습니다",
       })
     }
   }
@@ -186,58 +185,82 @@ export class BackupRepository extends BaseRepository {
   }
 
   /**
-   * Backup 작업 삭제
+   * Backup 작업 삭제 ( By ID )
    */
-  async deleteBackup({ id, transaction }: { id: number; transaction: TransactionManager }): Promise<boolean> {
+  async deleteById({ id, transaction }: { id: number; transaction: TransactionManager }): Promise<ResultSetHeader> {
     try {
       asyncContextStorage.addRepository({ name: this.repositoryName })
-      asyncContextStorage.addOrder({ component: this.repositoryName, method: "deleteBackup", state: "start" })
+      asyncContextStorage.addOrder({ component: this.repositoryName, method: "deleteById", state: "start" })
 
       const result = await this.delete({
-        whereCondition: "nID = ?",
-        whereParams: [id],
+        data: { nID: id },
         transaction,
-        request: `${this.repositoryName}.deleteBackup`,
+        request: `${this.repositoryName}.deleteById`,
       })
 
-      asyncContextStorage.addOrder({ component: this.repositoryName, method: "deleteBackup", state: "end" })
+      asyncContextStorage.addOrder({ component: this.repositoryName, method: "deleteById", state: "end" })
       return result
     } catch (error) {
       return this.handleRepositoryError({
         error,
-        method: "deleteBackup",
-        message: `[Backup 작업 삭제(단일)] - 오류가 발생했습니다`,
+        method: "deleteById",
+        message: `[Backup 작업 정보 삭제(단일)] - 오류가 발생했습니다`,
       })
     }
   }
 
   /**
-   * 여러 Backup 작업 삭제
+   * Backup 작업 삭제 ( by jobName )
    */
-  async deleteBackupByIds({ ids, transaction }: { ids: number[]; transaction: TransactionManager }): Promise<boolean> {
+  async deleteByJobName({ jobName, transaction }: { jobName: string; transaction: TransactionManager }): Promise<ResultSetHeader> {
     try {
       asyncContextStorage.addRepository({ name: this.repositoryName })
-      asyncContextStorage.addOrder({ component: this.repositoryName, method: "deleteBackupByIds", state: "start" })
+      asyncContextStorage.addOrder({ component: this.repositoryName, method: "deleteByJobName", state: "start" })
 
-      if (ids.length === 0) {
-        return false
-      }
-      const placeholders = ids.map(() => "?").join(",")
       const result = await this.delete({
-        whereCondition: `nID IN (${placeholders})`,
-        whereParams: ids,
+        data: { sJobName: jobName },
         transaction,
-        request: `${this.repositoryName}.deleteBackupByIds`,
+        request: `${this.repositoryName}.deleteByJobName`,
       })
 
-      asyncContextStorage.addOrder({ component: this.repositoryName, method: "deleteBackupByIds", state: "end" })
+      asyncContextStorage.addOrder({ component: this.repositoryName, method: "deleteByJobName", state: "end" })
       return result
     } catch (error) {
       return this.handleRepositoryError({
         error,
-        method: "deleteBackupByIds",
-        message: `[Backup 작업 삭제(다중중)] - 오류가 발생했습니다`,
+        method: "deleteByJobName",
+        message: `[Backup 작업 정보 삭제(단일)] - 오류가 발생했습니다`,
       })
     }
   }
+
+  // /**
+  //  * 여러 Backup 작업 삭제
+  //  */
+  // async deleteBackupByIds({ ids, transaction }: { ids: number[]; transaction: TransactionManager }): Promise<boolean> {
+  //   try {
+  //     asyncContextStorage.addRepository({ name: this.repositoryName })
+  //     asyncContextStorage.addOrder({ component: this.repositoryName, method: "deleteBackupByIds", state: "start" })
+
+  //     if (ids.length === 0) {
+  //       return false
+  //     }
+  //     const placeholders = ids.map(() => "?").join(",")
+  //     const result = await this.delete({
+  //       whereCondition: `nID IN (${placeholders})`,
+  //       whereParams: ids,
+  //       transaction,
+  //       request: `${this.repositoryName}.deleteBackupByIds`,
+  //     })
+
+  //     asyncContextStorage.addOrder({ component: this.repositoryName, method: "deleteBackupByIds", state: "end" })
+  //     return result
+  //   } catch (error) {
+  //     return this.handleRepositoryError({
+  //       error,
+  //       method: "deleteBackupByIds",
+  //       message: `[Backup 작업 삭제(다중중)] - 오류가 발생했습니다`,
+  //     })
+  //   }
+  // }
 }

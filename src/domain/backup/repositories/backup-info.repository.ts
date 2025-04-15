@@ -1,13 +1,13 @@
 import { ResultSetHeader } from "mysql2/promise"
 import { TransactionManager } from "../../../database/connection"
 import { RepositoryConnectionTypeMap } from "../../../types/common/repository"
+import { asyncContextStorage } from "../../../utils/AsyncContext"
 import { BaseRepository, SqlFieldOption } from "../../../utils/base/base-repository"
 import { ContextLogger } from "../../../utils/logger/logger.custom"
 import { BackupTypeMap } from "../types/backup-common.type"
 import { BackupFilterOptions } from "../types/backup-filter.type"
 import { BackupInfoTableInput } from "../types/backup-regist.type"
 import { BackupInfoTable } from "../types/db/job-backup-info"
-import { asyncContextStorage } from "../../../utils/AsyncContext"
 
 export class BackupInfoRepository extends BaseRepository {
   constructor() {
@@ -138,6 +138,31 @@ export class BackupInfoRepository extends BaseRepository {
         error,
         method: "insertBackupInfo",
         message: "[Backup Info 정보 추가] - 오류가 발생했습니다",
+      })
+    }
+  }
+
+  /**
+   * Backup info 작업 삭제 ( by jobName )
+   */
+  async deleteByJobName({ jobName, transaction }: { jobName: string; transaction: TransactionManager }): Promise<ResultSetHeader> {
+    try {
+      asyncContextStorage.addRepository({ name: this.repositoryName })
+      asyncContextStorage.addOrder({ component: this.repositoryName, method: "deleteByJobName", state: "start" })
+
+      const result = await this.delete({
+        data: { sJobName: jobName },
+        transaction,
+        request: `${this.repositoryName}.deleteByJobName`,
+      })
+
+      asyncContextStorage.addOrder({ component: this.repositoryName, method: "deleteByJobName", state: "end" })
+      return result
+    } catch (error) {
+      return this.handleRepositoryError({
+        error,
+        method: "deleteByJobName",
+        message: `[Backup Info 작업 정보 삭제(단일)] - 오류가 발생했습니다`,
       })
     }
   }

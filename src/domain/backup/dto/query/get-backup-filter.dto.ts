@@ -8,7 +8,7 @@ import { RepositoryType } from "../../../../types/common/repository"
 import { BackupType } from "../../types/backup-common.type"
 import { BackupFilterOptions } from "../../types/backup-filter.type"
 
-export class BackupQueryFilterDTO implements BackupFilterOptions {
+export class BackupGetQueryDTO implements BackupFilterOptions {
   //  필터 옵션
   @IsOptional()
   @IsIn(["full", "inc", "smart"], { message: "mode는 'full', 'inc', 'smart'만 가능합니다" })

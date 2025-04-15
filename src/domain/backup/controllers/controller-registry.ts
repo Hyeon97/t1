@@ -2,7 +2,8 @@
 //  Backup Controller 선언 및 관리  //
 /////////////////////////////////////
 
-import { backupRegistService, backupService } from "../services/service-registry"
+import { backupDeleteService, backupRegistService, backupService } from "../services/service-registry"
+import { BackupDeleteController } from "./common/backup.delete.controller"
 import { BackupController } from "./common/backup.get.controller"
 import { BackupRegistController } from "./common/backup.regist.controller"
 
@@ -13,3 +14,5 @@ import { BackupRegistController } from "./common/backup.regist.controller"
 export const backupController = new BackupController({ backupService })
 //  Backup 정보 등록 Controller
 export const backupRegistController = new BackupRegistController({ backupService, backupRegistService })
+//  Backup 정보 삭제 Controller
+export const backupDeleteController = new BackupDeleteController({ backupDeleteService })

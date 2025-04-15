@@ -4,9 +4,9 @@
 
 import { IsIn } from "class-validator"
 import { BackupSearchType } from "../../types/backup-common.type"
-import { BackupQueryFilterDTO } from "./backup-query-filter.dto"
+import { BackupGetQueryDTO } from "./get-backup-filter.dto"
 
-export class SpecificBackupFilterDTO extends BackupQueryFilterDTO {
+export class SpecificBackupGetQueryDTO extends BackupGetQueryDTO {
   //  식별자
   @IsIn(["name", "id", "serverName"], { message: 'identifierType는 필수이며 값은 "name", "serverName", "id"만 가능합니다' })
   identifierType!: BackupSearchType
