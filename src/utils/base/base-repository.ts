@@ -106,6 +106,34 @@ export class SqlBuilder {
   }
 
   /**
+   * Delete 쿼리 생성
+   */
+  buildDelete(tableName: string): { sql: string; params: any[] } {
+    const fieldParts: string[] = []
+    const params: any[] = []
+
+    // 일반 필드 처리
+    this.fields.forEach((value, name) => {
+      if (!this.excludedFields.has(name) && value !== undefined) {
+        fieldParts.push(`${name} = ?`)
+        params.push(value)
+      }
+    })
+
+    // Raw SQL 필드 처리
+    this.rawFields.forEach((rawSql, name) => {
+      if (!this.excludedFields.has(name)) {
+        fieldParts.push(`${name} = ${rawSql}`)
+      }
+    })
+
+    return {
+      sql: `DELETE FROM ${tableName} WHERE ${fieldParts.join(", ")}`,
+      params,
+    }
+  }
+
+  /**
    * UPDATE 쿼리 생성
    */
   buildUpdate(tableName: string, whereCondition: string, whereParams: any[] = []): { sql: string; params: any[] } {
@@ -289,7 +317,7 @@ export class BaseRepository {
       const { sql, params } = sqlBuilder.buildUpdate(this.tableName, whereCondition, whereParams)
 
       // 트랜잭션 내에서 또는 일반 쿼리로 실행
-      const result = await transaction.executeQuery<{ affectedRows: number }>({
+      const result = await transaction.executeQuery<ResultSetHeader>({
         sql,
         params,
         request,
@@ -309,28 +337,61 @@ export class BaseRepository {
   /**
    * 일반적인 DELETE 쿼리 실행
    */
-  protected async delete({
-    whereCondition,
-    whereParams,
+  // protected async delete({
+  //   whereCondition,
+  //   whereParams,
+  //   transaction,
+  //   request,
+  // }: {
+  //   whereCondition: string
+  //   whereParams: any[]
+  //   transaction: TransactionManager
+  //   request: string
+  // }): Promise<boolean> {
+  //   try {
+  //     const sql = `DELETE FROM ${this.tableName} WHERE ${whereCondition}`
+
+  //     // 트랜잭션 내에서 또는 일반 쿼리로 실행
+  //     const result = await transaction.executeQuery<ResultSetHeader>({
+  //       sql,
+  //       params: whereParams,
+  //       request,
+  //     })
+
+  //     return (result?.affectedRows || 0) > 0
+  //   } catch (error) {
+  //     const method = request.split(".").pop() || "delete"
+  //     return this.handleRepositoryError({
+  //       error,
+  //       method,
+  //       message: `${this.repositoryName} 데이터 삭제 중 오류가 발생했습니다`,
+  //     })
+  //   }
+  // }
+  protected async delete<T extends Record<string, any>>({
+    data,
+    options,
     transaction,
     request,
   }: {
-    whereCondition: string
-    whereParams: any[]
+    data: T
+    options?: Record<string, SqlFieldOption>
     transaction: TransactionManager
     request: string
-  }): Promise<boolean> {
+  }): Promise<ResultSetHeader> {
     try {
-      const sql = `DELETE FROM ${this.tableName} WHERE ${whereCondition}`
+      // const sql = `DELETE FROM ${this.tableName} WHERE ${whereCondition}`
+      const sqlBuilder = this.getSqlBuilder({ data, options })
+      const { sql, params } = sqlBuilder.buildDelete(this.tableName)
 
       // 트랜잭션 내에서 또는 일반 쿼리로 실행
-      const result = await transaction.executeQuery<{ affectedRows: number }>({
+      const result = await transaction.executeQuery<ResultSetHeader>({
         sql,
-        params: whereParams,
+        params,
         request,
       })
 
-      return (result?.affectedRows || 0) > 0
+      return result
     } catch (error) {
       const method = request.split(".").pop() || "delete"
       return this.handleRepositoryError({
