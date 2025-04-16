@@ -46,8 +46,8 @@ export class BackupController extends BaseController {
     } catch (error) {
       throw ControllerError.badRequest(ControllerError, {
         method: "extractFilterOptions",
-        message: "[Backup 조회 필터 옵션 추출] - 오류가 발생했습니다",
-        cause: error,
+        message: "[Backup 조회 필터 옵션 추출] - 필터 옵션 확인필요",
+        error,
       })
     }
   }
@@ -82,7 +82,7 @@ export class BackupController extends BaseController {
         next,
         error,
         method: "getBackups",
-        message: "[Backup 작업 목록 조회] - 오류가 발생했습니다",
+        message: "[Backup 작업 목록 조회] - 예기치 못한 오류 발생",
       })
     }
   }

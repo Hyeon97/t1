@@ -1,10 +1,10 @@
-import { BaseError, ErrorCode, ErrorLayer, ErrorOptions, ErrorParams } from "."
+import { ErrorCode, ErrorLayer, ErrorOptions, ErrorParams, NewError } from "."
 
 /**
  * 레거시 호환성을 위한 ApiError 클래스
  * BaseError를 상속하여 새 에러 시스템과 통합
  */
-export class ApiError extends BaseError {
+export class ApiError extends NewError {
   details?: any
 
   constructor({ name, statusCode, message, errorCode, details }: ErrorOptions) {
@@ -22,55 +22,55 @@ export class ApiError extends BaseError {
 
   // 일반적인 에러 팩토리 메서드들 - 레거시 호환성 유지
   // 400 Bad Request
-  static badRequest<T extends BaseError = ApiError>(
+  static badRequest<T extends NewError = ApiError>(
     constructor: new (params: ErrorParams) => T = ApiError as any,
     params: Omit<ErrorParams, "errorCode" | "statusCode"> = { layer: ErrorLayer.CONTROLLER, method: "apiRequest", message: "" }
   ): T {
-    return BaseError.badRequest(constructor, {
+    return NewError.badRequest(constructor, {
       ...params,
       layer: params.layer || ErrorLayer.CONTROLLER,
     })
   }
 
   // 401 Unauthorized
-  static unauthorized<T extends BaseError = ApiError>(
+  static unauthorized<T extends NewError = ApiError>(
     constructor: new (params: ErrorParams) => T = ApiError as any,
     params: Omit<ErrorParams, "errorCode" | "statusCode"> = { layer: ErrorLayer.CONTROLLER, method: "apiRequest", message: "" }
   ): T {
-    return BaseError.unauthorized(constructor, {
+    return NewError.unauthorized(constructor, {
       ...params,
       layer: params.layer || ErrorLayer.CONTROLLER,
     })
   }
 
   // 403 Forbidden
-  static forbidden<T extends BaseError = ApiError>(
+  static forbidden<T extends NewError = ApiError>(
     constructor: new (params: ErrorParams) => T = ApiError as any,
     params: Omit<ErrorParams, "errorCode" | "statusCode"> = { layer: ErrorLayer.CONTROLLER, method: "apiRequest", message: "" }
   ): T {
-    return BaseError.forbidden(constructor, {
+    return NewError.forbidden(constructor, {
       ...params,
       layer: params.layer || ErrorLayer.CONTROLLER,
     })
   }
 
   // 404 Not Found
-  static notFound<T extends BaseError = ApiError>(
+  static notFound<T extends NewError = ApiError>(
     constructor: new (params: ErrorParams) => T = ApiError as any,
     params: Omit<ErrorParams, "errorCode" | "statusCode"> = { layer: ErrorLayer.CONTROLLER, method: "apiRequest", message: "" }
   ): T {
-    return BaseError.notFound(constructor, {
+    return NewError.notFound(constructor, {
       ...params,
       layer: params.layer || ErrorLayer.CONTROLLER,
     })
   }
 
   // 405 Method Not Allowed
-  static methodNotAllowed<T extends BaseError = ApiError>(
+  static methodNotAllowed<T extends NewError = ApiError>(
     constructor: new (params: ErrorParams) => T = ApiError as any,
     params: Omit<ErrorParams, "errorCode" | "statusCode"> = { layer: ErrorLayer.CONTROLLER, method: "apiRequest", message: "" }
   ): T {
-    return BaseError.createFrom(constructor, {
+    return NewError.createFrom(constructor, {
       ...params,
       layer: params.layer || ErrorLayer.CONTROLLER,
       errorCode: ErrorCode.METHOD_NOT_ALLOWED,
@@ -79,11 +79,11 @@ export class ApiError extends BaseError {
   }
 
   // 409 Conflict
-  static conflict<T extends BaseError = ApiError>(
+  static conflict<T extends NewError = ApiError>(
     constructor: new (params: ErrorParams) => T = ApiError as any,
     params: Omit<ErrorParams, "errorCode" | "statusCode"> = { layer: ErrorLayer.CONTROLLER, method: "apiRequest", message: "" }
   ): T {
-    return BaseError.createFrom(constructor, {
+    return NewError.createFrom(constructor, {
       ...params,
       layer: params.layer || ErrorLayer.CONTROLLER,
       errorCode: ErrorCode.CONFLICT,
@@ -92,22 +92,22 @@ export class ApiError extends BaseError {
   }
 
   // 500 Internal Server Error
-  static internal<T extends BaseError = ApiError>(
+  static internal<T extends NewError = ApiError>(
     constructor: new (params: ErrorParams) => T = ApiError as any,
     params: Omit<ErrorParams, "errorCode" | "statusCode"> = { layer: ErrorLayer.CONTROLLER, method: "apiRequest", message: "" }
   ): T {
-    return BaseError.internalError(constructor, {
+    return NewError.internalError(constructor, {
       ...params,
       layer: params.layer || ErrorLayer.CONTROLLER,
     })
   }
 
   // 503 Service Unavailable
-  static serviceUnavailable<T extends BaseError = ApiError>(
+  static serviceUnavailable<T extends NewError = ApiError>(
     constructor: new (params: ErrorParams) => T = ApiError as any,
     params: Omit<ErrorParams, "errorCode" | "statusCode"> = { layer: ErrorLayer.CONTROLLER, method: "apiRequest", message: "" }
   ): T {
-    return BaseError.createFrom(constructor, {
+    return NewError.createFrom(constructor, {
       ...params,
       layer: params.layer || ErrorLayer.CONTROLLER,
       errorCode: ErrorCode.SERVICE_UNAVAILABLE,
@@ -116,21 +116,21 @@ export class ApiError extends BaseError {
   }
 
   // 비즈니스 도메인 에러 팩토리 메서드
-  static validationError<T extends BaseError = ApiError>(
+  static validationError<T extends NewError = ApiError>(
     constructor: new (params: ErrorParams) => T = ApiError as any,
     params: Omit<ErrorParams, "errorCode" | "statusCode"> = { layer: ErrorLayer.CONTROLLER, method: "apiRequest", message: "" }
   ): T {
-    return BaseError.validationError(constructor, {
+    return NewError.validationError(constructor, {
       ...params,
       layer: params.layer || ErrorLayer.CONTROLLER,
     })
   }
 
-  static resourceExists<T extends BaseError = ApiError>(
+  static resourceExists<T extends NewError = ApiError>(
     constructor: new (params: ErrorParams) => T = ApiError as any,
     params: Omit<ErrorParams, "errorCode" | "statusCode"> = { layer: ErrorLayer.CONTROLLER, method: "apiRequest", message: "" }
   ): T {
-    return BaseError.createFrom(constructor, {
+    return NewError.createFrom(constructor, {
       ...params,
       layer: params.layer || ErrorLayer.CONTROLLER,
       errorCode: ErrorCode.RESOURCE_EXISTS,
@@ -138,11 +138,11 @@ export class ApiError extends BaseError {
     })
   }
 
-  static databaseError<T extends BaseError = ApiError>(
+  static databaseError<T extends NewError = ApiError>(
     constructor: new (params: ErrorParams) => T = ApiError as any,
     params: Omit<ErrorParams, "errorCode" | "statusCode"> = { layer: ErrorLayer.CONTROLLER, method: "apiRequest", message: "" }
   ): T {
-    return BaseError.databaseError(constructor, {
+    return NewError.databaseError(constructor, {
       ...params,
       layer: params.layer || ErrorLayer.CONTROLLER,
     })

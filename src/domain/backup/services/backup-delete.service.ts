@@ -52,11 +52,13 @@ export class BackupDeleteService extends BaseService {
           // 필수 작업 세트의 결과가 둘다 성공이 아니면 error 리턴
           const mainFailures = mainDeletions.filter(result => result.status === 'rejected')
           if (mainFailures.length > 0) {
-            console.dir(mainFailures[0].reason, { depth: null })
+            // console.log('mainFailures[0].reason')
+            // console.dir(mainFailures[0].reason, { depth: null })
 
             // throw new Error(`필수 백업 데이터 삭제 실패: ${errors.join(', ')}`)
-            const message = ''
-            throw ServiceError.deletionError({ method: 'deleteByJobName', message, cause: mainFailures[0].reason, })
+            // const message = mainFailures[0].reason.message
+            const message = 'Backup Data 삭제 실패'
+            throw ServiceError.deletionError({ method: 'deleteByJobName', message, error: mainFailures[0].reason, })
           }
 
           // 나머지 작업들 (독립적으로 실행될 수 있음)

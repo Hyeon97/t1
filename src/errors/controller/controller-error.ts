@@ -1,11 +1,11 @@
-import { BaseError, ErrorCode, ErrorLayer, ErrorParams } from ".."
+import { ErrorCode, ErrorLayer, ErrorParams, NewError } from ".."
 import { ServiceError } from "../service/service-error"
 import { UtilityError } from "../utility/utility-error"
 
 /**
  * 컨트롤러 계층의 에러를 처리하는 클래스
  */
-export class ControllerError extends BaseError {
+export class ControllerError extends NewError {
   constructor(params: ErrorParams) {
     super({
       ...params,
@@ -13,99 +13,100 @@ export class ControllerError extends BaseError {
     })
   }
 
-  // 일반 에러를 현재 타입으로 변환
-  static fromError<T extends BaseError = ControllerError>(
+  /**
+   * Controller 계층에서 정의되지 않은 일반 Error 발생시
+   * 헤당 Error를 Controller 계층 Error 로 변환
+   */
+  static fromError<T extends NewError = ControllerError>(
     error: unknown,
-    params: Omit<ErrorParams, "layer" | "errorCode" | "statusCode" | "cause">
+    params: Omit<ErrorParams, "layer" | "errorCode" | "statusCode">
   ): T {
-    return BaseError.fromError(ControllerError as any, error, {
+    return NewError.fromError(ControllerError as any, error, {
       ...params,
       layer: ErrorLayer.CONTROLLER,
       errorCode: ErrorCode.INTERNAL_ERROR,
+      statusCode: 500
     }) as unknown as T
   }
 
   // 공통 에러 타입들 - BaseError의 팩토리 메서드 활용
 
   // 잘못된 요청
-  static badRequest<T extends BaseError = ControllerError>(
+  static badRequest<T extends NewError = ControllerError>(
     constructor: new (params: ErrorParams) => T = ControllerError as any,
-    params: Omit<ErrorParams, "errorCode" | "statusCode" | "layer"> = {
-      method: "",
-      message: "",
-    }
+    params: Omit<ErrorParams, "errorCode" | "statusCode" | "layer">
   ): T {
-    return BaseError.badRequest(constructor, {
+    return NewError.badRequest(constructor, {
       ...params,
       layer: ErrorLayer.CONTROLLER,
     })
   }
 
   // 권한 없음
-  static unauthorized<T extends BaseError = ControllerError>(
+  static unauthorized<T extends NewError = ControllerError>(
     constructor: new (params: ErrorParams) => T = ControllerError as any,
     params: Omit<ErrorParams, "errorCode" | "statusCode" | "layer"> = {
       method: "",
       message: "",
     }
   ): T {
-    return BaseError.unauthorized(constructor, {
+    return NewError.unauthorized(constructor, {
       ...params,
       layer: ErrorLayer.CONTROLLER,
     })
   }
 
   // 유효성 검증 오류
-  static validationError<T extends BaseError = ControllerError>(
+  static validationError<T extends NewError = ControllerError>(
     constructor: new (params: ErrorParams) => T = ControllerError as any,
     params: Omit<ErrorParams, "errorCode" | "statusCode" | "layer"> = {
       method: "",
       message: "",
     }
   ): T {
-    return BaseError.validationError(constructor, {
+    return NewError.validationError(constructor, {
       ...params,
       layer: ErrorLayer.CONTROLLER,
     })
   }
 
   // 비즈니스 규칙 오류
-  static businessRuleError<T extends BaseError = ControllerError>(
+  static businessRuleError<T extends NewError = ControllerError>(
     constructor: new (params: ErrorParams) => T = ControllerError as any,
     params: Omit<ErrorParams, "errorCode" | "statusCode" | "layer"> = {
       method: "",
       message: "",
     }
   ): T {
-    return BaseError.businessRuleViolation(constructor, {
+    return NewError.businessRuleViolation(constructor, {
       ...params,
       layer: ErrorLayer.CONTROLLER,
     })
   }
 
   // 리소스 찾기 실패
-  static resourceNotFoundError<T extends BaseError = ControllerError>(
+  static resourceNotFoundError<T extends NewError = ControllerError>(
     constructor: new (params: ErrorParams) => T = ControllerError as any,
     params: Omit<ErrorParams, "errorCode" | "statusCode" | "layer"> = {
       method: "",
       message: "",
     }
   ): T {
-    return BaseError.notFound(constructor, {
+    return NewError.notFound(constructor, {
       ...params,
       layer: ErrorLayer.CONTROLLER,
     })
   }
 
   // 내부 오류
-  static internalError<T extends BaseError = ControllerError>(
+  static internalError<T extends NewError = ControllerError>(
     constructor: new (params: ErrorParams) => T = ControllerError as any,
     params: Omit<ErrorParams, "errorCode" | "statusCode" | "layer"> = {
       method: "",
       message: "",
     }
   ): T {
-    return BaseError.internalError(constructor, {
+    return NewError.internalError(constructor, {
       ...params,
       layer: ErrorLayer.CONTROLLER,
     })
@@ -123,42 +124,42 @@ export class ControllerError extends BaseError {
         return ControllerError.resourceNotFoundError(ControllerError, {
           method,
           message: `요청한 리소스를 찾을 수 없습니다`,
-          cause: error,
+          error,
         })
 
       case ErrorCode.VALIDATION_ERROR:
         return ControllerError.validationError(ControllerError, {
           method,
           message: `요청 데이터 유효성 검증 실패`,
-          cause: error,
+          error,
         })
 
       case ErrorCode.BUSINESS_RULE_VIOLATION:
         return ControllerError.badRequest(ControllerError, {
           method,
           message: `비즈니스 규칙 위반`,
-          cause: error,
+          error,
         })
 
       case ErrorCode.UNAUTHORIZED:
         return ControllerError.unauthorized(ControllerError, {
           method,
           message: `인증 실패`,
-          cause: error,
+          error,
         })
 
       // case ErrorCode.FORBIDDEN:
       //   return ControllerError.forbidden(ControllerError, {
       //     method,
       //     message: `권한 없음`,
-      //     cause: error,
+      //     error,
       //   })
 
       default:
         return ControllerError.internalError(ControllerError, {
           method,
           message: `서버 내부 오류가 발생했습니다`,
-          cause: error,
+          error,
           metadata: { originalErrorCode },
         })
     }
@@ -177,28 +178,28 @@ export class ControllerError extends BaseError {
         return ControllerError.unauthorized(ControllerError, {
           method,
           message: `인증 중 오류 발생: ${error.message}`,
-          cause: error,
+          error,
         })
 
       case ErrorCode.VALIDATION_ERROR:
         return ControllerError.validationError(ControllerError, {
           method,
           message: error.message,
-          cause: error,
+          error,
         })
 
       case ErrorCode.NOT_FOUND:
         return ControllerError.resourceNotFoundError(ControllerError, {
           method,
           message: error.message,
-          cause: error,
+          error,
         })
 
       default:
         return ControllerError.internalError(ControllerError, {
           method,
           message: `Utility 작업 중 오류 발생: ${error.message}`,
-          cause: error,
+          error,
           metadata: { originalErrorCode },
         })
     }

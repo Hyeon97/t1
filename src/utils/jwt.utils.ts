@@ -1,8 +1,8 @@
 import jwt from "jsonwebtoken"
+import { configManager } from "../config/config-manager"
 import { CreateTokenData, TokenVerifySuccessResult } from "../domain/auth/interface/token"
 import { ErrorCode, ErrorLayer } from "../errors"
 import { UtilityError } from "../errors/utility/utility-error"
-import { configManager } from "../config/config-manager"
 import { logger } from "./logger/logger.util"
 
 export class JwtUtil {
@@ -43,7 +43,7 @@ export class JwtUtil {
       throw UtilityError.jwtSignError({
         method: "generateToken",
         message: "[토큰 생성] - 오류가 발생했습니다",
-        cause: error,
+        error,
         metadata: { payloadType: typeof payload },
       })
     }
@@ -64,14 +64,14 @@ export class JwtUtil {
           method: "verifyToken",
           message: "[토큰 검증] - 만료된 Token",
           errorCode: ErrorCode.JWT_EXPIRED,
-          cause: error,
+          error,
         })
       } else if (error instanceof jwt.JsonWebTokenError) {
         throw UtilityError.jwtVerifyError({
           method: "verifyToken",
           message: "[토큰 검증] - 유효하지 않은 Token",
           errorCode: ErrorCode.JWT_INVALID,
-          cause: error,
+          error,
         })
       }
       // 일반적인 에러 처리
@@ -80,7 +80,7 @@ export class JwtUtil {
         message: "[토큰 검증] - 검증 실패",
         layer: ErrorLayer.UTILITY,
         errorCode: ErrorCode.JWT_INVALID,
-        cause: error,
+        error,
         statusCode: 502,
       })
     }

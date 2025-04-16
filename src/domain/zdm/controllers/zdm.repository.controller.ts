@@ -2,13 +2,13 @@ import { NextFunction, Response } from "express"
 import { ControllerError } from "../../../errors/controller/controller-error"
 import { ExtendedRequest } from "../../../types/common/req.types"
 import { ApiUtils } from "../../../utils/api/api.utils"
+import { asyncContextStorage } from "../../../utils/AsyncContext"
 import { BaseController } from "../../../utils/base/base-controller"
 import { ContextLogger } from "../../../utils/logger/logger.custom"
 import { ZdmRepositoryFilterDTO } from "../dto/query/zdm-repository/zdm-repository-query-filter.dto"
 import { ZdmRepositoryInfoDTO } from "../dto/repository/zdm.repository.dto"
 import { ZdmRepositoryService } from "../services/zdm.repository.service"
 import { ZdmRepositoryFilterOptions } from "../types/zdm-repository/zdm-repository-filter.type"
-import { asyncContextStorage } from "../../../utils/AsyncContext"
 
 export class ZdmRepositoryController extends BaseController {
   private readonly zdmRepositoryService: ZdmRepositoryService
@@ -38,7 +38,7 @@ export class ZdmRepositoryController extends BaseController {
       throw ControllerError.badRequest(ControllerError, {
         method: "extractFilterOptions",
         message: "[ZDM 필터 옵션 추출] - 오류가 발생했습니다",
-        cause: error,
+        error,
       })
     }
   }

@@ -1,8 +1,8 @@
 import mysql from "mysql2/promise"
-import { DatabaseError } from "../errors/database/database-error"
-import { ContextLogger } from "../utils/logger/logger.custom"
-import { asyncContextStorage } from "../utils/AsyncContext"
 import { configManager } from "../config/config-manager"
+import { DatabaseError } from "../errors/database/database-error"
+import { asyncContextStorage } from "../utils/AsyncContext"
+import { ContextLogger } from "../utils/logger/logger.custom"
 import { logger } from "../utils/logger/logger.util"
 
 /**
@@ -67,7 +67,7 @@ export class DatabasePool {
       throw DatabaseError.connectionError({
         method: "testConnection",
         message: `데이터베이스 연결 실패`,
-        cause: error,
+        error,
       })
     } finally {
       if (connection) {
@@ -100,7 +100,7 @@ export class DatabasePool {
       throw DatabaseError.connectionError({
         method: "getConnection",
         message: `데이터베이스 연결 가져오기 실패: ${msg}`,
-        cause: error,
+        error,
       })
     }
   }
@@ -162,7 +162,7 @@ export class DatabaseOperations {
               method: "executeQuery",
               request,
               message: `무결성 제약 조건 위반`,
-              cause: error,
+              error,
               query: sql,
               params,
             })
@@ -172,7 +172,7 @@ export class DatabaseOperations {
               method: "executeQuery",
               request,
               message: `참조 무결성 위반`,
-              cause: error,
+              error,
               query: sql,
               params,
             })
@@ -181,7 +181,7 @@ export class DatabaseOperations {
               method: "executeQuery",
               request,
               message: `데이터베이스 접근 거부`,
-              cause: error,
+              error,
               query: sql,
             })
           case "ER_PARSE_ERROR":
@@ -190,7 +190,7 @@ export class DatabaseOperations {
               method: "executeQuery",
               request,
               message: `SQL 구문 오류`,
-              cause: error,
+              error,
               query: sql,
               params,
             })
@@ -199,7 +199,7 @@ export class DatabaseOperations {
               method: "executeQuery",
               request,
               message: `데이터베이스를 찾을 수 없음`,
-              cause: error,
+              error,
               query: sql,
             })
           case "ER_LOCK_DEADLOCK":
@@ -208,14 +208,14 @@ export class DatabaseOperations {
               method: "executeQuery",
               request,
               message: `트랜잭션 오류`,
-              cause: error,
+              error,
             })
           default:
             throw DatabaseError.queryError({
               method: "executeQuery",
               request,
               message: `쿼리 실행 오류(${error.code})`,
-              cause: error,
+              error,
               query: sql,
               params,
             })
@@ -232,7 +232,7 @@ export class DatabaseOperations {
         method: "executeQuery",
         request,
         message: `쿼리 실행 오류`,
-        cause: error,
+        error,
       })
     }
   }
@@ -292,7 +292,7 @@ export class TransactionManager {
       throw DatabaseError.transactionError({
         method: "begin",
         message: `트랜잭션 시작 실패: ${msg}`,
-        cause: error,
+        error,
       })
     }
   }
@@ -324,7 +324,7 @@ export class TransactionManager {
       throw DatabaseError.transactionError({
         method: "commit",
         message: `트랜잭션 커밋 실패: ${msg}`,
-        cause: error,
+        error,
       })
     } finally {
       this.connection.release()
@@ -356,7 +356,7 @@ export class TransactionManager {
       throw DatabaseError.transactionError({
         method: "rollback",
         message: `트랜잭션 롤백 실패: ${msg}`,
-        cause: error,
+        error,
       })
     } finally {
       this.connection.release()

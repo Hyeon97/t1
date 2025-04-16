@@ -7,7 +7,7 @@
 export * from './error-types'
 
 // 기반 클래스
-export { BaseError } from './base/base-error'
+export { NewError } from './base/new-error'
 
 // 계층별 에러 클래스
 export { ControllerError } from './controller/controller-error'

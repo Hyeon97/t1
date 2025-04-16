@@ -1,9 +1,9 @@
-import { BaseError, ErrorCode, ErrorLayer, ErrorParams } from ".."
+import { ErrorCode, ErrorLayer, ErrorParams, NewError } from ".."
 
 /**
  * 유틸리티 계층의 에러를 처리하는 클래스
  */
-export class UtilityError extends BaseError {
+export class UtilityError extends NewError {
   constructor(params: ErrorParams) {
     super({
       ...params,
@@ -12,7 +12,7 @@ export class UtilityError extends BaseError {
   }
 
   // 일반 에러를 Utility 에러로 변환하는 팩토리 메서드
-  static fromError<T extends BaseError = UtilityError>(
+  static fromError<T extends NewError = UtilityError>(
     error: unknown,
     params: Omit<ErrorParams, "errorCode" | "statusCode" | "cause"> & {
       method: string
@@ -20,7 +20,7 @@ export class UtilityError extends BaseError {
       layer?: ErrorLayer
     }
   ): T {
-    return BaseError.fromError(UtilityError as any, error, {
+    return NewError.fromError(UtilityError as any, error, {
       ...params,
       layer: ErrorLayer.UTILITY,
       errorCode: ErrorCode.INTERNAL_ERROR,
@@ -30,70 +30,70 @@ export class UtilityError extends BaseError {
   // 공통 에러 타입들 - BaseError의 팩토리 메서드 활용
 
   // 잘못된 요청
-  static badRequest<T extends BaseError = UtilityError>(
+  static badRequest<T extends NewError = UtilityError>(
     constructor: new (params: ErrorParams) => T = UtilityError as any,
     params: Omit<ErrorParams, "errorCode" | "statusCode" | "layer"> = {
       method: "",
       message: "",
     }
   ): T {
-    return BaseError.badRequest(constructor, {
+    return NewError.badRequest(constructor, {
       ...params,
       layer: ErrorLayer.UTILITY,
     })
   }
 
   // 권한 없음
-  static unauthorized<T extends BaseError = UtilityError>(
+  static unauthorized<T extends NewError = UtilityError>(
     constructor: new (params: ErrorParams) => T = UtilityError as any,
     params: Omit<ErrorParams, "errorCode" | "statusCode" | "layer"> = {
       method: "",
       message: "",
     }
   ): T {
-    return BaseError.unauthorized(constructor, {
+    return NewError.unauthorized(constructor, {
       ...params,
       layer: ErrorLayer.UTILITY,
     })
   }
 
   // 유효성 검증 오류
-  static validationError<T extends BaseError = UtilityError>(
+  static validationError<T extends NewError = UtilityError>(
     constructor: new (params: ErrorParams) => T = UtilityError as any,
     params: Omit<ErrorParams, "errorCode" | "statusCode" | "layer"> = {
       method: "",
       message: "",
     }
   ): T {
-    return BaseError.validationError(constructor, {
+    return NewError.validationError(constructor, {
       ...params,
       layer: ErrorLayer.UTILITY,
     })
   }
 
   // 비즈니스 규칙 오류
-  static businessRuleError<T extends BaseError = UtilityError>(
+  static businessRuleError<T extends NewError = UtilityError>(
     constructor: new (params: ErrorParams) => T = UtilityError as any,
     params: Omit<ErrorParams, "errorCode" | "statusCode" | "layer"> = {
       method: "",
       message: "",
     }
   ): T {
-    return BaseError.businessRuleViolation(constructor, {
+    return NewError.businessRuleViolation(constructor, {
       ...params,
       layer: ErrorLayer.UTILITY,
     })
   }
 
   // 리소스 찾기 실패
-  static resourceNotFoundError<T extends BaseError = UtilityError>(
+  static resourceNotFoundError<T extends NewError = UtilityError>(
     constructor: new (params: ErrorParams) => T = UtilityError as any,
     params: Omit<ErrorParams, "errorCode" | "statusCode" | "layer"> = {
       method: "",
       message: "",
     }
   ): T {
-    return BaseError.notFound(constructor, {
+    return NewError.notFound(constructor, {
       ...params,
       layer: ErrorLayer.UTILITY,
     })
@@ -106,7 +106,7 @@ export class UtilityError extends BaseError {
       message: "",
     }
   ): UtilityError {
-    return BaseError.createFrom(UtilityError, {
+    return NewError.createFrom(UtilityError, {
       ...params,
       layer: ErrorLayer.UTILITY,
       errorCode: ErrorCode.DEPENDENCY_ERROR,
@@ -121,7 +121,7 @@ export class UtilityError extends BaseError {
       message: "",
     }
   ): UtilityError {
-    return BaseError.createFrom(UtilityError, {
+    return NewError.createFrom(UtilityError, {
       ...params,
       layer: ErrorLayer.UTILITY,
       errorCode: ErrorCode.DATA_PROCESSING_ERROR,
@@ -136,7 +136,7 @@ export class UtilityError extends BaseError {
       message: "",
     }
   ): UtilityError {
-    return BaseError.createFrom(UtilityError, {
+    return NewError.createFrom(UtilityError, {
       ...params,
       layer: ErrorLayer.UTILITY,
       errorCode: ErrorCode.TRANSACTION_ERROR,
@@ -152,7 +152,7 @@ export class UtilityError extends BaseError {
       message: "",
     }
   ): UtilityError {
-    return BaseError.createFrom(UtilityError, {
+    return NewError.createFrom(UtilityError, {
       ...params,
       layer: ErrorLayer.UTILITY,
       errorCode: ErrorCode.ENV_CONFIG_ERROR,
@@ -167,7 +167,7 @@ export class UtilityError extends BaseError {
       message: "",
     }
   ): UtilityError {
-    return BaseError.createFrom(UtilityError, {
+    return NewError.createFrom(UtilityError, {
       ...params,
       layer: ErrorLayer.UTILITY,
       errorCode: ErrorCode.ENV_FILE_NOT_FOUND,
@@ -183,7 +183,7 @@ export class UtilityError extends BaseError {
       message: "",
     }
   ): UtilityError {
-    return BaseError.createFrom(UtilityError, {
+    return NewError.createFrom(UtilityError, {
       ...params,
       layer: ErrorLayer.UTILITY,
       errorCode: ErrorCode.JWT_SIGN_ERROR,
@@ -199,7 +199,7 @@ export class UtilityError extends BaseError {
       errorCode: ErrorCode.JWT_VERIFY_ERROR,
     }
   ): UtilityError {
-    return BaseError.createFrom(UtilityError, {
+    return NewError.createFrom(UtilityError, {
       ...params,
       layer: ErrorLayer.UTILITY,
       errorCode: params.errorCode || ErrorCode.JWT_VERIFY_ERROR,
@@ -214,7 +214,7 @@ export class UtilityError extends BaseError {
       message: "",
     }
   ): UtilityError {
-    return BaseError.createFrom(UtilityError, {
+    return NewError.createFrom(UtilityError, {
       ...params,
       layer: ErrorLayer.UTILITY,
       errorCode: ErrorCode.JWT_EXPIRED,
@@ -229,7 +229,7 @@ export class UtilityError extends BaseError {
       message: "",
     }
   ): UtilityError {
-    return BaseError.createFrom(UtilityError, {
+    return NewError.createFrom(UtilityError, {
       ...params,
       layer: ErrorLayer.UTILITY,
       errorCode: ErrorCode.JWT_INVALID,
@@ -245,7 +245,7 @@ export class UtilityError extends BaseError {
       message: "",
     }
   ): UtilityError {
-    return BaseError.createFrom(UtilityError, {
+    return NewError.createFrom(UtilityError, {
       ...params,
       layer: ErrorLayer.UTILITY,
       errorCode: ErrorCode.PARSING_ERROR,
@@ -260,7 +260,7 @@ export class UtilityError extends BaseError {
       message: "",
     }
   ): UtilityError {
-    return BaseError.createFrom(UtilityError, {
+    return NewError.createFrom(UtilityError, {
       ...params,
       layer: ErrorLayer.UTILITY,
       errorCode: ErrorCode.FILE_OPERATION_ERROR,

@@ -2,6 +2,7 @@ import { NextFunction, Response } from "express"
 import { ControllerError } from "../../../errors/controller/controller-error"
 import { ExtendedRequest } from "../../../types/common/req.types"
 import { ApiUtils } from "../../../utils/api/api.utils"
+import { asyncContextStorage } from "../../../utils/AsyncContext"
 import { BaseController } from "../../../utils/base/base-controller"
 import { stringToBoolean } from "../../../utils/data-convert.utils"
 import { ContextLogger } from "../../../utils/logger/logger.custom"
@@ -10,7 +11,6 @@ import { ZdmQueryFilterDTO } from "../dto/query/zdm/zdm-query-filter.dto"
 import { ZdmResponseFactory } from "../dto/response/zdm-response-factory"
 import { ZdmService } from "../services/zdm.service"
 import { ZdmFilterOptions } from "../types/zdm/zdm-filter.type"
-import { asyncContextStorage } from "../../../utils/AsyncContext"
 
 export class ZdmController extends BaseController {
   private readonly zdmService: ZdmService
@@ -50,7 +50,7 @@ export class ZdmController extends BaseController {
       throw ControllerError.badRequest(ControllerError, {
         method: "extractFilterOptions",
         message: "[ZDM 필터 옵션 추출] - 오류가 발생했습니다",
-        cause: error,
+        error,
       })
     }
   }

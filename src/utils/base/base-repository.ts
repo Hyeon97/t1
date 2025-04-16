@@ -406,21 +406,24 @@ export class BaseRepository {
    * Repository 에러 처리
    */
   protected handleRepositoryError({ error, method, message }: { error: unknown; method: string; message: string }): never {
-    // database layer에서 발생한 에러 처리
+    const application = this.repositoryName
+    // Database Layer에서 발생한 에러 처리
     if (error instanceof DatabaseError) {
       throw RepositoryError.fromDatabaseError({ error, method })
     }
-    //  repository layer에서 발생한 에러만 로깅
+    //  Repository Layer에서 발생한 에러만 로깅
     if (error instanceof Error && error instanceof RepositoryError) {
+      //  에러가 발생한 Repository Layer Application이름 주입
+      if (error?.metadata) { error.metadata.application = application }
+      //  로깅
       ContextLogger.debug({
         message: `[Repository-Layer] ${this.repositoryName}.${method}() 오류 발생`,
-        meta: {
-          error: error instanceof Error ? error.message : String(error),
-        },
+        meta: { error: error instanceof Error ? error.message : String(error), },
       })
-      //  일반 에러인 경우 Repository 에러로 변경
+      //  Repository Layer에서 발생한 정의되지 않은 오류 처리
     } else if (error instanceof Error && !(error instanceof RepositoryError)) {
-      error = RepositoryError.fromError<RepositoryError>(error, { method, message, cause: error })
+      console.log('handleRepositoryError-Error')
+      error = RepositoryError.fromError<RepositoryError>(error, { method, message, error, application })
     }
     throw error
   }

@@ -1,10 +1,10 @@
-import { BaseError, ErrorCode, ErrorLayer, ErrorParams } from ".."
+import { ErrorCode, ErrorLayer, ErrorParams, NewError } from ".."
 import { ControllerError } from "../controller/controller-error"
 
 /**
  * 검증 미들웨어 계층의 에러를 처리하는 클래스
  */
-export class ValidatorError extends BaseError {
+export class ValidatorError extends NewError {
   constructor(params: ErrorParams) {
     // 메타데이터 설정
     const enhancedMetadata = {
@@ -19,7 +19,7 @@ export class ValidatorError extends BaseError {
   }
 
   // 일반 에러를 현재 타입으로 변환
-  static fromError<T extends BaseError = ValidatorError>(error: unknown, params: Omit<ErrorParams, "errorCode" | "statusCode" | "cause">): T {
+  static fromError<T extends NewError = ValidatorError>(error: unknown, params: Omit<ErrorParams, "errorCode" | "statusCode" | "cause">): T {
     if (error instanceof ValidatorError) {
       return error as unknown as T
     } else if (error instanceof ControllerError) {
@@ -28,7 +28,7 @@ export class ValidatorError extends BaseError {
         message: error.message,
       }) as unknown as T
     } else {
-      return BaseError.fromError(ValidatorError as any, error, {
+      return NewError.fromError(ValidatorError as any, error, {
         ...params,
         layer: ErrorLayer.MIDDLEWARE,
         errorCode: ErrorCode.INTERNAL_ERROR,
@@ -37,14 +37,14 @@ export class ValidatorError extends BaseError {
   }
 
   // 유효성 검증 오류
-  static validationError<T extends BaseError = ValidatorError>(
+  static validationError<T extends NewError = ValidatorError>(
     constructor: new (params: ErrorParams) => T = ValidatorError as any,
     params: Omit<ErrorParams, "errorCode" | "statusCode" | "layer"> = {
       method: "",
       message: "",
     }
   ): T {
-    return BaseError.validationError(constructor, {
+    return NewError.validationError(constructor, {
       ...params,
       layer: ErrorLayer.MIDDLEWARE,
     })
@@ -57,7 +57,7 @@ export class ValidatorError extends BaseError {
       message: "",
     }
   ): ValidatorError {
-    return BaseError.createFrom(ValidatorError, {
+    return NewError.createFrom(ValidatorError, {
       ...params,
       message: params.message || "Token이 없습니다",
       layer: ErrorLayer.MIDDLEWARE,
@@ -73,7 +73,7 @@ export class ValidatorError extends BaseError {
       message: "",
     }
   ): ValidatorError {
-    return BaseError.createFrom(ValidatorError, {
+    return NewError.createFrom(ValidatorError, {
       ...params,
       message: params.message || "유효하지 않은 Token",
       layer: ErrorLayer.MIDDLEWARE,
@@ -89,7 +89,7 @@ export class ValidatorError extends BaseError {
       message: "",
     }
   ): ValidatorError {
-    return BaseError.createFrom(ValidatorError, {
+    return NewError.createFrom(ValidatorError, {
       ...params,
       message: params.message || "Token 만료됨",
       layer: ErrorLayer.MIDDLEWARE,
@@ -99,28 +99,28 @@ export class ValidatorError extends BaseError {
   }
 
   // 권한 없음
-  static permissionDenied<T extends BaseError = ValidatorError>(
+  static permissionDenied<T extends NewError = ValidatorError>(
     constructor: new (params: ErrorParams) => T = ValidatorError as any,
     params: Omit<ErrorParams, "errorCode" | "statusCode" | "layer"> = {
       method: "",
       message: "",
     }
   ): T {
-    return BaseError.unauthorized(constructor, {
+    return NewError.unauthorized(constructor, {
       ...params,
       layer: ErrorLayer.MIDDLEWARE,
     })
   }
 
   // 내부 오류
-  static internalError<T extends BaseError = ValidatorError>(
+  static internalError<T extends NewError = ValidatorError>(
     constructor: new (params: ErrorParams) => T = ValidatorError as any,
     params: Omit<ErrorParams, "errorCode" | "statusCode" | "layer"> = {
       method: "",
       message: "",
     }
   ): T {
-    return BaseError.internalError(constructor, {
+    return NewError.internalError(constructor, {
       ...params,
       layer: ErrorLayer.MIDDLEWARE,
     })

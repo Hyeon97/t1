@@ -27,12 +27,13 @@ export class BackupDeleteController extends BaseController {
         id: query.id || null
       }
       asyncContextStorage.addOrder({ component: this.controllerName, method: "extractFilterOptions", state: "end" })
+      // throw new Error('asdlksadg;khsdg;ksdfgk;sgdf;k')
       return filterOptions
     } catch (error) {
       throw ControllerError.badRequest(ControllerError, {
         method: "extractFilterOptions",
-        message: "[Backup 삭제 필터 옵션 추출] - 오류가 발생했습니다",
-        cause: error,
+        message: "[Backup 삭제 필터 옵션 추출] - 팔터 옵션 확인필요",
+        error,
       })
     }
   }
@@ -49,7 +50,6 @@ export class BackupDeleteController extends BaseController {
       const query = req.query as unknown as BackupDeleteQueryDTO
       const filterOptions = this.extractFilterOptions({ query })
       ContextLogger.debug({ message: `적용된 필터 옵션`, meta: filterOptions })
-
       //  서비스 호출
       let resultData
       if (filterOptions.jobName) {
@@ -72,7 +72,7 @@ export class BackupDeleteController extends BaseController {
         next,
         error,
         method: "delete",
-        message: "[Backup 작업 삭제] - 오류가 발생했습니다",
+        message: "[Backup 작업 삭제] - 예기치 못한 오류 발생",
       })
     }
   }
@@ -90,7 +90,7 @@ export class BackupDeleteController extends BaseController {
         next,
         error,
         method: "deleteByJobName",
-        message: "[Backup 작업 이름으로 삭제제] - 오류가 발생했습니다",
+        message: "[Backup 작업 이름으로 삭제] - 예기치 못한 오류 발생",
       })
     }
   }
@@ -108,7 +108,7 @@ export class BackupDeleteController extends BaseController {
         next,
         error,
         method: "deleteByJobId",
-        message: "[Backup 작업 ID로 삭제] - 오류가 발생했습니다",
+        message: "[Backup 작업 ID로 삭제] - 예기치 못한 오류 발생",
       })
     }
   }
@@ -126,7 +126,7 @@ export class BackupDeleteController extends BaseController {
         next,
         error,
         method: "deleteBySystenName",
-        message: "[Backup 작업 등록 System 이름으로 삭제] - 오류가 발생했습니다",
+        message: "[Backup 작업 등록 System 이름으로 삭제] - 예기치 못한 오류 발생",
       })
     }
   }

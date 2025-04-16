@@ -52,7 +52,7 @@ export class BackupInfoRepository extends BaseRepository {
       this.handleRepositoryError({
         error,
         method: "applyFilters",
-        message: "[필터 옵션 적용] - 오류가 발생했습니다",
+        message: "[Backup Info 조회 필터 옵션 적용] - 오류가 발생했습니다",
       })
     }
   }
@@ -66,9 +66,8 @@ export class BackupInfoRepository extends BaseRepository {
       asyncContextStorage.addOrder({ component: this.repositoryName, method: "findAll", state: "start" })
       this.resetQueryState()
       this.applyFilters({ filterOptions })
-
-      let query = `SELECT * FROM ${this.tableName}`
-      query += this.buildWhereClause()
+      throw new Error('dsak;jasdkljasdflkasfdlkasdflkasdflk')
+      let query = `SELECT * FROM ${this.tableName} ${this.buildWhereClause()}`
       const result = await this.executeQuery<BackupInfoTable[]>({ sql: query, params: this.params, request: `${this.repositoryName}.findAll` })
 
       asyncContextStorage.addOrder({ component: this.repositoryName, method: "findAll", state: "end" })

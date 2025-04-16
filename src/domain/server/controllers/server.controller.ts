@@ -2,6 +2,7 @@ import { NextFunction, Response } from "express"
 import { ControllerError } from "../../../errors/controller/controller-error"
 import { ExtendedRequest } from "../../../types/common/req.types"
 import { ApiUtils } from "../../../utils/api/api.utils"
+import { asyncContextStorage } from "../../../utils/AsyncContext"
 import { BaseController } from "../../../utils/base/base-controller"
 import { stringToBoolean } from "../../../utils/data-convert.utils"
 import { ContextLogger } from "../../../utils/logger/logger.custom"
@@ -10,7 +11,6 @@ import { SpecificServerFilterDTO } from "../dto/query/specific-server-query-filt
 import { ServerResponseFactory } from "../dto/response/server-response-factory"
 import { ServerService } from "../services/server.service"
 import { ServerFilterOptions } from "../types/server-filter.type"
-import { asyncContextStorage } from "../../../utils/AsyncContext"
 
 export class ServerController extends BaseController {
   private readonly serverService: ServerService
@@ -52,7 +52,7 @@ export class ServerController extends BaseController {
       throw ControllerError.badRequest(ControllerError, {
         method: "extractFilterOptions",
         message: "[Server 필터 옵션 추출] - 오류가 발생했습니다",
-        cause: error,
+        error,
       })
     }
   }

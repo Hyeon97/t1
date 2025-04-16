@@ -53,7 +53,7 @@ class JobUtils {
       throw UtilityError.dataProcessingError({
         method: 'chPartitionName',
         message: '[Job 이름 처리] - 파티션 양식 변환 중 오류 발생',
-        cause: error,
+        error,
       })
     }
   }
@@ -102,7 +102,7 @@ class JobUtils {
       throw UtilityError.dataProcessingError({
         method: 'preprocessJobName',
         message: `[Job 이름 처리] - ${type} Job 이름 전처리 중 오류 발생`,
-        cause: error,
+        error,
       })
     }
   }

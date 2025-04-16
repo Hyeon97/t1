@@ -70,10 +70,12 @@ export enum ErrorLayer {
 export interface ErrorParams {
   errorCode: ErrorCode // 서버 내부 에러 식별 코드
   layer: ErrorLayer //  에러가 발생한 계층
+  application?: string // 에러가 발생한 애플리케이션(controller, service, repository...) 이름
   method: string // 에러가 발생한 함수 이름
   message: string //  에러 메세지
   statusCode?: number //  HTTP 상태 코드, API 응답에 사용됨
-  cause?: unknown //  에러 원인 ( 에러 원본 )
+  error?: unknown //  에러 원본 << 필수로 변경
+  errorList?: any[]//  발생한 에러 원본 다넣기?
   metadata?: Record<string, any> // 에러와 관련된 추가 정보 객체
   request?: string // Database 에러에서 해당 쿼리 요청 함수 이름
   query?: string // Database 에러 발생시 실행한 쿼리

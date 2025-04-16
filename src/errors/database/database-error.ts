@@ -1,10 +1,10 @@
-import { BaseError, ErrorCode, ErrorLayer, ErrorParams } from ".."
+import { ErrorCode, ErrorLayer, ErrorParams, NewError } from ".."
 
 /**
  * 데이터베이스 계층의 에러를 처리하는 클래스
  * 공통 팩토리 메서드를 상속받아 간소화
  */
-export class DatabaseError extends BaseError {
+export class DatabaseError extends NewError {
   constructor(
     params: ErrorParams & {
       request?: string
@@ -24,8 +24,8 @@ export class DatabaseError extends BaseError {
   }
 
   // 일반 에러를 현재 타입으로 변환
-  static fromError<T extends BaseError = DatabaseError>(error: unknown, params: Omit<ErrorParams, "errorCode" | "statusCode" | "cause">): T {
-    return BaseError.fromError(DatabaseError, error, {
+  static fromError<T extends NewError = DatabaseError>(error: unknown, params: Omit<ErrorParams, "errorCode" | "statusCode" | "cause">): T {
+    return NewError.fromError(DatabaseError, error, {
       ...params,
       layer: ErrorLayer.DATABASE,
       errorCode: ErrorCode.DATABASE_ERROR,
@@ -42,7 +42,7 @@ export class DatabaseError extends BaseError {
       params: [],
     }
   ): DatabaseError {
-    return BaseError.createFrom(DatabaseError, {
+    return NewError.createFrom(DatabaseError, {
       ...params,
       request: params.request,
       query: params.query,
@@ -63,7 +63,7 @@ export class DatabaseError extends BaseError {
       params: [],
     }
   ): DatabaseError {
-    return BaseError.createFrom(DatabaseError, {
+    return NewError.createFrom(DatabaseError, {
       ...params,
       request: params.request,
       query: params.query,
@@ -84,7 +84,7 @@ export class DatabaseError extends BaseError {
       params: [],
     }
   ): DatabaseError {
-    return BaseError.createFrom(DatabaseError, {
+    return NewError.createFrom(DatabaseError, {
       ...params,
       request: params.request,
       query: params.query,
@@ -105,7 +105,7 @@ export class DatabaseError extends BaseError {
       params: [],
     }
   ): DatabaseError {
-    return BaseError.createFrom(DatabaseError, {
+    return NewError.createFrom(DatabaseError, {
       ...params,
       request: params.request,
       query: params.query,
@@ -126,7 +126,7 @@ export class DatabaseError extends BaseError {
       params: [],
     }
   ): DatabaseError {
-    return BaseError.createFrom(DatabaseError, {
+    return NewError.createFrom(DatabaseError, {
       ...params,
       request: params.request,
       query: params.query,

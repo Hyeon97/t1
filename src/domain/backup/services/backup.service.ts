@@ -41,7 +41,7 @@ export class BackupService extends BaseService {
       return this.handleServiceError({
         error,
         method: "combineBackupInfoData",
-        message: "[Backup 데이터 조합] - 오류가 발생했습니다",
+        message: "[Backup 데이터 조합] - Backup Data 취합 중 에러 발생",
       })
     }
   }
@@ -77,7 +77,7 @@ export class BackupService extends BaseService {
       return this.handleServiceError({
         error,
         method: "getBackupsByBackupFirst",
-        message: `[Backup 정보 조회] - 오류가 발생했습니다`,
+        message: `[Backup 정보 조회] - 예기치 못한 오류 발생`,
       })
     }
   }
@@ -113,7 +113,7 @@ export class BackupService extends BaseService {
       return this.handleServiceError({
         error,
         method: "getBackupsByInfoFirst",
-        message: `[Backup 정보 조회] - 오류가 발생했습니다`,
+        message: `[Backup 정보 조회] - 예기치 못한 오류 발생`,
       })
     }
   }
@@ -153,7 +153,7 @@ export class BackupService extends BaseService {
       return this.handleServiceError({
         error,
         method: "getBackups",
-        message: `[Backup 정보 조회] - 오류가 발생했습니다`,
+        message: `[Backup 정보 조회] - 예기치 못한 오류 발생`,
       })
     }
   }
@@ -177,7 +177,7 @@ export class BackupService extends BaseService {
   //     return results[0]
   //   } catch (error) {
   //     if (error instanceof ApiError) throw error
-  //     throw ApiError.internal({ message: "Backup 작업을 조회하는 중에 오류가 발생했습니다" })
+  //     throw ApiError.internal({ message: "Backup 작업을 조회하는 중에 예기치 못한 오류 발생" })
   //   }
   // }
 
@@ -200,7 +200,7 @@ export class BackupService extends BaseService {
   //     return results[0]
   //   } catch (error) {
   //     if (error instanceof ApiError) throw error
-  //     throw ApiError.internal({ message: "Backup 작업을 조회하는 중에 오류가 발생했습니다" })
+  //     throw ApiError.internal({ message: "Backup 작업을 조회하는 중에 예기치 못한 오류 발생" })
   //   }
   // }
 
@@ -223,7 +223,7 @@ export class BackupService extends BaseService {
   //     return this.combineBackupInfoData({ backups, backupInfos })
   //   } catch (error) {
   //     if (error instanceof ApiError) throw error
-  //     throw ApiError.internal({ message: "Backup 작업을 조회하는 중에 오류가 발생했습니다" })
+  //     throw ApiError.internal({ message: "Backup 작업을 조회하는 중에 예기치 못한 오류 발생" })
   //   }
   // }
 }

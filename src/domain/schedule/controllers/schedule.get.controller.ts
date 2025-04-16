@@ -39,7 +39,7 @@ export class ScheduleGetController extends BaseController {
       throw ControllerError.badRequest(ControllerError, {
         method: "extractFilterOptions",
         message: "[Schedule 필터 옵션 추출] - 오류가 발생했습니다",
-        cause: error,
+        error,
       })
     }
   }

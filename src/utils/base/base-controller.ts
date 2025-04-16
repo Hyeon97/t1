@@ -24,19 +24,23 @@ export class BaseController {
     message: string
     method: string
   }): void => {
-    //  repository, service error는 바로 상위 계층으로
+    const application = this.controllerName
+    //  Repository, Service Layer에서 발생한 1error는 바로 상위 계층으로
     if (error instanceof RepositoryError || error instanceof ServiceError) {
       next(error)
     }
-
-    //  controller layer에서 발생한 에러만 로깅
+    //  Controller Layer에서 발생한 에러만 로깅
     if (error instanceof Error && error instanceof ControllerError) {
-      ContextLogger.debug({
+      //  에러가 발생한 Controller Layer Application이름 주입
+      if (error?.metadata) { error.metadata.application = application }
+      //  로깅
+      ContextLogger.info({
         message: `[Controller-Layer] ${this.controllerName} () 오류 발생`,
         meta: { error: error instanceof Error ? error.message : String(error) },
       })
+      //  Controller Layer에서 발생한 정의되지 않은 오류 처리
     } else if (error instanceof Error && !(error instanceof ControllerError)) {
-      error = ControllerError.fromError<ControllerError>(error, { method, message })
+      error = ControllerError.fromError<ControllerError>(error, { error, method, message, application })
     }
     next(error)
   }

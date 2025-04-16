@@ -66,11 +66,24 @@ export interface ErrorParams {
   method: string // 에러가 발생한 함수 이름
   message: string //  에러 메세지
   statusCode?: number //  HTTP 상태 코드, API 응답에 사용됨
-  cause?: unknown //  에러 원인 ( 에러 원본 )
+  error?: unknown //  에러 원본
   metadata?: Record<string, any> // 에러와 관련된 추가 정보 객체
   request?: string // Database 에러에서 해당 쿼리 요청 함수 이름
   query?: string // Database 에러 발생시 실행한 쿼리
   params?: any[] // Database 에러 발생시 실행한 파라미터
 }
 
-에러 객체
+에러 객체 정의 ( 공통 )
+
+{
+  layer:"에러 최초 발생 레이어"
+  method:"에러 최초 발생 함수명"
+  message:"에러 메세지"
+  statusCode:"HTTP 상태코드"
+  errorCode:"서버 내부 에러 식별 코드"
+  error:"최초 발생 애러"
+  errorList:"발생한 에러 원본 목록"
+  metadata:"사용자 별도 추가 데이터"
+}
+
+

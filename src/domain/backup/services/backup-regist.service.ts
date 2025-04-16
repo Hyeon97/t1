@@ -99,7 +99,7 @@ export class BackupRegistService extends BaseService {
       throw ServiceError.dataProcessingError({
         method: "createBackupObject",
         message: "[Backup 정보 등록] - Backup Object 생성 오류 발생",
-        cause: error,
+        error,
       })
     }
   }
@@ -147,7 +147,7 @@ export class BackupRegistService extends BaseService {
       throw ServiceError.dataProcessingError({
         method: "createBackupInfoObject",
         message: "[Backup 정보 등록] - Backup Info Object 생성 오류 발생",
-        cause: error,
+        error,
       })
     }
   }
@@ -258,7 +258,7 @@ export class BackupRegistService extends BaseService {
   //     throw ServiceError.dataProcessingError({
   //       method: "chPartitionName",
   //       message: "[Backup 정보 등록] - Backup JobName 정보 가공 오류 발생",
-  //       cause: error,
+  //       error,
   //     })
   //   }
   // }
@@ -287,7 +287,7 @@ export class BackupRegistService extends BaseService {
   //     throw ServiceError.dataProcessingError({
   //       method: "preprocessJobName",
   //       message: "[Backup 정보 등록] - Backup JobName 정보 가공 오류 발생",
-  //       cause: error,
+  //       error,
   //     })
   //   }
   // }
@@ -309,7 +309,7 @@ export class BackupRegistService extends BaseService {
       throw ServiceError.dataProcessingError({
         method: "preprocessExcludePartitions",
         message: "[Backup 정보 등록] - Exclude Partition 정보 가공 오류 발생",
-        cause: error,
+        error,
       })
     }
   }
@@ -331,7 +331,7 @@ export class BackupRegistService extends BaseService {
       throw ServiceError.dataProcessingError({
         method: "preprocessExcludeDir",
         message: "[Backup 정보 등록] - Exclude Dir 정보 가공 오류 발생",
-        cause: error,
+        error,
       })
     }
   }
@@ -373,7 +373,7 @@ export class BackupRegistService extends BaseService {
       throw ServiceError.dataProcessingError({
         method: "registerBackupDataSet",
         message: "[Backup 정보 등록] - Backup / Backup Info 정보 DB등록 중 오류 발생",
-        cause: error,
+        error,
       })
     }
   }
