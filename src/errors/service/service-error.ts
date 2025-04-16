@@ -18,6 +18,7 @@ export class ServiceError extends BaseError {
     return BaseError.fromError(ServiceError as any, error, {
       ...params,
       layer: ErrorLayer.SERVICE,
+      errorCode: ErrorCode.INTERNAL_ERROR,
     }) as unknown as T
   }
 
@@ -152,6 +153,23 @@ export class ServiceError extends BaseError {
     })
   }
 
+  // 데이터 삭제 오류
+  static deletionError(
+    params: Omit<ErrorParams, "errorCode" | "statusCode" | "layer"> = {
+      method: "",
+      message: "",
+    }
+  ): ServiceError {
+    console.log('3')
+    console.dir(params)
+    return BaseError.createFrom(ServiceError, {
+      ...params,
+      layer: ErrorLayer.SERVICE,
+      errorCode: ErrorCode.DATA_DELETION_ERROR,
+      statusCode: 500,
+    })
+  }
+
   // 다른 계층 에러로부터 변환
 
   // Repository 에러로부터 변환
@@ -194,7 +212,7 @@ export class ServiceError extends BaseError {
       default:
         return ServiceError.internalError(ServiceError, {
           method,
-          message: `Repository 작업 중중 오류 발생`,
+          message: `Repository 작업 중 오류 발생`,
           cause: error,
           metadata: { originalErrorCode },
         })
@@ -213,7 +231,7 @@ export class ServiceError extends BaseError {
       case ErrorCode.JWT_INVALID:
         return ServiceError.unauthorized(ServiceError, {
           method,
-          message: `인증 중중 오류 발생: ${error.message}`,
+          message: `인증 중 오류 발생: ${error.message}`,
           cause: error,
         })
 

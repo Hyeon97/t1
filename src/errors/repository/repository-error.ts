@@ -15,14 +15,16 @@ export class RepositoryError extends BaseError {
   // 일반 에러를 현재 타입으로 변환
   static fromError<T extends BaseError = RepositoryError>(
     error: unknown,
-    params: Omit<ErrorParams, "layer" | "errorCode" | "statusCode" | "cause">
+    params: Omit<ErrorParams, "layer" | "errorCode" | "statusCode">
   ): T {
     let originMessage = error instanceof Error ? error.message : String(error)
-    if (params.message) originMessage = `${params.message} || ${originMessage}`
+    if (params.message) originMessage = params.message
     return BaseError.fromError(RepositoryError, error, {
       ...params,
       message: originMessage,
       layer: ErrorLayer.REPOSITORY,
+      errorCode: ErrorCode.INTERNAL_ERROR,
+      cause: error
     }) as unknown as T
   }
 

@@ -23,6 +23,7 @@ export class UtilityError extends BaseError {
     return BaseError.fromError(UtilityError as any, error, {
       ...params,
       layer: ErrorLayer.UTILITY,
+      errorCode: ErrorCode.INTERNAL_ERROR,
     }) as unknown as T
   }
 

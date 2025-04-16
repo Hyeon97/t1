@@ -27,96 +27,10 @@
 
 // 개선된 구조의 주요 포인트
 
-/**
- * I. 계층별 에러 처리 흐름
- * 
- * 1. 데이터베이스 연결/쿼리 오류 → DatabaseError
- * 2. Repository에서 오류 발생 또는 DatabaseError 포착 → RepositoryError
- * 3. Service에서 오류 발생 또는 RepositoryError 포착 → ServiceError
- * 4. Controller에서 오류 발생 또는 ServiceError 포착 → ControllerError
- * 5. 글로벌 에러 핸들러에서 ControllerError 처리 → API 응답 생성
- * 
- * 각 계층은 자신의 에러 타입을 사용하고, 하위 계층의 에러를 포착하여 변환
- */
+
 
 /**
- * II. 데이터베이스 관리 개선
- * 
- * 1. 트랜잭션 관리를 Service 계층으로 이동
- *   - 비즈니스 로직은 Service 계층에 위치
- *   - TransactionManager를 통해 트랜잭션 실행
- * 
- * 2. Repository 계층은 데이터 액세스에 집중
- *   - DB 연결 및 쿼리 실행 세부 사항을 추상화
- *   - DatabaseOperations를 사용하여 쿼리 실행
- * 
- * 3. 데이터베이스 연결 관리 개선
- *   - 싱글톤 패턴으로 연결 풀 관리
- *   - 연결 누수 방지를 위한 안전 장치 추가
- */
-
-/**
- * III. 주요 에러 처리 패턴
- * 
- * 1. 명시적인 함수 이름 포함
- *   - 모든 에러 객체에 발생 함수명 포함
- *   - 디버깅 및 오류 추적 용이성 향상
- * 
- * 2. 계층별 에러 코드 체계
- *   - 각 계층별로 고유한 에러 코드 형식 사용
- *   - DB_001, REPO_001, SRV_001, CTRL_001 형식
- * 
- * 3. 의미있는 에러 메시지
- *   - 사용자 친화적인 메시지와 기술적 상세 정보 분리
- *   - 내부 로깅용 상세 정보와 API 응답용 일반 메시지 구분
- * 
- * 4. 문맥 정보 보존
- *   - 원본 에러를 cause 속성으로 보존
- *   - 메타데이터를 활용한 추가 컨텍스트 정보 제공
- */
-
-/**
- * IV. 예제 트랜잭션 사용 패턴
- * 
- * ```typescript
- * // Service 메소드 내에서 트랜잭션 실행
- * async createServerWithDetails({ serverData, diskData, networkData }): Promise<ServerDataResponse> {
- *   return this.executeTransaction({
- *     operationName: "서버 생성",
- *     callback: async (transaction) => {
- *       // 1. 서버 기본 정보 저장
- *       const createdServer = await this.createServerBasic({ 
- *         serverData, 
- *         transaction
- *       });
- *       
- *       // 2. 디스크 정보 저장
- *       await this.saveServerDisks({ 
- *         serverId: createdServer.nID, 
- *         diskData, 
- *         transaction
- *       });
- *       
- *       // 3. 네트워크 정보 저장
- *       await this.saveServerNetworks({ 
- *         serverId: createdServer.nID, 
- *         networkData, 
- *         transaction
- *       });
- *       
- *       // 4. 새로 생성된 서버 데이터 조회 및 반환
- *       return this.getServerById({
- *         id: String(createdServer.nID),
- *         filterOptions: { detail: true }  
- *       });
- *     }
- *   });
- * }
- * ```
- */
-
-/**
- * V. 조회 작업 코드 흐름 예시
+ * 조회 작업 코드 흐름 예시
  * 
  * ```
  * 1. Controller: getServer API 엔드포인트 요청 처리
@@ -143,3 +57,20 @@
  *    - 오류 발생 시 DatabaseError로 변환 후 throw
  * ```
  */
+
+
+// 기본 에러 파라미터 인터페이스
+export interface ErrorParams {
+  errorCode: ErrorCode // 서버 내부 에러 식별 코드
+  layer: ErrorLayer //  에러가 발생한 계층
+  method: string // 에러가 발생한 함수 이름
+  message: string //  에러 메세지
+  statusCode?: number //  HTTP 상태 코드, API 응답에 사용됨
+  cause?: unknown //  에러 원인 ( 에러 원본 )
+  metadata?: Record<string, any> // 에러와 관련된 추가 정보 객체
+  request?: string // Database 에러에서 해당 쿼리 요청 함수 이름
+  query?: string // Database 에러 발생시 실행한 쿼리
+  params?: any[] // Database 에러 발생시 실행한 파라미터
+}
+
+에러 객체

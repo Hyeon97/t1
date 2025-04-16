@@ -28,6 +28,7 @@ export class DatabaseError extends BaseError {
     return BaseError.fromError(DatabaseError, error, {
       ...params,
       layer: ErrorLayer.DATABASE,
+      errorCode: ErrorCode.DATABASE_ERROR,
     }) as unknown as T
   }
 

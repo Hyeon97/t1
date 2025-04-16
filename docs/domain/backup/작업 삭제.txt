@@ -1,0 +1,5 @@
+작업 삭제
+  - backup, backup info, backup log, backup history 모두 삭제해야함
+    - 작업 이름기준 backup log, backup history내 동일한 작업 이름으로 모두 삭제
+  - backup, backup info는 세트 하나가 삭제 실패하는 경우 삭제 실패로 간주
+  

@@ -21,6 +21,7 @@ export class ControllerError extends BaseError {
     return BaseError.fromError(ControllerError as any, error, {
       ...params,
       layer: ErrorLayer.CONTROLLER,
+      errorCode: ErrorCode.INTERNAL_ERROR,
     }) as unknown as T
   }
 

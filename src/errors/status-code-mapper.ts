@@ -26,6 +26,7 @@ export function getStatusCodeFromErrorCode(errorCode: ErrorCode): number {
     // 비즈니스 로직 관련 에러
     BUSINESS_RULE_VIOLATION: 422, // Unprocessable Entity
     DATA_PROCESSING_ERROR: 422,
+    DATA_DELETION_ERROR: 500,
 
     // 데이터베이스 관련 에러
     DATABASE_ERROR: 500,
@@ -79,6 +80,7 @@ export function getUserFriendlyMessage({ errorCode }: { errorCode: ErrorCode }):
     // 비즈니스 로직 관련 에러
     BUSINESS_RULE_VIOLATION: "비즈니스 규칙에 위배됩니다",
     DATA_PROCESSING_ERROR: "데이터 처리 중 오류가 발생했습니다",
+    DATA_DELETION_ERROR: "데이터 삭제 실패",
 
     // 데이터베이스 관련 에러
     DATABASE_ERROR: "데이터베이스 오류가 발생했습니다",

@@ -420,7 +420,7 @@ export class BaseRepository {
       })
       //  일반 에러인 경우 Repository 에러로 변경
     } else if (error instanceof Error && !(error instanceof RepositoryError)) {
-      error = RepositoryError.fromError<RepositoryError>(error, { method, message })
+      error = RepositoryError.fromError<RepositoryError>(error, { method, message, cause: error })
     }
     throw error
   }

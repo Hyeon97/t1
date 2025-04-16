@@ -31,6 +31,7 @@ export class ValidatorError extends BaseError {
       return BaseError.fromError(ValidatorError as any, error, {
         ...params,
         layer: ErrorLayer.MIDDLEWARE,
+        errorCode: ErrorCode.INTERNAL_ERROR,
       }) as unknown as T
     }
   }

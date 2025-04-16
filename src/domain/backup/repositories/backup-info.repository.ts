@@ -149,7 +149,6 @@ export class BackupInfoRepository extends BaseRepository {
     try {
       asyncContextStorage.addRepository({ name: this.repositoryName })
       asyncContextStorage.addOrder({ component: this.repositoryName, method: "deleteByJobName", state: "start" })
-
       const result = await this.delete({
         data: { sJobName: jobName },
         transaction,

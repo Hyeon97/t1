@@ -21,7 +21,7 @@ export class BaseError extends Error {
 
     // 상태 코드가 명시적으로 제공되지 않은 경우 에러 코드에서 유추
     this.statusCode = statusCode || getStatusCodeFromErrorCode(errorCode)
-    this.metadata = { ...metadata, method, layer }
+    this.metadata = { ...metadata, method, layer, cause }
 
     // // 상세 정보 구성
     // const details: Record<string, any> = { ...metadata }
@@ -151,18 +151,14 @@ export class BaseError extends Error {
   static fromError<T extends BaseError>(
     constructor: new (params: ErrorParams) => T,
     error: unknown,
-    params: Omit<ErrorParams, "errorCode" | "statusCode" | "cause"> & {
-      layer: ErrorLayer
-      message?: string // message를 선택적 속성으로 포함
-      errorCode?: ErrorCode
-    }
+    params: Omit<ErrorParams, "statusCode">
   ): T {
-    const errorMessage = error instanceof Error ? error.message : errorToString(error)
+    const errorMessage = errorToString(error)
 
     return new constructor({
       ...params,
       message: params.message || errorMessage,
-      cause: error,
+      cause: params.cause || error,
       errorCode: params.errorCode || ErrorCode.UNKNOWN_ERROR,
       statusCode: error instanceof BaseError ? error.statusCode : 500,
     })
