@@ -6,7 +6,7 @@ import { asyncContextStorage } from "../../../../utils/AsyncContext"
 import { BaseController } from "../../../../utils/base/base-controller"
 import { stringToBoolean } from "../../../../utils/data-convert.utils"
 import { ContextLogger } from "../../../../utils/logger/logger.custom"
-import { BackupGetQueryDTO } from "../../dto/query/get-backup-filter.dto"
+import { BackupGetByServerNameQueryDTO, BackupGetQueryDTO } from "../../dto/query/get-backup-query.dto"
 import { SpecificBackupGetQueryDTO } from "../../dto/query/get-specific-backup-filter.dto"
 import { BackupResponseFactory } from "../../dto/response/backup-response-factory"
 import { BackupService } from "../../services/backup.service"
@@ -23,7 +23,7 @@ export class BackupController extends BaseController {
   }
 
   //  Backup 조회 옵션 추출
-  private extractFilterOptions({ query }: { query: BackupGetQueryDTO | SpecificBackupGetQueryDTO }): BackupFilterOptions {
+  private extractFilterOptions({ query }: { query: BackupGetQueryDTO | BackupGetByServerNameQueryDTO }): BackupFilterOptions {
     try {
       asyncContextStorage.addOrder({ component: this.controllerName, method: "extractFilterOptions", state: "start" })
       const filterOptions: BackupFilterOptions = {
@@ -38,8 +38,8 @@ export class BackupController extends BaseController {
         //  상세 정보
         detail: query.detail ?? false,
       }
-      if (query instanceof SpecificBackupGetQueryDTO) {
-        filterOptions.identifierType = query.identifierType
+      if (query instanceof BackupGetByServerNameQueryDTO) {
+        filterOptions.serverType = query.serverType || ""
       }
       asyncContextStorage.addOrder({ component: this.controllerName, method: "extractFilterOptions", state: "end" })
       return filterOptions
@@ -86,4 +86,12 @@ export class BackupController extends BaseController {
       })
     }
   }
+
+  /**
+   * Backup 작업 ID로 조회
+   */
+
+  /**
+   * Backup 작업 이름으로 조회
+   */
 }

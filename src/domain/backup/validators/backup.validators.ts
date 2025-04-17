@@ -1,25 +1,22 @@
 import { validationMiddleware } from "../../../middlewares/validation/validationMiddleware"
 import { BackupRegistBodyDTO } from "../dto/body/backup-regist.dto"
-import { SpecificBackupGetParamDTO } from "../dto/param/get-specific-backup-param.dto"
-import { BackupMonitoringByJobNameDTO, BackupMonitoringByJobIdDTO, BackupMonitoringByServerNameDTO } from "../dto/param/monit-backup-param.dto"
+import { BackupGetByJobIdParamDTO, BackupGetByJobNameParamDTO, BackupGetByServerNameParamDTO } from "../dto/param/get-backup-param.dto"
+import { BackupMonitoringByJobIdDTO, BackupMonitoringByJobNameDTO, BackupMonitoringByServerNameDTO } from "../dto/param/monit-backup-param.dto"
 import { BackupDeleteQueryDTO } from "../dto/query/delete-backup-filter.dto"
-import { BackupGetQueryDTO } from "../dto/query/get-backup-filter.dto"
-import { SpecificBackupGetQueryDTO } from "../dto/query/get-specific-backup-filter.dto"
+import { BackupGetQueryDTO } from "../dto/query/get-backup-query.dto"
 import { BackupMonitoringQueryDTO } from "../dto/query/monit-backup-query.dto"
 
 /**
  * Backup 작업 조회
  */
 //  Backup 조회 공통 queryString 검증
-export const validateBackupListQuery = validationMiddleware.validateQuery(BackupGetQueryDTO)
-//  특정 Backup 조회 parameter 검증
-export const validateSpecificBackupParams = validationMiddleware.validateParams(SpecificBackupGetParamDTO)
-//  특정 Backup 조회 queryString 검증
-export const validateSpecificBackupQuery = validationMiddleware.validateQuery(SpecificBackupGetQueryDTO)
+export const validateBackupGetQuery = validationMiddleware.validateQuery(BackupGetQueryDTO)
 //  작업 ID로 조회 parameter 검증
-export const validateBackupByJobIdParams = validationMiddleware.validateParams
+export const validateBackupGetByJobIdParams = validationMiddleware.validateParams(BackupGetByJobIdParamDTO)
 //  작업 이름으로 조회 parameter 검증
-export const validateBackupByJobNameParams = validationMiddleware.validateParams
+export const validateBackupGetByJobNameParams = validationMiddleware.validateParams(BackupGetByJobNameParamDTO)
+//  작업 대상 server 이름으로 조회 parameter 검증
+export const validateBackupGetByServerNameParams = validationMiddleware.validateParams(BackupGetByServerNameParamDTO)
 
 /**
  * Backup 작업 등록

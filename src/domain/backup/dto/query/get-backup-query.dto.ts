@@ -48,3 +48,11 @@ export class BackupGetQueryDTO implements BackupFilterOptions {
   @IsIn(["true"], { message: "detail은 'true'만 가능합니다" })
   detail?: string
 }
+
+//  작업 대상 server 이름으로 조회 요청시 DTO
+export class BackupGetByServerNameQueryDTO extends BackupGetQueryDTO {
+  //  작업 대상 서버 타입
+  @IsOptional()
+  @IsString()
+  serverType!: string
+}

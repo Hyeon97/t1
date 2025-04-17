@@ -1,8 +1,11 @@
 import { Router } from "express"
 import { backupController, backupDeleteController, backupRegistController } from "../controllers/controller-registry"
 import {
+  validateBackupGetByJobIdParams,
+  validateBackupGetByJobNameParams,
+  validateBackupGetByServerNameParams,
   validateBackupDeleteQuery,
-  validateBackupListQuery,
+  validateBackupGetQuery,
   validateBackupMonitoringByJobIdParams,
   validateBackupMonitoringByJobNameParams,
   validateBackupMonitoringByServerNameParams,
@@ -23,18 +26,22 @@ export class BackupRoutes {
 
   //  Backup 기본
   private BackupRoutes(): void {
-    //  전체 목록 리턴
-    this.router.get("/", validateBackupListQuery, backupController.getBackups)
+    //  전체 목록 조회
+    this.router.get("/", validateBackupGetQuery, backupController.getBackups)
     //  작업 ID로 조회
-    this.router.get("/id")
+    this.router.get("/id/:jobId", validateBackupGetByJobIdParams, validateBackupGetQuery)
     //  작업 이름으로 조회
-    this.router.get("/job-name")
+    this.router.get("/job-name/:jobName", validateBackupGetByJobNameParams, validateBackupGetQuery)
+    //  작업 대상 서버 이름으로 조회
+    this.router.get("/server-name/:serverName", validateBackupGetByServerNameParams, validateBackupGetQuery)
+
     //  Backup 작업 삭제
     this.router.delete("/", validateBackupDeleteQuery, backupDeleteController.delete)
     //  작업 ID로 삭제
-    this.router.delete("/id")
+    this.router.delete("/id/:jobId")
     //  작업 이름으로 삭제
-    this.router.delete("/job-name")
+    this.router.delete("/job-name/:jobName")
+
     //  Backup 작업 등록
     this.router.post("/", validateBackupRegistBody, backupRegistController.regist)
   }
@@ -42,9 +49,9 @@ export class BackupRoutes {
   //  Backup Monitoring 관련
   private BackupMonitoringRoutes(): void {
     // 작업 ID로 백업 모니터링
-    this.router.get("/id/:backupId/monitoring", validateBackupMonitoringByJobIdParams, validateBackupMonitoringQuery)
+    this.router.get("/id/:jobId/monitoring", validateBackupMonitoringByJobIdParams, validateBackupMonitoringQuery)
     // 작업 이름으로 백업 모니터링
-    this.router.get("/job-name/:name/monitoring", validateBackupMonitoringByJobNameParams, validateBackupMonitoringQuery)
+    this.router.get("/job-name/:jobName/monitoring", validateBackupMonitoringByJobNameParams, validateBackupMonitoringQuery)
     // 작업 대상 서버 이름으로 백업 모니터링
     this.router.get("/server-name/:serverName/monitoring", validateBackupMonitoringByServerNameParams, validateBackupMonitoringQuery)
   }
@@ -52,9 +59,9 @@ export class BackupRoutes {
   //  Backup History 관련
   private BackupHistoryRoutes(): void {
     // 작업 ID로 백업 히스토리 조회
-    this.router.get("/id/:backupId/histories")
+    this.router.get("/id/:jobId/histories")
     // 작업 이름으로 백업 히스토리 조회
-    this.router.get("/job-name/:name/histories")
+    this.router.get("/job-name/:jobName/histories")
     // 작업 대상 서버 이름으로 백업 히스토리 조회
     this.router.get("/server-name/:serverName/histories")
   }
@@ -62,9 +69,9 @@ export class BackupRoutes {
   //  Backup Log 관련
   private BackupLogRoutes(): void {
     // 작업 ID로 백업 로그 조회
-    this.router.get("/id/:backupId/logs")
+    this.router.get("/id/:jobId/logs")
     // 작업 이름으로 백업 로그 조회
-    this.router.get("/job-name/:name/logs")
+    this.router.get("/job-name/:jobName/logs")
     // 작업 대상 서버 이름으로 백업 로그 조회
     this.router.get("/server-name/:serverName/logs")
   }

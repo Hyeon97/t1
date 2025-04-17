@@ -1,7 +1,7 @@
 import { ControllerError } from "../../../../errors"
 import { asyncContextStorage } from "../../../../utils/AsyncContext"
 import { BaseController } from "../../../../utils/base/base-controller"
-import { BackupGetQueryDTO } from "../../dto/query/get-backup-filter.dto"
+import { BackupGetQueryDTO } from "../../dto/query/get-backup-query.dto"
 import { SpecificBackupGetQueryDTO } from "../../dto/query/get-specific-backup-filter.dto"
 import { BackupRegistService } from "../../services/backup-regist.service"
 import { BackupService } from "../../services/backup.service"

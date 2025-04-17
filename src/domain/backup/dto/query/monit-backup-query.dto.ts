@@ -7,9 +7,6 @@ import { RepositoryType } from "../../../../types/common/repository"
 import { BackupType } from "../../types/backup-common.type"
 import { BackupMonitoringFilterOptions } from "../../types/backup-monitoring.type"
 
-/**
- * 모니터링 공통
- */
 export class BackupMonitoringQueryDTO implements BackupMonitoringFilterOptions {
   //  필터 옵션
   //  작업 모드

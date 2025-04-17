@@ -4,7 +4,7 @@
 
 import { IsIn } from "class-validator"
 import { BackupSearchType } from "../../types/backup-common.type"
-import { BackupGetQueryDTO } from "./get-backup-filter.dto"
+import { BackupGetQueryDTO } from "./get-backup-query.dto"
 
 export class SpecificBackupGetQueryDTO extends BackupGetQueryDTO {
   //  식별자
