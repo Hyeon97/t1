@@ -19,7 +19,6 @@ export class BaseService {
     if (error instanceof RepositoryError || error instanceof DatabaseError || error instanceof UtilityError) {
       throw error
     }
-
     //  Service layer에서 발생한 에러만 로깅
     if (error instanceof Error && error instanceof ServiceError) {
       //  에러가 발생한 Service Layer Application이름 주입

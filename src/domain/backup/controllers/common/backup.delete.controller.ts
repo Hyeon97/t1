@@ -27,7 +27,6 @@ export class BackupDeleteController extends BaseController {
         id: query.id || null
       }
       asyncContextStorage.addOrder({ component: this.controllerName, method: "extractFilterOptions", state: "end" })
-      // throw new Error('asdlksadg;khsdg;ksdfgk;sgdf;k')
       return filterOptions
     } catch (error) {
       throw ControllerError.badRequest(ControllerError, {
@@ -63,7 +62,6 @@ export class BackupDeleteController extends BaseController {
           filterOptions
         })
       }
-      console.dir(resultData, { depth: null })
       ContextLogger.info({ message: `Backup 작업 삭제 완료` })
       ApiUtils.success({ res, data: resultData, message: "Backup job data delete result" })
       asyncContextStorage.addOrder({ component: this.controllerName, method: "deleteByJobName", state: "end" })

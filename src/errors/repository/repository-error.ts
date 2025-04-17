@@ -94,6 +94,21 @@ export class RepositoryError extends NewError {
     })
   }
 
+  // 데이터 삭제 오류
+  static deletionError(
+    params: Omit<ErrorParams, "errorCode" | "statusCode" | "layer"> = {
+      method: "",
+      message: "",
+    }
+  ): RepositoryError {
+    return NewError.createFrom(RepositoryError, {
+      ...params,
+      layer: ErrorLayer.REPOSITORY,
+      errorCode: ErrorCode.DATA_DELETION_ERROR,
+      statusCode: 500,
+    })
+  }
+
   // 데이터베이스 에러로부터 변환
   static fromDatabaseError({ error, method }: { error: DatabaseError; method: string }): RepositoryError {
     const originalErrorCode = error.errorCode

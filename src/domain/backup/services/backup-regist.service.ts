@@ -25,6 +25,7 @@ interface BackupDataSet {
   backupDataObject: BackupTableInput
   backupInfoDataObject: BackupInfoTableInput
 }
+
 //  Backup Data 등록 결과
 interface BackupDataRegistResultSet {
   successful: Array<{ dataSet: BackupDataSet }>
@@ -238,59 +239,6 @@ export class BackupRegistService extends BaseService {
       })
     }
   }
-
-  // /**
-  //  * 작업 이름 생성 - 파티션 값 변환
-  //  */
-  // private chPartitionName({ server, partition }: { server: ServerBasicTable, partition: string }): string {
-  //   try {
-  //     const os = OSTypeMap.toString({ value: server.nOS })
-  //     let changedDrivePath = ''
-  //     if (os === 'Window') {
-  //       //  윈도우 에서 드라이브 이름끝 :으로 끝나는거 제거
-  //       changedDrivePath = partition.replaceAll(':', '')
-  //     }
-  //     else if (os === 'Linux') {
-  //       changedDrivePath = partition === '/' ? '_ROOT' : partition.replaceAll('/', '_')
-  //     }
-  //     return changedDrivePath
-  //   } catch (error) {
-  //     throw ServiceError.dataProcessingError({
-  //       method: "chPartitionName",
-  //       message: "[Backup 정보 등록] - Backup JobName 정보 가공 오류 발생",
-  //       error,
-  //     })
-  //   }
-  // }
-
-  // /**
-  //  * 데이터 전처리(작업이름 중복 검사 or 자동생성)
-  //  */
-  // private async preprocessJobName({ jobName, server, partition }: { jobName: string, server: ServerBasicTable, partition: string }): Promise<{ jName: string, idx: number }> {
-  //   try {
-  //     let jName = ''
-  //     asyncContextStorage.addOrder({ component: this.serviceName, method: "preprocessJobName", state: "start" })
-  //     //  작업 이름이 없는경우 - 자동생성 ( + 파티션 이름 변환 )
-  //     if (!jobName) {
-  //       jName = `${server.sSystemName}${this.chPartitionName({ server, partition })}`
-  //     }
-  //     //  작업 이름이 있는경우 - 사용자 입력 작업 이름 + 파티션 이름 변환
-  //     else if (jobName) {
-  //       jName = `${jobName}${this.chPartitionName({ server, partition })}`
-  //     }
-  //     //  해당 작업 이름으로 등록된 작업 유뮤 조회
-  //     //  등록된 작업 수 === 자동 idx 추가 
-  //     const idx = await (await this.backupRepository.findByJobNameUseLike({ jobName: jName, filterOptions: {} })).length
-  //     asyncContextStorage.addOrder({ component: this.serviceName, method: "preprocessJobName", state: "end" })
-  //     return { jName: `${jName}_idx`, idx }
-  //   } catch (error) {
-  //     throw ServiceError.dataProcessingError({
-  //       method: "preprocessJobName",
-  //       message: "[Backup 정보 등록] - Backup JobName 정보 가공 오류 발생",
-  //       error,
-  //     })
-  //   }
-  // }
 
   /**
    * 데이터 전처리(제외 파티션)

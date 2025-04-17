@@ -94,3 +94,16 @@ export interface BackupDataResponse {
 export interface BackupDataRegistResponse {
 
 }
+
+/**
+ * Backup 작업 삭제 결과 서비스 리턴 타입
+ */
+export interface BackupDataDeleteResponse {
+  job_name?: string
+  job_id?: number
+  delete_state: {
+    data: string
+    log: string
+    history: string
+  }
+}

@@ -422,7 +422,6 @@ export class BaseRepository {
       })
       //  Repository Layer에서 발생한 정의되지 않은 오류 처리
     } else if (error instanceof Error && !(error instanceof RepositoryError)) {
-      console.log('handleRepositoryError-Error')
       error = RepositoryError.fromError<RepositoryError>(error, { method, message, error, application })
     }
     throw error
