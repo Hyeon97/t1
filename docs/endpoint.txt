@@ -1,0 +1,126 @@
+[ ai 질문 프롬프트 ]
+당신은 매우 숙련된 server 개발자 입니다.
+질문에 대한 답변을 할 땐 신중하게 고민 후 답변을 해주며 최신 트렌드를 반영합니다.
+restfull 방식으로만 답변하며 다른 대안이 있는 경우 해당 대안도 보여줍니다.
+유지보수성과 확장성이 용이한 방식으로 설계합니다.
+
+[ token ]
+POST    /token                                                                                        //  token 발급
+
+[ user ]
+GET     /users                                                                                        //  user 전체 정보 조회
+
+[ server ]
+DELETE  /servers/{identifier}?identifierType={id|name}                                                // server 정보 단일 삭제 ( server id | name )
+//  공통 조회 추가 옵션
+disk={true}&network={true}&partition={true}&repository={true}                                         // disk 정보 추가 | network 정보 추가 | partition 정보 추가 | recovery 정보 추가
+connection={connect|disconnect}&os={win|lin}&mode={source|target}&license={assign|unassign}           // server 연결 상태 | server os 타입 | server mode | license 할당 상태
+GET     /servers                                                                                      // server 전체 정보 조회
+GET     /servers/{identifier}?identifierType={id|name}                                                // server 특정 정보 조회 ( server id | name)
+
+[ center(zdm) ]
+//  공통 조회 추가 옵션
+disk={true}&network={true}&partition={true}&repository={true}&zos-repository={true}                   // disk 정보 추가 | network 정보 추가 | partition 정보 추가 | recovery 정보 추가 | zos recovery 정보 추가
+connection={connect|disconnect}&activation={ok|fail}                                                  // center 연결 상태 | center 활성화 상태
+GET     /centers                                                                                      // center 전체 정보 조회
+GET     /centers/{identifier}?identifierType={id|name}                                                // center 특정 정보 조회  ( center id | name )
+
+[ center(zdm) - repository ]
+POST    /centers/{identifier}/repositories?identifierType={id|name}                                   // center repository 정보 추가 ( center id | name )
+PUT     /centers/{identifier}/repositories/{repoId}?identifierType={id|name}                          // center repository 정보 수정 ( center id | name, repository id )
+DELETE  /centers/{identifier}/repositories/{repoId}?identifierType={id|name}                          // center repository 정보 삭제 ( center id | name, repository id )
+//  공통 조회 필터 옵션
+type={smb|nfs}&os={win|lin}&path={path}                                                               // repository 타입 | os 타입 | recovery remote path
+GET     /centers/repositories                                                                         // center repository 전체 정보 조회  ( center 구분 없음 )
+GET     /centers/{identifier}/repositories?identifierType={id|name}                                   // center repository 전체 정보 조회  ( center id | name )
+GET     /centers/{identifier}/repositories/{repoId}?identifierType={id|name}                          // center repository 특정 정보 조회  ( center id | name, repository id )
+
+[ center(zdm) - zos repository ]
+POST    /centers/{identifier}/zos/repositories?identifierType={id|name}                               // center zos repository 추가 ( center id | name )
+PUT     /centers/{identifier}/zos/repositories/{repoId}?identifierType={id|name}                      // center zos repository 수정 ( center id | name, zos repository id )
+DELETE  /centers/{identifier}/zos/repositories/{repoId}?identifierType={id|name}                      // center zos repository 삭제 ( center id | name, zos repository id )
+//  공통 조회 필터 옵션
+platform={aws|gcp|ncp|openstack|nhn|azure}                                                            // platform 타입
+GET     /centers/zos/repositories                                                                     // center zos repository 전체 정보 조회 ( center 구분 없음 )
+GET     /centers/{identifier}/zos/repositories?identifierType={id|name}                               // center zos repository 전체 정보 조회 ( center id | name )
+GET     /centers/{identifier}/zos/repositories/{repoId}?identifierType={id|name}                      // center zos repository 특정 정보 조회 ( center id | name, zos repository id )
+
+[ license ]
+POST    /licenses                                                                                     // license 추가
+DELETE  /licenses/{identifier}?identifierType={id|name}                                               // license 삭제 ( license id | name )
+//  공통 조회 필터 옵션
+server={server}&state={active|inactive}&category={category}                                           // license 할당 서버 이름 | license 활성화 상태 | license 카테고리
+GET     /licenses                                                                                     // license 전체 정보 조회
+GET     /licenses/{identifier}?identifierType={id|name}                                               // license 특정 정보 조회 ( license id | name )
+GET     /licenses/histories                                                                           // license 전체 history 조회
+GET     /licenses/{identifier}/histories?identifierType={id|name}                                     // license 특정 history 조회 ( license id | name )
+
+[ backup ]
+POST   /backups                                                                                       // backup 작업 정보 등록
+DELETE /backups/{identifier}?identifierType={id|name}                                                 // backup 작업 정보 단일 삭제 ( 작업 id | name )
+DELETE /backups?serverName={server}                                                                   // backup 작업 정보 다중 삭제 ( 해당 server 이름이 존재하는 모든 작업 )
+PUT    /backups/{identifier}?identifierType={id|name}                                                 // backup 작업 정보 수정 ( 작업 id | name )
+//  공통 조회 필터 옵션
+mode={full|inc|smart}&partition={partition}&status={status}&result={result}&detail={true}             // backup mode | 작업 partition 이름 | 작업 진행 상태 | 작업 결과 | 상세 정보
+repositoryID={id}&repositoryType={smb|nfs}&repositoryPath={path}                                      // 작업에 사용한 repository ID | 작업에 사용한 repository 타입 | 작업에 사용한 repository path
+GET    /backups                                                                                       // backup 작업 전체 정보 조회
+GET    /backups/{identifier}?identifierType={id|name|serverName}                                      // backup 작업 특정 정보 조회 ( 작업 id | name, 작업 대상 server name )
+GET    /backups/{identifier}/monitoring?identifierType={id|name|serverName}                           // backup 작업 모니터링 ( 작업 id | name, 작업 대상 server name )
+GET    /backups/{identifier}/histories?identifierType={id|name|serverName}                            // backup 작업 전체 히스토리 조회 ( 작업 id | name, 작업 대상 server name )
+GET    /backups/{identifier}/logs?identifierType={id|name|serverName}                                 // backup 작업 전체 로그 조회 ( 작업 id | name, 작업 대상 server name )
+
+[이렇게 수정해야함]
+# 조회 관련 엔드포인트
+GET /backups                                      // 전체 백업 조회
+GET /backups/id/{backupId}                        // 작업 ID로 백업 조회
+GET /backups/job-name/{name}                      // 작업 이름으로 백업 조회
+GET /backups/server-name/{serverName}             // 특정 서버의 모든 백업 조회
+# 모니터링 관련 엔드포인트
+GET /backups/id/{backupId}/monitoring             // 작업 ID로 백업 모니터링
+GET /backups/job-name/{name}/monitoring           // 작업 이름으로 백업 모니터링
+GET /backups/server-name/{serverName}/monitoring  // 작업 대상 서버 이름으로 백업 모니터링
+# 히스토리 관련 엔드포인트
+GET /backups/id/{backupId}/histories              // 작업 ID로 백업 히스토리 조회
+GET /backups/job-name/{name}/histories            // 작업 이름으로 백업 히스토리 조회
+GET /backups/server-name/{serverName}/histories   // 작업 대상 서버 이름으로 백업 히스토리 조회
+# 로그 관련 엔드포인트
+GET /backups/id/{backupId}/logs                   // 작업 ID로 백업 로그 조회
+GET /backups/job-name/{name}/logs                 // 작업 이름으로 백업 로그 조회
+GET /backups/server-name/{serverName}/logs        // 작업 대상 서버 이름으로 백업 로그 조회
+
+[ recovery ]
+POST   /recoveries                                                                                    // recovery 작업 정보 등록
+DELETE /recoveries/{identifier}?identifierType={id|name}                                              // recovery 작업 정보 단일 삭제 ( 작업 id | name )
+DELETE /recoveries?serverName={server}&serverType={source|target}                                     // recovery 작업 정보 다중 삭제 ( 해당 server 이름이 존재하는 모든 작업, serverType이 없으면 source, target 구분 없이 모두 삭제 )
+PUT    /recoveries/{identifier}?identifierType={id|name}                                              // recovery 작업 정보 수정 ( 작업 id | name )
+//  공통 조회 필터 옵션
+serverType={source|target}&platform={aws|gcp|ncp|openstack|nhn|azure}                                 // 조회할 서버 타입 | 플랫폼 타입
+mode={full|inc}&partition={partition}&status={status}&result={result}                                 // recovery mode | 작업 partition 이름 | 작업 진행 상태 | 작업 결과
+repositoryID={id}&repositoryType={smb|nfs}&repositoryPath={path}                                      // 작업에 사용한 repository ID | 작업에 사용한 repository 타입 | 작업에 사용한 repository path
+GET    /recoveries                                                                                    // recovery 작업 전체 정보 조회
+GET    /recoveries/{identifier}?identifierType={id|name|serverName}                                   // recovery 작업 특정 정보 조회 ( 작업 id | name, 작업 대상 server name, serverType이 없으면 source, target 구분 없음 )
+GET    /recoveries/{identifier}/monitoring?identifierType={id|name|serverName}                        // recovery 작업 모니터링 ( 작업 id | name, 작업 대상 server name, serverType이 없으면 source, target 구분 없음 )
+GET    /recoveries/{identifier}/histories?identifierType={id|name|serverName}                         // recovery 작업 전체 히스토리 조회 ( 작업 id | name, 작업 대상 server name, serverType이 없으면 source, target 구분 없음 )
+GET    /recoveries/{identifier}/logs?identifierType={id|name|serverName}                              // recovery 작업 전체 로그 조회 ( 작업 id | name, 작업 대상 server name, serverType이 없으면 source, target 구분 없음 )
+
+[ replication ]
+POST   /replications                                                                                  // replication 작업 정보 등록
+DELETE /replications/{identifier}?identifierType={id|name}                                            // replication 작업 정보 단일 삭제 ( 작업 id | name )
+DELETE /replications?centerName={center}                                                              // replication 작업 정보 다중 삭제 ( 해당 center 이름이 존재하는 모든 작업 )
+PUT    /replications/{identifier}?identifierType={id|name}                                            // replication 작업 정보 수정 ( 작업 id | name )
+//  공통 조회 필터 옵션
+mode={full|inc}&type={image|repo}&status={status}&result={result}                                     // replication mode | replication type | 작업 진행 상태 | 작업 결과
+repositoryID={id}&repositoryType={smb|nfs}&repositoryPath={path}                                      // 작업에 사용한 repository ID | 작업에 사용한 repository 타입 | 작업에 사용한 repository path
+GET    /replications                                                                                  // replication 작업 전체 정보 조회
+GET    /replications/{identifier}?identifierType={id|name|centerName}                                 // replication 작업 특정 정보 조회 ( 작업 id | name, 작업 대상 center name )
+GET    /replications/{identifier}/monitoring?identifierType={id|name|centerName}                      // replication 작업 모니터링 ( 작업 id | name, 작업 대상 center name )
+GET    /replications/{identifier}/histories?identifierType={id|name|centerName}                       // replication 작업 전체 히스토리 조회 ( 작업 id | name, 작업 대상 center name )
+GET    /replications/{identifier}/logs?identifierType={id|name|centerName}                            // replication 작업 전체 로그 조회 ( 작업 id | name, 작업 대상 center name )
+
+[ schedule ]
+POST   /schedules                                                                                     // schedule 정보 등록
+DELETE /schedules/:id                                                                                 // schedule 정보 삭제 ( schedule id )
+//  공통 조회 필터 옵션
+type={type}&state={state}&jobName={name}                                                              // schedule 타입 | schedule 활성화 상태 | schedule 등록 작업 이름
+GET    /schedules                                                                                     // schedule 전체 정보 조회
+GET    /schedules/:id                                                                                 // schedule 특정 정보 조회 ( schedule id )

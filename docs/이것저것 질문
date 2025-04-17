@@ -1,0 +1,33 @@
+특정 객체 삭제 엔드포인트 구성시
+
+해당 객체는 name, id, system이 삭제의 기준이 된다
+그래서 일반적으로는
+
+name으로 삭제
+id로 삭제
+system으로 삭제
+로 구현을 하고 예시는 다음과 같다
+
+DELETE /api/objects/:identifier?identifier='name'|'id'|'system'&name&id&system
+identifier > 사용자 입력값
+
+그런데 만약 name이 a 이면서 id가 99인 객체를 삭제하는 기능을 포함하려면 어떻게 설계를 하는게 좋은가?
+
+그렇다면
+DELETE /api/objects/:identifier?identifier='name'|'id'|'system'&name&id&system
+identifier > 사용자 입력값
+
+다음과 같이 엔드포인트를 설계하는 것은 어떤가?
+식별자와 필터 모두를 지원하며
+식별자 identifier값을 추후 controller단에서 식별자 값에 적용시킨후 동작하는 것이다
+ex.
+/api/objects/abc?identifier='name'&name&id=12&system 으로 요청이 오는경우
+controller단에서는 사전 필터옵션 처리시
+/api/objects/abc?identifier='name'&name=abc&id=12&system 형태로 변형 하여 사용함함
+
+DELETE /api/objects/name/abc?system=linux&id=99
+다음과 같이 엔드포인트를 설계하는 경우
+id가 99이면서 system이 linux인 객체를 삭제하려면
+DELETE /api/objects/system/linux?system=linux&id=99
+이런식으로 엔드포인트를 추가 설계해야하지 않나?
+

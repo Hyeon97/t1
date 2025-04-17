@@ -4,9 +4,9 @@
 
 import { serverPartitionService, serverService } from "../../server/services/service-registry"
 import { zdmRepositoryService, zdmService } from "../../zdm/services/service-registry"
-import { BackupHistoryRepository } from "../repositories/backup-history"
+import { BackupHistoryRepository } from "../repositories/backup-history.repository"
 import { BackupInfoRepository } from "../repositories/backup-info.repository"
-import { BackupLogRepository } from "../repositories/backup-log-event"
+import { BackupLogRepository } from "../repositories/backup-log-event.repository"
 import { BackupRepository } from "../repositories/backup.repository"
 import { BackupDeleteService } from "./backup-delete.service"
 import { BackupRegistService } from "./backup-regist.service"
@@ -42,5 +42,5 @@ export const backupDeleteService = new BackupDeleteService({
   backupRepository,
   backupInfoRepository,
   backupLogRepository,
-  backupHistoryRepository
+  backupHistoryRepository,
 })
