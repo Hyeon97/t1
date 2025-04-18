@@ -5,7 +5,7 @@ import { ApiUtils } from "../../../../utils/api/api.utils"
 import { asyncContextStorage } from "../../../../utils/AsyncContext"
 import { BaseController } from "../../../../utils/base/base-controller"
 import { ContextLogger } from "../../../../utils/logger/logger.custom"
-import { BackupDeleteQueryDTO } from "../../dto/query/delete-backup-filter.dto"
+import { BackupDeleteQueryDTO } from "../../dto/query/backup-delete-query.dto"
 import { BackupDeleteService } from "../../services/backup-delete.service"
 import { BackupDeleteOptions } from "../../types/backup-delete.type"
 

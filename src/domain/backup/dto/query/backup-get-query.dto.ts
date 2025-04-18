@@ -6,7 +6,7 @@ import { IsIn, IsOptional, IsString } from "class-validator"
 import { JobResult, JobStatus } from "../../../../types/common/job"
 import { RepositoryType } from "../../../../types/common/repository"
 import { BackupType } from "../../types/backup-common.type"
-import { BackupFilterOptions } from "../../types/backup-filter.type"
+import { BackupFilterOptions } from "../../types/backup-get.type"
 
 export class BackupGetQueryDTO implements BackupFilterOptions {
   //  필터 옵션

@@ -5,7 +5,7 @@ import { asyncContextStorage } from "../../../utils/AsyncContext"
 import { BaseRepository, SqlFieldOption } from "../../../utils/base/base-repository"
 import { ContextLogger } from "../../../utils/logger/logger.custom"
 import { BackupTypeMap } from "../types/backup-common.type"
-import { BackupFilterOptions } from "../types/backup-filter.type"
+import { BackupFilterOptions } from "../types/backup-get.type"
 import { BackupInfoTableInput } from "../types/backup-regist.type"
 import { BackupInfoTable } from "../types/db/job-backup-info"
 

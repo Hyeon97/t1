@@ -3,7 +3,7 @@
 /////////////////////////////////////////
 
 
-/**
+/*
  * Backup data 삭제 옵션
  */
 export interface BackupDeleteOptions {

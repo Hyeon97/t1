@@ -3,7 +3,7 @@ import { asyncContextStorage } from "../../../utils/AsyncContext"
 import { BaseRepository } from "../../../utils/base/base-repository"
 import { ContextLogger } from "../../../utils/logger/logger.custom"
 import { BackupTypeMap } from "../types/backup-common.type"
-import { BackupFilterOptions } from "../types/backup-filter.type"
+import { BackupFilterOptions } from "../types/backup-get.type"
 import { BackupActiveTable } from "../types/db/active-backup"
 
 export class BackupActiveRepository extends BaseRepository {

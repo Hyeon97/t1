@@ -1,11 +1,10 @@
 import { ControllerError } from "../../../../errors"
 import { asyncContextStorage } from "../../../../utils/AsyncContext"
 import { BaseController } from "../../../../utils/base/base-controller"
-import { BackupGetQueryDTO } from "../../dto/query/get-backup-query.dto"
-import { SpecificBackupGetQueryDTO } from "../../dto/query/get-specific-backup-filter.dto"
+import { BackupGetQueryDTO } from "../../dto/query/backup-get-query.dto"
 import { BackupRegistService } from "../../services/backup-regist.service"
 import { BackupService } from "../../services/backup.service"
-import { BackupFilterOptions } from "../../types/backup-filter.type"
+import { BackupFilterOptions } from "../../types/backup-get.type"
 
 export class BackupMonitoringController extends BaseController {
   private readonly backupService: BackupService
@@ -20,7 +19,7 @@ export class BackupMonitoringController extends BaseController {
   }
 
   //  Backup 모니터링링 옵션 추출
-  private extractFilterOptions({ query }: { query: BackupGetQueryDTO | SpecificBackupGetQueryDTO }): BackupFilterOptions {
+  private extractFilterOptions({ query }: { query: BackupGetQueryDTO }): BackupFilterOptions {
     try {
       asyncContextStorage.addOrder({ component: this.controllerName, method: "extractFilterOptions", state: "start" })
       const filterOptions: BackupFilterOptions = {
@@ -35,8 +34,8 @@ export class BackupMonitoringController extends BaseController {
         //  상세 정보
         detail: query.detail ?? false,
       }
-      if (query instanceof SpecificBackupGetQueryDTO) {
-        filterOptions.identifierType = query.identifierType
+      if (query instanceof BackupGetQueryDTO) {
+        // filterOptions.identifierType = query.identifierType
       }
       asyncContextStorage.addOrder({ component: this.controllerName, method: "extractFilterOptions", state: "end" })
       return filterOptions

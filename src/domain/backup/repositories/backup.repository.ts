@@ -3,7 +3,7 @@ import { TransactionManager } from "../../../database/connection"
 import { asyncContextStorage } from "../../../utils/AsyncContext"
 import { BaseRepository, SqlFieldOption } from "../../../utils/base/base-repository"
 import { ContextLogger } from "../../../utils/logger/logger.custom"
-import { BackupFilterOptions } from "../types/backup-filter.type"
+import { BackupFilterOptions } from "../types/backup-get.type"
 import { BackupTableInput } from "../types/backup-regist.type"
 import { BackupTable } from "../types/db/job-backup"
 

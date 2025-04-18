@@ -6,11 +6,10 @@ import { asyncContextStorage } from "../../../../utils/AsyncContext"
 import { BaseController } from "../../../../utils/base/base-controller"
 import { stringToBoolean } from "../../../../utils/data-convert.utils"
 import { ContextLogger } from "../../../../utils/logger/logger.custom"
-import { BackupGetByServerNameQueryDTO, BackupGetQueryDTO } from "../../dto/query/get-backup-query.dto"
-import { SpecificBackupGetQueryDTO } from "../../dto/query/get-specific-backup-filter.dto"
+import { BackupGetByServerNameQueryDTO, BackupGetQueryDTO } from "../../dto/query/backup-get-query.dto"
 import { BackupResponseFactory } from "../../dto/response/backup-response-factory"
 import { BackupService } from "../../services/backup.service"
-import { BackupFilterOptions } from "../../types/backup-filter.type"
+import { BackupFilterOptions } from "../../types/backup-get.type"
 
 export class BackupController extends BaseController {
   private readonly backupService: BackupService

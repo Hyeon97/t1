@@ -1,10 +1,10 @@
 import { validationMiddleware } from "../../../middlewares/validation/validationMiddleware"
 import { BackupRegistBodyDTO } from "../dto/body/backup-regist.dto"
-import { BackupGetByJobIdParamDTO, BackupGetByJobNameParamDTO, BackupGetByServerNameParamDTO } from "../dto/param/get-backup-param.dto"
-import { BackupMonitoringByJobIdDTO, BackupMonitoringByJobNameDTO, BackupMonitoringByServerNameDTO } from "../dto/param/monit-backup-param.dto"
-import { BackupDeleteQueryDTO } from "../dto/query/delete-backup-filter.dto"
-import { BackupGetQueryDTO } from "../dto/query/get-backup-query.dto"
-import { BackupMonitoringQueryDTO } from "../dto/query/monit-backup-query.dto"
+import { BackupGetByJobIdParamDTO, BackupGetByJobNameParamDTO, BackupGetByServerNameParamDTO } from "../dto/param/backup-get-param.dto"
+import { BackupMonitoringByJobIdDTO, BackupMonitoringByJobNameDTO, BackupMonitoringByServerNameDTO } from "../dto/param/backup-monit-param.dto"
+import { BackupDeleteQueryDTO } from "../dto/query/backup-delete-query.dto"
+import { BackupGetQueryDTO } from "../dto/query/backup-get-query.dto"
+import { BackupMonitoringQueryDTO } from "../dto/query/backup-monit-query.dto"
 
 /**
  * Backup 작업 조회
