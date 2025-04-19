@@ -52,7 +52,6 @@ export class BackupGetQueryDTO implements BackupFilterOptions {
 //  작업 대상 server 이름으로 조회 요청시 DTO
 export class BackupGetByServerNameQueryDTO extends BackupGetQueryDTO {
   //  작업 대상 서버 타입
-  @IsOptional()
   @IsString()
   serverType!: string
 }

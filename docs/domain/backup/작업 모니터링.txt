@@ -1,0 +1,20 @@
+# 동작 ( 일단은 제일 최신 하나만 리턴하는것으로, 추후 요청시 나머지 전체 모니터링 추가 진행 )
+1.  active_backup, job_backup, job_backup_info table에서 데이터 가져옴
+2.  데이터 목록 생성 ( 기준: job_backup table )
+    - active_backup table 에서 nPercent 가져옴, 그외의 정보는 job_backup, job_backup_info table 에서 가져옴
+
+# 조회 기준
+1.  작업 이름 / 작업 ID
+2.  작업 대상 server 이름
+
+작업 이름 or ID로 모니터링 하는 경우
+    -   job_backup, job_backup_info 는 여러개
+    -   active_backup이 동일작업당 하나 생성되나? 아니면 누적인가? 그걸 모르겠음
+
+작업 대상 server 이름으로 모니터링 하는 경우 
+    -   server 이름에 여러 작업 할당 되어 있음으로 기본으로 job_backup, job_backup_info 여러개 출력됨
+
+active_backup에 데이터가 존재함 >> 현재 작업이 무슨상태든 진행중
+    job_backup을 기준으로 진행
+    -   active_backup 데이터 존재
+    -   active_backup 데이터 부재

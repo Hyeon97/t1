@@ -9,14 +9,12 @@ import { BackupService } from "../../services/backup.service"
 import { BackupRegistRequestBody } from "../../types/backup-regist.type"
 
 export class BackupRegistController extends BaseController {
-  private readonly backupService: BackupService
   private readonly backupRegistService: BackupRegistService
 
-  constructor({ backupService, backupRegistService }: { backupService: BackupService; backupRegistService: BackupRegistService }) {
+  constructor({ backupRegistService }: { backupRegistService: BackupRegistService }) {
     super({
       controllerName: "BackupRegistController",
     })
-    this.backupService = backupService
     this.backupRegistService = backupRegistService
   }
 

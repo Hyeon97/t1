@@ -38,7 +38,7 @@ export const validateBackupDeleteByJobNameParams = validationMiddleware.validate
  * Backup 작업 모니터링
  */
 //  모니터링 공통 queryString 검증
-export const validateBackupMonitoringQuery = validationMiddleware.validateParams(BackupMonitoringQueryDTO)
+export const validateBackupMonitoringQuery = validationMiddleware.validateQuery(BackupMonitoringQueryDTO)
 //  작업 이름으로 모니터링 parameter 검증
 export const validateBackupMonitoringByJobNameParams = validationMiddleware.validateParams(BackupMonitoringByJobNameDTO)
 //  작업 ID로 모니터링 parameter 검증

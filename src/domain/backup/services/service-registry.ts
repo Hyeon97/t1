@@ -4,11 +4,13 @@
 
 import { serverPartitionService, serverService } from "../../server/services/service-registry"
 import { zdmRepositoryService, zdmService } from "../../zdm/services/service-registry"
+import { BackupActiveRepository } from "../repositories/backup-active.repository"
 import { BackupHistoryRepository } from "../repositories/backup-history.repository"
 import { BackupInfoRepository } from "../repositories/backup-info.repository"
 import { BackupLogRepository } from "../repositories/backup-log-event.repository"
 import { BackupRepository } from "../repositories/backup.repository"
 import { BackupDeleteService } from "./backup-delete.service"
+import { BackupMonitoringService } from "./backup-monitoring.service"
 import { BackupRegistService } from "./backup-regist.service"
 import { BackupService } from "./backup.service"
 
@@ -19,6 +21,7 @@ const backupRepository = new BackupRepository()
 const backupInfoRepository = new BackupInfoRepository()
 const backupLogRepository = new BackupLogRepository()
 const backupHistoryRepository = new BackupHistoryRepository()
+const backupActiveRepository = new BackupActiveRepository()
 
 /**
  * 서비스 인스턴스 생성 및 의존성 주입
@@ -43,4 +46,10 @@ export const backupDeleteService = new BackupDeleteService({
   backupInfoRepository,
   backupLogRepository,
   backupHistoryRepository,
+})
+//  Backup 정보 모니터링 Service
+export const backupMonitoringService = new BackupMonitoringService({
+  backupRepository,
+  backupInfoRepository,
+  backupActiveRepository,
 })

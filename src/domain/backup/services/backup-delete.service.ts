@@ -48,35 +48,43 @@ export class BackupDeleteService extends BaseService {
    * 결과 확인 및 출력 결과 가공
    */
   private processResult({ data, jobName, id }: { data: BackupDataDeleteResultSet; jobName?: string; id?: number }): BackupDataDeleteResponse {
-    asyncContextStorage.addOrder({ component: this.serviceName, method: "processResult", state: "start" })
-    let returnObject: BackupDataDeleteResponse | null = null
-    const mainResult = data.mainResults.filter((el) => el.status === "fulfilled").length === 2 ? "success" : "false"
-    const log = data.additionalResults.find((el) => el.type === "Log") ?? null
-    const logResult = !log ? "fail" : log.status === "fulfilled" ? "success" : "fail"
-    const history = data.additionalResults.find((el) => el.type === "History") ?? null
-    const historyResult = !history ? "fail" : history.status === "fulfilled" ? "success" : "fail"
+    try {
+      asyncContextStorage.addOrder({ component: this.serviceName, method: "processResult", state: "start" })
+      let returnObject: BackupDataDeleteResponse | null = null
+      const mainResult = data.mainResults.filter((el) => el.status === "fulfilled").length === 2 ? "success" : "false"
+      const log = data.additionalResults.find((el) => el.type === "Log") ?? null
+      const logResult = !log ? "fail" : log.status === "fulfilled" ? "success" : "fail"
+      const history = data.additionalResults.find((el) => el.type === "History") ?? null
+      const historyResult = !history ? "fail" : history.status === "fulfilled" ? "success" : "fail"
 
-    if (jobName) {
-      returnObject = {
-        job_name: jobName,
-        delete_state: {
-          data: mainResult,
-          log: logResult,
-          history: historyResult,
-        },
+      if (jobName) {
+        returnObject = {
+          job_name: jobName,
+          delete_state: {
+            data: mainResult,
+            log: logResult,
+            history: historyResult,
+          },
+        }
+      } else {
+        returnObject = {
+          job_id: String(id),
+          delete_state: {
+            data: mainResult,
+            log: logResult,
+            history: historyResult,
+          },
+        }
       }
-    } else {
-      returnObject = {
-        job_id: id,
-        delete_state: {
-          data: mainResult,
-          log: logResult,
-          history: historyResult,
-        },
-      }
+      asyncContextStorage.addOrder({ component: this.serviceName, method: "processResult", state: "end" })
+      return returnObject
+    } catch (error) {
+      return this.handleServiceError({
+        error,
+        method: "processResult",
+        message: `[Backup 이름으로 삭제] - 출력데이터 생성 실패`,
+      })
     }
-    asyncContextStorage.addOrder({ component: this.serviceName, method: "processResult", state: "end" })
-    return returnObject
   }
 
   /**

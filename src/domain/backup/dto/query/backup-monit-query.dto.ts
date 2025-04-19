@@ -2,7 +2,7 @@
 //  Backup monitoring 공통 필터링 옵션 DTO //
 ////////////////////////////////////////////
 
-import { IsIn, IsOptional, IsString } from "class-validator"
+import { IsOptional, IsIn, IsString } from "class-validator"
 import { RepositoryType } from "../../../../types/common/repository"
 import { BackupType } from "../../types/backup-common.type"
 import { BackupMonitoringFilterOptions } from "../../types/backup-monitoring.type"
@@ -28,13 +28,15 @@ export class BackupMonitoringQueryDTO implements BackupMonitoringFilterOptions {
   @IsString()
   repositoryPath?: string
 
-  //  작업 대상 서버 타입 ( 작업 대상 server 이름으로 모니터링 요청시에만 사용 )
-  @IsOptional()
-  @IsString()
-  serverType?: string
-
   //  상세 정보
   @IsOptional()
   @IsIn(["true"], { message: "detail은 'true'만 가능합니다" })
   detail?: string
+}
+
+//  작업 대상 server 이름으로 조회 요청시 DTO
+export class BackupMonitoringByServerNameQueryDTO extends BackupMonitoringQueryDTO {
+  //  작업 대상 서버 타입
+  @IsString()
+  serverType!: string
 }

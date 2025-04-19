@@ -46,8 +46,8 @@ X backup 작업 수정
   X 작업 이름으로 수정
   X 작업 ID로 수정
 
-X backup 작업 모니터링
-  X 작업 이름으로 모니터링
+- backup 작업 모니터링
+  - 작업 이름으로 모니터링 ( active_backup table 값에 따라 동작 수정해야 할거같음 )
   X 작업 ID로 모니터링
   X 작업 대상 Server 이름으로 모니터링
   

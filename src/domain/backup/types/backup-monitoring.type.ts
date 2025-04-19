@@ -16,4 +16,6 @@ export interface BackupMonitoringFilterOptions {
   repositoryPath?: string
   //  추가 정보
   detail?: string | boolean
+  //  작업 대상 server 이름으로 Monitoring 요청시에만 사용
+  serverType?: string
 }

@@ -37,6 +37,7 @@ export class BackupController extends BaseController {
         //  상세 정보
         detail: query.detail ?? false,
       }
+      //  작업 대상 server 이름으로 조회 요청시에만 사용
       if (query instanceof BackupGetByServerNameQueryDTO) {
         filterOptions.serverType = query.serverType || ""
       }
