@@ -5,7 +5,6 @@ import { asyncContextStorage } from "../../../../utils/AsyncContext"
 import { BaseController } from "../../../../utils/base/base-controller"
 import { ContextLogger } from "../../../../utils/logger/logger.custom"
 import { BackupRegistService } from "../../services/backup-regist.service"
-import { BackupService } from "../../services/backup.service"
 import { BackupRegistRequestBody } from "../../types/backup-regist.type"
 
 export class BackupRegistController extends BaseController {
