@@ -20,13 +20,15 @@ export class BaseService {
       throw error
     }
     //  Service layer에서 발생한 에러만 로깅
-    if (error instanceof Error && error instanceof ServiceError) {
+    else if (error instanceof Error && error instanceof ServiceError) {
       //  에러가 발생한 Service Layer Application이름 주입
-      if (error?.metadata) { error.metadata.application = application }
+      if (error?.metadata) {
+        error.metadata.application = application
+      }
       //  로깅
       ContextLogger.info({
         message: `[Service-Layer] ${this.serviceName}.${method}() 오류 발생`,
-        meta: { error: error instanceof Error ? error.message : String(error), },
+        meta: { error: error instanceof Error ? error.message : String(error) },
       })
       //  Service Layer에서 발생한 정의되지 않은 오류 처리
     } else if (error instanceof Error && !(error instanceof ServiceError)) {
@@ -49,12 +51,12 @@ export class BaseService {
           message: msg,
           error,
         })
-      }
-      else if (error instanceof Error && error instanceof ServiceError) {
+      } else if (error instanceof Error && error instanceof ServiceError) {
         // console.log(`executeTransaction-error`)
         throw error
+      } else {
+        throw error
       }
-      else { throw error }
     }
   }
 }

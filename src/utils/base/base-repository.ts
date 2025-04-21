@@ -232,6 +232,7 @@ export class BaseRepository {
    */
   protected async executeQuery<T>({ sql, params = [], request }: { sql: string; params?: any[]; request: string }): Promise<T> {
     try {
+      if (!params.length) params = this.params
       return await DatabaseOperations.executeQuery<T>({ sql, params, request })
     } catch (error) {
       // if (error instanceof DatabaseError) {throw RepositoryError.fromDatabaseError({ error, method }) }
@@ -412,13 +413,15 @@ export class BaseRepository {
       throw RepositoryError.fromDatabaseError({ error, method })
     }
     //  Repository Layer에서 발생한 에러만 로깅
-    if (error instanceof Error && error instanceof RepositoryError) {
+    else if (error instanceof Error && error instanceof RepositoryError) {
       //  에러가 발생한 Repository Layer Application이름 주입
-      if (error?.metadata) { error.metadata.application = application }
+      if (error?.metadata) {
+        error.metadata.application = application
+      }
       //  로깅
       ContextLogger.debug({
         message: `[Repository-Layer] ${this.repositoryName}.${method}() 오류 발생`,
-        meta: { error: error instanceof Error ? error.message : String(error), },
+        meta: { error: error instanceof Error ? error.message : String(error) },
       })
       //  Repository Layer에서 발생한 정의되지 않은 오류 처리
     } else if (error instanceof Error && !(error instanceof RepositoryError)) {

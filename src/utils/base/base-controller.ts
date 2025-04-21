@@ -30,9 +30,11 @@ export class BaseController {
       next(error)
     }
     //  Controller Layer에서 발생한 에러만 로깅
-    if (error instanceof Error && error instanceof ControllerError) {
+    else if (error instanceof Error && error instanceof ControllerError) {
       //  에러가 발생한 Controller Layer Application이름 주입
-      if (error?.metadata) { error.metadata.application = application }
+      if (error?.metadata) {
+        error.metadata.application = application
+      }
       //  로깅
       ContextLogger.info({
         message: `[Controller-Layer] ${this.controllerName} () 오류 발생`,
