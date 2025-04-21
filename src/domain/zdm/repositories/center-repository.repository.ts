@@ -16,8 +16,9 @@ export class ZdmRepositoryRepository extends BaseRepository {
   /**
    * 필터 옵션 적용
    */
-  private applyFilters({ filterOptions }: { filterOptions: ZdmRepositoryFilterOptions }): void {
+  private applyFilters({ filterOptions }: { filterOptions?: ZdmRepositoryFilterOptions }): void {
     try {
+      if (!filterOptions) return
       asyncContextStorage.addOrder({ component: this.repositoryName, method: "applyFilters", state: "start" })
       //  center 필터 적용
       //  filterOptions.center 값이 center name 인 경우 별도 처리 필요 ( center 정보 가져와야 함 )
@@ -51,7 +52,7 @@ export class ZdmRepositoryRepository extends BaseRepository {
   /**
    *  모든 레포지토리 조회
    */
-  async findAll({ filterOptions }: { filterOptions: ZdmRepositoryFilterOptions }): Promise<ZdmRepositoryTable[]> {
+  async findAll({ filterOptions }: { filterOptions?: ZdmRepositoryFilterOptions }): Promise<ZdmRepositoryTable[]> {
     try {
       asyncContextStorage.addRepository({ name: this.repositoryName })
       asyncContextStorage.addOrder({ component: this.repositoryName, method: "findAll", state: "start" })
@@ -75,7 +76,7 @@ export class ZdmRepositoryRepository extends BaseRepository {
   /**
    * 특정 레포지토리 조회 ( by ID )
    */
-  async findById({ id, filterOptions }: { id: number; filterOptions: ZdmRepositoryFilterOptions }): Promise<ZdmRepositoryTable | null> {
+  async findById({ id, filterOptions }: { id: number; filterOptions?: ZdmRepositoryFilterOptions }): Promise<ZdmRepositoryTable | null> {
     try {
       asyncContextStorage.addRepository({ name: this.repositoryName })
       asyncContextStorage.addOrder({ component: this.repositoryName, method: "findById", state: "start" })

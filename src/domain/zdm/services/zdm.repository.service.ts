@@ -20,7 +20,7 @@ export class ZdmRepositoryService extends BaseService {
   /**
    * 모든 Repository 정보 조회
    */
-  async getRepositoryList({ filterOptions }: { filterOptions: ZdmRepositoryFilterOptions }): Promise<ZdmRepositoryDataResponse> {
+  async getRepositoryList({ filterOptions }: { filterOptions?: ZdmRepositoryFilterOptions }): Promise<ZdmRepositoryDataResponse> {
     try {
       asyncContextStorage.addService({ name: this.serviceName })
       asyncContextStorage.addOrder({ component: this.serviceName, method: "getRepositoryList", state: "start" })
@@ -40,7 +40,7 @@ export class ZdmRepositoryService extends BaseService {
   /**
    * Repository ID로 정보 조회
    */
-  async getRepositoryById({ id, filterOptions }: { id: number; filterOptions: ZdmRepositoryFilterOptions }): Promise<ZdmRepositoryDataResponse> {
+  async getRepositoryById({ id, filterOptions }: { id: number; filterOptions?: ZdmRepositoryFilterOptions }): Promise<ZdmRepositoryDataResponse> {
     try {
       asyncContextStorage.addService({ name: this.serviceName })
       asyncContextStorage.addOrder({ component: this.serviceName, method: "getRepositoryById", state: "start" })
