@@ -11,7 +11,7 @@ export enum CompressionEnum {
 //  압축 타입 변환
 export const CompressionTypeMap = {
   // 문자열 → 숫자
-  fromString: (str: string): number => {
+  fromString: ({ str }: { str: string }): number => {
     const upperStr = str.toUpperCase()
     switch (upperStr) {
       case "USE":
@@ -21,7 +21,7 @@ export const CompressionTypeMap = {
     }
   },
   // 숫자 → 문자열
-  toString: (value: number): string => {
+  toString: ({ value }: { value: number }): string => {
     switch (value) {
       case CompressionEnum.USE:
         return "Use"
