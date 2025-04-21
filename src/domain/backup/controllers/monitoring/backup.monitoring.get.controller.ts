@@ -4,14 +4,11 @@ import { ExtendedRequest } from "../../../../types/common/req.types"
 import { ApiUtils } from "../../../../utils/api/api.utils"
 import { asyncContextStorage } from "../../../../utils/AsyncContext"
 import { BaseController } from "../../../../utils/base/base-controller"
-import { stringToBoolean } from "../../../../utils/data-convert.utils"
 import { ContextLogger } from "../../../../utils/logger/logger.custom"
-import { BackupGetQueryDTO } from "../../dto/query/backup-get-query.dto"
-import { BackupResponseFactory } from "../../dto/response/backup-response-factory"
+import { BackupMonitoringByJobNameParamDTO } from "../../dto/param/backup-monit-param.dto"
 import { BackupMonitoringByServerNameQueryDTO, BackupMonitoringQueryDTO } from "../../dto/query/backup-monit-query.dto"
-import { BackupMonitoringFilterOptions } from "../../types/backup-monitoring.type"
 import { BackupMonitoringService } from "../../services/backup-monitoring.service"
-import { BackupMonitoringByJobNameDTO } from "../../dto/param/backup-monit-param.dto"
+import { BackupMonitoringFilterOptions } from "../../types/backup-monitoring.type"
 
 export class BackupMonitoringController extends BaseController {
   private readonly backupMonitoringService: BackupMonitoringService
@@ -61,7 +58,7 @@ export class BackupMonitoringController extends BaseController {
       asyncContextStorage.addOrder({ component: this.controllerName, method: "monitByJobName", state: "start" })
 
       // 파라미터 추출
-      const params = req.params as unknown as BackupMonitoringByJobNameDTO
+      const params = req.params as unknown as BackupMonitoringByJobNameParamDTO
       ContextLogger.debug({ message: `파라미터터`, meta: params })
 
       // 필터 옵션 추출
@@ -72,11 +69,6 @@ export class BackupMonitoringController extends BaseController {
       //  서비스 호출
       const backupMonitData = await this.backupMonitoringService.monitByJobName({ jobName: params.jobName, filterOptions })
 
-      // //  출력 가공
-      // const backupsDTO = BackupResponseFactory.createFromEntities({
-      //   detail: stringToBoolean({ value: filterOptions?.detail }),
-      //   backupsData,
-      // })
       ContextLogger.info({ message: `Backup 작업 이름으로 모니터링. 상세 정보 포함: ${filterOptions.detail}` })
       ApiUtils.success({ res, data: backupMonitData, message: "Backup infomation list" })
       asyncContextStorage.addOrder({ component: this.controllerName, method: "monitByJobName", state: "end" })

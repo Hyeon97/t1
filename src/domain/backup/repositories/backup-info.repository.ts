@@ -20,8 +20,9 @@ export class BackupInfoRepository extends BaseRepository {
   /**
    * 필터 옵션 적용
    */
-  private applyFilters({ filterOptions }: { filterOptions: BackupFilterOptions }): void {
+  private applyFilters({ filterOptions }: { filterOptions?: BackupFilterOptions }): void {
     try {
+      if (!filterOptions) return
       asyncContextStorage.addOrder({ component: this.repositoryName, method: "applyFilters", state: "start" })
       //  mode 필터 적용
       if (filterOptions.mode) {
@@ -103,6 +104,32 @@ export class BackupInfoRepository extends BaseRepository {
         error,
         method: "findByJobNames",
         message: "[Backup Info 작업 이름으로 조회] - 오류가 발생했습니다",
+      })
+    }
+  }
+
+  /**
+   * 특정 작업 조회 ( by JobName )
+   */
+  async findByJobName({ jobName, filterOptions }: { jobName: string; filterOptions?: BackupFilterOptions }): Promise<BackupInfoTable[]> {
+    try {
+      asyncContextStorage.addRepository({ name: this.repositoryName })
+      asyncContextStorage.addOrder({ component: this.repositoryName, method: "findByJobName", state: "start" })
+
+      this.resetQueryState()
+      this.addCondition({ condition: "sJobName = ?", params: [jobName] })
+      this.applyFilters({ filterOptions })
+
+      const query = `SELECT * FROM ${this.tableName}`
+      const result = await this.executeQuery<BackupInfoTable[]>({ sql: query, request: `${this.repositoryName}.findByJobName` })
+
+      asyncContextStorage.addOrder({ component: this.repositoryName, method: "findByJobName", state: "end" })
+      return result
+    } catch (error) {
+      return this.handleRepositoryError({
+        error,
+        method: "findByJobName",
+        message: `[Backup Info 작업 이름으로 조회] - 오류가 발생했습니다`,
       })
     }
   }

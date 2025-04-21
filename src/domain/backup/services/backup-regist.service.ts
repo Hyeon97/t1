@@ -17,7 +17,7 @@ import { ZdmRepositoryFilterOptions } from "../../zdm/types/zdm-repository/zdm-r
 import { BackupInfoRepository } from "../repositories/backup-info.repository"
 import { BackupRepository } from "../repositories/backup.repository"
 import { BackupTypeMap } from "../types/backup-common.type"
-import { BackupInfoTableInput, BackupRegistRequestBody, BackupRegistRequestRepository, BackupTableInput } from "../types/backup-regist.type"
+import { BackupInfoTableInput, BackupRegistRequestBody, BackupRequestRepository, BackupTableInput } from "../types/backup-regist.type"
 import { BackupDataRegistResponse } from "../types/backup-response.type"
 
 //  Backup Data 등록 DataSet 배열 Type
@@ -84,7 +84,7 @@ export class BackupRegistService extends BaseService {
         nUserID: (data.user ?? 1) as number,
         nCenterID: center.nID,
         sSystemName: server.sSystemName,
-        sJobName: data.jobName || '',
+        sJobName: data.jobName || "",
         nJobID: 0,
         nJobStatus: data.autoStart === "use" ? 3 : 2,
         nScheduleID: 0,
@@ -220,7 +220,7 @@ export class BackupRegistService extends BaseService {
   /**
    * repository 정보 가져오기
    */
-  private async getRepositoryInfo({ repository, center }: { repository: BackupRegistRequestRepository; center: ZdmInfoTable }) {
+  private async getRepositoryInfo({ repository, center }: { repository: BackupRequestRepository; center: ZdmInfoTable }) {
     try {
       asyncContextStorage.addOrder({ component: this.serviceName, method: "getRepositoryInfo", state: "start" })
       const filterOptions: ZdmRepositoryFilterOptions = {
@@ -438,21 +438,21 @@ export class BackupRegistService extends BaseService {
       // 처리할 파티션 목록 결정
       const partitionsToProcess = data.partition.length
         ? data.partition.map((partition) => {
-          const partitionInfo = partitionList.find((item) => item.sLetter === partition)
-          //  사용자 입력 파티션 검증
-          if (!partitionInfo) {
-            throw ServiceError.badRequest(ServiceError, {
-              method: "regist",
-              message: `[Backup 정보 등록] - 파티션( ${partition} )이 서버( ${server.sSystemName} )에 존재하지 않습니다`,
-              metadata: {
-                partition,
-                server: server.sSystemName,
-              },
-            })
-          }
+            const partitionInfo = partitionList.find((item) => item.sLetter === partition)
+            //  사용자 입력 파티션 검증
+            if (!partitionInfo) {
+              throw ServiceError.badRequest(ServiceError, {
+                method: "regist",
+                message: `[Backup 정보 등록] - 파티션( ${partition} )이 서버( ${server.sSystemName} )에 존재하지 않습니다`,
+                metadata: {
+                  partition,
+                  server: server.sSystemName,
+                },
+              })
+            }
 
-          return partitionInfo
-        })
+            return partitionInfo
+          })
         : partitionList
 
       // 제외 파티션이 아닌 것들만 필터링 후 dataSet 생성
@@ -463,7 +463,11 @@ export class BackupRegistService extends BaseService {
           .map(async (partition: ServerPartitionTable) => {
             // const jobNameResult = await this.preprocessJobName({ jobName: data.jobName || '', server: server, partition: partition.sLetter })
             const jobNameResult = await jobUtils.preprocessJobName({
-              jobName: data.jobName || '', server: server, partition: partition.sLetter, type: 'Backup', repository: this.backupRepository
+              jobName: data.jobName || "",
+              server: server,
+              partition: partition.sLetter,
+              type: "Backup",
+              repository: this.backupRepository,
             })
             data.jobName = jobNameResult.jName
             maxIdx = Math.max(maxIdx, jobNameResult.idx)
@@ -491,7 +495,7 @@ export class BackupRegistService extends BaseService {
 
       //  dataSet 등록전 작업 이름 최종 수정
       dataSet.map((el) => {
-        const sjobName = el.backupDataObject.sJobName.replace('_idx', `_${maxIdx}`)
+        const sjobName = el.backupDataObject.sJobName.replace("_idx", `_${maxIdx}`)
         el.backupDataObject.sJobName = el.backupInfoDataObject.sJobName = sjobName
       })
 

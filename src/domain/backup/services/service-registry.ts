@@ -10,6 +10,7 @@ import { BackupInfoRepository } from "../repositories/backup-info.repository"
 import { BackupLogRepository } from "../repositories/backup-log-event.repository"
 import { BackupRepository } from "../repositories/backup.repository"
 import { BackupDeleteService } from "./backup-delete.service"
+import { BackupEditService } from "./backup-edit.service"
 import { BackupMonitoringService } from "./backup-monitoring.service"
 import { BackupRegistService } from "./backup-regist.service"
 import { BackupService } from "./backup.service"
@@ -42,6 +43,15 @@ export const backupRegistService = new BackupRegistService({
 })
 //  Backup 정보 삭제 Service
 export const backupDeleteService = new BackupDeleteService({
+  backupRepository,
+  backupInfoRepository,
+  backupLogRepository,
+  backupHistoryRepository,
+})
+//  Backup 정보 수정 Service
+export const backupEditService = new BackupEditService({
+  zdmService,
+  zdmRepositoryService,
   backupRepository,
   backupInfoRepository,
   backupLogRepository,

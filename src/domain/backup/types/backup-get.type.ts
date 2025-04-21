@@ -2,7 +2,7 @@
 //  Backup 조회 필터링 옵션 인터페이스  //
 ////////////////////////////////////////
 
-import { JobResult, JobStatus } from "../../../types/common/job"
+import { JobResult, JobStatusType } from "../../../types/common/job"
 import { RepositoryConnectionType } from "../../../types/common/repository"
 import { BackupSearchType, BackupType } from "./backup-common.type"
 
@@ -15,7 +15,7 @@ export interface BackupFilterOptions {
   //  필터 옵션
   mode?: BackupType | ""
   partition?: string
-  status?: JobStatus | ""
+  status?: JobStatusType | ""
   result?: JobResult | ""
   repositoryID?: number | null
   repositoryType?: RepositoryConnectionType | "" //  조회시에는 연결 타입으로, 등록시에는 repository 자체의 타입으로 구분

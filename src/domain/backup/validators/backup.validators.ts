@@ -1,7 +1,13 @@
 import { validationMiddleware } from "../../../middlewares/validation/validationMiddleware"
-import { BackupRegistBodyDTO } from "../dto/body/backup-regist.dto"
+import { BackupEditBodyDTO } from "../dto/body/backup-edit-body.dto"
+import { BackupRegistBodyDTO } from "../dto/body/backup-regist-body.dto"
+import { BackupEditByJobIdParamDTO, BackupEditByJobNameParamDTO, BackupEditByServerNameParamDTO } from "../dto/param/backup-edit-param.dto"
 import { BackupGetByJobIdParamDTO, BackupGetByJobNameParamDTO, BackupGetByServerNameParamDTO } from "../dto/param/backup-get-param.dto"
-import { BackupMonitoringByJobIdDTO, BackupMonitoringByJobNameDTO, BackupMonitoringByServerNameDTO } from "../dto/param/backup-monit-param.dto"
+import {
+  BackupMonitoringByJobIdParamDTO,
+  BackupMonitoringByJobNameParamDTO,
+  BackupMonitoringByServerNameParamDTO,
+} from "../dto/param/backup-monit-param.dto"
 import { BackupDeleteQueryDTO } from "../dto/query/backup-delete-query.dto"
 import { BackupGetQueryDTO } from "../dto/query/backup-get-query.dto"
 import { BackupMonitoringQueryDTO } from "../dto/query/backup-monit-query.dto"
@@ -25,6 +31,17 @@ export const validateBackupGetByServerNameParams = validationMiddleware.validate
 export const validateBackupRegistBody = validationMiddleware.validateBody(BackupRegistBodyDTO)
 
 /**
+ * Backup 작업 수정
+ */
+//  작업 ID로 수정 parameter 검증
+export const validateBackupEditByJobIdParams = validationMiddleware.validateParams(BackupEditByJobIdParamDTO)
+//  작업 이름으로 수정 parameter 검증
+export const validateBackupEditByJobNameParams = validationMiddleware.validateParams(BackupEditByJobNameParamDTO)
+//  작업 대상 server 이름으로 수정 parameter 검증
+export const validateBackupEditByServerNameParams = validationMiddleware.validateParams(BackupEditByServerNameParamDTO)
+//  작업 수정 body 검증
+export const validateBackupEditBody = validationMiddleware.validateBody(BackupEditBodyDTO)
+/**
  * Backup 작업 삭제
  */
 //  작업 삭제 공통 queryString 검증
@@ -40,11 +57,11 @@ export const validateBackupDeleteByJobNameParams = validationMiddleware.validate
 //  모니터링 공통 queryString 검증
 export const validateBackupMonitoringQuery = validationMiddleware.validateQuery(BackupMonitoringQueryDTO)
 //  작업 이름으로 모니터링 parameter 검증
-export const validateBackupMonitoringByJobNameParams = validationMiddleware.validateParams(BackupMonitoringByJobNameDTO)
+export const validateBackupMonitoringByJobNameParams = validationMiddleware.validateParams(BackupMonitoringByJobNameParamDTO)
 //  작업 ID로 모니터링 parameter 검증
-export const validateBackupMonitoringByJobIdParams = validationMiddleware.validateParams(BackupMonitoringByJobIdDTO)
+export const validateBackupMonitoringByJobIdParams = validationMiddleware.validateParams(BackupMonitoringByJobIdParamDTO)
 //  작업 대상 server 이름으로 모니터링 parameter 검증
-export const validateBackupMonitoringByServerNameParams = validationMiddleware.validateParams(BackupMonitoringByServerNameDTO)
+export const validateBackupMonitoringByServerNameParams = validationMiddleware.validateParams(BackupMonitoringByServerNameParamDTO)
 
 /**
  * Backup 작업 History 조회

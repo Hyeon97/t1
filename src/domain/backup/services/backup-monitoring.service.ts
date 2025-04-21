@@ -56,7 +56,7 @@ export class BackupMonitoringService extends BaseService {
             JobName: backup.sJobName,
             JobID: backup.nJobID,
             JobResult: backup.sJobResult || "-",
-            JobStatus: backup.nJobStatus,
+            JobStatusType: backup.nJobStatus,
             BackupType: backupInfo ? backupInfo.nBackupType : "-",
             Drive: backupInfo ? backupInfo.sDrive : "-",
             Percent: backupActive ? backupActive.nPercent : "-",
@@ -89,16 +89,16 @@ export class BackupMonitoringService extends BaseService {
       //  1.  job_backup table에서 데이터 가져옴
       const backup =
         (
-          await this.backupRepository.findByJobNames({
-            jobNames: [jobName],
+          await this.backupRepository.findByJobName({
+            jobName,
             filterOptions,
           })
         )[0] || null
       //  2.  backupData 갯수만큼 job_backup, active_backup 테이블에서 정보 가져옴
       const backupInfo =
         (
-          await this.backupInfoRepository.findByJobNames({
-            jobNames: [jobName],
+          await this.backupInfoRepository.findByJobName({
+            jobName,
             filterOptions,
           })
         )[0] || null
