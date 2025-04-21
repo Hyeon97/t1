@@ -124,7 +124,7 @@ class LoggerFactory {
       winston.format.printf((info) => {
         const { timestamp, level, message, ...meta } = info
         // 메타데이터가 있으면 포함
-        const metaStr = Object.keys(meta).length ? ` | ${JSON.stringify(meta)}` : ""
+        const metaStr = Object.keys(meta).length ? `\n${JSON.stringify(meta, null, 2)}` : ""
         return `${timestamp} ${level}: ${message}${metaStr}`
       })
     )
@@ -136,7 +136,7 @@ class LoggerFactory {
       winston.format.printf((info) => {
         const { timestamp, level, message, ...meta } = info
         // 메타데이터가 있으면 포함
-        const metaStr = Object.keys(meta).length ? ` | ${JSON.stringify(meta)}` : ""
+        const metaStr = Object.keys(meta).length ? `\n${JSON.stringify(meta, null, 2)}` : ""
         return `${timestamp} ${level}: ${message}${metaStr}`
       })
     )
