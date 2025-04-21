@@ -1,3 +1,4 @@
+import { Expose } from "class-transformer"
 import { IsEmail, IsNotEmpty } from "class-validator"
 
 /**
@@ -6,9 +7,11 @@ import { IsEmail, IsNotEmpty } from "class-validator"
 export class TokenIssueBodyDTO {
   @IsEmail({}, { message: "유효한 이메일 형식이 아닙니다" })
   @IsNotEmpty({ message: "email은 필수 입력값입니다" })
+  @Expose()
   email: string = ""
 
   @IsNotEmpty({ message: "password는 필수 입력값입니다" })
+  @Expose()
   password: string = ""
 }
 
