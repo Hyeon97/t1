@@ -30,10 +30,7 @@ export class NewError extends Error {
    */
 
   // 일반 에러를 BaseError로 변환하는 메서드
-  static createFrom<T extends NewError>(
-    constructor: new (params: ErrorParams) => T,
-    params: ErrorParams
-  ): T {
+  static createFrom<T extends NewError>(constructor: new (params: ErrorParams) => T, params: ErrorParams): T {
     return new constructor(params as ErrorParams)
   }
 
@@ -113,15 +110,7 @@ export class NewError extends Error {
   }
 
   // 일반 에러 객체를 특정 계층 에러로 변환
-  static fromError<T extends NewError>(
-    constructor: new (params: ErrorParams) => T,
-    error: unknown,
-    params: ErrorParams
-  ): T {
-    // console.log('NewError-fromError-error')
-    // console.dir(error, { depth: null })
-    // console.log('NewError-fromError-params')
-    // console.dir(params, { depth: null })
+  static fromError<T extends NewError>(constructor: new (params: ErrorParams) => T, error: unknown, params: ErrorParams): T {
     const errorMessage = errorToString(error)
     return new constructor({
       ...params,

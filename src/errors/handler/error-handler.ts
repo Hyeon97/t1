@@ -12,10 +12,10 @@ function buildUnifiedError(err: Error) {
   let clientErrorCode = ErrorCode.INTERNAL_ERROR
   let detail = null //  일반 사용자
   let log_debug = null //  디버깅
-
+  // console.log("buildUnifiedError")
+  // console.dir(err, { depth: null })
   // BaseError 계열의 모든 에러 처리 (모든 계층별 에러가 이를 상속함)
   if (err instanceof NewError) {
-
     // 상태 코드를 직접 사용
     statusCode = err.statusCode
     clientErrorCode = err.errorCode
@@ -25,11 +25,16 @@ function buildUnifiedError(err: Error) {
       clientMessage = `${getUserFriendlyMessage({ errorCode: err.errorCode })}`
       detail = { cause: err.message.split("||") }
       log_debug = err.metadata
-    }
-    else {
+    } else {
       //  그외 계층에서 발생한 에러
-      clientMessage = `${getUserFriendlyMessage({ errorCode: err.errorCode })}`
-      detail = { cause: err.message }
+      clientMessage = err.message
+      const errorName = err?.metadata?.error?.name
+      const data = err?.metadata?.data
+      let cause = err?.metadata?.error?.message || ""
+      if (errorName === "Error") {
+        cause = "서버 내부 오류 발생"
+      }
+      detail = { cause, data }
       log_debug = err.metadata
     }
   }
@@ -44,7 +49,7 @@ function buildUnifiedError(err: Error) {
         layer: ErrorLayer.MIDDLEWARE,
       }
     } else {
-      ; (statusCode = 500),
+      ;(statusCode = 500),
         (clientMessage = "알 수 없는 오류"),
         (clientErrorCode = ErrorCode.UNKNOWN_ERROR),
         (detail = { cause: err.message }),
@@ -84,7 +89,7 @@ export const errorHandler = (err: Error, req: Request, res: Response, next: Next
       message: `[${unifiedError.clientErrorCode}] ${unifiedError.clientMessage}`,
     })
   }
-  // console.log('errorHandler-unifiedError')
+  // console.log("errorHandler-unifiedError")
   // console.dir(unifiedError, { depth: null })
   // 응답 생성
   const errorResponse: ErrorResponse = {
@@ -109,7 +114,7 @@ export const errorHandler = (err: Error, req: Request, res: Response, next: Next
       errorResponse.debug.error = {
         name: originalError.name,
         message: originalError.message,
-        stack: originalError.stack
+        stack: originalError.stack,
       }
     }
   } else {

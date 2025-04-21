@@ -17,15 +17,12 @@ export class ServiceError extends NewError {
    * Service 계층에서 정의되지 않은 일반 Error 발생시
    * 헤당 Error를 Service 계층 Error 로 변환
    */
-  static fromError<T extends NewError = ServiceError>(
-    error: unknown,
-    params: Omit<ErrorParams, "layer" | "errorCode" | "statusCode">
-  ): T {
+  static fromError<T extends NewError = ServiceError>(error: unknown, params: Omit<ErrorParams, "layer" | "errorCode" | "statusCode">): T {
     return NewError.fromError(ServiceError as any, error, {
       ...params,
       layer: ErrorLayer.SERVICE,
       errorCode: ErrorCode.INTERNAL_ERROR,
-      statusCode: 500
+      statusCode: 500,
     }) as unknown as T
   }
 
