@@ -1,7 +1,7 @@
+import "reflect-metadata"
 import { plainToInstance } from "class-transformer"
 import { validate as classValidate, ValidationError } from "class-validator"
 import { NextFunction, Request, Response } from "express"
-import "reflect-metadata"
 import { ApiError, ValidatorError } from "../../errors"
 import { logger } from "../../utils/logger/logger.util"
 
@@ -16,13 +16,20 @@ export class ValidationMiddleware {
       try {
         const data = req[source]
 
+        // console.log("data")
+        // console.dir(data, { depth: null })
+
         // 요청 데이터를 DTO 클래스의 인스턴스로 변환
         const dtoInstance = plainToInstance(dtoClass, data, {
           enableImplicitConversion: true, // 문자열->숫자 등의 암시적 변환 허용
           exposeDefaultValues: true, // 기본값 노출
-          excludeExtraneousValues: false, // 추가 값 제외 안함
+          // excludeExtraneousValues: false, // 추가 값 제외 안함 >> DTO를 아무리 설계해도 무시하고 진행됨
+          excludeExtraneousValues: true, // 추가 값 제외 >> DTO에 @Expose()가 선언되어 있어야 정상적으로 파싱됨
           enableCircularCheck: false, // 순환 참조 체크 비활성화
         })
+
+        // console.log("dtoInstance")
+        // console.dir(dtoInstance, { depth: null })
 
         // class-validator를 사용한 유효성 검사
         const errors = await classValidate(dtoInstance, {
