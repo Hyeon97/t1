@@ -1,7 +1,7 @@
-import "reflect-metadata"
 import { plainToInstance } from "class-transformer"
 import { validate as classValidate, ValidationError } from "class-validator"
 import { NextFunction, Request, Response } from "express"
+import "reflect-metadata"
 import { ApiError, ValidatorError } from "../../errors"
 import { logger } from "../../utils/logger/logger.util"
 
@@ -16,6 +16,7 @@ export class ValidationMiddleware {
       try {
         const data = req[source]
 
+        // console.log(`source: ${source}`)
         // console.log("data")
         // console.dir(data, { depth: null })
 
@@ -36,6 +37,7 @@ export class ValidationMiddleware {
           whitelist,
           forbidNonWhitelisted: true,
           skipMissingProperties: false,
+          // validateNested: true,
           //  중첩
           validationError: {
             target: false,
