@@ -6,3 +6,7 @@
 export const regNumberOnly = /^\d+$/
 //  기본 이메일
 export const regCommonEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+//  smb
+export const regSmbPath = /^(\\\\|smb:\/\/)(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9]|[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})(\\|\/)([\w.$-]+(\\|\/))*([\w.$-]+)?$/
+//  nfs
+export const regNfsPath = /^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9]|[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}):(\/([\w.-]+))*\/?$/
