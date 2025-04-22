@@ -13,11 +13,11 @@ import {
 } from "../../../../types/common/const-value"
 import { EncryptionType } from "../../../../types/common/encryption"
 import { AutoStartType } from "../../../../types/common/job"
+import { JobRegistRepositoryDTO } from "../../../../types/dto/job"
 import { stringToNumber } from "../../../../utils/data-convert.utils"
 import { IsEmailOrNumberConstraint } from "../../../../utils/dto.utils"
 import { BackupType } from "../../types/backup-common.type"
 import { BackupRegistRequestBody } from "../../types/backup-regist.type"
-import { RepositoryDTO } from "../../../../types/dto/job"
 
 /**
  * Backup data 등록 DTO
@@ -48,10 +48,10 @@ export class BackupRegistBodyDTO implements BackupRegistRequestBody {
 
   //  작업 사용 레포지토리
   @ValidateNested({ message: "repository 객체의 형식이 올바르지 않습니다" })
-  @Type(() => RepositoryDTO)
+  @Type(() => JobRegistRepositoryDTO)
   @IsNotEmpty({ message: "repository가 누락되었습니다" })
   @Expose()
-  repository!: RepositoryDTO
+  repository!: JobRegistRepositoryDTO
 
   //  선택
   @IsOptional()

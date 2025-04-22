@@ -5,6 +5,7 @@ import { asyncContextStorage } from "../../../utils/AsyncContext"
 import { BaseRepository, SqlFieldOption } from "../../../utils/base/base-repository"
 import { ContextLogger } from "../../../utils/logger/logger.custom"
 import { BackupTypeMap } from "../types/backup-common.type"
+import { BackupTableInfoUpdateInput } from "../types/backup-edit.type"
 import { BackupFilterOptions } from "../types/backup-get.type"
 import { BackupInfoTableInput } from "../types/backup-regist.type"
 import { BackupInfoTable } from "../types/db/job-backup-info"
@@ -163,6 +164,42 @@ export class BackupInfoRepository extends BaseRepository {
         error,
         method: "insertBackupInfo",
         message: "[Backup Info 정보 추가] - 오류가 발생했습니다",
+      })
+    }
+  }
+
+  /**
+   * Backup info 작업 업데이트
+   */
+  async updateBackupInfo({ id, backupInfoData, transaction }: {
+    id: number
+    backupInfoData: Partial<BackupTableInfoUpdateInput>
+    transaction: TransactionManager
+  }): Promise<ResultSetHeader> {
+    try {
+      asyncContextStorage.addRepository({ name: this.repositoryName })
+      asyncContextStorage.addOrder({ component: this.repositoryName, method: "updateBackupInfo", state: "start" })
+
+      // sLastUpdateTime 필드를 현재 시간으로 자동 설정
+      const sqlOptions: Record<string, SqlFieldOption> = {
+        // sLastUpdateTime: { raw: 'now()' }
+      }
+      const result = await this.update({
+        data: backupInfoData,
+        whereCondition: "nID = ?",
+        whereParams: [id],
+        options: sqlOptions,
+        transaction,
+        request: `${this.repositoryName}.updateBackupInfo`,
+      })
+
+      asyncContextStorage.addOrder({ component: this.repositoryName, method: "updateBackupInfo", state: "end" })
+      return result
+    } catch (error) {
+      return this.handleRepositoryError({
+        error,
+        method: "updateBackupInfo",
+        message: `[Backup 작업 정보 업데이트] - 오류가 발생했습니다`,
       })
     }
   }

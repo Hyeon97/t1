@@ -2,15 +2,15 @@
 //  Backup 작업 수정 Body DTO //
 ///////////////////////////////
 
-import { IsIn, IsInt, IsOptional, Min, ValidateNested } from "class-validator"
-import { BackupEditRequestBody } from "../../types/backup-edit.type"
 import { Expose, Type } from "class-transformer"
+import { IsIn, IsInt, IsOptional, Min, ValidateNested } from "class-validator"
 import { CompressionType } from "../../../../types/common/compression"
+import { VALID_COMPRESSION_VALUES, VALID_ENCRYPTION_VALUES, VALID_JOB_TYPE_VALUES } from "../../../../types/common/const-value"
 import { EncryptionType } from "../../../../types/common/encryption"
 import { JobStatusType } from "../../../../types/common/job"
-import { RepositoryDTO } from "../../../../types/dto/job"
+import { JobEditRepositoryDTO } from "../../../../types/dto/job"
 import { BackupType } from "../../types/backup-common.type"
-import { VALID_JOB_TYPE_VALUES, VALID_COMPRESSION_VALUES, VALID_ENCRYPTION_VALUES } from "../../../../types/common/const-value"
+import { BackupEditRequestBody } from "../../types/backup-edit.type"
 
 /**
  * Backup data 수정 DTO
@@ -95,7 +95,7 @@ export class BackupEditBodyDTO implements BackupEditRequestBody {
   //  작업 사용 레포지토리
   @IsOptional()
   @ValidateNested({ message: "repository 객체의 형식이 올바르지 않습니다" })
-  @Type(() => RepositoryDTO)
+  @Type(() => JobEditRepositoryDTO)
   @Expose()
-  repository?: RepositoryDTO
+  repository?: JobEditRepositoryDTO
 }

@@ -8,6 +8,7 @@ import {
 } from "../controllers/controller-registry"
 import {
   validateBackupDeleteQuery,
+  validateBackupEditBody,
   validateBackupEditByJobIdParams,
   validateBackupEditByJobNameParams,
   validateBackupGetByJobIdParams,
@@ -57,9 +58,9 @@ export class BackupRoutes {
 
     //  [Backup 작업 수정]
     //  작업 이름으로 수정
-    this.router.put("/job-name/:jobName", validateBackupEditByJobNameParams, backupEditController.editByJobName)
+    this.router.put("/job-name/:jobName", validateBackupEditByJobNameParams, validateBackupEditBody, backupEditController.editByJobName)
     //  작업 ID로 수정
-    this.router.put("/job-id/:jobId", validateBackupEditByJobIdParams, backupEditController.editByJobId)
+    this.router.put("/job-id/:jobId", validateBackupEditByJobIdParams, validateBackupEditBody, backupEditController.editByJobId)
   }
 
   //  Backup Monitoring 관련

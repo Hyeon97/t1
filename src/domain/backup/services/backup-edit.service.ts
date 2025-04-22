@@ -4,6 +4,7 @@ import { JobStatusMap } from "../../../types/common/job"
 import { asyncContextStorage } from "../../../utils/AsyncContext"
 import { BaseService } from "../../../utils/base/base-service"
 import { ContextLogger } from "../../../utils/logger/logger.custom"
+import { regNfsPath, regSmbPath } from "../../../utils/regex.utils"
 import { ZdmRepositoryService } from "../../zdm/services/zdm.repository.service"
 import { ZdmService } from "../../zdm/services/zdm.service"
 import { BackupHistoryRepository } from "../repositories/backup-history.repository"
@@ -15,7 +16,7 @@ import { BackupEditRequestBody } from "../types/backup-edit.type"
 import { BackupTable } from "../types/db/job-backup"
 import { BackupInfoTable } from "../types/db/job-backup-info"
 import { EncryptionTypeMap } from "./../../../types/common/encryption"
-import { RepositoryTypeMap } from "./../../../types/common/repository"
+import { RepositoryConnectionTypeMap } from "./../../../types/common/repository"
 
 export class BackupEditService extends BaseService {
   private readonly zdmService: ZdmService
@@ -63,7 +64,6 @@ export class BackupEditService extends BaseService {
 
       // backup 정보 가져오기 (조건 로직 수정)
       if (type === "name") {
-        console.log(`type: ${type}, value: ${value}`)
         backup = (await this.backupRepository.findByJobName({ jobName: value as string }))[0] || null
       } else {
         backup = (await this.backupRepository.findByJobId({ jobId: value as number }))[0] || null
@@ -158,7 +158,7 @@ export class BackupEditService extends BaseService {
       const statusCode = JobStatusMap.fromString({ str: changeJobStatus })
       if (backup.nJobStatus !== statusCode) {
         backup.nJobStatus = statusCode
-        changedFields.add("JobStatus")
+        changedFields.add("Job Status")
       }
 
       asyncContextStorage.addOrder({ component: this.serviceName, method: "changeJobStatus", state: "end" })
@@ -226,15 +226,18 @@ export class BackupEditService extends BaseService {
   /**
    * 작업 모드(타입) 변경
    */
-  private changeJobMode({ jobMode }: { jobMode: string }): number {
+  private changeJobMode({ backupInfo, jobMode, changedFields }: { backupInfo: BackupInfoTable, jobMode: string, changedFields: Set<string> }): void {
     try {
       asyncContextStorage.addOrder({ component: this.serviceName, method: "changeJobMode", state: "start" })
 
       // 유효값 여부 미들웨어에서 검증 완료
       const modeCode = BackupTypeMap.fromString({ str: jobMode })
+      if (backupInfo.nBackupType !== modeCode) {
+        backupInfo.nBackupType = modeCode
+        changedFields.add("Backup Type")
+      }
 
       asyncContextStorage.addOrder({ component: this.serviceName, method: "changeJobMode", state: "end" })
-      return modeCode
     } catch (error) {
       if (!(error instanceof ServiceError)) {
         const originError = error
@@ -271,30 +274,59 @@ export class BackupEditService extends BaseService {
       const filterOptions = {
         type: repository?.type || "",
       }
-      const { items } = await this.zdmRepositoryService.getRepositoryById({ id: Number(repository.id), filterOptions })
-      console.log("items")
-      console.dir(items)
-      // Repository 변경 로직 구현
-      if (repository.path !== undefined && backupInfo.sRepositoryPath !== repository.path) {
-        backupInfo.sRepositoryPath = repository.path
-        changedFields.add("sRepositoryPath")
-      }
-
-      if (repository.type !== undefined) {
-        const repoType = typeof repository.type === "string" ? RepositoryTypeMap.fromString({ str: repository.type }) : repository.type
-
-        if (backupInfo.nRepositoryType !== repoType) {
-          backupInfo.nRepositoryType = repoType
-          changedFields.add("nRepositoryType")
+      if (repository.id) {
+        const { items } = await this.zdmRepositoryService.getRepositoryById({ id: Number(repository.id), filterOptions })
+        if (items.length) {
+          backupInfo.nRepositoryID = items[0].nID
+          backupInfo.nRepositoryType = RepositoryConnectionTypeMap.toEnum({ value: items[0].nType })
+          backupInfo.sRepositoryPath = items[0].sRemotePath
+          changedFields.add("RepositoryID")
+          changedFields.add("RepositoryType")
+          changedFields.add("RepositoryPath")
         }
+      }
+      if (repository.path) {
+        //  사용자가 입력한 path에 대한 타입 검증이 필요함
+        switch (backupInfo.nRepositoryType) {
+          case 1: // SMB
+            if (!regSmbPath.test(repository.path)) {
+              // SMB 경로 검증 실패 처리
+              throw ServiceError.badRequest(ServiceError, {
+                method: "processRepositoryChange",
+                message: `[Backup 정보 수정] - Repository 경로 에러.(SMB 양식 불일치)`,
+                metadata: {}
+              })
+            }
+            break
+          case 2: // NFS
+            if (!regNfsPath.test(repository.path)) {
+              // NFS 경로 검증 실패 처리
+              throw ServiceError.badRequest(ServiceError, {
+                method: "processRepositoryChange",
+                message: `[Backup 정보 수정] - Repository 경로 에러.(NFS 양식 불일치)`,
+                metadata: {}
+              })
+            }
+            break
+        }
+        backupInfo.sRepositoryPath = repository.path
+        if (!changedFields.has("RepositoryPath")) { changedFields.add("RepositoryPath") }
       }
 
       asyncContextStorage.addOrder({ component: this.serviceName, method: "processRepositoryChange", state: "end" })
     } catch (error) {
-      throw ServiceError.dataProcessingError({
-        method: "processRepositoryChange",
-        message: "[Backup 정보 수정] - Repository 변경 중 오류 발생",
+      if (!(error instanceof ServiceError)) {
+        const originError = error
+        error = ServiceError.dataProcessingError({
+          method: "processRepositoryChange",
+          message: "[Backup 정보 수정] - Repository 정보 변경 중 예기치 못한 오류 발생",
+          error: originError,
+        })
+      }
+      this.handleServiceError({
         error,
+        method: "processRepositoryChange",
+        message: `[Backup 정보 수정] - Repository 정보 변경 중 오류 발생`,
       })
     }
   }
@@ -339,10 +371,18 @@ export class BackupEditService extends BaseService {
 
       asyncContextStorage.addOrder({ component: this.serviceName, method: "processOtherOptions", state: "end" })
     } catch (error) {
-      throw ServiceError.dataProcessingError({
-        method: "processOtherOptions",
-        message: "[Backup 정보 수정] - 작업 기타 옵션 변경 중 오류 발생",
+      if (!(error instanceof ServiceError)) {
+        const originError = error
+        error = ServiceError.dataProcessingError({
+          method: "processOtherOptions",
+          message: "[Backup 정보 수정] - 작업 기타 옵션 변경 중 예기치 못한 오류 발생",
+          error: originError,
+        })
+      }
+      this.handleServiceError({
         error,
+        method: "processOtherOptions",
+        message: `[Backup 정보 수정] - 작업 기타 옵션 변경 중 오류 발생`,
       })
     }
   }
@@ -373,37 +413,21 @@ export class BackupEditService extends BaseService {
 
       // 스케줄 변경
       if (data.schedule) {
-        await this.processScheduleChange({
-          schedule: data.schedule,
-          backup,
-          changedFields,
-        })
+        await this.processScheduleChange({ schedule: data.schedule, backup, changedFields, })
       }
 
       // 작업 타입 변경
       if (data.type) {
-        const modeCode = this.changeJobMode({ jobMode: data.type })
-        if (backupInfo.nBackupType !== modeCode) {
-          backupInfo.nBackupType = modeCode
-          changedFields.add("nBackupType")
-        }
+        this.changeJobMode({ backupInfo, jobMode: data.type, changedFields })
       }
 
       // Repository 관련 데이터 변경
       if (data.repository) {
-        await this.processRepositoryChange({
-          repository: data.repository,
-          backupInfo,
-          changedFields,
-        })
+        await this.processRepositoryChange({ repository: data.repository, backupInfo, changedFields, })
       }
 
       // 기타 옵션 변경 (rotation, compression, encryption, excludeDir 등)
-      this.processOtherOptions({
-        data,
-        backupInfo,
-        changedFields,
-      })
+      this.processOtherOptions({ data, backupInfo, changedFields, })
 
       asyncContextStorage.addOrder({ component: this.serviceName, method: "editData", state: "end" })
       return {
@@ -416,6 +440,53 @@ export class BackupEditService extends BaseService {
         error,
         method: "editData",
         message: `[Backup 정보 수정] - Backup 정보 수정 중 오류 발생`,
+      })
+    }
+  }
+
+  /**
+   * 데이터 업데이트
+   */
+  private async updateBackupDataSet({ editBackup, editBackupInfo }: { editBackup: BackupTable, editBackupInfo: BackupInfoTable }): Promise<void> {
+    try {
+      asyncContextStorage.addOrder({ component: this.serviceName, method: "updateBackupDataSet", state: "start" })
+      const result = await this.executeTransaction({
+        callback: async (transaction) => {
+          // Backup 기본 정보 업데이트
+          const backupUpdateResult = await this.backupRepository.updateBackup({
+            id: editBackup.nID,
+            backupData: editBackup,
+            transaction,
+          })
+
+          // Backup 추가 정보 업데이트
+          const backupInfoUpdateResult = await this.backupInfoRepository.updateBackupInfo({
+            id: editBackup.nID,
+            backupInfoData: editBackupInfo,
+            transaction,
+          })
+
+          return {
+            backupUpdateResult,
+            backupInfoUpdateResult
+          }
+        },
+      })
+
+      asyncContextStorage.addOrder({ component: this.serviceName, method: "updateBackupDataSet", state: "end" })
+    } catch (error) {
+      if (!(error instanceof ServiceError)) {
+        const originError = error
+        error = ServiceError.dataProcessingError({
+          method: "updateBackupDataSet",
+          message: "[Backup 정보 수정] - 작업 정보 DB 적용 중 예기치 못한 오류 발생",
+          error: originError,
+        })
+      }
+      this.handleServiceError({
+        error,
+        method: "updateBackupDataSet",
+        message: `[Backup 정보 수정] - 작업 정보 DB 적용 중 오류 발생`,
       })
     }
   }
@@ -458,11 +529,13 @@ export class BackupEditService extends BaseService {
       }
 
       // 수정된 데이터 저장
-      // await this.backupRepository.update({ data: editBackup })
-      // await this.backupInfoRepository.update({ data: editBackupInfo })
+      await this.updateBackupDataSet({ editBackup, editBackupInfo })
+
+      // await this.update({ data: editBackup })
+      // await this.update({ data: editBackupInfo })
 
       // 결과 반환
-      const result = null
+      console.dir(result)
       // {
       //   id: editBackup.nJobID,
       //   name: editBackup.sJobName,

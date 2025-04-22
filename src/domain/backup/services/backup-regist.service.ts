@@ -438,21 +438,21 @@ export class BackupRegistService extends BaseService {
       // 처리할 파티션 목록 결정
       const partitionsToProcess = data.partition.length
         ? data.partition.map((partition) => {
-            const partitionInfo = partitionList.find((item) => item.sLetter === partition)
-            //  사용자 입력 파티션 검증
-            if (!partitionInfo) {
-              throw ServiceError.badRequest(ServiceError, {
-                method: "regist",
-                message: `[Backup 정보 등록] - 파티션( ${partition} )이 서버( ${server.sSystemName} )에 존재하지 않습니다`,
-                metadata: {
-                  partition,
-                  server: server.sSystemName,
-                },
-              })
-            }
+          const partitionInfo = partitionList.find((item) => item.sLetter === partition)
+          //  사용자 입력 파티션 검증
+          if (!partitionInfo) {
+            throw ServiceError.badRequest(ServiceError, {
+              method: "regist",
+              message: `[Backup 정보 등록] - 파티션( ${partition} )이 서버( ${server.sSystemName} )에 존재하지 않습니다`,
+              metadata: {
+                partition,
+                server: server.sSystemName,
+              },
+            })
+          }
 
-            return partitionInfo
-          })
+          return partitionInfo
+        })
         : partitionList
 
       // 제외 파티션이 아닌 것들만 필터링 후 dataSet 생성

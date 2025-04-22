@@ -3,6 +3,7 @@ import { TransactionManager } from "../../../database/connection"
 import { asyncContextStorage } from "../../../utils/AsyncContext"
 import { BaseRepository, SqlFieldOption } from "../../../utils/base/base-repository"
 import { ContextLogger } from "../../../utils/logger/logger.custom"
+import { BackupTableUpdateInput } from "../types/backup-edit.type"
 import { BackupFilterOptions } from "../types/backup-get.type"
 import { BackupTableInput } from "../types/backup-regist.type"
 import { BackupTable } from "../types/db/job-backup"
@@ -200,22 +201,18 @@ export class BackupRepository extends BaseRepository {
   /**
    * Backup 작업 정보 업데이트
    */
-  async updateBackup({
-    id,
-    backupData,
-    transaction,
-  }: {
+  async updateBackup({ id, backupData, transaction }: {
     id: number
-    backupData: Partial<BackupTableInput>
+    backupData: Partial<BackupTableUpdateInput>
     transaction: TransactionManager
-  }): Promise<boolean> {
+  }): Promise<ResultSetHeader> {
     try {
       asyncContextStorage.addRepository({ name: this.repositoryName })
       asyncContextStorage.addOrder({ component: this.repositoryName, method: "updateBackup", state: "start" })
 
       // sLastUpdateTime 필드를 현재 시간으로 자동 설정
       const sqlOptions: Record<string, SqlFieldOption> = {
-        // sLastUpdateTime: { raw: 'now()' }
+        sLastUpdateTime: { raw: 'now()' }
       }
       const result = await this.update({
         data: backupData,
