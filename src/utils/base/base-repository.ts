@@ -311,7 +311,7 @@ export class BaseRepository {
     options?: Record<string, SqlFieldOption>
     transaction: TransactionManager
     request: string
-  }): Promise<boolean> {
+  }): Promise<ResultSetHeader> {
     try {
       // SQL 빌더로 쿼리 생성
       const sqlBuilder = this.getSqlBuilder({ data, options })
@@ -324,7 +324,7 @@ export class BaseRepository {
         request,
       })
 
-      return (result?.affectedRows || 0) > 0
+      return result
     } catch (error) {
       const method = request.split(".").pop() || "update"
       return this.handleRepositoryError({
