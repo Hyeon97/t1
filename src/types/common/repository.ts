@@ -5,6 +5,18 @@
 import { VALID_REPOSITORY_VALUES } from "./const-value"
 
 /**
+ * 작업 등록 또는 정보 수정 시 repository 입력 양식
+ */
+export interface RepositoryBody {
+  //  repository id
+  id?: number
+  //  repository type
+  type?: RepositoryType
+  //  repository path
+  path?: string
+}
+
+/**
  * 일반적인 Repository 타입 정의
  */
 export type RepositoryType = (typeof VALID_REPOSITORY_VALUES)[number]
@@ -72,6 +84,18 @@ export const RepositoryConnectionTypeMap = {
         return "NFS"
       default:
         return "Unknown"
+    }
+  },
+
+  // enum -> enum
+  toEnum: ({ value }: { value: number }): RepositoryConnectionEnum => {
+    switch (value) {
+      case RepositoryEnum.SMB:
+        return RepositoryConnectionEnum.SMB
+      case RepositoryEnum.NFS:
+        return RepositoryConnectionEnum.NFS
+      default:
+        throw new Error(`Unknown Repository Connection type: ${value}`)
     }
   },
 }
