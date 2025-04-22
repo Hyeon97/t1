@@ -5,7 +5,7 @@
 import { CompressionType } from "../../../types/common/compression"
 import { EncryptionType } from "../../../types/common/encryption"
 import { AutoStartType } from "../../../types/common/job"
-import { RepositoryType } from "../../../types/common/repository"
+import { RepositoryBody } from "../../../types/common/repository"
 import { BackupType } from "./backup-common.type"
 import { BackupTable } from "./db/job-backup"
 import { BackupInfoTable } from "./db/job-backup-info"
@@ -13,12 +13,7 @@ import { BackupInfoTable } from "./db/job-backup-info"
 /**
  * Backup 작업 등록시 repository 양식
  */
-export interface BackupRequestRepository {
-  id: number
-  type: RepositoryType
-  path?: string
-}
-
+export type BackupRequestRepository = Omit<RepositoryBody, 'id'> & { id: number } //  repository id는 필수로 입력받음
 /**
  * Backup 작업 등록 user input
  * excludeDir,excludePartition > 사용자 입력 타입: string | 내부 사용값 변환시: string[]

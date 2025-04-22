@@ -5,17 +5,10 @@
 import { CompressionType } from "../../../types/common/compression"
 import { EncryptionType } from "../../../types/common/encryption"
 import { JobStatusType } from "../../../types/common/job"
-import { RepositoryType } from "../../../types/common/repository"
+import { RepositoryBody } from "../../../types/common/repository"
 import { BackupType } from "./backup-common.type"
-
-/**
- * Backup 작업 수정시 repository 양식
- */
-export interface BackupRequestRepository {
-  id?: number
-  type?: RepositoryType
-  path?: string
-}
+import { BackupTable } from "./db/job-backup"
+import { BackupInfoTable } from "./db/job-backup-info"
 
 /**
  * Backup 작업 수정 user input
@@ -40,5 +33,38 @@ export interface BackupEditRequestBody {
     full?: string //  숫자만 있는 경우 zdm에 등록된 schedule ID | 그외 : 신규 스케쥴 등록 후 적용
     inc?: string //  숫자만 있는 경우 zdm에 등록된 schedule ID | 그외 : 신규 스케쥴 등록 후 적용
   }
-  repository?: BackupRequestRepository
+  repository?: RepositoryBody
 }
+
+/**
+ * job_backup table update 객체
+ */
+export type BackupTableUpdateInput = Pick<
+  BackupTable,
+  | "sJobName"
+  | "nJobStatus"
+  | "nScheduleID"
+  | "nScheduleID_advanced"
+  | "sJobResult"
+  | "sDescription"
+  | "sLastUpdateTime"
+>
+
+/**
+ * job_backup_info table update 객체
+ */
+export type BackupTableInfoUpdateInput = Pick<
+  BackupInfoTable,
+  | "sJobName"
+  | "nBackupType"
+  | "nRotation"
+  | "nCompression"
+  | "nEncryption"
+  | "sExcludeDir"
+  | "nEmailEvent"
+  | "sComment"
+  | "nRepositoryID"
+  | "nRepositoryType"
+  | "sRepositoryPath"
+  | "nNetworkLimit"
+>
