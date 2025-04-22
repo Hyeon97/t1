@@ -49,7 +49,7 @@ export class ZdmRepositoryService extends BaseService {
       if (!repos) {
         throw ServiceError.resourceNotFoundError(ServiceError, {
           method: "getRepositoryById",
-          message: `ID가 '${id}'인 ZDM Repository를 찾을 수 없습니다`,
+          message: `일치하는 Repository 정보가 없습니다`,
           metadata: { id },
         })
       }
