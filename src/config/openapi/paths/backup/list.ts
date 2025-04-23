@@ -91,7 +91,7 @@ export const backupListPath = {
         },
       ],
       responses: {
-        200: {
+        "200": {
           description: "Backup 목록 조회 성공",
           content: {
             "application/json": {
@@ -104,14 +104,14 @@ export const backupListPath = {
             },
           },
         },
-        400: {
+        "400": {
           $ref: "#/components/responses/BadRequest",
         },
-        401: {
+        "401": {
           $ref: "#/components/responses/Unauthorized",
         },
-        500: {
-          $ref: "#/components/responses/InternalServerError",
+        "500": {
+          $ref: "#/components/responses/ServerError",
         },
       },
     },

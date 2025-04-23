@@ -1012,7 +1012,7 @@
             "$ref": "#/components/responses/Unauthorized"
           },
           "500": {
-            "$ref": "#/components/responses/InternalServerError"
+            "$ref": "#/components/responses/ServerError"
           }
         }
       }
