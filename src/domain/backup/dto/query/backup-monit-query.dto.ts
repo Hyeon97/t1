@@ -2,11 +2,11 @@
 //  Backup monitoring 공통 필터링 옵션 DTO //
 ////////////////////////////////////////////
 
-import { IsOptional, IsIn, IsString } from "class-validator"
+import { Expose } from "class-transformer"
+import { IsIn, IsOptional, IsString } from "class-validator"
 import { RepositoryType } from "../../../../types/common/repository"
 import { BackupType } from "../../types/backup-common.type"
 import { BackupMonitoringFilterOptions } from "../../types/backup-monitoring.type"
-import { Expose } from "class-transformer"
 
 export class BackupMonitoringQueryDTO implements BackupMonitoringFilterOptions {
   //  필터 옵션
@@ -35,7 +35,7 @@ export class BackupMonitoringQueryDTO implements BackupMonitoringFilterOptions {
 
   //  상세 정보
   @IsOptional()
-  @IsIn(["true"], { message: "detail은 'true'만 가능합니다" })
+  @IsIn(["true", "false"], { message: "detail은 'true','false'만 가능합니다" })
   @Expose()
   detail?: string
 }

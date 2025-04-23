@@ -39,6 +39,6 @@ export class ZdmQueryFilterDTO implements ZdmFilterOptions {
 
   //  상세 정보 추가
   @IsOptional()
-  @IsIn(["true"], { message: "detail은 'true'만 가능합니다" })
+  @IsIn(["true", "false"], { message: "detail은 'true','false'만 가능합니다" })
   detail?: string
 }

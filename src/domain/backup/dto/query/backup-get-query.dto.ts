@@ -2,12 +2,12 @@
 //  Backup data 조회 공통 필터링 옵션 DTO //
 //////////////////////////////////////////
 
+import { Expose } from "class-transformer"
 import { IsIn, IsOptional, IsString } from "class-validator"
 import { JobResult, JobStatusType } from "../../../../types/common/job"
 import { RepositoryType } from "../../../../types/common/repository"
 import { BackupType } from "../../types/backup-common.type"
 import { BackupFilterOptions } from "../../types/backup-get.type"
-import { Expose } from "class-transformer"
 
 export class BackupGetQueryDTO implements BackupFilterOptions {
   //  필터 옵션
@@ -53,7 +53,7 @@ export class BackupGetQueryDTO implements BackupFilterOptions {
 
   //  상세 정보
   @IsOptional()
-  @IsIn(["true"], { message: "detail은 'true'만 가능합니다" })
+  @IsIn(["true", "false"], { message: "detail은 'true','false'만 가능합니다" })
   @Expose()
   detail?: string
 }
