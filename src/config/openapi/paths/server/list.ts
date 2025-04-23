@@ -5,7 +5,7 @@ export const serverListPath = {
   "/servers": {
     get: {
       summary: "서버 목록 조회",
-      description: "서버 목록을 조회합니다. 다양한 쿼리 파라미터를 통해 필터링 및 추가 정보 포함 여부를 설정할 수 있습니다.",
+      description: "서버 목록을 조회합니다.",
       tags: ["Server Management"],
       security: [
         {

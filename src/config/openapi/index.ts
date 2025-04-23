@@ -5,12 +5,13 @@
 
 import { commonResponses } from "./components/responses/common"
 import { authSchemas } from "./components/schemas/auth"
+import { backupSchemas } from "./components/schemas/backup"
 import { errorSchemas } from "./components/schemas/errors"
 import { serverSchemas } from "./components/schemas/server"
 import { security, securitySchemes } from "./components/security"
 import { info, servers } from "./info"
 import { authPaths } from "./paths/auth"
-import { fallbackPaths } from "./paths/fallback"
+import { backupPaths } from "./paths/backup"
 import { serverPaths } from "./paths/server"
 
 export const generateOpenApiSpec = () => {
@@ -23,6 +24,7 @@ export const generateOpenApiSpec = () => {
         ...errorSchemas,
         ...authSchemas,
         ...serverSchemas,
+        ...backupSchemas
       },
       responses: {
         ...commonResponses,
@@ -33,7 +35,8 @@ export const generateOpenApiSpec = () => {
     paths: {
       ...authPaths,
       ...serverPaths,
-      ...fallbackPaths,
+      ...backupPaths
+      // ...fallbackPaths,
     },
   }
 }
