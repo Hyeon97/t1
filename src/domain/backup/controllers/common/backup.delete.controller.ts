@@ -4,7 +4,7 @@ import { ApiUtils } from "../../../../utils/api/api.utils"
 import { asyncContextStorage } from "../../../../utils/AsyncContext"
 import { BaseController } from "../../../../utils/base/base-controller"
 import { ContextLogger } from "../../../../utils/logger/logger.custom"
-import { BackupDeleteByJobIdParamDTO, BackupDeleteByJobNameParamDTO, BackupDeleteByServerNameParamDTO } from "../../dto/param/backup-delete-param.dto"
+import { BackupDeleteByJobIdParamDTO, BackupDeleteByJobNameParamDTO } from "../../dto/param/backup-delete-param.dto"
 import { BackupDeleteService } from "../../services/backup-delete.service"
 
 export class BackupDeleteController extends BaseController {
@@ -18,22 +18,22 @@ export class BackupDeleteController extends BaseController {
   }
 
   /**
-   * 공통 Backup 삭제 헨들러 
+   * 공통 Backup 삭제 핸들러 
    */
   private async handleBackupDelete<T>({
-    req,
-    res,
-    next,
+    req, res, next,
     methodName,
     paramExtractor,
     errorMessage,
+    serviceMethod
   }: {
     req: ExtendedRequest
     res: Response
     next: NextFunction
     methodName: string
-    paramExtractor: (params: any) => { jobId?: number; jobName?: string, serverName?: string }
     errorMessage: string
+    paramExtractor: (params: any) => { jobId?: number; jobName?: string, serverName?: string }
+    serviceMethod: (params: any) => Promise<any>
   }): Promise<void> {
     try {
       ContextLogger.debug({ message: `Backup 작업 삭제 시작 - ${methodName}` })
@@ -45,14 +45,8 @@ export class BackupDeleteController extends BaseController {
       const identifier = paramExtractor(params)
       ContextLogger.debug({ message: `[식별자]`, meta: identifier! })
 
-
-      //  서비스 호출
-      let resultData
-      if (identifier.jobName) {
-        resultData = await this.backupDeleteService.deleteByJobName({ jobName: identifier.jobName })
-      } else if (identifier.jobId) {
-        resultData = await this.backupDeleteService.deleteBackupByJobId({ jobId: identifier.jobId })
-      }
+      // 서비스 메서드 호출 - 수정된 부분
+      const resultData = await serviceMethod(identifier)
 
       ContextLogger.info({ message: `Backup 작업 삭제 완료` })
       ApiUtils.success({ res, data: resultData, message: "Backup job data delete result" })
@@ -75,8 +69,9 @@ export class BackupDeleteController extends BaseController {
     await this.handleBackupDelete<BackupDeleteByJobNameParamDTO>({
       req, res, next,
       methodName: "deleteByJobName",
-      paramExtractor: (params) => ({ jobName: params.jobName }),
       errorMessage: "[Backup 작업 이름으로 삭제] - 예기치 못한 오류 발생",
+      paramExtractor: (params) => ({ jobName: params.jobName }),
+      serviceMethod: ({ jobName }) => this.backupDeleteService.deleteByJobName({ jobName }),
     })
   }
 
@@ -87,8 +82,9 @@ export class BackupDeleteController extends BaseController {
     await this.handleBackupDelete<BackupDeleteByJobIdParamDTO>({
       req, res, next,
       methodName: "deleteByJobId",
-      paramExtractor: (params) => ({ jobName: params.jobName }),
       errorMessage: "[Backup 작업 ID로 삭제] - 예기치 못한 오류 발생",
+      paramExtractor: (params) => ({ jobId: params.jobId }),
+      serviceMethod: ({ jobId }) => this.backupDeleteService.deleteBackupByJobId({ jobId }),
     })
   }
 
@@ -96,11 +92,12 @@ export class BackupDeleteController extends BaseController {
    * Backup 작업 서버 이름으로 삭제 ( source, target 구분 X? )
    */
   deleteBySystenName = async (req: ExtendedRequest, res: Response, next: NextFunction): Promise<void> => {
-    await this.handleBackupDelete<BackupDeleteByServerNameParamDTO>({
-      req, res, next,
-      methodName: "deleteBySystenName",
-      paramExtractor: (params) => ({ jobName: params.jobName }),
-      errorMessage: "[Backup 작업 등록 System 이름으로 삭제] - 예기치 못한 오류 발생",
-    })
+    // await this.handleBackupDelete<BackupDeleteByServerNameParamDTO>({
+    //   req, res, next,
+    //   methodName: "deleteBySystenName",
+    //   errorMessage: "[Backup 작업 등록 System 이름으로 삭제] - 예기치 못한 오류 발생",
+    //   paramExtractor: (params) => ({ serverName: params.serverName }),
+    //   serviceMethod: ({ serverName }) => this.backupDeleteService.deleteByServerName({ serverName }),
+    // })
   }
 }

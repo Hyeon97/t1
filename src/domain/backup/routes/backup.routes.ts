@@ -36,6 +36,9 @@ export class BackupRoutes {
 
   //  Backup 기본
   private BackupRoutes(): void {
+    //  [Backup 작업 등록]
+    this.router.post("/", validateBackupRegistBody, backupRegistController.regist)
+
     //  [Backup 작업 조회]
     //  전체 목록 조회
     this.router.get("/", validateBackupGetQuery, backupController.getBackups)
@@ -51,9 +54,6 @@ export class BackupRoutes {
     this.router.delete("/job-id/:jobId", validateBackupDeleteByJobIdParams, backupDeleteController.deleteByJobId)
     //  작업 이름으로 삭제
     this.router.delete("/job-name/:jobName", validateBackupDeleteByJobNameParams, backupDeleteController.deleteByJobName)
-
-    //  [Backup 작업 등록]
-    this.router.post("/", validateBackupRegistBody, backupRegistController.regist)
 
     //  [Backup 작업 수정]
     //  작업 이름으로 수정
