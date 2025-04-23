@@ -13,6 +13,7 @@ import { BackupLogRepository } from "../repositories/backup-log-event.repository
 import { BackupRepository } from "../repositories/backup.repository"
 import { BackupTypeMap } from "../types/backup-common.type"
 import { BackupEditRequestBody } from "../types/backup-edit.type"
+import { BackupDataEditResponse } from "../types/backup-response.type"
 import { BackupTable } from "../types/db/job-backup"
 import { BackupInfoTable } from "../types/db/job-backup-info"
 import { EncryptionTypeMap } from "./../../../types/common/encryption"
@@ -494,7 +495,7 @@ export class BackupEditService extends BaseService {
   /**
    * Backup 작업 수정 Main
    */
-  async edit({ jobId, jobName, data }: { jobId?: number; jobName?: string; data: BackupEditRequestBody }): Promise<any> {
+  async edit({ jobId, jobName, data }: { jobId?: number; jobName?: string; data: BackupEditRequestBody }): Promise<BackupDataEditResponse> {
     try {
       asyncContextStorage.addService({ name: this.serviceName })
       asyncContextStorage.addOrder({ component: this.serviceName, method: "edit", state: "start" })
@@ -521,9 +522,8 @@ export class BackupEditService extends BaseService {
         })
 
         return {
-          id: editBackup.nJobID,
-          name: editBackup.sJobName,
-          message: "변경된 내용이 없습니다.",
+          job_name: editBackup.sJobName,
+          job_id: String(editBackup.nJobID),
           changedFields: [],
         }
       }
@@ -531,18 +531,12 @@ export class BackupEditService extends BaseService {
       // 수정된 데이터 저장
       await this.updateBackupDataSet({ editBackup, editBackupInfo })
 
-      // await this.update({ data: editBackup })
-      // await this.update({ data: editBackupInfo })
-
       // 결과 반환
-      console.dir(result)
-      // {
-      //   id: editBackup.nJobID,
-      //   name: editBackup.sJobName,
-      //   status: JobStatusMap.toString({ value: editBackup.nStatus }),
-      //   message: "Backup 작업이 성공적으로 수정되었습니다",
-      //   changedFields, // 변경된 필드 목록 추가
-      // }
+      const result = {
+        job_name: editBackup.sJobName,
+        job_id: String(editBackup.nJobID),
+        changedFields, // 변경된 필드 목록 추가
+      }
 
       ContextLogger.info({
         message: `Backup 작업 '${editBackup.sJobName}' 수정 완료`,
