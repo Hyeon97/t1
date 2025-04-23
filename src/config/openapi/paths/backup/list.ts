@@ -2,8 +2,10 @@
  * Backup 목록 조회 API 경로 정의
  */
 export const backupListPath = {
+  // 백업 목록 조회 (GET /backups)
   "/backups": {
     get: {
+      operationId: "getBackups",
       summary: "Backup 목록 조회",
       description: "Backup 목록을 조회합니다.",
       tags: ["Backup Management"],
@@ -49,7 +51,7 @@ export const backupListPath = {
           required: false,
           schema: {
             type: "string",
-            enum: [],
+            enum: ["success", "failure", "partial", "unknown"],
           },
         },
         {
@@ -87,6 +89,7 @@ export const backupListPath = {
           required: false,
           schema: {
             type: "boolean",
+            default: false
           },
         },
       ],
@@ -96,13 +99,10 @@ export const backupListPath = {
           content: {
             "application/json": {
               schema: {
-                type: "array",
-                items: {
-                  $ref: "#/components/schemas/BackupListResponse",
-                },
-              },
-            },
-          },
+                $ref: "#/components/schemas/BackupListResponse"
+              }
+            }
+          }
         },
         "400": {
           $ref: "#/components/responses/BadRequest",

@@ -387,9 +387,172 @@
           "data": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/BackupItem"
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "example": "14"
+                },
+                "jobName": {
+                  "type": "string",
+                  "example": "prd-search01-new_ROOT"
+                },
+                "systemName": {
+                  "type": "string",
+                  "example": "prd-search01-new (172.25.1.63)"
+                },
+                "partition": {
+                  "type": "string",
+                  "example": "/"
+                },
+                "mode": {
+                  "type": "string",
+                  "enum": [
+                    "Full Backup",
+                    "Inc Backup",
+                    "Smart Backup"
+                  ],
+                  "example": "Full Backup"
+                },
+                "result": {
+                  "type": "string",
+                  "enum": [
+                    "RUN",
+                    "COMPLETE",
+                    "START",
+                    "WAITING",
+                    "CANCEL",
+                    "SCHEDULED"
+                  ],
+                  "example": "COMPLETE"
+                },
+                "schedule": {
+                  "type": "object",
+                  "properties": {
+                    "basic": {
+                      "type": "string",
+                      "example": "-"
+                    },
+                    "advanced": {
+                      "type": "string",
+                      "example": "-"
+                    }
+                  },
+                  "required": [
+                    "basic",
+                    "advanced"
+                  ]
+                },
+                "repository": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "example": "14"
+                    },
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "SMB",
+                        "NFS",
+                        "SSH"
+                      ],
+                      "example": "NFS"
+                    },
+                    "path": {
+                      "type": "string",
+                      "example": "172.25.0.83:/ZConverter"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "type",
+                    "path"
+                  ]
+                },
+                "timestamp": {
+                  "type": "object",
+                  "properties": {
+                    "start": {
+                      "type": "string",
+                      "format": "date-time",
+                      "example": "2025-02-19T10:59:10.000Z"
+                    },
+                    "end": {
+                      "type": "string",
+                      "format": "date-time",
+                      "example": "2025-02-19 20:02:12"
+                    },
+                    "elapsed": {
+                      "type": "string",
+                      "example": "0 day, 00:03:02"
+                    }
+                  },
+                  "required": [
+                    "start",
+                    "end",
+                    "elapsed"
+                  ]
+                },
+                "lastUpdate": {
+                  "type": "string",
+                  "format": "date-time",
+                  "example": "2025-02-19T11:02:12.000Z"
+                },
+                "option": {
+                  "type": "object",
+                  "properties": {
+                    "rotation": {
+                      "type": "string",
+                      "description": "백업 로테이션 설정",
+                      "example": "1"
+                    },
+                    "excludeDir": {
+                      "type": "string",
+                      "description": "제외할 디렉토리 목록",
+                      "example": "-"
+                    },
+                    "compression": {
+                      "type": "string",
+                      "enum": [
+                        "Use",
+                        "Not Use"
+                      ],
+                      "description": "압축 사용 여부",
+                      "example": "Use"
+                    },
+                    "encryption": {
+                      "type": "string",
+                      "enum": [
+                        "Use",
+                        "Not Use"
+                      ],
+                      "description": "암호화 사용 여부",
+                      "example": "Not Use"
+                    }
+                  },
+                  "required": [
+                    "rotation",
+                    "excludeDir",
+                    "compression",
+                    "encryption"
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "jobName",
+                "systemName",
+                "partition",
+                "mode",
+                "result",
+                "schedule",
+                "repository",
+                "timestamp",
+                "lastUpdate"
+              ]
             },
-            "description": "기본 백업 항목 목록. detail=true 쿼리 파라미터가 사용되면 DetailedBackupItem 스키마가 대신 사용됩니다."
+            "description": "기본 백업 항목 목록. detail=true 쿼리 파라미터가 사용되면 option 필드가 포함됩니다."
           },
           "timestamp": {
             "type": "string",
@@ -405,185 +568,431 @@
           "timestamp"
         ]
       },
-      "BackupItem": {
+      "BackupRegistResponse": {
         "type": "object",
         "properties": {
-          "id": {
+          "requestID": {
             "type": "string",
-            "example": "14"
+            "example": "9e562891-3c21-40ed-a145-c99910cf6197"
           },
-          "jobName": {
+          "message": {
             "type": "string",
-            "example": "prd-search01-new_ROOT"
+            "example": "Backup job data regist result"
           },
-          "systemName": {
-            "type": "string",
-            "example": "prd-search01-new (172.25.1.63)"
+          "success": {
+            "type": "boolean",
+            "example": true
           },
-          "partition": {
-            "type": "string",
-            "example": "/"
-          },
-          "mode": {
-            "type": "string",
-            "enum": [
-              "Full Backup",
-              "Inc Backup",
-              "Smart Backup"
-            ],
-            "example": "Full Backup"
-          },
-          "result": {
-            "type": "string",
-            "enum": [
-              "RUN",
-              "COMPLETE",
-              "START",
-              "WAITING",
-              "CANCEL",
-              "SCHEDULED"
-            ],
-            "example": "COMPLETE"
-          },
-          "schedule": {
-            "type": "object",
-            "properties": {
-              "basic": {
-                "type": "string",
-                "example": "-"
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "state": {
+                  "type": "string",
+                  "enum": [
+                    "success",
+                    "fail"
+                  ],
+                  "example": "success"
+                },
+                "job_name": {
+                  "type": "string",
+                  "example": "prd-web01_ROOT_1"
+                },
+                "partition": {
+                  "type": "string",
+                  "example": "/"
+                },
+                "job_type": {
+                  "type": "string",
+                  "example": "Full Backup"
+                },
+                "auto_start": {
+                  "type": "string",
+                  "example": "not use"
+                },
+                "use_schedule": {
+                  "type": "string",
+                  "example": "-"
+                }
               },
-              "advanced": {
-                "type": "string",
-                "example": "-"
-              }
-            },
-            "required": [
-              "basic",
-              "advanced"
-            ]
-          },
-          "repository": {
-            "type": "object",
-            "properties": {
-              "id": {
-                "type": "string",
-                "example": "14"
-              },
-              "type": {
-                "type": "string",
-                "enum": [
-                  "SMB",
-                  "NFS",
-                  "SSH"
-                ],
-                "example": "NFS"
-              },
-              "path": {
-                "type": "string",
-                "example": "172.25.0.83:/ZConverter"
-              }
-            },
-            "required": [
-              "id",
-              "type",
-              "path"
-            ]
+              "required": [
+                "state",
+                "job_name",
+                "partition",
+                "job_type",
+                "auto_start",
+                "use_schedule"
+              ]
+            }
           },
           "timestamp": {
-            "type": "object",
-            "properties": {
-              "start": {
-                "type": "string",
-                "format": "date-time",
-                "example": "2025-02-19T10:59:10.000Z"
-              },
-              "end": {
-                "type": "string",
-                "format": "date-time",
-                "example": "2025-02-19 20:02:12"
-              },
-              "elapsed": {
-                "type": "string",
-                "example": "0 day, 00:03:02"
-              }
-            },
-            "required": [
-              "start",
-              "end",
-              "elapsed"
-            ]
-          },
-          "lastUpdate": {
             "type": "string",
             "format": "date-time",
-            "example": "2025-02-19T11:02:12.000Z"
+            "example": "2025-03-30T18:02:17.569Z"
           }
         },
         "required": [
-          "id",
-          "jobName",
-          "systemName",
-          "partition",
-          "mode",
-          "result",
-          "schedule",
-          "repository",
-          "timestamp",
-          "lastUpdate"
+          "requestID",
+          "message",
+          "success",
+          "data",
+          "timestamp"
         ]
       },
-      "DetailedBackupItem": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/BackupItem"
+      "BackupEditResponse": {
+        "type": "object",
+        "properties": {
+          "requestID": {
+            "type": "string",
+            "example": "9e562891-3c21-40ed-a145-c99910cf6197"
           },
-          {
+          "message": {
+            "type": "string",
+            "example": "Backup job data edit result"
+          },
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "data": {
             "type": "object",
             "properties": {
-              "option": {
-                "type": "object",
-                "properties": {
-                  "rotation": {
-                    "type": "string",
-                    "description": "백업 로테이션 설정",
-                    "example": "1"
-                  },
-                  "excludeDir": {
-                    "type": "string",
-                    "description": "제외할 디렉토리 목록",
-                    "example": "-"
-                  },
-                  "compression": {
-                    "type": "string",
-                    "enum": [
-                      "Use",
-                      "Not Use"
-                    ],
-                    "description": "압축 사용 여부",
-                    "example": "Use"
-                  },
-                  "encryption": {
-                    "type": "string",
-                    "enum": [
-                      "Use",
-                      "Not Use"
-                    ],
-                    "description": "암호화 사용 여부",
-                    "example": "Not Use"
-                  }
+              "job_name": {
+                "type": "string",
+                "example": "prd-web01_new_backup"
+              },
+              "job_id": {
+                "type": "string",
+                "example": "75"
+              },
+              "changedFields": {
+                "type": "array",
+                "items": {
+                  "type": "string"
                 },
-                "required": [
-                  "rotation",
-                  "excludeDir",
-                  "compression",
-                  "encryption"
+                "example": [
+                  "JobName",
+                  "Rotation",
+                  "Compression"
                 ]
               }
             },
             "required": [
-              "option"
+              "job_name",
+              "job_id",
+              "changedFields"
             ]
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2025-03-30T18:02:17.569Z"
           }
+        },
+        "required": [
+          "requestID",
+          "message",
+          "success",
+          "data",
+          "timestamp"
+        ]
+      },
+      "BackupDeleteResponse": {
+        "type": "object",
+        "properties": {
+          "requestID": {
+            "type": "string",
+            "example": "9e562891-3c21-40ed-a145-c99910cf6197"
+          },
+          "message": {
+            "type": "string",
+            "example": "Backup job data delete result"
+          },
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "job_name": {
+                "type": "string",
+                "example": "prd-web01_ROOT_1"
+              },
+              "job_id": {
+                "type": "string",
+                "example": "75"
+              },
+              "delete_state": {
+                "type": "object",
+                "properties": {
+                  "data": {
+                    "type": "string",
+                    "enum": [
+                      "success",
+                      "fail"
+                    ],
+                    "example": "success"
+                  },
+                  "log": {
+                    "type": "string",
+                    "enum": [
+                      "success",
+                      "fail"
+                    ],
+                    "example": "success"
+                  },
+                  "history": {
+                    "type": "string",
+                    "enum": [
+                      "success",
+                      "fail"
+                    ],
+                    "example": "success"
+                  }
+                },
+                "required": [
+                  "data",
+                  "log",
+                  "history"
+                ]
+              }
+            },
+            "required": [
+              "delete_state"
+            ]
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2025-03-30T18:02:17.569Z"
+          }
+        },
+        "required": [
+          "requestID",
+          "message",
+          "success",
+          "data",
+          "timestamp"
+        ]
+      },
+      "BackupMonitoringResponse": {
+        "type": "object",
+        "properties": {
+          "requestID": {
+            "type": "string",
+            "example": "9e562891-3c21-40ed-a145-c99910cf6197"
+          },
+          "message": {
+            "type": "string",
+            "example": "Backup information list"
+          },
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "job_name": {
+                "type": "string",
+                "example": "prd-web01_ROOT_1"
+              },
+              "job_id": {
+                "type": "string",
+                "example": "75"
+              },
+              "monitoring_data": {
+                "type": "object",
+                "properties": {
+                  "SystemName": {
+                    "type": "string",
+                    "example": "prd-web01 (172.25.0.11)"
+                  },
+                  "JobName": {
+                    "type": "string",
+                    "example": "prd-web01_ROOT_1"
+                  },
+                  "JobID": {
+                    "type": "number",
+                    "example": 75
+                  },
+                  "JobResult": {
+                    "type": "string",
+                    "example": "RUNNING"
+                  },
+                  "JobStatusType": {
+                    "type": "number",
+                    "example": 3
+                  },
+                  "BackupType": {
+                    "type": "string",
+                    "example": "300"
+                  },
+                  "Drive": {
+                    "type": "string",
+                    "example": "/"
+                  },
+                  "Percent": {
+                    "type": "string",
+                    "example": "72"
+                  },
+                  "StartTime": {
+                    "type": "string",
+                    "example": "2025-02-19T10:59:10.000Z"
+                  },
+                  "ElapsedTime": {
+                    "type": "string",
+                    "example": "0 day, 00:02:12"
+                  },
+                  "EndTime": {
+                    "type": "string",
+                    "example": "-"
+                  }
+                },
+                "required": [
+                  "SystemName",
+                  "JobName",
+                  "JobID",
+                  "JobResult",
+                  "BackupType",
+                  "Drive",
+                  "Percent",
+                  "StartTime",
+                  "ElapsedTime"
+                ]
+              }
+            },
+            "required": [
+              "job_name",
+              "job_id",
+              "monitoring_data"
+            ]
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2025-03-30T18:02:17.569Z"
+          }
+        },
+        "required": [
+          "requestID",
+          "message",
+          "success",
+          "data",
+          "timestamp"
+        ]
+      },
+      "BackupMonitoringListResponse": {
+        "type": "object",
+        "properties": {
+          "requestID": {
+            "type": "string",
+            "example": "9e562891-3c21-40ed-a145-c99910cf6197"
+          },
+          "message": {
+            "type": "string",
+            "example": "Backup information list"
+          },
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "job_name": {
+                  "type": "string",
+                  "example": "prd-web01_ROOT_1"
+                },
+                "job_id": {
+                  "type": "string",
+                  "example": "75"
+                },
+                "monitoring_data": {
+                  "type": "object",
+                  "properties": {
+                    "SystemName": {
+                      "type": "string",
+                      "example": "prd-web01 (172.25.0.11)"
+                    },
+                    "JobName": {
+                      "type": "string",
+                      "example": "prd-web01_ROOT_1"
+                    },
+                    "JobID": {
+                      "type": "number",
+                      "example": 75
+                    },
+                    "JobResult": {
+                      "type": "string",
+                      "example": "RUNNING"
+                    },
+                    "JobStatusType": {
+                      "type": "number",
+                      "example": 3
+                    },
+                    "BackupType": {
+                      "type": "string",
+                      "example": "300"
+                    },
+                    "Drive": {
+                      "type": "string",
+                      "example": "/"
+                    },
+                    "Percent": {
+                      "type": "string",
+                      "example": "72"
+                    },
+                    "StartTime": {
+                      "type": "string",
+                      "example": "2025-02-19T10:59:10.000Z"
+                    },
+                    "ElapsedTime": {
+                      "type": "string",
+                      "example": "0 day, 00:02:12"
+                    },
+                    "EndTime": {
+                      "type": "string",
+                      "example": "-"
+                    }
+                  },
+                  "required": [
+                    "SystemName",
+                    "JobName",
+                    "JobID",
+                    "JobResult",
+                    "BackupType",
+                    "Drive",
+                    "Percent",
+                    "StartTime",
+                    "ElapsedTime"
+                  ]
+                }
+              },
+              "required": [
+                "job_name",
+                "job_id",
+                "monitoring_data"
+              ]
+            }
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2025-03-30T18:02:17.569Z"
+          }
+        },
+        "required": [
+          "requestID",
+          "message",
+          "success",
+          "data",
+          "timestamp"
         ]
       }
     },
@@ -888,6 +1297,7 @@
     },
     "/backups": {
       "get": {
+        "operationId": "getBackups",
         "summary": "Backup 목록 조회",
         "description": "Backup 목록을 조회합니다.",
         "tags": [
@@ -946,7 +1356,12 @@
             "required": false,
             "schema": {
               "type": "string",
-              "enum": []
+              "enum": [
+                "success",
+                "failure",
+                "partial",
+                "unknown"
+              ]
             }
           },
           {
@@ -987,7 +1402,8 @@
             "description": "상세 정보 포함 여부 (true, false)",
             "required": false,
             "schema": {
-              "type": "boolean"
+              "type": "boolean",
+              "default": false
             }
           }
         ],
@@ -997,10 +1413,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/BackupListResponse"
-                  }
+                  "$ref": "#/components/schemas/BackupListResponse"
                 }
               }
             }
@@ -1010,6 +1423,1282 @@
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      },
+      "post": {
+        "summary": "Backup 작업 등록",
+        "description": "새로운 백업 작업을 등록합니다.",
+        "tags": [
+          "Backup Management"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "center",
+                  "server",
+                  "type",
+                  "partition",
+                  "repository"
+                ],
+                "properties": {
+                  "center": {
+                    "oneOf": [
+                      {
+                        "type": "number",
+                        "description": "센터 ID"
+                      },
+                      {
+                        "type": "string",
+                        "description": "센터 이름"
+                      }
+                    ],
+                    "example": 1,
+                    "description": "작업을 등록할 센터 ID 또는 이름"
+                  },
+                  "server": {
+                    "oneOf": [
+                      {
+                        "type": "number",
+                        "description": "서버 ID"
+                      },
+                      {
+                        "type": "string",
+                        "description": "서버 이름"
+                      }
+                    ],
+                    "example": "prd-web01 (172.25.0.11)",
+                    "description": "백업 대상 서버 ID 또는 이름"
+                  },
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "full",
+                      "inc",
+                      "smart"
+                    ],
+                    "example": "full",
+                    "description": "백업 작업 타입"
+                  },
+                  "partition": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "example": [
+                      "/",
+                      "/boot",
+                      "/data"
+                    ],
+                    "description": "백업할 파티션 목록 (빈 배열인 경우 모든 파티션 백업)"
+                  },
+                  "repository": {
+                    "type": "object",
+                    "required": [
+                      "id"
+                    ],
+                    "properties": {
+                      "id": {
+                        "type": "number",
+                        "example": 14,
+                        "description": "저장소 ID"
+                      },
+                      "type": {
+                        "type": "string",
+                        "enum": [
+                          "smb",
+                          "nfs",
+                          "ssh"
+                        ],
+                        "example": "nfs",
+                        "description": "저장소 유형"
+                      },
+                      "path": {
+                        "type": "string",
+                        "example": "172.25.0.83:/ZConverter",
+                        "description": "저장소 경로"
+                      }
+                    },
+                    "description": "백업 저장소 정보"
+                  },
+                  "jobName": {
+                    "type": "string",
+                    "example": "prd-web01_root",
+                    "description": "작업 이름 (없을 경우 자동 생성)"
+                  },
+                  "user": {
+                    "oneOf": [
+                      {
+                        "type": "number",
+                        "description": "사용자 ID"
+                      },
+                      {
+                        "type": "string",
+                        "format": "email",
+                        "description": "사용자 이메일"
+                      }
+                    ],
+                    "example": "admin@example.com",
+                    "description": "작업 소유자"
+                  },
+                  "schedule": {
+                    "type": "object",
+                    "properties": {
+                      "full": {
+                        "type": "number",
+                        "example": 0,
+                        "description": "전체 백업 스케줄 ID"
+                      },
+                      "inc": {
+                        "type": "number",
+                        "example": 0,
+                        "description": "증분 백업 스케줄 ID"
+                      }
+                    },
+                    "description": "백업 스케줄 정보"
+                  },
+                  "descroption": {
+                    "type": "string",
+                    "example": "월간 전체 백업",
+                    "description": "작업 설명"
+                  },
+                  "rotation": {
+                    "type": "number",
+                    "minimum": 1,
+                    "maximum": 30,
+                    "example": 1,
+                    "description": "백업 보관 횟수"
+                  },
+                  "compression": {
+                    "type": "string",
+                    "enum": [
+                      "use",
+                      "not use"
+                    ],
+                    "example": "use",
+                    "description": "압축 사용 여부"
+                  },
+                  "encryption": {
+                    "type": "string",
+                    "enum": [
+                      "use",
+                      "not use"
+                    ],
+                    "example": "not use",
+                    "description": "암호화 사용 여부"
+                  },
+                  "excludeDir": {
+                    "type": "string",
+                    "example": "/var/log|/var/cache",
+                    "description": "백업 제외 디렉터리 (| 구분자 사용)"
+                  },
+                  "excludePartition": {
+                    "type": "string",
+                    "example": "/tmp",
+                    "description": "백업 제외 파티션 (| 구분자 사용)"
+                  },
+                  "mailEvent": {
+                    "type": "string",
+                    "format": "email",
+                    "example": "admin@example.com",
+                    "description": "백업 이벤트 수신 이메일"
+                  },
+                  "networkLimit": {
+                    "type": "number",
+                    "minimum": 0,
+                    "example": 0,
+                    "description": "네트워크 제한 속도 (0: 무제한)"
+                  },
+                  "autoStart": {
+                    "type": "string",
+                    "enum": [
+                      "use",
+                      "not use"
+                    ],
+                    "example": "not use",
+                    "description": "자동 시작 여부"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Backup 작업 등록 성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BackupRegistResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/backups/job-id/{jobId}": {
+      "get": {
+        "summary": "작업 ID로 Backup 조회",
+        "description": "특정 ID를 가진 백업 작업의 상세 정보를 조회합니다.",
+        "tags": [
+          "Backup Management"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "jobId",
+            "in": "path",
+            "description": "조회할 Backup 작업 ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "detail",
+            "in": "query",
+            "description": "상세 정보 포함 여부 (true, false)",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": true
+            }
+          },
+          {
+            "name": "mode",
+            "in": "query",
+            "description": "작업 모드 필터 (full, inc, smart)",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "full",
+                "inc",
+                "smart"
+              ]
+            }
+          },
+          {
+            "name": "result",
+            "in": "query",
+            "description": "작업 결과 필터",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "success",
+                "failure",
+                "partial",
+                "unknown"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Backup 작업 조회 성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BackupListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      },
+      "put": {
+        "operationId": "updateBackupByJobId",
+        "summary": "작업 ID로 Backup 수정",
+        "description": "백업 작업 정보를 수정합니다.",
+        "tags": [
+          "Backup Management"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "jobId",
+            "in": "path",
+            "description": "수정할 Backup 작업 ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "partition": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "example": [
+                      "/",
+                      "/boot"
+                    ],
+                    "description": "수정할 파티션 목록"
+                  },
+                  "changeName": {
+                    "type": "string",
+                    "example": "prd-web01_new_backup",
+                    "description": "변경할 작업 이름"
+                  },
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "full",
+                      "inc",
+                      "smart"
+                    ],
+                    "example": "full",
+                    "description": "변경할 백업 작업 타입"
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "connect",
+                      "disconnect"
+                    ],
+                    "example": "connect",
+                    "description": "변경할 작업 상태"
+                  },
+                  "descroption": {
+                    "type": "string",
+                    "example": "주간 백업으로 변경",
+                    "description": "변경할 작업 설명"
+                  },
+                  "rotation": {
+                    "type": "number",
+                    "minimum": 1,
+                    "maximum": 30,
+                    "example": 3,
+                    "description": "변경할 백업 보관 횟수"
+                  },
+                  "compression": {
+                    "type": "string",
+                    "enum": [
+                      "use",
+                      "not use"
+                    ],
+                    "example": "use",
+                    "description": "변경할 압축 사용 여부"
+                  },
+                  "encryption": {
+                    "type": "string",
+                    "enum": [
+                      "use",
+                      "not use"
+                    ],
+                    "example": "use",
+                    "description": "변경할 암호화 사용 여부"
+                  },
+                  "excludeDir": {
+                    "type": "string",
+                    "example": "/var/log|/tmp",
+                    "description": "변경할 백업 제외 디렉터리 (| 구분자 사용)"
+                  },
+                  "mailEvent": {
+                    "type": "string",
+                    "format": "email",
+                    "example": "admin@example.com",
+                    "description": "변경할 백업 이벤트 수신 이메일"
+                  },
+                  "networkLimit": {
+                    "type": "number",
+                    "minimum": 0,
+                    "example": 1024,
+                    "description": "변경할 네트워크 제한 속도 (KB/s)"
+                  },
+                  "schedule": {
+                    "type": "object",
+                    "properties": {
+                      "full": {
+                        "type": "string",
+                        "example": "1",
+                        "description": "변경할 전체 백업 스케줄 (ID 또는 스케줄 표현식)"
+                      },
+                      "inc": {
+                        "type": "string",
+                        "example": "2",
+                        "description": "변경할 증분 백업 스케줄 (ID 또는 스케줄 표현식)"
+                      }
+                    },
+                    "description": "변경할 백업 스케줄 정보"
+                  },
+                  "repository": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "example": "14",
+                        "description": "변경할 저장소 ID"
+                      },
+                      "type": {
+                        "type": "string",
+                        "enum": [
+                          "smb",
+                          "nfs",
+                          "ssh"
+                        ],
+                        "example": "nfs",
+                        "description": "변경할 저장소 유형"
+                      },
+                      "path": {
+                        "type": "string",
+                        "example": "172.25.0.83:/ZConverter/backup",
+                        "description": "변경할 저장소 경로"
+                      }
+                    },
+                    "description": "변경할 백업 저장소 정보"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Backup 작업 수정 성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BackupEditResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      },
+      "delete": {
+        "summary": "작업 ID로 Backup 삭제",
+        "description": "특정 ID의 백업 작업을 삭제합니다.",
+        "tags": [
+          "Backup Management"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "jobId",
+            "in": "path",
+            "description": "삭제할 Backup 작업 ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Backup 작업 삭제 성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BackupDeleteResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/backups/job-name/{jobName}": {
+      "get": {
+        "summary": "작업 이름으로 Backup 조회",
+        "description": "특정 이름을 가진 백업 작업의 상세 정보를 조회합니다.",
+        "tags": [
+          "Backup Management"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "jobName",
+            "in": "path",
+            "description": "조회할 Backup 작업 이름",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "detail",
+            "in": "query",
+            "description": "상세 정보 포함 여부 (true, false)",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": true
+            }
+          },
+          {
+            "name": "mode",
+            "in": "query",
+            "description": "작업 모드 필터 (full, inc, smart)",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "full",
+                "inc",
+                "smart"
+              ]
+            }
+          },
+          {
+            "name": "result",
+            "in": "query",
+            "description": "작업 결과 필터",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "success",
+                "failure",
+                "partial",
+                "unknown"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Backup 작업 조회 성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BackupListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      },
+      "put": {
+        "operationId": "updateBackupByJobName",
+        "summary": "작업 이름으로 Backup 수정",
+        "description": "백업 작업 정보를 수정합니다.",
+        "tags": [
+          "Backup Management"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "jobName",
+            "in": "path",
+            "description": "수정할 Backup 작업 이름",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "partition": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "example": [
+                      "/",
+                      "/boot"
+                    ],
+                    "description": "수정할 파티션 목록"
+                  },
+                  "changeName": {
+                    "type": "string",
+                    "example": "prd-web01_new_backup",
+                    "description": "변경할 작업 이름"
+                  },
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "full",
+                      "inc",
+                      "smart"
+                    ],
+                    "example": "full",
+                    "description": "변경할 백업 작업 타입"
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "connect",
+                      "disconnect"
+                    ],
+                    "example": "connect",
+                    "description": "변경할 작업 상태"
+                  },
+                  "descroption": {
+                    "type": "string",
+                    "example": "주간 백업으로 변경",
+                    "description": "변경할 작업 설명"
+                  },
+                  "rotation": {
+                    "type": "number",
+                    "minimum": 1,
+                    "maximum": 30,
+                    "example": 3,
+                    "description": "변경할 백업 보관 횟수"
+                  },
+                  "compression": {
+                    "type": "string",
+                    "enum": [
+                      "use",
+                      "not use"
+                    ],
+                    "example": "use",
+                    "description": "변경할 압축 사용 여부"
+                  },
+                  "encryption": {
+                    "type": "string",
+                    "enum": [
+                      "use",
+                      "not use"
+                    ],
+                    "example": "use",
+                    "description": "변경할 암호화 사용 여부"
+                  },
+                  "excludeDir": {
+                    "type": "string",
+                    "example": "/var/log|/tmp",
+                    "description": "변경할 백업 제외 디렉터리 (| 구분자 사용)"
+                  },
+                  "mailEvent": {
+                    "type": "string",
+                    "format": "email",
+                    "example": "admin@example.com",
+                    "description": "변경할 백업 이벤트 수신 이메일"
+                  },
+                  "networkLimit": {
+                    "type": "number",
+                    "minimum": 0,
+                    "example": 1024,
+                    "description": "변경할 네트워크 제한 속도 (KB/s)"
+                  },
+                  "schedule": {
+                    "type": "object",
+                    "properties": {
+                      "full": {
+                        "type": "string",
+                        "example": "1",
+                        "description": "변경할 전체 백업 스케줄 (ID 또는 스케줄 표현식)"
+                      },
+                      "inc": {
+                        "type": "string",
+                        "example": "2",
+                        "description": "변경할 증분 백업 스케줄 (ID 또는 스케줄 표현식)"
+                      }
+                    },
+                    "description": "변경할 백업 스케줄 정보"
+                  },
+                  "repository": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "example": "14",
+                        "description": "변경할 저장소 ID"
+                      },
+                      "type": {
+                        "type": "string",
+                        "enum": [
+                          "smb",
+                          "nfs",
+                          "ssh"
+                        ],
+                        "example": "nfs",
+                        "description": "변경할 저장소 유형"
+                      },
+                      "path": {
+                        "type": "string",
+                        "example": "172.25.0.83:/ZConverter/backup",
+                        "description": "변경할 저장소 경로"
+                      }
+                    },
+                    "description": "변경할 백업 저장소 정보"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Backup 작업 수정 성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BackupEditResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      },
+      "delete": {
+        "summary": "작업 이름으로 Backup 삭제",
+        "description": "특정 이름의 백업 작업을 삭제합니다.",
+        "tags": [
+          "Backup Management"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "jobName",
+            "in": "path",
+            "description": "삭제할 Backup 작업 이름",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Backup 작업 삭제 성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BackupDeleteResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/backups/server-name/{serverName}": {
+      "get": {
+        "summary": "서버 이름으로 Backup 조회",
+        "description": "특정 서버에 대한 백업 작업 목록을 조회합니다.",
+        "tags": [
+          "Backup Management"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "serverName",
+            "in": "path",
+            "description": "조회할 서버 이름",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "detail",
+            "in": "query",
+            "description": "상세 정보 포함 여부 (true, false)",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "mode",
+            "in": "query",
+            "description": "작업 모드 필터 (full, inc, smart)",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "full",
+                "inc",
+                "smart"
+              ]
+            }
+          },
+          {
+            "name": "serverType",
+            "in": "query",
+            "description": "서버 타입 필터",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Backup 작업 조회 성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BackupListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/backups/job-name/{jobName}/monitoring": {
+      "get": {
+        "summary": "작업 이름으로 Backup 모니터링",
+        "description": "특정 이름의 백업 작업 진행 상황을 모니터링합니다.",
+        "tags": [
+          "Backup Monitoring"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "jobName",
+            "in": "path",
+            "description": "모니터링할 Backup 작업 이름",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "detail",
+            "in": "query",
+            "description": "상세 정보 포함 여부 (true, false)",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "mode",
+            "in": "query",
+            "description": "작업 모드 필터 (full, inc, smart)",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "full",
+                "inc",
+                "smart"
+              ]
+            }
+          },
+          {
+            "name": "partition",
+            "in": "query",
+            "description": "특정 파티션 필터",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "repositoryType",
+            "in": "query",
+            "description": "저장소 유형 필터",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "smb",
+                "nfs",
+                "ssh"
+              ]
+            }
+          },
+          {
+            "name": "repositoryPath",
+            "in": "query",
+            "description": "저장소 경로 필터",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Backup 작업 모니터링 정보 조회 성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BackupMonitoringResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/backups/job-id/{jobId}/monitoring": {
+      "get": {
+        "summary": "작업 ID로 Backup 모니터링",
+        "description": "특정 ID의 백업 작업 진행 상황을 모니터링합니다.",
+        "tags": [
+          "Backup Monitoring"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "jobId",
+            "in": "path",
+            "description": "모니터링할 Backup 작업 ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "detail",
+            "in": "query",
+            "description": "상세 정보 포함 여부 (true, false)",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "mode",
+            "in": "query",
+            "description": "작업 모드 필터 (full, inc, smart)",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "full",
+                "inc",
+                "smart"
+              ]
+            }
+          },
+          {
+            "name": "partition",
+            "in": "query",
+            "description": "특정 파티션 필터",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "repositoryType",
+            "in": "query",
+            "description": "저장소 유형 필터",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "smb",
+                "nfs",
+                "ssh"
+              ]
+            }
+          },
+          {
+            "name": "repositoryPath",
+            "in": "query",
+            "description": "저장소 경로 필터",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Backup 작업 모니터링 정보 조회 성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BackupMonitoringResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/backups/server-name/{serverName}/monitoring": {
+      "get": {
+        "summary": "서버 이름으로 Backup 모니터링",
+        "description": "특정 서버의 모든 백업 작업 진행 상황을 모니터링합니다.",
+        "tags": [
+          "Backup Monitoring"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "serverName",
+            "in": "path",
+            "description": "모니터링할 서버 이름",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "detail",
+            "in": "query",
+            "description": "상세 정보 포함 여부 (true, false)",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "mode",
+            "in": "query",
+            "description": "작업 모드 필터 (full, inc, smart)",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "full",
+                "inc",
+                "smart"
+              ]
+            }
+          },
+          {
+            "name": "partition",
+            "in": "query",
+            "description": "특정 파티션 필터",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "serverType",
+            "in": "query",
+            "description": "서버 유형 필터",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "repositoryType",
+            "in": "query",
+            "description": "저장소 유형 필터",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "smb",
+                "nfs",
+                "ssh"
+              ]
+            }
+          },
+          {
+            "name": "repositoryPath",
+            "in": "query",
+            "description": "저장소 경로 필터",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Backup 작업 모니터링 정보 조회 성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BackupMonitoringListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
           },
           "500": {
             "$ref": "#/components/responses/ServerError"

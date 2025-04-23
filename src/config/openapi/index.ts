@@ -35,7 +35,7 @@ export const generateOpenApiSpec = () => {
     paths: {
       ...authPaths,
       ...serverPaths,
-      ...backupPaths
+      ...backupPaths,
       // ...fallbackPaths,
     },
   }
