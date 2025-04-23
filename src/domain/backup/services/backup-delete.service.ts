@@ -6,7 +6,6 @@ import { BackupHistoryRepository } from "../repositories/backup-history.reposito
 import { BackupInfoRepository } from "../repositories/backup-info.repository"
 import { BackupLogRepository } from "../repositories/backup-log-event.repository"
 import { BackupRepository } from "../repositories/backup.repository"
-import { BackupDeleteOptions } from "../types/backup-delete.type"
 import { BackupDataDeleteResponse } from "../types/backup-response.type"
 
 //  Backup Data 삭제 결과 DataSet
@@ -47,7 +46,7 @@ export class BackupDeleteService extends BaseService {
   /**
    * 결과 확인 및 출력 결과 가공
    */
-  private processResult({ data, jobName, id }: { data: BackupDataDeleteResultSet; jobName?: string; id?: number }): BackupDataDeleteResponse {
+  private processResult({ data, jobName, jobId }: { data: BackupDataDeleteResultSet; jobName?: string; jobId?: number }): BackupDataDeleteResponse {
     try {
       asyncContextStorage.addOrder({ component: this.serviceName, method: "processResult", state: "start" })
       let returnObject: BackupDataDeleteResponse | null = null
@@ -68,7 +67,7 @@ export class BackupDeleteService extends BaseService {
         }
       } else {
         returnObject = {
-          job_id: String(id),
+          job_id: String(jobId),
           delete_state: {
             data: mainResult,
             log: logResult,
@@ -90,7 +89,7 @@ export class BackupDeleteService extends BaseService {
   /**
    * Backup 작업 이름으로 삭제
    */
-  async deleteByJobName({ filterOptions, jobName }: { filterOptions: BackupDeleteOptions; jobName: string }): Promise<BackupDataDeleteResponse> {
+  async deleteByJobName({ jobName }: { jobName: string }): Promise<BackupDataDeleteResponse> {
     try {
       asyncContextStorage.addService({ name: this.serviceName })
       asyncContextStorage.addOrder({ component: this.serviceName, method: "deleteByJobName", state: "start" })
@@ -168,10 +167,70 @@ export class BackupDeleteService extends BaseService {
   /**
    * Backup 작업 ID로 삭제
    */
-  async deleteBackupByJobId({ filterOptions, id }: { filterOptions: BackupDeleteOptions; id: number }) {
+  async deleteBackupByJobId({ jobId }: { jobId: number }) {
     try {
       asyncContextStorage.addService({ name: this.serviceName })
       asyncContextStorage.addOrder({ component: this.serviceName, method: "deleteBackupByJobId", state: "start" })
+      // 트랜잭션 직접 실행
+      const transactionResult = await TransactionManager.execute({
+        callback: async (transaction) => {
+          // 필수 작업 세트 (함께 성공해야 함)
+          const mainTasks = [
+            { repo: this.backupRepository, type: "Main" },
+            { repo: this.backupInfoRepository, type: "Info" },
+          ]
+
+          // 필수 작업 세트 실행
+          const mainResults: BackupDataDeleteSet[] = await Promise.all(
+            mainTasks.map(async (task) => {
+              try {
+                const result = await task.repo.deleteByJobId({ jobId, transaction })
+                return { status: "fulfilled", value: result, type: task.type }
+              } catch (error) {
+                return { status: "rejected", reason: error, type: task.type }
+              }
+            })
+          )
+
+          // 필수 작업 세트의 결과가 둘다 성공이 아니면 error 리턴
+          // 필수 작업 세트의 실패 항목 식별 (소스 정보 포함)
+          const mainFailures = mainResults.filter((item) => item.status === "rejected")
+          if (mainFailures.length > 0) {
+            const failedItem = mainFailures[0]
+            const message = `Backup ${failedItem.type} Data 삭제 실패`
+            throw RepositoryError.deletionError({
+              method: "deleteByJobId",
+              message,
+              error: failedItem.reason.metadata?.error || failedItem.reason,
+            })
+          }
+
+          // 부가 작업 정의 및 실행
+          const additionalTasks = [
+            { repo: this.backupLogRepository, type: "Log" },
+            { repo: this.backupHistoryRepository, type: "History" },
+          ]
+
+          // 부가 작업도 메타데이터와 함께 매핑
+          const additionalResults: BackupDataDeleteSet[] = await Promise.all(
+            additionalTasks.map(async (task) => {
+              try {
+                const result = await task.repo.deleteByJobId({ jobId, transaction })
+                return { status: "fulfilled", value: result, type: task.type }
+              } catch (error) {
+                return { status: "rejected", reason: error, type: task.type }
+              }
+            })
+          )
+
+          // 모든 결과를 합쳐서 반환
+          return {
+            mainResults,
+            additionalResults,
+          }
+        },
+      })
+      const result = this.processResult({ data: transactionResult, jobId })
       asyncContextStorage.addOrder({ component: this.serviceName, method: "deleteBackupByJobId", state: "end" })
     } catch (error) {
       return this.handleServiceError({

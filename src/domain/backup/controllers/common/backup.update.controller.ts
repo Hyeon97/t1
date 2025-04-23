@@ -4,9 +4,9 @@ import { ApiUtils } from "../../../../utils/api/api.utils"
 import { asyncContextStorage } from "../../../../utils/AsyncContext"
 import { BaseController } from "../../../../utils/base/base-controller"
 import { ContextLogger } from "../../../../utils/logger/logger.custom"
-import { BackupEditRequestBody } from "../../types/backup-edit.type"
-import { BackupEditService } from "../../services/backup-edit.service"
 import { BackupEditByJobIdParamDTO, BackupEditByJobNameParamDTO } from "../../dto/param/backup-edit-param.dto"
+import { BackupEditService } from "../../services/backup-edit.service"
+import { BackupEditRequestBody } from "../../types/backup-edit.type"
 
 export class BackupEditController extends BaseController {
   private readonly backupEditService: BackupEditService
@@ -37,19 +37,17 @@ export class BackupEditController extends BaseController {
     errorMessage: string
   }): Promise<void> {
     try {
-      ContextLogger.debug({ message: `Backup 작업 ${methodName} 수정 시작` })
+      ContextLogger.debug({ message: `Backup 작업 수정 시작 - ${methodName}` })
       asyncContextStorage.setController({ name: this.controllerName })
       asyncContextStorage.addOrder({ component: this.controllerName, method: methodName, state: "start" })
 
-      // 파라미터 추출
+      // 파라미터 추출 ( jobId || jobName )
       const params = req.params as unknown as T
-      ContextLogger.debug({ message: `[파라미터]\n${JSON.stringify(params, null, 2)}` })
+      const identifier = paramExtractor(params)
+      ContextLogger.debug({ message: `[파라미터]`, meta: identifier! })
 
       // body data 추출
       const data = req.body as BackupEditRequestBody
-
-      // 식별자 추출 (jobId 또는 jobName)
-      const identifier = paramExtractor(params)
 
       // 서비스 호출
       const resultData = await this.backupEditService.edit({ ...identifier, data })

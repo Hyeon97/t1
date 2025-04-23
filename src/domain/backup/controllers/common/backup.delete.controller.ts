@@ -1,13 +1,11 @@
 import { NextFunction, Response } from "express"
-import { ControllerError } from "../../../../errors"
 import { ExtendedRequest } from "../../../../types/common/req.types"
 import { ApiUtils } from "../../../../utils/api/api.utils"
 import { asyncContextStorage } from "../../../../utils/AsyncContext"
 import { BaseController } from "../../../../utils/base/base-controller"
 import { ContextLogger } from "../../../../utils/logger/logger.custom"
-import { BackupDeleteQueryDTO } from "../../dto/query/backup-delete-query.dto"
+import { BackupDeleteByJobIdParamDTO, BackupDeleteByJobNameParamDTO, BackupDeleteByServerNameParamDTO } from "../../dto/param/backup-delete-param.dto"
 import { BackupDeleteService } from "../../services/backup-delete.service"
-import { BackupDeleteOptions } from "../../types/backup-delete.type"
 
 export class BackupDeleteController extends BaseController {
   private readonly backupDeleteService: BackupDeleteService
@@ -18,59 +16,54 @@ export class BackupDeleteController extends BaseController {
     })
     this.backupDeleteService = backupDeleteService
   }
-  //  Backup 삭제 옵션 추출
-  private extractFilterOptions({ query }: { query: BackupDeleteQueryDTO }): BackupDeleteOptions {
-    try {
-      asyncContextStorage.addOrder({ component: this.controllerName, method: "extractFilterOptions", state: "start" })
-      const filterOptions: BackupDeleteOptions = {
-        jobName: query.jobName || '',
-        id: query.id || null
-      }
-      asyncContextStorage.addOrder({ component: this.controllerName, method: "extractFilterOptions", state: "end" })
-      return filterOptions
-    } catch (error) {
-      throw ControllerError.badRequest(ControllerError, {
-        method: "extractFilterOptions",
-        message: "[Backup 삭제 필터 옵션 추출] - 팔터 옵션 확인필요",
-        error,
-      })
-    }
-  }
 
   /**
-   * Backup 작업 삭제 
+   * 공통 Backup 삭제 헨들러 
    */
-  delete = async (req: ExtendedRequest, res: Response, next: NextFunction): Promise<void> => {
+  private async handleBackupDelete<T>({
+    req,
+    res,
+    next,
+    methodName,
+    paramExtractor,
+    errorMessage,
+  }: {
+    req: ExtendedRequest
+    res: Response
+    next: NextFunction
+    methodName: string
+    paramExtractor: (params: any) => { jobId?: number; jobName?: string, serverName?: string }
+    errorMessage: string
+  }): Promise<void> {
     try {
+      ContextLogger.debug({ message: `Backup 작업 삭제 시작 - ${methodName}` })
       asyncContextStorage.setController({ name: this.controllerName })
-      asyncContextStorage.addOrder({ component: this.controllerName, method: "deleteByJobName", state: "start" })
+      asyncContextStorage.addOrder({ component: this.controllerName, method: methodName, state: "start" })
 
-      //  필터 옵션 추출
-      const query = req.query as unknown as BackupDeleteQueryDTO
-      const filterOptions = this.extractFilterOptions({ query })
-      ContextLogger.debug({ message: `적용된 필터 옵션`, meta: filterOptions })
+      // 파라미터 추출 ( jobId || jobName || serverName )
+      const params = req.params as unknown as T
+      const identifier = paramExtractor(params)
+      ContextLogger.debug({ message: `[식별자]`, meta: identifier! })
+
+
       //  서비스 호출
       let resultData
-      if (filterOptions.jobName) {
-        resultData = await this.backupDeleteService.deleteByJobName({
-          jobName: filterOptions.jobName,
-          filterOptions
-        })
-      } else if (filterOptions.id) {
-        resultData = await this.backupDeleteService.deleteBackupByJobId({
-          id: filterOptions.id,
-          filterOptions
-        })
+      if (identifier.jobName) {
+        resultData = await this.backupDeleteService.deleteByJobName({ jobName: identifier.jobName })
+      } else if (identifier.jobId) {
+        resultData = await this.backupDeleteService.deleteBackupByJobId({ jobId: identifier.jobId })
       }
+
       ContextLogger.info({ message: `Backup 작업 삭제 완료` })
       ApiUtils.success({ res, data: resultData, message: "Backup job data delete result" })
-      asyncContextStorage.addOrder({ component: this.controllerName, method: "deleteByJobName", state: "end" })
+      asyncContextStorage.addOrder({ component: this.controllerName, method: methodName, state: "end" })
+
     } catch (error) {
       this.handleControllerError({
         next,
         error,
-        method: "delete",
-        message: "[Backup 작업 삭제] - 예기치 못한 오류 발생",
+        method: methodName,
+        message: errorMessage,
       })
     }
   }
@@ -79,53 +72,35 @@ export class BackupDeleteController extends BaseController {
    * Backup 작업 이름으로 삭제
    */
   deleteByJobName = async (req: ExtendedRequest, res: Response, next: NextFunction): Promise<void> => {
-    try {
-      asyncContextStorage.setController({ name: this.controllerName })
-      asyncContextStorage.addOrder({ component: this.controllerName, method: "deleteByJobName", state: "start" })
-      asyncContextStorage.addOrder({ component: this.controllerName, method: "deleteByJobName", state: "end" })
-    } catch (error) {
-      this.handleControllerError({
-        next,
-        error,
-        method: "deleteByJobName",
-        message: "[Backup 작업 이름으로 삭제] - 예기치 못한 오류 발생",
-      })
-    }
+    await this.handleBackupDelete<BackupDeleteByJobNameParamDTO>({
+      req, res, next,
+      methodName: "deleteByJobName",
+      paramExtractor: (params) => ({ jobName: params.jobName }),
+      errorMessage: "[Backup 작업 이름으로 삭제] - 예기치 못한 오류 발생",
+    })
   }
 
   /**
    * Backup 작업 ID로 삭제
    */
   deleteByJobId = async (req: ExtendedRequest, res: Response, next: NextFunction): Promise<void> => {
-    try {
-      asyncContextStorage.setController({ name: this.controllerName })
-      asyncContextStorage.addOrder({ component: this.controllerName, method: "deleteByJobId", state: "start" })
-      asyncContextStorage.addOrder({ component: this.controllerName, method: "deleteByJobId", state: "end" })
-    } catch (error) {
-      this.handleControllerError({
-        next,
-        error,
-        method: "deleteByJobId",
-        message: "[Backup 작업 ID로 삭제] - 예기치 못한 오류 발생",
-      })
-    }
+    await this.handleBackupDelete<BackupDeleteByJobIdParamDTO>({
+      req, res, next,
+      methodName: "deleteByJobId",
+      paramExtractor: (params) => ({ jobName: params.jobName }),
+      errorMessage: "[Backup 작업 ID로 삭제] - 예기치 못한 오류 발생",
+    })
   }
 
   /**
    * Backup 작업 서버 이름으로 삭제 ( source, target 구분 X? )
    */
   deleteBySystenName = async (req: ExtendedRequest, res: Response, next: NextFunction): Promise<void> => {
-    try {
-      asyncContextStorage.setController({ name: this.controllerName })
-      asyncContextStorage.addOrder({ component: this.controllerName, method: "deleteBySystenName", state: "start" })
-      asyncContextStorage.addOrder({ component: this.controllerName, method: "deleteBySystenName", state: "end" })
-    } catch (error) {
-      this.handleControllerError({
-        next,
-        error,
-        method: "deleteBySystenName",
-        message: "[Backup 작업 등록 System 이름으로 삭제] - 예기치 못한 오류 발생",
-      })
-    }
+    await this.handleBackupDelete<BackupDeleteByServerNameParamDTO>({
+      req, res, next,
+      methodName: "deleteBySystenName",
+      paramExtractor: (params) => ({ jobName: params.jobName }),
+      errorMessage: "[Backup 작업 등록 System 이름으로 삭제] - 예기치 못한 오류 발생",
+    })
   }
 }

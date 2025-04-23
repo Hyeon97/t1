@@ -237,23 +237,23 @@ export class BackupRepository extends BaseRepository {
   /**
    * Backup 작업 삭제 ( By ID )
    */
-  async deleteById({ id, transaction }: { id: number; transaction: TransactionManager }): Promise<ResultSetHeader> {
+  async deleteByJobId({ jobId, transaction }: { jobId: number; transaction: TransactionManager }): Promise<ResultSetHeader> {
     try {
       asyncContextStorage.addRepository({ name: this.repositoryName })
-      asyncContextStorage.addOrder({ component: this.repositoryName, method: "deleteById", state: "start" })
+      asyncContextStorage.addOrder({ component: this.repositoryName, method: "deleteByJobId", state: "start" })
 
       const result = await this.delete({
-        data: { nID: id },
+        data: { nID: jobId },
         transaction,
-        request: `${this.repositoryName}.deleteById`,
+        request: `${this.repositoryName}.deleteByJobId`,
       })
 
-      asyncContextStorage.addOrder({ component: this.repositoryName, method: "deleteById", state: "end" })
+      asyncContextStorage.addOrder({ component: this.repositoryName, method: "deleteByJobId", state: "end" })
       return result
     } catch (error) {
       return this.handleRepositoryError({
         error,
-        method: "deleteById",
+        method: "deleteByJobId",
         message: `[Backup 작업 정보 삭제(단일)] - 오류가 발생했습니다`,
       })
     }

@@ -227,4 +227,28 @@ export class BackupInfoRepository extends BaseRepository {
       })
     }
   }
+
+  /**
+ * Backup info 작업 삭제 ( by jobID )
+ */
+  async deleteByJobId({ jobId, transaction }: { jobId: number; transaction: TransactionManager }): Promise<ResultSetHeader> {
+    try {
+      asyncContextStorage.addRepository({ name: this.repositoryName })
+      asyncContextStorage.addOrder({ component: this.repositoryName, method: "deleteByJobId", state: "start" })
+      const result = await this.delete({
+        data: { nID: jobId },
+        transaction,
+        request: `${this.repositoryName}.deleteByJobId`,
+      })
+
+      asyncContextStorage.addOrder({ component: this.repositoryName, method: "deleteByJobId", state: "end" })
+      return result
+    } catch (error) {
+      return this.handleRepositoryError({
+        error,
+        method: "deleteByJobId",
+        message: `[Backup Info 작업 정보 삭제(단일)] - 오류가 발생했습니다`,
+      })
+    }
+  }
 }

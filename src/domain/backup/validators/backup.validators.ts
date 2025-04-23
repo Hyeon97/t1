@@ -1,6 +1,7 @@
 import { validationMiddleware } from "../../../middlewares/validation/validationMiddleware"
 import { BackupEditBodyDTO } from "../dto/body/backup-edit-body.dto"
 import { BackupRegistBodyDTO } from "../dto/body/backup-regist-body.dto"
+import { BackupDeleteByJobIdParamDTO, BackupDeleteByJobNameParamDTO } from "../dto/param/backup-delete-param.dto"
 import { BackupEditByJobIdParamDTO, BackupEditByJobNameParamDTO, BackupEditByServerNameParamDTO } from "../dto/param/backup-edit-param.dto"
 import { BackupGetByJobIdParamDTO, BackupGetByJobNameParamDTO, BackupGetByServerNameParamDTO } from "../dto/param/backup-get-param.dto"
 import {
@@ -8,7 +9,6 @@ import {
   BackupMonitoringByJobNameParamDTO,
   BackupMonitoringByServerNameParamDTO,
 } from "../dto/param/backup-monit-param.dto"
-import { BackupDeleteQueryDTO } from "../dto/query/backup-delete-query.dto"
 import { BackupGetQueryDTO } from "../dto/query/backup-get-query.dto"
 import { BackupMonitoringQueryDTO } from "../dto/query/backup-monit-query.dto"
 
@@ -41,15 +41,14 @@ export const validateBackupEditByJobNameParams = validationMiddleware.validatePa
 export const validateBackupEditByServerNameParams = validationMiddleware.validateParams(BackupEditByServerNameParamDTO)
 //  작업 수정 body 검증
 export const validateBackupEditBody = validationMiddleware.validateBody(BackupEditBodyDTO)
+
 /**
  * Backup 작업 삭제
  */
-//  작업 삭제 공통 queryString 검증
-export const validateBackupDeleteQuery = validationMiddleware.validateQuery(BackupDeleteQueryDTO)
 //  작업 ID로 삭제 parameter 검증
-export const validateBackupDeleteByJobIdParams = validationMiddleware.validateParams
+export const validateBackupDeleteByJobIdParams = validationMiddleware.validateParams(BackupDeleteByJobIdParamDTO)
 //  작업 이름으로 삭제 parameter 검증
-export const validateBackupDeleteByJobNameParams = validationMiddleware.validateParams
+export const validateBackupDeleteByJobNameParams = validationMiddleware.validateParams(BackupDeleteByJobNameParamDTO)
 
 /**
  * Backup 작업 모니터링

@@ -7,7 +7,8 @@ import {
   backupRegistController,
 } from "../controllers/controller-registry"
 import {
-  validateBackupDeleteQuery,
+  validateBackupDeleteByJobIdParams,
+  validateBackupDeleteByJobNameParams,
   validateBackupEditBody,
   validateBackupEditByJobIdParams,
   validateBackupEditByJobNameParams,
@@ -19,7 +20,7 @@ import {
   validateBackupMonitoringByJobNameParams,
   validateBackupMonitoringByServerNameParams,
   validateBackupMonitoringQuery,
-  validateBackupRegistBody,
+  validateBackupRegistBody
 } from "../validators/backup.validators"
 
 export class BackupRoutes {
@@ -46,12 +47,10 @@ export class BackupRoutes {
     this.router.get("/server-name/:serverName", validateBackupGetByServerNameParams, validateBackupGetQuery)
 
     //  [Backup 작업 삭제]
-    //  Backup 작업 삭제
-    this.router.delete("/", validateBackupDeleteQuery, backupDeleteController.delete)
     //  작업 ID로 삭제
-    this.router.delete("/job-id/:jobId")
+    this.router.delete("/job-id/:jobId", validateBackupDeleteByJobIdParams, backupDeleteController.deleteByJobId)
     //  작업 이름으로 삭제
-    this.router.delete("/job-name/:jobName")
+    this.router.delete("/job-name/:jobName", validateBackupDeleteByJobNameParams, backupDeleteController.deleteByJobName)
 
     //  [Backup 작업 등록]
     this.router.post("/", validateBackupRegistBody, backupRegistController.regist)
