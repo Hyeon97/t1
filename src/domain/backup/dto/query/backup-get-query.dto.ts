@@ -4,8 +4,10 @@
 
 import { Expose } from "class-transformer"
 import { IsIn, IsOptional, IsString } from "class-validator"
+import { VALID_SYSTEM_MODE_VALUES } from "../../../../types/common/const-value"
 import { JobResult, JobStatusType } from "../../../../types/common/job"
 import { RepositoryType } from "../../../../types/common/repository"
+import { SystemModeType } from "../../../server/types/server-common.type"
 import { BackupType } from "../../types/backup-common.type"
 import { BackupFilterOptions } from "../../types/backup-get.type"
 
@@ -60,8 +62,12 @@ export class BackupGetQueryDTO implements BackupFilterOptions {
 
 //  작업 대상 server 이름으로 조회 요청시 DTO
 export class BackupGetByServerNameQueryDTO extends BackupGetQueryDTO {
-  //  작업 대상 서버 타입
+  //  작업 대상 서버 타입 | 해당 값 없으면 souce, target 구분 x 
+  @IsOptional()
   @IsString()
+  @IsIn(VALID_SYSTEM_MODE_VALUES, {
+    message: `serverType은 ${VALID_SYSTEM_MODE_VALUES.join(", ")}만 가능합니다`
+  })
   @Expose()
-  serverType!: string
+  serverType!: SystemModeType
 }

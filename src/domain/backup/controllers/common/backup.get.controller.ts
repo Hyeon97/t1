@@ -74,6 +74,7 @@ export class BackupController extends BaseController {
       ContextLogger.debug({ message: `Backup 작업 조회 시작 - ${methodName}` })
       asyncContextStorage.setController({ name: this.controllerName })
       asyncContextStorage.addOrder({ component: this.controllerName, method: methodName, state: "start" })
+
       // 필터 옵션 추출
       const query = req.query as unknown as BackupGetQueryDTO | BackupGetByServerNameQueryDTO
       const filterOptions = this.extractFilterOptions({ query })
