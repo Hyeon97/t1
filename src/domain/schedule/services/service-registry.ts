@@ -14,3 +14,5 @@ const scheduleRepository = new ScheduleRepository()
  */
 //  Schedule 정보 조회 Service
 export const scheduleGetService = new ScheduleService({ scheduleRepository })
+//  Schedule 정보 등록 Service
+export const scheduleRegistService = new ScheduleService({ scheduleRepository })
