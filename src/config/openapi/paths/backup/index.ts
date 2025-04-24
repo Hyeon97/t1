@@ -48,24 +48,24 @@ const allPathKeys = [
   ...Object.keys(backupMonitoringPath)
 ]
 
-// 중복 경로 확인
-const uniqueKeys = new Set(allPathKeys)
-if (uniqueKeys.size < allPathKeys.length) {
-  console.log("중복 경로 발견: 총", allPathKeys.length, "개 중", uniqueKeys.size, "개만 고유함")
+// // 중복 경로 확인
+// const uniqueKeys = new Set(allPathKeys)
+// if (uniqueKeys.size < allPathKeys.length) {
+//   console.log("중복 경로 발견: 총", allPathKeys.length, "개 중", uniqueKeys.size, "개만 고유함")
 
-  // 중복된 경로 찾기
-  const keyCounts: Record<string, number> = {}
-  allPathKeys.forEach(key => {
-    keyCounts[key] = (keyCounts[key] || 0) + 1
-  })
+//   // 중복된 경로 찾기
+//   const keyCounts: Record<string, number> = {}
+//   allPathKeys.forEach(key => {
+//     keyCounts[key] = (keyCounts[key] || 0) + 1
+//   })
 
-  // 중복된 경로 출력
-  Object.entries(keyCounts)
-    .filter(([_, count]) => count > 1)
-    .forEach(([key, count]) => {
-      console.log(`경로 '${key}'가 ${count}번 중복됨`)
-    })
-}
+//   // 중복된 경로 출력
+//   Object.entries(keyCounts)
+//     .filter(([_, count]) => count > 1)
+//     .forEach(([key, count]) => {
+//       console.log(`경로 '${key}'가 ${count}번 중복됨`)
+//     })
+// }
 
 // 수동으로 병합하여 모든 메서드가 보존되도록 함
 const backupPaths: PathObject = {};
@@ -86,10 +86,11 @@ const backupPaths: PathObject = {};
   })
 })
 
-// 최종 병합 결과 확인
-console.log("병합된 총 경로 수:", Object.keys(backupPaths).length)
-Object.keys(backupPaths).forEach(path => {
-  console.log(`경로: ${path}, 메서드:`, Object.keys(backupPaths[path]))
-})
+// // 최종 병합 결과 확인
+// console.log("병합된 총 경로 수:", Object.keys(backupPaths).length)
+// Object.keys(backupPaths).forEach(path => {
+//   console.log(`경로: ${path}, 메서드:`, Object.keys(backupPaths[path]))
+// })
 
 export { backupPaths }
+
