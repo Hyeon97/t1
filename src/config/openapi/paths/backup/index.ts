@@ -30,23 +30,23 @@ import { backupRegistPath } from "./regist"
 type PathMethods = Record<string, any>
 type PathObject = Record<string, PathMethods>
 
-// 각 경로 객체의 내용을 로깅하여 확인
-console.log("List 경로 수:", Object.keys(backupListPath).length)
-console.log("Detail 경로 수:", Object.keys(backupDetailPath).length)
-console.log("Regist 경로 수:", Object.keys(backupRegistPath).length)
-console.log("Edit 경로 수:", Object.keys(backupEditPath).length)
-console.log("Delete 경로 수:", Object.keys(backupDeletePath).length)
-console.log("Monitoring 경로 수:", Object.keys(backupMonitoringPath).length)
+// // 각 경로 객체의 내용을 로깅하여 확인
+// console.log("List 경로 수:", Object.keys(backupListPath).length)
+// console.log("Detail 경로 수:", Object.keys(backupDetailPath).length)
+// console.log("Regist 경로 수:", Object.keys(backupRegistPath).length)
+// console.log("Edit 경로 수:", Object.keys(backupEditPath).length)
+// console.log("Delete 경로 수:", Object.keys(backupDeletePath).length)
+// console.log("Monitoring 경로 수:", Object.keys(backupMonitoringPath).length)
 
-// 충돌 확인을 위해 모든 경로 키를 수집
-const allPathKeys = [
-  ...Object.keys(backupListPath),
-  ...Object.keys(backupDetailPath),
-  ...Object.keys(backupRegistPath),
-  ...Object.keys(backupEditPath),
-  ...Object.keys(backupDeletePath),
-  ...Object.keys(backupMonitoringPath)
-]
+// // 충돌 확인을 위해 모든 경로 키를 수집
+// const allPathKeys = [
+//   ...Object.keys(backupListPath),
+//   ...Object.keys(backupDetailPath),
+//   ...Object.keys(backupRegistPath),
+//   ...Object.keys(backupEditPath),
+//   ...Object.keys(backupDeletePath),
+//   ...Object.keys(backupMonitoringPath)
+// ]
 
 // // 중복 경로 확인
 // const uniqueKeys = new Set(allPathKeys)
