@@ -3,9 +3,9 @@
 //////////////////////////////////////////////
 
 import { IsIn, IsOptional } from "class-validator"
-import { ScheduleFilterOptions } from "../../types/schedule-filter.type"
-import { ScheduleType, ScheduleStatusType } from "../../types/schedule-common.type"
 import { VALID_SCHEDULE_ACTIVATION_VALUES, VALID_SCHEDULE_TYPE_VALUES } from "../../../../types/common/const-value"
+import { ScheduleStatusType, ScheduleType } from "../../types/schedule-common.type"
+import { ScheduleFilterOptions } from "../../types/schedule-filter.type"
 
 export class ScheduleQueryFilterDTO implements ScheduleFilterOptions {
   //  필터 옵션

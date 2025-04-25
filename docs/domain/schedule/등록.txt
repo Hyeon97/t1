@@ -68,12 +68,12 @@ scheduleType 0~6: 일반 7~11:smart
   - 변환
     ```
     # 기본 form
-    mon|tue|wed|thu|fri|sat|sun
+    mon|tue|wed|thu|fri|sat|sun|
 
     # 사용자가 입력한 요일에 해당하는 부분을 1로 없는 부분을 0으로 변환
     ex.
       사용자 입력 : mon, wed
-      변환       : 1|0|1|0|0|0|0
+      변환       : 1|0|1|0|0|0|0|
     ```
 > 일
   - input
@@ -88,7 +88,22 @@ scheduleType 0~6: 일반 7~11:smart
     # 사용자가 입력한 일에 해당하는 부분을 1로 없는 부분을 0으로 변환
     ex.
       사용자 입력 : 1,5,8,11
-      변환       : 1|0|0|0|1|0|0|1|0|0|1|.......|0
+      변환       : 1|0|0|0|1|0|0|1|0|0|1|.......|0|
+    ```
+> 주
+  - input
+    ```
+    1,2,3...5
+    ```
+  - 변환
+    ```
+    # 기본 form
+    1|2|3|4|5|
+
+    # 사용자가 입력한 주에 해당 하는 부분을 1로 없는 부분을 0으로 변환
+    ex.
+      사용자 입력 : 2,3
+      변환       : 0|1|1|0|0|
     ```
 
 * type: 0 [once] [full/inc]
@@ -96,6 +111,7 @@ scheduleType 0~6: 일반 7~11:smart
   > JSON body설계
   ```
   {
+    type: 0,
     full / inc:{
       year:'2025',
       month:'04 or 4',
@@ -115,6 +131,7 @@ scheduleType 0~6: 일반 7~11:smart
   > JSON body설계
   ```
   {
+    type: 1,
     full / inc:{
       year:'',
       month:'',
@@ -133,6 +150,7 @@ scheduleType 0~6: 일반 7~11:smart
   > JSON body설계
   ```
   {
+    type: 2,
     full / inc:{
       year:'',
       month:'',
@@ -151,6 +169,7 @@ scheduleType 0~6: 일반 7~11:smart
   > JSON body설계
   ```
   {
+    type: 3,
     full / inc:{
       year:'',
       month:'',
@@ -170,11 +189,12 @@ scheduleType 0~6: 일반 7~11:smart
   > JSON body설계
   ```
   {
+    type: 4,
     full / inc:{
       year:'',
       month:'',
-      week:'mon|tue|wed|thu|fri|sat|sun',
-      day:'',
+      week:'',
+      day:'mon,tue,wed,thu,fri,sat,sun',
       time:'12:00',
       interval:{
         minute:'',
@@ -182,13 +202,48 @@ scheduleType 0~6: 일반 7~11:smart
       }
     }
   }
+
 * type: 5 [monthly] [full/inc]
   - 특정 주, 특정 요일, 특정 시간에만 실행
     - 주는 복수 선택 가능 ( 1 ~ 5 )
     - 요일은 복수 선택 가능 ( 월 ~ 일 )
+  > JSON body설계
+  ```
+  {
+    type: 5,
+    full / inc:{
+      year:'',
+      month:'',
+      week:'1,3',
+      day:'mon,tue,wed,thu,fri,sat,sun',
+      time:'12:00',
+      interval:{
+        minute:'',
+        hour:''
+      }
+    }
+  }
+
 * type: 6 [specific month] [full/inc]
   - 특정 일, 특정 시간에만 실행
     - 일은 복수 선택 가능 ( 1 ~ 31 )
+  > JSON body설계
+  ```
+  {
+    type: 6,
+    full / inc:{
+      year:'',
+      month:'',
+      week:'',
+      day:'1,4,7,31',
+      time:'12:00',
+      interval:{
+        minute:'',
+        hour:''
+      }
+    }
+  }
+
 * type: 7 [weekly] [smart]
   > full
     - 매주 특정 요일, 특정 시간 실행
@@ -196,6 +251,34 @@ scheduleType 0~6: 일반 7~11:smart
   > increment
     - 매주 특정 요일, 특정 시간 실행
       - 요일은 복수 선택 가능 ( 월 ~ 일 )
+  > JSON body설계
+  ```
+  {
+    type: 7,
+    full:{
+      year:'',
+      month:'',
+      week:'',
+      day:'mon,tue,wed,thu,fri,sat,sun',
+      time:'12:00',
+      interval:{
+        minute:'',
+        hour:''
+      }
+    },
+    inc:{
+      year:'',
+      month:'',
+      week:'',
+      day:'mon,tue,wed,thu,fri,sat,sun',
+      time:'12:00',
+      interval:{
+        minute:'',
+        hour:''
+      }
+    }
+  }
+
 * type: 8 [monthly - weekly] [smart]
   > full
     - 특정 주, 특정 요일, 특정 시간 실행
@@ -205,6 +288,34 @@ scheduleType 0~6: 일반 7~11:smart
     - 특정 주, 특정 요일, 특정 시간 실행
       - 주는 복수 선택 가능 ( 1 ~ 5 )
       - 요일은 복수 선택 가능 ( 월 ~ 일 )
+  > JSON body설계
+  ```
+  {
+    type: 8,
+    full:{
+      year:'',
+      month:'',
+      week:'2',
+      day:'mon,tue,wed,thu,fri,sat,sun',
+      time:'12:00',
+      interval:{
+        minute:'',
+        hour:''
+      }
+    },
+    inc:{
+      year:'',
+      month:'',
+      week:'2,3',
+      day:'mon,tue,wed,thu,fri,sat,sun',
+      time:'12:00',
+      interval:{
+        minute:'',
+        hour:''
+      }
+    }
+  }
+
 * type: 9 [monthly - daily] [smart]
   > full
     - 특정 일, 특정 시간 실행
@@ -212,33 +323,34 @@ scheduleType 0~6: 일반 7~11:smart
   > increment
     - 특정 일, 특정 시간 실행
       - 일은 복수 선택 가능 ( 1 ~ 31 )
-  > JSON Body 설계
+  > JSON body설계
   ```
   {
+    type: 9,
     full:{
-      year:'2025',
-      month:'04 or 4',
+      year:'',
+      month:'',
       week:'',
-      day:'04 or 4',
+      day:'3,6,9',
       time:'12:00',
       interval:{
-      minute:'',
-      hour:''
+        minute:'',
+        hour:''
       }
     },
     inc:{
-      year:'2025',
-      month:'04 or 4',
+      year:'',
+      month:'',
       week:'',
-      day:'04 or 4',
+      day:'3,4,7,9',
       time:'12:00',
       interval:{
-      minute:'',
-      hour:''
+        minute:'',
+        hour:''
       }
     }
   }
-  ```
+
 * type: 10 [specific month - weekly] [smart]
   > full
     - 특정 달, 특정 주, 특정 요일, 특정 시간 실행
@@ -250,6 +362,34 @@ scheduleType 0~6: 일반 7~11:smart
       - 달은 복수 선택 가능 ( 1 ~ 12 )
       - 주는 복수 선택 가능 ( 1 ~ 5 )
       - 요일은 복수 선택 가능 ( 월 ~ 일 )
+  > JSON body설계
+  ```
+  {
+    type: 10,
+    full:{
+      year:'',
+      month:'4',
+      week:'1',
+      day:'mon',
+      time:'12:00',
+      interval:{
+        minute:'',
+        hour:''
+      }
+    },
+    inc:{
+      year:'',
+      month:'4,6',
+      week:'1,3',
+      day:'mon,tue,wed,thu',
+      time:'12:00',
+      interval:{
+        minute:'',
+        hour:''
+      }
+    }
+  }
+
 * type: 11 [specific month - daily] [smart]
   > full
     - 특정 달, 특정 일, 특정 시간 실행
@@ -259,3 +399,30 @@ scheduleType 0~6: 일반 7~11:smart
     - 특정 달, 특정 일 특정 시간 실행
       - 달은 복수 선택 가능 ( 1 ~ 12 )
       - 일은 복수 선택 가능 ( 1 ~ 31 )
+  > JSON body설계
+  ```
+  {
+    type: 11,
+    full:{
+      year:'',
+      month:'4',
+      week:'',
+      day:'3',
+      time:'12:00',
+      interval:{
+        minute:'',
+        hour:''
+      }
+    },
+    inc:{
+      year:'',
+      month:'4,7',
+      week:'',
+      day:'3,4,7,9',
+      time:'12:00',
+      interval:{
+        minute:'',
+        hour:''
+      }
+    }
+  }

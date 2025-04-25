@@ -16,7 +16,7 @@ export class ScheduleService extends BaseService {
   /**
    * 모든 Schedule 조회
    */
-  async getSchedules({ filterOptions }: { filterOptions: ScheduleFilterOptions }): Promise<ScheduleDataResponse> {
+  async getSchedules({ filterOptions }: { filterOptions?: ScheduleFilterOptions }): Promise<ScheduleDataResponse> {
     try {
       asyncContextStorage.addService({ name: this.serviceName })
       asyncContextStorage.addOrder({ component: this.serviceName, method: "getSchedules", state: "start" })

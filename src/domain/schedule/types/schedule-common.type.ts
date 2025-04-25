@@ -43,8 +43,18 @@ export const ScheduleStatusMap = {
 
 /**
  * Schedule 타입 정의
- * 0: Once(한번) 1:Every Minute(매분) 2: Hourly(매시), 3: Daily(매일)
- * 4: Weekly(매주) 5: Monthly on Specific Week(매월 특정주) 6: Monthly on Specific Day(매월 특정일)
+ * 0: Once (한번) 
+ * 1: Every Minute (매분) 
+ * 2: Hourly (매시)
+ * 3: Daily (매일)
+ * 4: Weekly (매주) 
+ * 5: Monthly on Specific Week (매월 특정 주)
+ * 6: Monthly on Specific Day (매월 특정 일)
+ * 7: Smart Weekly on Specific Day (매주 특정 요일) 
+ * 8: Smart Monthly on Specific Week and Day (매월 특정 주, 특정 요일) 
+ * 9: Smart Monthly on Specific Date (매월 특정일) 
+ * 10: Smart Custom Monthly on Specific Month, Week and Day (특정 달, 특정 주, 특정 일) 
+ * 11: Smart Custom Monthly on Specific Month and Date (특정 달, 특정 일)
  */
 export type ScheduleType = (typeof VALID_SCHEDULE_TYPE_VALUES)[number]
 export enum ScheduleTypeEnum {
@@ -55,6 +65,11 @@ export enum ScheduleTypeEnum {
   WEEKLY = 4,
   MONTHLY_ON_SPECIFIC_WEEK = 5,
   MONTHLY_ON_SPECIFIC_DAY = 6,
+  SMART_WEEKLY_ON_SPECIFIC_DAY = 7,
+  SMART_MONTHLY_ON_SPECIFIC_WEEK_AND_DAY = 8,
+  SMART_MONTHLY_ON_SPECIFIC_DATE = 9,
+  SMART_CUSTOM_MONTHLY_ON_SPECIFIC_MONTH_AND_WEEK_AND_DAY = 10,
+  SMART_CUSTOM_MONTHLY_ON_SPECIFIC_MONTH_AND_DATE = 11
 }
 export const ScheduleTypeMap = {
   fromString: ({ str }: { str: string }): number => {
@@ -74,6 +89,16 @@ export const ScheduleTypeMap = {
         return ScheduleTypeEnum.MONTHLY_ON_SPECIFIC_WEEK
       case "monthly on specific day":
         return ScheduleTypeEnum.MONTHLY_ON_SPECIFIC_DAY
+      case "smart weekly on specific day":
+        return ScheduleTypeEnum.SMART_WEEKLY_ON_SPECIFIC_DAY
+      case "smart monthly on specific week and day":
+        return ScheduleTypeEnum.SMART_MONTHLY_ON_SPECIFIC_WEEK_AND_DAY
+      case "smart monthly on specific date":
+        return ScheduleTypeEnum.SMART_MONTHLY_ON_SPECIFIC_DATE
+      case "smart custom monthly on specific month, week and day":
+        return ScheduleTypeEnum.SMART_CUSTOM_MONTHLY_ON_SPECIFIC_MONTH_AND_WEEK_AND_DAY
+      case "smart custom monthly on specific month and date":
+        return ScheduleTypeEnum.SMART_CUSTOM_MONTHLY_ON_SPECIFIC_MONTH_AND_DATE
       default:
         throw new Error(`Unknown Schedule type: ${str}`)
     }
@@ -94,6 +119,16 @@ export const ScheduleTypeMap = {
         return "Monthly on Specific Week"
       case ScheduleTypeEnum.MONTHLY_ON_SPECIFIC_DAY:
         return "Monthly on Specific Day"
+      case ScheduleTypeEnum.SMART_WEEKLY_ON_SPECIFIC_DAY:
+        return "Smart Weekly on Specific Day"
+      case ScheduleTypeEnum.SMART_MONTHLY_ON_SPECIFIC_WEEK_AND_DAY:
+        return "Smart Monthly on Specific Week and Day"
+      case ScheduleTypeEnum.SMART_MONTHLY_ON_SPECIFIC_DATE:
+        return "Smart Monthly on Specific Date"
+      case ScheduleTypeEnum.SMART_CUSTOM_MONTHLY_ON_SPECIFIC_MONTH_AND_WEEK_AND_DAY:
+        return " Smart Custom Monthly on Specific Month, Week and Day"
+      case ScheduleTypeEnum.SMART_CUSTOM_MONTHLY_ON_SPECIFIC_MONTH_AND_DATE:
+        return " Smart Custom Monthly on Specific Month and Date"
       default:
         return "Unknown"
     }

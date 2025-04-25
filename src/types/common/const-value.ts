@@ -31,4 +31,9 @@ export const VALID_SCHEDULE_TYPE_VALUES = [
   "weekly",
   "monthly on specific week",
   "monthly on specific day",
+  "smart weekly on specific day",
+  "smart monthly on specific week and day",
+  "smart monthly on specific date",
+  "smart custom monthly on specific month, week and day",
+  "smart custom monthly on specific month and date",
 ] as const

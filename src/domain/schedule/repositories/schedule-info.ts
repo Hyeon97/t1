@@ -16,8 +16,9 @@ export class ScheduleRepository extends BaseRepository {
   /**
    * 필터 옵션 적용
    */
-  private applyFilters({ filterOptions }: { filterOptions: ScheduleFilterOptions }): void {
+  private applyFilters({ filterOptions }: { filterOptions?: ScheduleFilterOptions }): void {
     try {
+      if (!filterOptions) return
       asyncContextStorage.addOrder({ component: this.repositoryName, method: "applyFilters", state: "start" })
       //  type 필터 적용
       if (filterOptions.type) {
@@ -41,7 +42,7 @@ export class ScheduleRepository extends BaseRepository {
   /**
    * 모든 Schedule 조회
    */
-  async findAll({ filterOptions }: { filterOptions: ScheduleFilterOptions }): Promise<ScheduleInfoTable[]> {
+  async findAll({ filterOptions }: { filterOptions?: ScheduleFilterOptions }): Promise<ScheduleInfoTable[]> {
     try {
       asyncContextStorage.addRepository({ name: this.repositoryName })
       asyncContextStorage.addOrder({ component: this.repositoryName, method: "findAll", state: "start" })
