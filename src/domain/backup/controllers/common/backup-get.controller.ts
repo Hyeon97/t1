@@ -8,17 +8,17 @@ import { stringToBoolean } from "../../../../utils/data-convert.utils"
 import { ContextLogger } from "../../../../utils/logger/logger.custom"
 import { BackupGetByServerNameQueryDTO, BackupGetQueryDTO } from "../../dto/query/backup-get-query.dto"
 import { BackupResponseFactory } from "../../dto/response/backup-response-factory"
-import { BackupService } from "../../services/backup.service"
+import { BackupGetService } from "../../services/common/backup-get.service"
 import { BackupFilterOptions } from "../../types/backup-get.type"
 
-export class BackupController extends BaseController {
-  private readonly backupService: BackupService
+export class BackupGetController extends BaseController {
+  private readonly backupGetService: BackupGetService
 
-  constructor({ backupService }: { backupService: BackupService }) {
+  constructor({ backupGetService }: { backupGetService: BackupGetService }) {
     super({
-      controllerName: "BackupController",
+      controllerName: "BackupGetController",
     })
-    this.backupService = backupService
+    this.backupGetService = backupGetService
   }
 
   //  Backup 조회 옵션 추출
@@ -56,7 +56,9 @@ export class BackupController extends BaseController {
    * 공통 Backup 조회 핸들러
    */
   private async handleBackupGet<T>({
-    req, res, next,
+    req,
+    res,
+    next,
     methodName,
     paramExtractor,
     errorMessage,
@@ -89,7 +91,7 @@ export class BackupController extends BaseController {
       }
 
       // 서비스 호출
-      const backupsData = await serviceMethod({ ...identifier, filterOptions, })
+      const backupsData = await serviceMethod({ ...identifier, filterOptions })
 
       // 출력 가공
       const backupsDTO = BackupResponseFactory.createFromEntities({
@@ -97,7 +99,9 @@ export class BackupController extends BaseController {
         backupsData: Array.isArray(backupsData) ? backupsData : [backupsData],
       })
 
-      const resultMessage = `총 ${Array.isArray(backupsData) ? backupsData.length : 1}개의 Backup 작업 정보를 조회했습니다. 상세 정보 포함: ${filterOptions.detail}`
+      const resultMessage = `총 ${Array.isArray(backupsData) ? backupsData.length : 1}개의 Backup 작업 정보를 조회했습니다. 상세 정보 포함: ${
+        filterOptions.detail
+      }`
       ContextLogger.info({ message: resultMessage })
 
       ApiUtils.success({ res, data: backupsDTO, message: "Backup information list" })
@@ -117,10 +121,12 @@ export class BackupController extends BaseController {
    */
   getBackups = async (req: ExtendedRequest, res: Response, next: NextFunction): Promise<void> => {
     await this.handleBackupGet({
-      req, res, next,
+      req,
+      res,
+      next,
       methodName: "getBackups",
       errorMessage: "[Backup 작업 목록 조회] - 예기치 못한 오류 발생",
-      serviceMethod: ({ filterOptions }) => this.backupService.getBackups({ filterOptions }),
+      serviceMethod: ({ filterOptions }) => this.backupGetService.getBackups({ filterOptions }),
     })
   }
 
@@ -133,7 +139,7 @@ export class BackupController extends BaseController {
     //   methodName: "getBackupByJobId",
     //   paramExtractor: (params) => ({ jobId: params.jobId }),
     //   errorMessage: "[Backup 작업 ID로 조회] - 예기치 못한 오류 발생",
-    //   serviceMethod: ({ jobId, filterOptions }) => this.backupService.getBackupByJobId({ jobId, filterOptions }),
+    //   serviceMethod: ({ jobId, filterOptions }) => this.backupGetService.getBackupByJobId({ jobId, filterOptions }),
     // })
   }
 
@@ -146,7 +152,7 @@ export class BackupController extends BaseController {
     //   methodName: "getBackupByJobName",
     //   paramExtractor: (params) => ({ jobName: params.jobName }),
     //   errorMessage: "[Backup 작업 이름으로 조회] - 예기치 못한 오류 발생",
-    //   serviceMethod: ({ jobName, filterOptions }) => this.backupService.getBackupByJobName({ jobName, filterOptions }),
+    //   serviceMethod: ({ jobName, filterOptions }) => this.backupGetService.getBackupByJobName({ jobName, filterOptions }),
     // })
   }
 
@@ -159,7 +165,7 @@ export class BackupController extends BaseController {
     //   methodName: "getBackupByServerName",
     //   paramExtractor: (params) => ({ serverName: params.serverName }),
     //   errorMessage: "[Backup 작업 서버 이름으로 조회] - 예기치 못한 오류 발생",
-    //   serviceMethod: ({ serverName, filterOptions }) => this.backupService.getBackupByServerName({ serverName, filterOptions }),
+    //   serviceMethod: ({ serverName, filterOptions }) => this.backupGetService.getBackupByServerName({ serverName, filterOptions }),
     // })
   }
 }

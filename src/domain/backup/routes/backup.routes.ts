@@ -1,6 +1,6 @@
 import { Router } from "express"
 import {
-  backupController,
+  backupGetController,
   backupDeleteController,
   backupEditController,
   backupMonitoringController,
@@ -20,7 +20,7 @@ import {
   validateBackupMonitoringByJobNameParams,
   validateBackupMonitoringByServerNameParams,
   validateBackupMonitoringQuery,
-  validateBackupRegistBody
+  validateBackupRegistBody,
 } from "../validators/backup.validators"
 
 export class BackupRoutes {
@@ -41,7 +41,7 @@ export class BackupRoutes {
 
     //  [Backup 작업 조회]
     //  전체 목록 조회
-    this.router.get("/", validateBackupGetQuery, backupController.getBackups)
+    this.router.get("/", validateBackupGetQuery, backupGetController.getBackups)
     //  작업 ID로 조회
     this.router.get("/job-id/:jobId", validateBackupGetByJobIdParams, validateBackupGetQuery)
     //  작업 이름으로 조회

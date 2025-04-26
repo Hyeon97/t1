@@ -1,15 +1,15 @@
-import { BackupActiveRepository } from "./../repositories/backup-active.repository"
-import { BaseService } from "../../../utils/base/base-service"
-import { BackupInfoRepository } from "../repositories/backup-info.repository"
-import { BackupRepository } from "../repositories/backup.repository"
-import { asyncContextStorage } from "../../../utils/AsyncContext"
-import { BackupMonitoringFilterOptions } from "../types/backup-monitoring.type"
-import { BackupDataMonitoringResponse } from "../types/backup-response.type"
-import { BackupTable } from "../types/db/job-backup"
-import { BackupInfoTable } from "../types/db/job-backup-info"
-import { BackupActiveTable } from "../types/db/active-backup"
+import { asyncContextStorage } from "../../../../utils/AsyncContext"
+import { BaseService } from "../../../../utils/base/base-service"
+import { BackupActiveRepository } from "../../repositories/backup-active.repository"
+import { BackupInfoRepository } from "../../repositories/backup-info.repository"
+import { BackupRepository } from "../../repositories/backup.repository"
+import { BackupMonitoringFilterOptions } from "../../types/backup-monitoring.type"
+import { BackupDataMonitoringResponse } from "../../types/backup-response.type"
+import { BackupActiveTable } from "../../types/db/active-backup"
+import { BackupTable } from "../../types/db/job-backup"
+import { BackupInfoTable } from "../../types/db/job-backup-info"
 
-export class BackupMonitoringService extends BaseService {
+export class BackupMonitoringGetService extends BaseService {
   private readonly backupRepository: BackupRepository
   private readonly backupInfoRepository: BackupInfoRepository
   private readonly backupActiveRepository: BackupActiveRepository
@@ -23,7 +23,7 @@ export class BackupMonitoringService extends BaseService {
     backupActiveRepository: BackupActiveRepository
   }) {
     super({
-      serviceName: "BackupMonitoringService",
+      serviceName: "BackupMonitoringGetService",
     })
     this.backupRepository = backupRepository
     this.backupInfoRepository = backupInfoRepository

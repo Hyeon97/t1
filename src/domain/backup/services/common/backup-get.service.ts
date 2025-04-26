@@ -1,18 +1,18 @@
-import { asyncContextStorage } from "../../../utils/AsyncContext"
-import { BaseService } from "../../../utils/base/base-service"
-import { BackupInfoRepository } from "../repositories/backup-info.repository"
-import { BackupRepository } from "../repositories/backup.repository"
-import { BackupFilterOptions } from "../types/backup-get.type"
-import { BackupDataResponse } from "../types/backup-response.type"
-import { BackupTable } from "../types/db/job-backup"
-import { BackupInfoTable } from "../types/db/job-backup-info"
+import { asyncContextStorage } from "../../../../utils/AsyncContext"
+import { BaseService } from "../../../../utils/base/base-service"
+import { BackupInfoRepository } from "../../repositories/backup-info.repository"
+import { BackupRepository } from "../../repositories/backup.repository"
+import { BackupFilterOptions } from "../../types/backup-get.type"
+import { BackupDataResponse } from "../../types/backup-response.type"
+import { BackupTable } from "../../types/db/job-backup"
+import { BackupInfoTable } from "../../types/db/job-backup-info"
 
-export class BackupService extends BaseService {
+export class BackupGetService extends BaseService {
   private readonly backupRepository: BackupRepository
   private readonly backupInfoRepository: BackupInfoRepository
   constructor({ backupRepository, backupInfoRepository }: { backupRepository: BackupRepository; backupInfoRepository: BackupInfoRepository }) {
     super({
-      serviceName: "BackupService",
+      serviceName: "BackupGetService",
     })
     this.backupRepository = backupRepository
     this.backupInfoRepository = backupInfoRepository

@@ -1,24 +1,24 @@
-import { TransactionManager } from "../../../database/connection"
-import { ServiceError } from "../../../errors/service/service-error"
-import { AutoStartType } from "../../../types/common/job"
-import { asyncContextStorage } from "../../../utils/AsyncContext"
-import { BaseService } from "../../../utils/base/base-service"
-import { jobUtils } from "../../../utils/job/job.utils"
-import { ContextLogger } from "../../../utils/logger/logger.custom"
-import { ServerPartitionService } from "../../server/services/server-partition.service"
-import { ServerService } from "../../server/services/server.service"
-import { ServerBasicTable } from "../../server/types/db/server-basic"
-import { ServerPartitionTable } from "../../server/types/db/server-partition"
-import { ZdmRepositoryService } from "../../zdm/services/zdm.repository.service"
-import { ZdmService } from "../../zdm/services/zdm.service"
-import { ZdmInfoTable } from "../../zdm/types/db/center-info"
-import { ZdmRepositoryTable } from "../../zdm/types/db/center-repository"
-import { ZdmRepositoryFilterOptions } from "../../zdm/types/zdm-repository/zdm-repository-filter.type"
-import { BackupInfoRepository } from "../repositories/backup-info.repository"
-import { BackupRepository } from "../repositories/backup.repository"
-import { BackupTypeMap } from "../types/backup-common.type"
-import { BackupInfoTableInput, BackupRegistRequestBody, BackupRequestRepository, BackupTableInput } from "../types/backup-regist.type"
-import { BackupDataRegistResponse } from "../types/backup-response.type"
+import { TransactionManager } from "../../../../database/connection"
+import { ServiceError } from "../../../../errors/service/service-error"
+import { AutoStartType } from "../../../../types/common/job"
+import { asyncContextStorage } from "../../../../utils/AsyncContext"
+import { BaseService } from "../../../../utils/base/base-service"
+import { jobUtils } from "../../../../utils/job/job.utils"
+import { ContextLogger } from "../../../../utils/logger/logger.custom"
+import { ServerPartitionService } from "../../../server/services/server-partition.service"
+import { ServerGetService } from "../../../server/services/server-get.service"
+import { ServerBasicTable } from "../../../server/types/db/server-basic"
+import { ServerPartitionTable } from "../../../server/types/db/server-partition"
+import { ZdmRepositoryGetService } from "../../../zdm/services/repository/zdm.repository-get.service"
+import { ZdmGetService } from "../../../zdm/services/common/zdm-get.service"
+import { ZdmInfoTable } from "../../../zdm/types/db/center-info"
+import { ZdmRepositoryTable } from "../../../zdm/types/db/center-repository"
+import { ZdmRepositoryFilterOptions } from "../../../zdm/types/zdm-repository/zdm-repository-filter.type"
+import { BackupInfoRepository } from "../../repositories/backup-info.repository"
+import { BackupRepository } from "../../repositories/backup.repository"
+import { BackupTypeMap } from "../../types/backup-common.type"
+import { BackupInfoTableInput, BackupRegistRequestBody, BackupRequestRepository, BackupTableInput } from "../../types/backup-regist.type"
+import { BackupDataRegistResponse } from "../../types/backup-response.type"
 
 //  Backup Data 등록 DataSet 배열 Type
 interface BackupDataSet {
@@ -33,35 +33,35 @@ interface BackupDataRegistResultSet {
 }
 
 export class BackupRegistService extends BaseService {
-  private readonly serverService: ServerService
+  private readonly serverGetService: ServerGetService
   private readonly serverPartitionService: ServerPartitionService
-  private readonly zdmService: ZdmService
-  private readonly zdmRepositoryService: ZdmRepositoryService
+  private readonly zdmGetService: ZdmGetService
+  private readonly zdmRepositoryGetService: ZdmRepositoryGetService
   private readonly backupRepository: BackupRepository
   private readonly backupInfoRepository: BackupInfoRepository
 
   constructor({
-    serverService,
+    serverGetService,
     serverPartitionService,
-    zdmService,
-    zdmRepositoryService,
+    zdmGetService,
+    zdmRepositoryGetService,
     backupRepository,
     backupInfoRepository,
   }: {
-    serverService: ServerService
+    serverGetService: ServerGetService
     serverPartitionService: ServerPartitionService
-    zdmService: ZdmService
-    zdmRepositoryService: ZdmRepositoryService
+    zdmGetService: ZdmGetService
+    zdmRepositoryGetService: ZdmRepositoryGetService
     backupRepository: BackupRepository
     backupInfoRepository: BackupInfoRepository
   }) {
     super({
       serviceName: "BackupRegistService",
     })
-    this.serverService = serverService
+    this.serverGetService = serverGetService
     this.serverPartitionService = serverPartitionService
-    this.zdmService = zdmService
-    this.zdmRepositoryService = zdmRepositoryService
+    this.zdmGetService = zdmGetService
+    this.zdmRepositoryGetService = zdmRepositoryGetService
     this.backupRepository = backupRepository
     this.backupInfoRepository = backupInfoRepository
   }
@@ -161,9 +161,9 @@ export class BackupRegistService extends BaseService {
       asyncContextStorage.addOrder({ component: this.serviceName, method: "getServerInfo", state: "start" })
       let serverInfo = null
       if (typeof server === "number") {
-        serverInfo = await this.serverService.getServerById({ id: String(server), filterOptions: {} })
+        serverInfo = await this.serverGetService.getServerById({ id: String(server), filterOptions: {} })
       } else if (typeof server === "string") {
-        serverInfo = await this.serverService.getServerByName({ name: server, filterOptions: {} })
+        serverInfo = await this.serverGetService.getServerByName({ name: server, filterOptions: {} })
       }
       asyncContextStorage.addOrder({ component: this.serviceName, method: "getServerInfo", state: "end" })
       return serverInfo?.server!
@@ -202,9 +202,9 @@ export class BackupRegistService extends BaseService {
       asyncContextStorage.addOrder({ component: this.serviceName, method: "getCenterInfo", state: "start" })
       let centerInfo = null
       if (typeof center === "number") {
-        centerInfo = await this.zdmService.getZdmById({ id: String(center), filterOptions: {} })
+        centerInfo = await this.zdmGetService.getZdmById({ id: String(center), filterOptions: {} })
       } else if (typeof center === "string") {
-        centerInfo = await this.zdmService.getZdmByName({ name: center, filterOptions: {} })
+        centerInfo = await this.zdmGetService.getZdmByName({ name: center, filterOptions: {} })
       }
       asyncContextStorage.addOrder({ component: this.serviceName, method: "getCenterInfo", state: "end" })
       return centerInfo?.zdm!
@@ -228,7 +228,7 @@ export class BackupRegistService extends BaseService {
         type: repository.type || "",
         path: repository.path || "",
       }
-      const repositoryInfo = await this.zdmRepositoryService.getRepositoryById({ id: repository.id, filterOptions })
+      const repositoryInfo = await this.zdmRepositoryGetService.getRepositoryById({ id: repository.id, filterOptions })
       asyncContextStorage.addOrder({ component: this.serviceName, method: "getRepositoryInfo", state: "end" })
       return repositoryInfo.items[0]
     } catch (error) {
@@ -438,21 +438,21 @@ export class BackupRegistService extends BaseService {
       // 처리할 파티션 목록 결정
       const partitionsToProcess = data.partition.length
         ? data.partition.map((partition) => {
-          const partitionInfo = partitionList.find((item) => item.sLetter === partition)
-          //  사용자 입력 파티션 검증
-          if (!partitionInfo) {
-            throw ServiceError.badRequest(ServiceError, {
-              method: "regist",
-              message: `[Backup 정보 등록] - 파티션( ${partition} )이 서버( ${server.sSystemName} )에 존재하지 않습니다`,
-              metadata: {
-                partition,
-                server: server.sSystemName,
-              },
-            })
-          }
+            const partitionInfo = partitionList.find((item) => item.sLetter === partition)
+            //  사용자 입력 파티션 검증
+            if (!partitionInfo) {
+              throw ServiceError.badRequest(ServiceError, {
+                method: "regist",
+                message: `[Backup 정보 등록] - 파티션( ${partition} )이 서버( ${server.sSystemName} )에 존재하지 않습니다`,
+                metadata: {
+                  partition,
+                  server: server.sSystemName,
+                },
+              })
+            }
 
-          return partitionInfo
-        })
+            return partitionInfo
+          })
         : partitionList
 
       // 제외 파티션이 아닌 것들만 필터링 후 dataSet 생성

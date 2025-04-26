@@ -5,7 +5,7 @@ import { asyncContextStorage } from "../../../../utils/AsyncContext"
 import { BaseController } from "../../../../utils/base/base-controller"
 import { ContextLogger } from "../../../../utils/logger/logger.custom"
 import { BackupEditByJobIdParamDTO, BackupEditByJobNameParamDTO } from "../../dto/param/backup-edit-param.dto"
-import { BackupEditService } from "../../services/backup-edit.service"
+import { BackupEditService } from "../../services/common/backup-edit.service"
 import { BackupEditRequestBody } from "../../types/backup-edit.type"
 
 export class BackupEditController extends BaseController {
@@ -22,7 +22,9 @@ export class BackupEditController extends BaseController {
    * 공통 Backup 편집 핸들러
    */
   private async handleBackupEdit<T>({
-    req, res, next,
+    req,
+    res,
+    next,
     methodName,
     paramExtractor,
     errorMessage,
@@ -68,7 +70,9 @@ export class BackupEditController extends BaseController {
    */
   editByJobName = async (req: ExtendedRequest, res: Response, next: NextFunction): Promise<void> => {
     await this.handleBackupEdit<BackupEditByJobNameParamDTO>({
-      req, res, next,
+      req,
+      res,
+      next,
       methodName: "editByJobName",
       paramExtractor: (params) => ({ jobName: params.jobName }),
       errorMessage: "[Backup 작업 이름으로 수정] - 예기치 못한 오류 발생",
@@ -80,7 +84,9 @@ export class BackupEditController extends BaseController {
    */
   editByJobId = async (req: ExtendedRequest, res: Response, next: NextFunction): Promise<void> => {
     await this.handleBackupEdit<BackupEditByJobIdParamDTO>({
-      req, res, next,
+      req,
+      res,
+      next,
       methodName: "editByJobId",
       paramExtractor: (params) => ({ jobId: Number(params.jobId) }),
       errorMessage: "[Backup 작업 ID로 수정] - 예기치 못한 오류 발생",

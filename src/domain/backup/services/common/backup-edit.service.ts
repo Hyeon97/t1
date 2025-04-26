@@ -1,42 +1,42 @@
-import { ServiceError } from "../../../errors"
-import { CompressionTypeMap } from "../../../types/common/compression"
-import { JobStatusMap } from "../../../types/common/job"
-import { asyncContextStorage } from "../../../utils/AsyncContext"
-import { BaseService } from "../../../utils/base/base-service"
-import { ContextLogger } from "../../../utils/logger/logger.custom"
-import { regNfsPath, regSmbPath } from "../../../utils/regex.utils"
-import { ZdmRepositoryService } from "../../zdm/services/zdm.repository.service"
-import { ZdmService } from "../../zdm/services/zdm.service"
-import { BackupHistoryRepository } from "../repositories/backup-history.repository"
-import { BackupInfoRepository } from "../repositories/backup-info.repository"
-import { BackupLogRepository } from "../repositories/backup-log-event.repository"
-import { BackupRepository } from "../repositories/backup.repository"
-import { BackupTypeMap } from "../types/backup-common.type"
-import { BackupEditRequestBody } from "../types/backup-edit.type"
-import { BackupDataEditResponse } from "../types/backup-response.type"
-import { BackupTable } from "../types/db/job-backup"
-import { BackupInfoTable } from "../types/db/job-backup-info"
-import { EncryptionTypeMap } from "./../../../types/common/encryption"
-import { RepositoryConnectionTypeMap } from "./../../../types/common/repository"
+import { ServiceError } from "../../../../errors"
+import { CompressionTypeMap } from "../../../../types/common/compression"
+import { JobStatusMap } from "../../../../types/common/job"
+import { asyncContextStorage } from "../../../../utils/AsyncContext"
+import { BaseService } from "../../../../utils/base/base-service"
+import { ContextLogger } from "../../../../utils/logger/logger.custom"
+import { regNfsPath, regSmbPath } from "../../../../utils/regex.utils"
+import { ZdmRepositoryGetService } from "../../../zdm/services/repository/zdm.repository-get.service"
+import { ZdmGetService } from "../../../zdm/services/common/zdm-get.service"
+import { BackupHistoryRepository } from "../../repositories/backup-history.repository"
+import { BackupInfoRepository } from "../../repositories/backup-info.repository"
+import { BackupLogRepository } from "../../repositories/backup-log-event.repository"
+import { BackupRepository } from "../../repositories/backup.repository"
+import { BackupTypeMap } from "../../types/backup-common.type"
+import { BackupEditRequestBody } from "../../types/backup-edit.type"
+import { BackupDataEditResponse } from "../../types/backup-response.type"
+import { BackupTable } from "../../types/db/job-backup"
+import { BackupInfoTable } from "../../types/db/job-backup-info"
+import { EncryptionTypeMap } from "../../../../types/common/encryption"
+import { RepositoryConnectionTypeMap } from "../../../../types/common/repository"
 
 export class BackupEditService extends BaseService {
-  private readonly zdmService: ZdmService
-  private readonly zdmRepositoryService: ZdmRepositoryService
+  private readonly zdmGetService: ZdmGetService
+  private readonly zdmRepositoryGetService: ZdmRepositoryGetService
   private readonly backupRepository: BackupRepository
   private readonly backupInfoRepository: BackupInfoRepository
   private readonly backupLogRepository: BackupLogRepository
   private readonly backupHistoryRepository: BackupHistoryRepository
 
   constructor({
-    zdmService,
-    zdmRepositoryService,
+    zdmGetService,
+    zdmRepositoryGetService,
     backupRepository,
     backupInfoRepository,
     backupLogRepository,
     backupHistoryRepository,
   }: {
-    zdmService: ZdmService
-    zdmRepositoryService: ZdmRepositoryService
+    zdmGetService: ZdmGetService
+    zdmRepositoryGetService: ZdmRepositoryGetService
     backupRepository: BackupRepository
     backupInfoRepository: BackupInfoRepository
     backupLogRepository: BackupLogRepository
@@ -45,8 +45,8 @@ export class BackupEditService extends BaseService {
     super({
       serviceName: "BackupEditService",
     })
-    this.zdmService = zdmService
-    this.zdmRepositoryService = zdmRepositoryService
+    this.zdmGetService = zdmGetService
+    this.zdmRepositoryGetService = zdmRepositoryGetService
     this.backupRepository = backupRepository
     this.backupInfoRepository = backupInfoRepository
     this.backupLogRepository = backupLogRepository
@@ -227,7 +227,7 @@ export class BackupEditService extends BaseService {
   /**
    * 작업 모드(타입) 변경
    */
-  private changeJobMode({ backupInfo, jobMode, changedFields }: { backupInfo: BackupInfoTable, jobMode: string, changedFields: Set<string> }): void {
+  private changeJobMode({ backupInfo, jobMode, changedFields }: { backupInfo: BackupInfoTable; jobMode: string; changedFields: Set<string> }): void {
     try {
       asyncContextStorage.addOrder({ component: this.serviceName, method: "changeJobMode", state: "start" })
 
@@ -276,7 +276,7 @@ export class BackupEditService extends BaseService {
         type: repository?.type || "",
       }
       if (repository.id) {
-        const { items } = await this.zdmRepositoryService.getRepositoryById({ id: Number(repository.id), filterOptions })
+        const { items } = await this.zdmRepositoryGetService.getRepositoryById({ id: Number(repository.id), filterOptions })
         if (items.length) {
           backupInfo.nRepositoryID = items[0].nID
           backupInfo.nRepositoryType = RepositoryConnectionTypeMap.toEnum({ value: items[0].nType })
@@ -295,7 +295,7 @@ export class BackupEditService extends BaseService {
               throw ServiceError.badRequest(ServiceError, {
                 method: "processRepositoryChange",
                 message: `[Backup 정보 수정] - Repository 경로 에러.(SMB 양식 불일치)`,
-                metadata: {}
+                metadata: {},
               })
             }
             break
@@ -305,13 +305,15 @@ export class BackupEditService extends BaseService {
               throw ServiceError.badRequest(ServiceError, {
                 method: "processRepositoryChange",
                 message: `[Backup 정보 수정] - Repository 경로 에러.(NFS 양식 불일치)`,
-                metadata: {}
+                metadata: {},
               })
             }
             break
         }
         backupInfo.sRepositoryPath = repository.path
-        if (!changedFields.has("RepositoryPath")) { changedFields.add("RepositoryPath") }
+        if (!changedFields.has("RepositoryPath")) {
+          changedFields.add("RepositoryPath")
+        }
       }
 
       asyncContextStorage.addOrder({ component: this.serviceName, method: "processRepositoryChange", state: "end" })
@@ -414,7 +416,7 @@ export class BackupEditService extends BaseService {
 
       // 스케줄 변경
       if (data.schedule) {
-        await this.processScheduleChange({ schedule: data.schedule, backup, changedFields, })
+        await this.processScheduleChange({ schedule: data.schedule, backup, changedFields })
       }
 
       // 작업 타입 변경
@@ -424,11 +426,11 @@ export class BackupEditService extends BaseService {
 
       // Repository 관련 데이터 변경
       if (data.repository) {
-        await this.processRepositoryChange({ repository: data.repository, backupInfo, changedFields, })
+        await this.processRepositoryChange({ repository: data.repository, backupInfo, changedFields })
       }
 
       // 기타 옵션 변경 (rotation, compression, encryption, excludeDir 등)
-      this.processOtherOptions({ data, backupInfo, changedFields, })
+      this.processOtherOptions({ data, backupInfo, changedFields })
 
       asyncContextStorage.addOrder({ component: this.serviceName, method: "editData", state: "end" })
       return {
@@ -448,7 +450,7 @@ export class BackupEditService extends BaseService {
   /**
    * 데이터 업데이트
    */
-  private async updateBackupDataSet({ editBackup, editBackupInfo }: { editBackup: BackupTable, editBackupInfo: BackupInfoTable }): Promise<void> {
+  private async updateBackupDataSet({ editBackup, editBackupInfo }: { editBackup: BackupTable; editBackupInfo: BackupInfoTable }): Promise<void> {
     try {
       asyncContextStorage.addOrder({ component: this.serviceName, method: "updateBackupDataSet", state: "start" })
       const result = await this.executeTransaction({
@@ -469,7 +471,7 @@ export class BackupEditService extends BaseService {
 
           return {
             backupUpdateResult,
-            backupInfoUpdateResult
+            backupInfoUpdateResult,
           }
         },
       })

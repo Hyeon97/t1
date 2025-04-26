@@ -7,17 +7,17 @@ import { BaseController } from "../../../../utils/base/base-controller"
 import { ContextLogger } from "../../../../utils/logger/logger.custom"
 import { BackupMonitoringByJobNameParamDTO } from "../../dto/param/backup-monit-param.dto"
 import { BackupMonitoringByServerNameQueryDTO, BackupMonitoringQueryDTO } from "../../dto/query/backup-monit-query.dto"
-import { BackupMonitoringService } from "../../services/backup-monitoring.service"
 import { BackupMonitoringFilterOptions } from "../../types/backup-monitoring.type"
+import { BackupMonitoringGetService } from "../../services/monitoring/backup-monitoring.service"
 
-export class BackupMonitoringController extends BaseController {
-  private readonly backupMonitoringService: BackupMonitoringService
+export class BackupMonitoringGetController extends BaseController {
+  private readonly backupMonitoringGetService: BackupMonitoringGetService
 
-  constructor({ backupMonitoringService }: { backupMonitoringService: BackupMonitoringService }) {
+  constructor({ backupMonitoringGetService }: { backupMonitoringGetService: BackupMonitoringGetService }) {
     super({
-      controllerName: "BackupMonitoringController",
+      controllerName: "BackupMonitoringGetController",
     })
-    this.backupMonitoringService = backupMonitoringService
+    this.backupMonitoringGetService = backupMonitoringGetService
   }
 
   //  Backup 모니터링링 옵션 추출
@@ -67,7 +67,7 @@ export class BackupMonitoringController extends BaseController {
       ContextLogger.debug({ message: `적용된 필터 옵션`, meta: filterOptions })
 
       //  서비스 호출
-      const backupMonitData = await this.backupMonitoringService.monitByJobName({ jobName: params.jobName, filterOptions })
+      const backupMonitData = await this.backupMonitoringGetService.monitByJobName({ jobName: params.jobName, filterOptions })
 
       ContextLogger.info({ message: `Backup 작업 이름으로 모니터링. 상세 정보 포함: ${filterOptions.detail}` })
       ApiUtils.success({ res, data: backupMonitData, message: "Backup infomation list" })
