@@ -19,23 +19,6 @@ export class ScheduleGetService extends BaseService {
   /**
    * 모든 Schedule 조회
    */
-  // async getSchedules({ filterOptions }: { filterOptions?: ScheduleFilterOptions }): Promise<ScheduleDataResponse> {
-  //   try {
-  //     asyncContextStorage.addService({ name: this.serviceName })
-  //     asyncContextStorage.addOrder({ component: this.serviceName, method: "getSchedules", state: "start" })
-
-  //     //  Schedule 정보 조회
-  //     const schedules = await this.scheduleRepository.findAll({ filterOptions })
-  //     asyncContextStorage.addOrder({ component: this.serviceName, method: "getSchedules", state: "end" })
-  //     return { items: schedules }
-  //   } catch (error) {
-  //     return this.handleServiceError({
-  //       error,
-  //       method: "getSchedules",
-  //       message: `[Schedule 정보 조회] - 오류가 발생했습니다`,
-  //     })
-  //   }
-  // }
   async getSchedules({ filterOptions }: { filterOptions?: ScheduleFilterOptions }): Promise<ScheduleDataResponse> {
     try {
       asyncContextStorage.addService({ name: this.serviceName })
@@ -47,7 +30,7 @@ export class ScheduleGetService extends BaseService {
       // 모든 고유한 센터 ID 추출
       const centerIds = [...new Set(schedules.map((schedule) => schedule.nCenterID))]
 
-      // 한 번의 쿼리로 모든 필요한 센터 정보 조회
+      // 모든 필요한 센터 정보 조회
       const centers = await this.zdmRepository.findByZdmIds({ ids: centerIds })
 
       // 센터 ID를 키로 하는 맵 생성
@@ -65,7 +48,7 @@ export class ScheduleGetService extends BaseService {
       return this.handleServiceError({
         error,
         method: "getSchedules",
-        message: `[Schedule 및 Center 정보 조회] - 오류가 발생했습니다`,
+        message: `[Schedule 정보 조회] - 오류가 발생했습니다`,
       })
     }
   }
