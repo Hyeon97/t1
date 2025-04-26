@@ -8,8 +8,8 @@ import { ZdmNetworkRepository } from "./../repositories/center-info-network.repo
 import { ZdmPartitionRepository } from "./../repositories/center-info-partition.repository"
 import { ZdmRepository } from "./../repositories/center-info.repository"
 import { ZdmRepositoryRepository } from "./../repositories/center-repository.repository"
-import { ZdmRepositoryService } from "./zdm.repository.service"
-import { ZdmService } from "./zdm.service"
+import { ZdmRepositoryGetService } from "./repository/zdm.repository-get.service"
+import { ZdmGetService } from "./common/zdm-get.service"
 
 /**
  * 리포지토리 인스턴스 생성
@@ -25,7 +25,7 @@ const zdmZosRepositoryRepository = new ZdmZosRepositoryRepository()
  * 서비스 인스턴스 생성 및 의존성 주입
  */
 //  ZDM 정보 조회 Service
-export const zdmService = new ZdmService({
+export const zdmGetService = new ZdmGetService({
   zdmRepository,
   zdmDiskRepository,
   zdmNetworkRepository,
@@ -34,7 +34,7 @@ export const zdmService = new ZdmService({
   zdmZosRepositoryRepository,
 })
 ///  ZDM Repository 정보 조회 Service
-export const zdmRepositoryService = new ZdmRepositoryService({
+export const zdmRepositoryGetService = new ZdmRepositoryGetService({
   zdmRepository,
   zdmRepositoryRepository,
 })

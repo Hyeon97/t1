@@ -1,26 +1,26 @@
-import { ServiceError } from "../../../errors/service/service-error"
-import { asyncContextStorage } from "../../../utils/AsyncContext"
-import { BaseService } from "../../../utils/base/base-service"
-import { ContextLogger } from "../../../utils/logger/logger.custom"
-import { regNumberOnly } from "../../../utils/regex.utils"
-import { ZdmDiskRepository } from "../repositories/center-info-disk.repository"
-import { ZdmNetworkRepository } from "../repositories/center-info-network.repository"
-import { ZdmPartitionRepository } from "../repositories/center-info-partition.repository"
-import { ZdmRepository } from "../repositories/center-info.repository"
-import { ZdmRepositoryRepository } from "../repositories/center-repository.repository"
-import { ZdmZosRepositoryRepository } from "../repositories/center-zos-repository.repository"
-import { ZdmInfoTable } from "../types/db/center-info"
-import { ZdmInfoDiskTable } from "../types/db/center-info-disk"
-import { ZdmInfoNetworkTable } from "../types/db/center-info-network"
-import { ZdmInfoPartitionTable } from "../types/db/center-info-partition"
-import { ZdmRepositoryTable } from "../types/db/center-repository"
-import { ZdmFilterOptions } from "../types/zdm/zdm-filter.type"
-import { ZdmDataResponse } from "../types/zdm/zdm-response.type"
+import { ServiceError } from "../../../../errors/service/service-error"
+import { asyncContextStorage } from "../../../../utils/AsyncContext"
+import { BaseService } from "../../../../utils/base/base-service"
+import { ContextLogger } from "../../../../utils/logger/logger.custom"
+import { regNumberOnly } from "../../../../utils/regex.utils"
+import { ZdmDiskRepository } from "../../repositories/center-info-disk.repository"
+import { ZdmNetworkRepository } from "../../repositories/center-info-network.repository"
+import { ZdmPartitionRepository } from "../../repositories/center-info-partition.repository"
+import { ZdmRepository } from "../../repositories/center-info.repository"
+import { ZdmRepositoryRepository } from "../../repositories/center-repository.repository"
+import { ZdmZosRepositoryRepository } from "../../repositories/center-zos-repository.repository"
+import { ZdmInfoTable } from "../../types/db/center-info"
+import { ZdmInfoDiskTable } from "../../types/db/center-info-disk"
+import { ZdmInfoNetworkTable } from "../../types/db/center-info-network"
+import { ZdmInfoPartitionTable } from "../../types/db/center-info-partition"
+import { ZdmRepositoryTable } from "../../types/db/center-repository"
+import { ZdmFilterOptions } from "../../types/zdm/zdm-filter.type"
+import { ZdmDataResponse } from "../../types/zdm/zdm-response.type"
 
 type AdditionalInfoKey = "disks" | "networks" | "partitions" | "repositories"
 type ZdmDataPropertyKey = Exclude<keyof ZdmDataResponse, "zdm">
 
-export class ZdmService extends BaseService {
+export class ZdmGetService extends BaseService {
   private readonly zdmRepository: ZdmRepository
   private readonly zdmDiskRepository: ZdmDiskRepository
   private readonly zdmNetworkRepository: ZdmNetworkRepository
@@ -43,7 +43,7 @@ export class ZdmService extends BaseService {
     zdmZosRepositoryRepository: ZdmZosRepositoryRepository
   }) {
     super({
-      serviceName: "ZdmService",
+      serviceName: "ZdmGetService",
     })
     this.zdmRepository = zdmRepository
     this.zdmDiskRepository = zdmDiskRepository

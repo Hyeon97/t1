@@ -1,5 +1,5 @@
 import { Router } from "express"
-import { zdmController } from "../controllers/controller-registry"
+import { zdmGetController } from "../controllers/controller-registry"
 import { validateSpecificZdmParams, validateSpecificZdmQuery, validateZdmListQuery } from "../validators/zdm"
 
 export class ZdmRoutes {
@@ -15,9 +15,9 @@ export class ZdmRoutes {
   //  ZDM 관련
   private zdmRoutes(): void {
     //  전체 목록 리턴
-    this.router.get("/", validateZdmListQuery, zdmController.getZdms)
+    this.router.get("/", validateZdmListQuery, zdmGetController.getZdms)
     //  특정 조건으로 조회 ( 기준 : ZDM name | ZDM id )
-    this.router.get("/:identifier", validateSpecificZdmParams, validateSpecificZdmQuery, zdmController.getZdm)
+    this.router.get("/:identifier", validateSpecificZdmParams, validateSpecificZdmQuery, zdmGetController.getZdm)
     //  특정 조건으로 삭제 ( 기준 : ZDM name | ZDM id )
     this.router.delete("/:identifier")
   }

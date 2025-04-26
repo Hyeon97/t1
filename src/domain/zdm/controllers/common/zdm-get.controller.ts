@@ -1,24 +1,24 @@
 import { NextFunction, Response } from "express"
-import { ControllerError } from "../../../errors/controller/controller-error"
-import { ExtendedRequest } from "../../../types/common/req.types"
-import { ApiUtils } from "../../../utils/api/api.utils"
-import { asyncContextStorage } from "../../../utils/AsyncContext"
-import { BaseController } from "../../../utils/base/base-controller"
-import { stringToBoolean } from "../../../utils/data-convert.utils"
-import { ContextLogger } from "../../../utils/logger/logger.custom"
-import { SpecificZdmFilterDTO } from "../dto/query/zdm/specific-zdm-query-filter.dto"
-import { ZdmQueryFilterDTO } from "../dto/query/zdm/zdm-query-filter.dto"
-import { ZdmResponseFactory } from "../dto/response/zdm-response-factory"
-import { ZdmService } from "../services/zdm.service"
-import { ZdmFilterOptions } from "../types/zdm/zdm-filter.type"
+import { ControllerError } from "../../../../errors/controller/controller-error"
+import { ExtendedRequest } from "../../../../types/common/req.types"
+import { ApiUtils } from "../../../../utils/api/api.utils"
+import { asyncContextStorage } from "../../../../utils/AsyncContext"
+import { BaseController } from "../../../../utils/base/base-controller"
+import { stringToBoolean } from "../../../../utils/data-convert.utils"
+import { ContextLogger } from "../../../../utils/logger/logger.custom"
+import { SpecificZdmFilterDTO } from "../../dto/query/zdm/specific-zdm-query-filter.dto"
+import { ZdmQueryFilterDTO } from "../../dto/query/zdm/zdm-query-filter.dto"
+import { ZdmResponseFactory } from "../../dto/response/zdm-response-factory"
+import { ZdmGetService } from "../../services/common/zdm-get.service"
+import { ZdmFilterOptions } from "../../types/zdm/zdm-filter.type"
 
-export class ZdmController extends BaseController {
-  private readonly zdmService: ZdmService
-  constructor({ zdmService }: { zdmService: ZdmService }) {
+export class ZdmGetController extends BaseController {
+  private readonly zdmGetService: ZdmGetService
+  constructor({ zdmGetService }: { zdmGetService: ZdmGetService }) {
     super({
-      controllerName: "ZdmController",
+      controllerName: "ZdmGetController",
     })
-    this.zdmService = zdmService
+    this.zdmGetService = zdmGetService
   }
 
   /**
@@ -70,7 +70,7 @@ export class ZdmController extends BaseController {
       ContextLogger.debug({ message: `적용된 필터 옵션`, meta: filterOptions })
 
       // 서비스 호출
-      const zdmsData = await this.zdmService.getZdms({ filterOptions })
+      const zdmsData = await this.zdmGetService.getZdms({ filterOptions })
 
       //  출력 가공
       const zdmsDTOs = ZdmResponseFactory.createFromEntities({
@@ -111,12 +111,12 @@ export class ZdmController extends BaseController {
       //  서비스 호출
       let zdmData
       if (filterOptions.identifierType === "id") {
-        zdmData = await this.zdmService.getZdmById({
+        zdmData = await this.zdmGetService.getZdmById({
           id: identifier,
           filterOptions,
         })
       } else {
-        zdmData = await this.zdmService.getZdmByName({
+        zdmData = await this.zdmGetService.getZdmByName({
           name: identifier,
           filterOptions,
         })

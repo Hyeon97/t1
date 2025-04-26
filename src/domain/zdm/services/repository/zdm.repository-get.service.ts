@@ -1,17 +1,17 @@
-import { ServiceError } from "../../../errors/service/service-error"
-import { asyncContextStorage } from "../../../utils/AsyncContext"
-import { BaseService } from "../../../utils/base/base-service"
-import { ZdmRepository } from "../repositories/center-info.repository"
-import { ZdmRepositoryRepository } from "../repositories/center-repository.repository"
-import { ZdmRepositoryFilterOptions } from "../types/zdm-repository/zdm-repository-filter.type"
-import { ZdmRepositoryDataResponse } from "../types/zdm-repository/zdm-repository-response.type"
+import { ServiceError } from "../../../../errors/service/service-error"
+import { asyncContextStorage } from "../../../../utils/AsyncContext"
+import { BaseService } from "../../../../utils/base/base-service"
+import { ZdmRepository } from "../../repositories/center-info.repository"
+import { ZdmRepositoryRepository } from "../../repositories/center-repository.repository"
+import { ZdmRepositoryFilterOptions } from "../../types/zdm-repository/zdm-repository-filter.type"
+import { ZdmRepositoryDataResponse } from "../../types/zdm-repository/zdm-repository-response.type"
 
-export class ZdmRepositoryService extends BaseService {
+export class ZdmRepositoryGetService extends BaseService {
   private readonly zdmRepository: ZdmRepository
   private readonly zdmRepositoryRepository: ZdmRepositoryRepository
   constructor({ zdmRepository, zdmRepositoryRepository }: { zdmRepository: ZdmRepository; zdmRepositoryRepository: ZdmRepositoryRepository }) {
     super({
-      serviceName: "ZdmRepositoryService",
+      serviceName: "ZdmRepositoryGetService",
     })
     this.zdmRepository = zdmRepository
     this.zdmRepositoryRepository = zdmRepositoryRepository

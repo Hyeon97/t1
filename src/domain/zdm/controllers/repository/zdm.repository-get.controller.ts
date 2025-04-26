@@ -1,22 +1,22 @@
 import { NextFunction, Response } from "express"
-import { ControllerError } from "../../../errors/controller/controller-error"
-import { ExtendedRequest } from "../../../types/common/req.types"
-import { ApiUtils } from "../../../utils/api/api.utils"
-import { asyncContextStorage } from "../../../utils/AsyncContext"
-import { BaseController } from "../../../utils/base/base-controller"
-import { ContextLogger } from "../../../utils/logger/logger.custom"
-import { ZdmRepositoryFilterDTO } from "../dto/query/zdm-repository/zdm-repository-query-filter.dto"
-import { ZdmRepositoryInfoDTO } from "../dto/repository/zdm.repository.dto"
-import { ZdmRepositoryService } from "../services/zdm.repository.service"
-import { ZdmRepositoryFilterOptions } from "../types/zdm-repository/zdm-repository-filter.type"
+import { ControllerError } from "../../../../errors/controller/controller-error"
+import { ExtendedRequest } from "../../../../types/common/req.types"
+import { ApiUtils } from "../../../../utils/api/api.utils"
+import { asyncContextStorage } from "../../../../utils/AsyncContext"
+import { BaseController } from "../../../../utils/base/base-controller"
+import { ContextLogger } from "../../../../utils/logger/logger.custom"
+import { ZdmRepositoryFilterDTO } from "../../dto/query/zdm-repository/zdm-repository-query-filter.dto"
+import { ZdmRepositoryInfoDTO } from "../../dto/repository/zdm.repository.dto"
+import { ZdmRepositoryGetService } from "../../services/repository/zdm.repository-get.service"
+import { ZdmRepositoryFilterOptions } from "../../types/zdm-repository/zdm-repository-filter.type"
 
-export class ZdmRepositoryController extends BaseController {
-  private readonly zdmRepositoryService: ZdmRepositoryService
-  constructor({ zdmRepositoryService }: { zdmRepositoryService: ZdmRepositoryService }) {
+export class ZdmRepositoryGetController extends BaseController {
+  private readonly zdmRepositoryGetService: ZdmRepositoryGetService
+  constructor({ zdmRepositoryGetService }: { zdmRepositoryGetService: ZdmRepositoryGetService }) {
     super({
-      controllerName: "ZdmRepositoryController",
+      controllerName: "ZdmRepositoryGetController",
     })
-    this.zdmRepositoryService = zdmRepositoryService
+    this.zdmRepositoryGetService = zdmRepositoryGetService
   }
   /**
    * ZDM Repository 조회 옵션 추출
@@ -58,7 +58,7 @@ export class ZdmRepositoryController extends BaseController {
       ContextLogger.debug({ message: `적용된 필터 옵션`, meta: filterOptions })
 
       //  서비스 호출
-      const repositories = await this.zdmRepositoryService.getRepositoryList({ filterOptions })
+      const repositories = await this.zdmRepositoryGetService.getRepositoryList({ filterOptions })
 
       //  출력 가공
       const repositoriesDTO = ZdmRepositoryInfoDTO.fromEntities({ repositories })
