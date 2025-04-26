@@ -13,7 +13,7 @@ export class ZdmRepository extends BaseRepository {
   /**
    * 필터 옵션 적용
    */
-  private applyFilters({ filterOptions }: { filterOptions: ZdmFilterOptions }): void {
+  private applyFilters({ filterOptions }: { filterOptions?: ZdmFilterOptions }): void {
     asyncContextStorage.addOrder({ component: this.repositoryName, method: "applyFilters", state: "start" })
     asyncContextStorage.addOrder({ component: this.repositoryName, method: "applyFilters", state: "end" })
   }
@@ -38,6 +38,35 @@ export class ZdmRepository extends BaseRepository {
         error,
         method: "findAll",
         message: "[ZDM 목록 조회] - 오류가 발생했습니다",
+      })
+    }
+  }
+
+  /**
+   * 특정 ZDM 조회 ( by ZDM ID )
+   */
+  async findByZdmIds({ ids, filterOptions }: { ids: number[]; filterOptions?: ZdmFilterOptions }): Promise<ZdmInfoTable[]> {
+    try {
+      asyncContextStorage.addRepository({ name: this.repositoryName })
+      asyncContextStorage.addOrder({ component: this.repositoryName, method: "findByZdmIds", state: "start" })
+
+      if (ids.length === 0) {
+        return []
+      }
+      this.resetQueryState()
+      this.applyFilters({ filterOptions })
+
+      const placeholders = ids.map(() => "?").join(",")
+      const query = `SELECT * FROM ${this.tableName} WHERE nID IN (${placeholders})`
+      const result = await this.executeQuery<ZdmInfoTable[]>({ sql: query, params: ids, request: `${this.repositoryName}.findByZdmIds` })
+
+      asyncContextStorage.addOrder({ component: this.repositoryName, method: "findByZdmIds", state: "end" })
+      return result
+    } catch (error) {
+      return this.handleRepositoryError({
+        error,
+        method: "findByZdmIds",
+        message: `[ZDM ID로 조회] - 오류가 발생했습니다`,
       })
     }
   }

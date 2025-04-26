@@ -2,14 +2,22 @@
 //  Schedule 조회 응답 type 정의  //
 ///////////////////////////////////
 
+import { ZdmInfoTable } from "../../zdm/types/db/center-info"
 import { ScheduleInfoTable } from "./db/schedule-info"
 import { ScheduleStatusType, ScheduleType } from "./schedule-common.type"
 
 /**
  * Schedule data 조회 결과 서비스 리턴 타입
  */
+//  단일 객체
+export interface ScheduleWithCenterItem {
+  schedule: ScheduleInfoTable
+  center: ZdmInfoTable
+}
+
+//  최종 리턴
 export interface ScheduleDataResponse {
-  items: ScheduleInfoTable[]
+  items: ScheduleWithCenterItem[]
 }
 
 /**
@@ -17,7 +25,10 @@ export interface ScheduleDataResponse {
  */
 export interface ScheduleResponseFields {
   id: string //  Schedule ID
-  center: string //  Schedule 등록 Center ID
+  center: {
+    id: string //  Schedule 등록 Center ID
+    name: string //  Schedule 등록 Center Name
+  }
   type: ScheduleType | string //  Schedule Type
   state: ScheduleStatusType | string //  Schedule 활성화 상태
   jobName: string // Schedule 할당 작업 이름
@@ -30,7 +41,10 @@ export interface ScheduleResponseFields {
  */
 export const DEFAULT_VALUES_SCHEDULE_RESPONSE = {
   id: "-",
-  center: "-",
+  center: {
+    id: "-",
+    name: "-",
+  },
   type: "Unknown",
   state: "Unknown",
   jobName: "-",
