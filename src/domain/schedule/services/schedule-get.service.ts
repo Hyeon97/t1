@@ -4,11 +4,11 @@ import { ScheduleRepository } from "../repositories/schedule-info"
 import { ScheduleFilterOptions } from "../types/schedule-filter.type"
 import { ScheduleDataResponse } from "../types/schedule-response.type"
 
-export class ScheduleService extends BaseService {
+export class ScheduleGetService extends BaseService {
   private readonly scheduleRepository: ScheduleRepository
   constructor({ scheduleRepository }: { scheduleRepository: ScheduleRepository }) {
     super({
-      serviceName: "ScheduleService",
+      serviceName: "ScheduleGetService",
     })
     this.scheduleRepository = scheduleRepository
   }

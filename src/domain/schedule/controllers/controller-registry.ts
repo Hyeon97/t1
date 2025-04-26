@@ -3,7 +3,7 @@
 ///////////////////////////////////////
 
 import { scheduleGetService } from "../services/service-registry"
-import { ScheduleGetController } from "./schedule.get.controller"
+import { ScheduleGetController } from "./schedule-get.controller"
 
 /**
  * Schedule 컨트롤러 인스턴스 생성 및 의존성 주입

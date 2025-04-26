@@ -8,13 +8,13 @@ import { ContextLogger } from "../../../utils/logger/logger.custom"
 import { ScheduleQueryFilterDTO } from "../dto/query/schedule-query-filter.dto"
 import { SpecificScheduleFilterDTO } from "../dto/query/specific-schedule-filter.dto"
 import { ScheduleResponseDTO } from "../dto/response/schedule-response.dto"
-import { ScheduleService } from "../services/schedule.service"
+import { ScheduleGetService } from "../services/schedule-get.service"
 import { ScheduleFilterOptions } from "../types/schedule-filter.type"
 
 export class ScheduleGetController extends BaseController {
-  private readonly scheduleGetService: ScheduleService
+  private readonly scheduleGetService: ScheduleGetService
 
-  constructor({ scheduleGetService }: { scheduleGetService: ScheduleService }) {
+  constructor({ scheduleGetService }: { scheduleGetService: ScheduleGetService }) {
     super({
       controllerName: "ScheduleGetController",
     })
@@ -48,7 +48,9 @@ export class ScheduleGetController extends BaseController {
    * 공통 Schedule 조회 핸들러
    */
   private async handleScheduleGet<T>({
-    req, res, next,
+    req,
+    res,
+    next,
     methodName,
     paramExtractor,
     errorMessage,
@@ -80,7 +82,7 @@ export class ScheduleGetController extends BaseController {
       }
 
       // 서비스 호출
-      const schedules = await serviceMethod({ ...identifier, filterOptions, })
+      const schedules = await serviceMethod({ ...identifier, filterOptions })
 
       //  출력 가공
       const schedulesDTOs = ScheduleResponseDTO.fromEntities({ schedules })
@@ -103,7 +105,9 @@ export class ScheduleGetController extends BaseController {
    */
   getSchedules = async (req: ExtendedRequest, res: Response, next: NextFunction): Promise<void> => {
     await this.handleScheduleGet({
-      req, res, next,
+      req,
+      res,
+      next,
       methodName: "getSchedules",
       errorMessage: "[Schedule 목록 조회] - 예기치 못한 오류 발생",
       serviceMethod: ({ filterOptions }) => this.scheduleGetService.getSchedules({ filterOptions }),
