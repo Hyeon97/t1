@@ -9,17 +9,17 @@ import { ContextLogger } from "../../../utils/logger/logger.custom"
 import { ServerQueryFilterDTO } from "../dto/query/server-query-filter.dto"
 import { SpecificServerFilterDTO } from "../dto/query/specific-server-query-filter.dto"
 import { ServerResponseFactory } from "../dto/response/server-response-factory"
-import { ServerService } from "../services/server.service"
+import { ServerGetService } from "../services/server-get.service"
 import { ServerFilterOptions } from "../types/server-filter.type"
 
-export class ServerController extends BaseController {
-  private readonly serverService: ServerService
+export class ServerGetController extends BaseController {
+  private readonly serverGetService: ServerGetService
 
-  constructor({ serverService }: { serverService: ServerService }) {
+  constructor({ serverGetService }: { serverGetService: ServerGetService }) {
     super({
-      controllerName: "ServerController",
+      controllerName: "ServerGetController",
     })
-    this.serverService = serverService
+    this.serverGetService = serverGetService
   }
 
   /**
@@ -72,7 +72,7 @@ export class ServerController extends BaseController {
       ContextLogger.debug({ message: `적용된 필터 옵션`, meta: filterOptions })
 
       // 서비스 호출
-      const serversData = await this.serverService.getServers({ filterOptions })
+      const serversData = await this.serverGetService.getServers({ filterOptions })
 
       //  출력 가공
       const serversDTOs = ServerResponseFactory.createFromEntities({
@@ -125,12 +125,12 @@ export class ServerController extends BaseController {
       // 서비스 호출
       let serverData
       if (filterOptions.identifierType === "id") {
-        serverData = await this.serverService.getServerById({
+        serverData = await this.serverGetService.getServerById({
           id: identifier,
           filterOptions,
         })
       } else {
-        serverData = await this.serverService.getServerByName({
+        serverData = await this.serverGetService.getServerByName({
           name: identifier,
           filterOptions,
         })

@@ -8,7 +8,7 @@ import { ServerNetworkRepository } from "./../repositories/server-network.reposi
 import { ServerPartitionRepository } from "./../repositories/server-partition.repository"
 import { ServerRepositoryRepository } from "./../repositories/server-repository.repository"
 import { ServerPartitionService } from "./server-partition.service"
-import { ServerService } from "./server.service"
+import { ServerGetService } from "./server-get.service"
 
 /**
  * 리포지토리 인스턴스 생성
@@ -23,7 +23,7 @@ const serverRepositoryRepository = new ServerRepositoryRepository()
  * 서비스 인스턴스 생성 및 의존성 주입
  */
 //  Server 정보 조회 Service
-export const serverService = new ServerService({
+export const serverGetService = new ServerGetService({
   serverBasicRepository,
   serverDiskRepository,
   serverPartitionRepository,

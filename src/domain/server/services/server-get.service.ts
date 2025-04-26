@@ -19,7 +19,7 @@ import { ServerDataResponse } from "../types/server-response.type"
 type AdditionalInfoKey = "disks" | "networks" | "partitions" | "repositories"
 type ServerDataPropertyKey = Exclude<keyof ServerDataResponse, "server">
 
-export class ServerService extends BaseService {
+export class ServerGetService extends BaseService {
   private readonly serverBasicRepository: ServerBasicRepository
   private readonly serverDiskRepository: ServerDiskRepository
   private readonly serverPartitionRepository: ServerPartitionRepository
@@ -39,7 +39,7 @@ export class ServerService extends BaseService {
     serverRepositoryRepository: ServerRepositoryRepository
   }) {
     super({
-      serviceName: "ServerService",
+      serviceName: "ServerGetService",
     })
     this.serverBasicRepository = serverBasicRepository
     this.serverDiskRepository = serverDiskRepository
