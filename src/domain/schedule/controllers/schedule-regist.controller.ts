@@ -4,7 +4,7 @@ import { ApiUtils } from "../../../utils/api/api.utils"
 import { asyncContextStorage } from "../../../utils/AsyncContext"
 import { BaseController } from "../../../utils/base/base-controller"
 import { ContextLogger } from "../../../utils/logger/logger.custom"
-import { ScheduleRegistService } from "../services/shcedule-regist.service"
+import { ScheduleRegistService } from "../services/schedule-regist.service"
 import { ScheduleRegistRequestBody } from "../types/schedule-regist.type"
 
 export class ScheduleRegistController extends BaseController {
