@@ -74,7 +74,7 @@ export class ZdmRepository extends BaseRepository {
   /**
    * 특정 ZDM 조회 ( by Name )
    */
-  async findByZdmName({ name, filterOptions }: { name: string; filterOptions: ZdmFilterOptions }): Promise<ZdmInfoTable | null> {
+  async findByZdmName({ name, filterOptions }: { name: string; filterOptions?: ZdmFilterOptions }): Promise<ZdmInfoTable | null> {
     try {
       asyncContextStorage.addRepository({ name: this.repositoryName })
       asyncContextStorage.addOrder({ component: this.repositoryName, method: "findByZdmName", state: "start" })
@@ -99,7 +99,7 @@ export class ZdmRepository extends BaseRepository {
   /**
    * 특정 ZDM 조회 ( By ID )
    */
-  async findByZdmId({ id, filterOptions }: { id: number; filterOptions: ZdmFilterOptions }): Promise<ZdmInfoTable | null> {
+  async findByZdmId({ id, filterOptions }: { id: number; filterOptions?: ZdmFilterOptions }): Promise<ZdmInfoTable | null> {
     try {
       asyncContextStorage.addRepository({ name: this.repositoryName })
       asyncContextStorage.addOrder({ component: this.repositoryName, method: "findByZdmId", state: "start" })
