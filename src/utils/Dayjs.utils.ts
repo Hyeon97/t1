@@ -1,9 +1,9 @@
-import dayjs from 'dayjs'
-import advancedFormat from 'dayjs/plugin/advancedFormat'
-import customParseFormat from 'dayjs/plugin/customParseFormat'
-import relativeTime from 'dayjs/plugin/relativeTime'
-import timezone from 'dayjs/plugin/timezone'
-import utc from 'dayjs/plugin/utc'
+import dayjs from "dayjs"
+import advancedFormat from "dayjs/plugin/advancedFormat"
+import customParseFormat from "dayjs/plugin/customParseFormat"
+import relativeTime from "dayjs/plugin/relativeTime"
+import timezone from "dayjs/plugin/timezone"
+import utc from "dayjs/plugin/utc"
 
 // 플러그인 확장
 dayjs.extend(utc)
@@ -18,17 +18,24 @@ dayjs.extend(customParseFormat)
  */
 export class DateTimeUtils {
   /**
+   * 날자 포멧 YYYY-MM-DD 로 변경
+   */
+  static formatDateString({ year, month, day }: { year: number; month: number; day: number }): string {
+    return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`
+  }
+
+  /**
    * 현재 시간을 기본 포맷(YYYY-MM-DD HH:mm:ss)으로 반환
    */
   static getCurrentTime(): string {
-    return dayjs().format('YYYY-MM-DD HH:mm:ss')
+    return dayjs().format("YYYY-MM-DD HH:mm:ss")
   }
 
   /**
    * 현재 시간을 밀리초 포함 포맷(YYYY-MM-DD HH:mm:ss.SSS)으로 반환
    */
   static getCurrentTimeWithMs(): string {
-    return dayjs().format('YYYY-MM-DD HH:mm:ss.SSS')
+    return dayjs().format("YYYY-MM-DD HH:mm:ss.SSS")
   }
 
   /**
@@ -36,7 +43,7 @@ export class DateTimeUtils {
    * @param timestamp Unix 타임스탬프(밀리초)
    */
   static formatTimestamp({ timestamp }: { timestamp: number }): string {
-    return dayjs(timestamp).format('YYYY-MM-DD HH:mm:ss')
+    return dayjs(timestamp).format("YYYY-MM-DD HH:mm:ss")
   }
 
   /**
@@ -44,7 +51,7 @@ export class DateTimeUtils {
    * @param timestamp Unix 타임스탬프(밀리초)
    */
   static formatTimestampWithMs({ timestamp }: { timestamp: number }): string {
-    return dayjs(timestamp).format('YYYY-MM-DD HH:mm:ss.SSS')
+    return dayjs(timestamp).format("YYYY-MM-DD HH:mm:ss.SSS")
   }
 
   /**
@@ -69,7 +76,7 @@ export class DateTimeUtils {
    * @param isoString ISO 날짜 문자열
    */
   static formatISOString({ isoString }: { isoString: string }): string {
-    return dayjs(isoString).format('YYYY-MM-DD HH:mm:ss')
+    return dayjs(isoString).format("YYYY-MM-DD HH:mm:ss")
   }
 
   /**
@@ -84,7 +91,7 @@ export class DateTimeUtils {
    * 로깅용 타임스탬프 포맷 (YYYY-MM-DD HH:mm:ss.SSS)
    */
   static getLogTimestamp(): string {
-    return dayjs().format('YYYY-MM-DD HH:mm:ss.SSS')
+    return dayjs().format("YYYY-MM-DD HH:mm:ss.SSS")
   }
 
   /**
@@ -92,7 +99,7 @@ export class DateTimeUtils {
    * @param timestamp Unix 타임스탬프(밀리초)
    */
   static formatDateOnly({ timestamp }: { timestamp?: number } = {}): string {
-    return dayjs(timestamp).format('YYYY-MM-DD')
+    return dayjs(timestamp).format("YYYY-MM-DD")
   }
 
   /**
@@ -100,7 +107,7 @@ export class DateTimeUtils {
    * @param timestamp Unix 타임스탬프(밀리초)
    */
   static formatTimeOnly({ timestamp }: { timestamp?: number } = {}): string {
-    return dayjs(timestamp).format('HH:mm:ss')
+    return dayjs(timestamp).format("HH:mm:ss")
   }
 
   /**
@@ -138,7 +145,7 @@ export class DateTimeUtils {
    * @param dateString 검사할 날짜 문자열
    * @param format 예상 포맷 (기본값: 'YYYY-MM-DD')
    */
-  static isValidDate({ dateString, format = 'YYYY-MM-DD' }: { dateString: string; format?: string }): boolean {
+  static isValidDate({ dateString, format = "YYYY-MM-DD" }: { dateString: string; format?: string }): boolean {
     return dayjs(dateString, format, true).isValid()
   }
 }
