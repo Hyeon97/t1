@@ -2,7 +2,7 @@
 //  schedule_info table 스키마 정의  //
 //////////////////////////////////////
 
-import { ScheduleStatusEnum, ScheduleType, ScheduleTypeEnum } from "../schedule-common.type"
+import { ScheduleStatusEnum, ScheduleTypeEnum } from "../schedule-common.type"
 
 export interface ScheduleInfoTable {
   nID: number
