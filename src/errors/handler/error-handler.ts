@@ -31,7 +31,7 @@ function buildUnifiedError(err: Error) {
       const errorName = err?.metadata?.error?.name
       const data = err?.metadata?.data
       let cause = err?.metadata?.error?.message || ""
-      if (errorName === "Error") {
+      if (errorName === "Error" && cause === "") {
         cause = "서버 내부 오류 발생"
       }
       detail = { cause, data }
