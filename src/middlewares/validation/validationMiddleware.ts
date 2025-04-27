@@ -37,7 +37,6 @@ export class ValidationMiddleware {
           whitelist,
           forbidNonWhitelisted: true,
           skipMissingProperties: false,
-          // validateNested: true,
           //  중첩
           validationError: {
             target: false,
