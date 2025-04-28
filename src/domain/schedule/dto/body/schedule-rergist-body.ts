@@ -13,11 +13,11 @@ import { ScheduleDetail, ScheduleDetailInterval, ScheduleRegistRequestBody } fro
 export class ScheduleDetailBodyIntervalDTO implements ScheduleDetailInterval {
   @Expose()
   @IsDefined({ message: "hour가 누락되었습니다." })
-  hour!: number
+  hour!: string
 
   @Expose()
   @IsDefined({ message: "minute이 누락되었습니다." })
-  minute!: number
+  minute!: string
 }
 
 /**
