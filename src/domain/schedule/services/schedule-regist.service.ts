@@ -42,6 +42,8 @@ export class ScheduleRegistService extends BaseService {
         increment: data?.increment
       }
       dbInputObject = this.scheduleVerifiService.validateSchedule({ scheduleData, type: data.type })
+      console.log('dbInputObject')
+      console.dir(dbInputObject, { depth: null })
       //  center 정보 가져오기
       let center = null
       //  ID 인 경우
