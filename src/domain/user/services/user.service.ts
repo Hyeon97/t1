@@ -34,7 +34,7 @@ export class UserService extends BaseService {
       return this.handleServiceError({
         error,
         method: "getUserByEmail",
-        message: `User 정보 조회 - 오류가 발생했습니다`,
+        message: `[User 정보 조회] - 오류가 발생했습니다`,
       })
     }
   }

@@ -2,6 +2,7 @@
 //  Schedule Service 선언 및 관리  //
 ////////////////////////////////////
 
+import { userService } from "../../user/services/service-registry"
 import { ZdmRepository } from "../../zdm/repositories/center-info.repository"
 import { zdmGetService } from "../../zdm/services/service-registry"
 import { ScheduleRepository } from "../repositories/schedule-info"
@@ -22,4 +23,4 @@ export const scheduleVerifiService = new ScheduleVerifiService()
 //  Schedule 정보 조회 Service
 export const scheduleGetService = new ScheduleGetService({ scheduleRepository, zdmRepository })
 //  Schedule 정보 등록 Service
-export const scheduleRegistService = new ScheduleRegistService({ scheduleRepository, scheduleVerifiService, zdmGetService })
+export const scheduleRegistService = new ScheduleRegistService({ scheduleRepository, scheduleVerifiService, userService, zdmGetService })

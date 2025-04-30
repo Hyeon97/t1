@@ -57,9 +57,21 @@ export class ScheduleDetailBodyDTO implements ScheduleDetail {
  */
 export class ScheduleRegistBodyDTO implements ScheduleRegistRequestBody {
   //  필수
+  //  center 이름 or ID
   @Expose()
   @IsNotEmpty({ message: "center가 누락되었습니다." })
-  center!: string //  center 이름 or ID
+  center!: string
+
+  //  center 이름 or ID
+  @Expose()
+  @IsOptional()
+  @IsNotEmpty({ message: "user가 누락되었습니다." })
+  user?: string
+
+  //  작업 이름
+  @Expose()
+  @IsOptional()
+  jobName?: string
 
   //  Schedule 관련 정보
   @Expose()

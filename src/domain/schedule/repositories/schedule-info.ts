@@ -1,3 +1,4 @@
+import { TransactionManager } from "../../../database/connection"
 import { asyncContextStorage } from "../../../utils/AsyncContext"
 import { BaseRepository } from "../../../utils/base/base-repository"
 import { ContextLogger } from "../../../utils/logger/logger.custom"
@@ -63,4 +64,38 @@ export class ScheduleRepository extends BaseRepository {
       })
     }
   }
+
+  /**
+   * ID로 조회
+   */
+  async findById({ id, filterOptions }: { id: number, filterOptions?: ScheduleFilterOptions }): Promise<ScheduleInfoTable[]> {
+    try {
+      asyncContextStorage.addRepository({ name: this.repositoryName })
+      asyncContextStorage.addOrder({ component: this.repositoryName, method: "findById", state: "start" })
+
+      this.resetQueryState()
+      this.addCondition({ condition: "nID = ?", params: [id] })
+      this.applyFilters({ filterOptions })
+
+      const query = `SELECT * FROM ${this.tableName} ${this.buildWhereClause()}`
+      const result = await this.executeQuery<ScheduleInfoTable[]>({ sql: query, params: this.params, request: `${this.repositoryName}.findAll` })
+
+      asyncContextStorage.addOrder({ component: this.repositoryName, method: "findById", state: "end" })
+      return result
+    } catch (error) {
+      return this.handleRepositoryError({
+        error,
+        method: "findById",
+        message: "[Schedule ID로 조회] - 오류가 발생했습니다",
+      })
+    }
+  }
+
+  /**
+   * Schedule 정보 추가
+   */
+  async insertSchedule({ data, transaction }: { data: any, transaction: TransactionManager }) {
+
+  }
+
 }

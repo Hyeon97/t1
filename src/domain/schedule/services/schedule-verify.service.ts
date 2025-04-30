@@ -25,7 +25,7 @@ export class ScheduleVerifiService extends BaseService {
       this.validateScheduleConstraints({ scheduleData, type })
 
       // 타입에 따른 데이터 추출
-      const data = this.extractScheduleData({ scheduleData, type })
+      const { data, mode } = this.extractScheduleData({ scheduleData, type })
 
       // 타입별 검증 분기
       let result = null
@@ -68,7 +68,12 @@ export class ScheduleVerifiService extends BaseService {
           break
       }
       asyncContextStorage.addOrder({ component: this.serviceName, method: "validateSchedule", state: "end" })
-      return result
+      let processedData: any = result
+      if (0 <= type && type <= 6) {
+        if (mode === 'full') { processedData = { full: result } }
+        else if (mode === 'increment') { processedData = { increment: result } }
+      }
+      return { processedData, scheduleMode: mode }
     } catch (error) {
       return this.handleServiceError({
         error,
@@ -104,14 +109,19 @@ export class ScheduleVerifiService extends BaseService {
   /**
    * 타입에 따른 스케줄 데이터 추출
    */
-  private extractScheduleData({ scheduleData, type }: { scheduleData: ScheduleVerifiInput; type: ScheduleTypeEnum }): ScheduleDetail | ScheduleVerifiInput {
+  private extractScheduleData({ scheduleData, type }: { scheduleData: ScheduleVerifiInput; type: ScheduleTypeEnum }): { data: ScheduleDetail | ScheduleVerifiInput, mode: 'full' | 'increment' | 'smart' } {
     if (type <= 6) {
       // 일반 타입인 경우 full 또는 increment 사용
-      return (scheduleData?.full || scheduleData?.increment)!
+      if (scheduleData?.full) {
+        return { data: scheduleData.full, mode: 'full' }
+      }
+      else {
+        return { data: scheduleData.increment!, mode: 'increment' }
+      }
     } else {
       // 스마트 타입인 경우 (추후 구현)
       // 여기서는 full을 반환하지만, 실제로는 타입에 따라 적절한 데이터 처리 필요
-      return scheduleData
+      return { data: scheduleData, mode: 'smart' }
     }
   }
 
@@ -1003,7 +1013,7 @@ export class ScheduleVerifiService extends BaseService {
       const months = data.split(',').map(month => month.trim())
 
       if (!multiple && months.length > 1) {
-        throw new Error(`이 스케줄 타입은 여러 월을 선택할 수 없습니다. 선택된 월: [${months}]`)
+        throw new Error(`이 스케줄 타입은 여러 월을 선택할 수 없습니다. 선택된 월: [${month}]`)
       }
       if (!months.length) {
         throw new Error(`유효하지 않은 월 입니다.`)

@@ -29,6 +29,11 @@ export class ScheduleRegistController extends BaseController {
       //  body data 추출
       const data = req.body as ScheduleRegistRequestBody
 
+      //  user 정보 추출
+      if (!data.user) {
+        data.user = req?.user?.id ? String(req.user.id) : req.user?.email || ''
+      }
+
       //  서비스 호출
       const resultData = await this.scheduleRegistService.regist({ data })
 
