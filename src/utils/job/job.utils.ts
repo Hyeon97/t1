@@ -106,6 +106,18 @@ class JobUtils {
       })
     }
   }
+
+  async getRandomNumber({ checkExists }: { checkExists: (id: number) => Promise<boolean> }): Promise<number> {
+    const min = 100, max = 999999
+    let id = null
+
+    while (true) {
+      id = Math.floor(Math.random() * (max - min + 1)) + min
+      if (!(await checkExists(id))) break
+    }
+
+    return id
+  }
 }
 
 export const jobUtils = new JobUtils()
