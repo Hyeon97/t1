@@ -31,6 +31,8 @@ export interface ScheduleDetail {
 export interface ScheduleRegistRequestBody {
   //  기본 정보
   center: string //  center 이름 or ID
+  user?: string  //  schedule 등록 user ID or Mail
+  jobName?: string  //  스케쥴 할당할 작업 이름
   //  Schedule 관련 정보
   type: ScheduleTypeEnum // 0 ~ 11 까지
   full?: ScheduleDetail
