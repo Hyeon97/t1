@@ -2,12 +2,18 @@
 //  Schedule 공통 사용 type 정의  //
 ///////////////////////////////////
 
-import { VALID_SCHEDULE_ACTIVATION_VALUES, VALID_SCHEDULE_TYPE_VALUES } from "../../../types/common/const-value"
+import { VALID_SCHEDULE_ACTIVATION_VALUES, VALID_SCHEDULE_MODE_VALUES, VALID_SCHEDULE_TYPE_VALUES } from "../../../types/common/const-value"
+import { DailyScheduleData, EveryMinuteScheduleData, HourlyScheduleData, MonthlyByDayScheduleData, MonthlyByWeekScheduleData, OnceScheduleData, SmartCustomMonthlyByDateScheduleData, SmartCustomMonthlyByWeekAndDayScheduleData, SmartMonthlyByDateScheduleData, SmartMonthlyByWeekAndWeekdayScheduleData, SmartWeeklyByWeekdayScheduleData, WeeklyScheduleData } from "./schedule-regist.type"
 
 /**
  * Schedule 조회 타입
  */
 export type ScheduleSearchType = "jobName" | "id"
+
+/**
+ * Schedule mode 정의
+ */
+export type ScheduleModeType = (typeof VALID_SCHEDULE_MODE_VALUES)[number]
 
 /**
  * Schedule 활성화 상태 정의
@@ -133,4 +139,32 @@ export const ScheduleTypeMap = {
         throw new Error(`Unknown Schedule type: ${value}`)
     }
   },
+}
+
+
+// full만 존재하는 경우
+type FullOnlyScheduleData = {
+  full: OnceScheduleData | EveryMinuteScheduleData | HourlyScheduleData | DailyScheduleData |
+  WeeklyScheduleData | MonthlyByWeekScheduleData | MonthlyByDayScheduleData
+  increment?: undefined
+}
+
+// increment만 존재하는 경우
+type IncrementOnlyScheduleData = {
+  full?: undefined
+  increment: OnceScheduleData | EveryMinuteScheduleData | HourlyScheduleData | DailyScheduleData |
+  WeeklyScheduleData | MonthlyByWeekScheduleData | MonthlyByDayScheduleData
+}
+
+// 일반 스케줄 데이터는 둘 중 하나가 반드시 존재함
+export type RegularScheduleData = FullOnlyScheduleData | IncrementOnlyScheduleData
+
+// 스마트 스케줄 데이터 타입 (full과 increment가 반드시 존재)
+export type SmartScheduleData = {
+  full: SmartWeeklyByWeekdayScheduleData | SmartMonthlyByWeekAndWeekdayScheduleData |
+  SmartMonthlyByDateScheduleData | SmartCustomMonthlyByWeekAndDayScheduleData |
+  SmartCustomMonthlyByDateScheduleData
+  increment: SmartWeeklyByWeekdayScheduleData | SmartMonthlyByWeekAndWeekdayScheduleData |
+  SmartMonthlyByDateScheduleData | SmartCustomMonthlyByWeekAndDayScheduleData |
+  SmartCustomMonthlyByDateScheduleData
 }

@@ -80,34 +80,42 @@ export type HourlyScheduleData = CommonScheduleData & Pick<ScheduleInfoTable, 'n
  * Schedule DB 등록 타입 - Daily
  */
 export type DailyScheduleData = CommonScheduleData
+
 /**
  * Schedule DB 등록 타입 - Weekly
  */
 export type WeeklyScheduleData = CommonScheduleData & Pick<ScheduleInfoTable, "sDayweek">
+
 /**
  * Schedule DB 등록 타입 - Monthly on Specific Week
  */
 export type MonthlyByWeekScheduleData = CommonScheduleData & Pick<ScheduleInfoTable, "sDayweek" | "sWeek">
+
 /**
  * Schedule DB 등록 타입 - Monthly on Specific Day
  */
 export type MonthlyByDayScheduleData = CommonScheduleData & Pick<ScheduleInfoTable, "sDate">
+
 /**
  * Schedule DB 등록 타입 - Smart Weekly on Specific Day
  */
 export type SmartWeeklyByWeekdayScheduleData = CommonScheduleData & Pick<ScheduleInfoTable, "sDayweek">
+
 /**
  * Schedule DB 등록 타입 - Smart Monthly on Specific Week and Day
  */
 export type SmartMonthlyByWeekAndWeekdayScheduleData = CommonScheduleData & Pick<ScheduleInfoTable, "sDayweek" | "sWeek">
+
 /**
  * Schedule DB 등록 타입 - Smart Monthly on Specific Date
  */
 export type SmartMonthlyByDateScheduleData = CommonScheduleData & Pick<ScheduleInfoTable, "sDate">
+
 /**
  * Schedule DB 등록 타입 - Smart Custom Monthly on Specific Month, Week and Day
  */
 export type SmartCustomMonthlyByWeekAndDayScheduleData = CommonScheduleData & Pick<ScheduleInfoTable, "sDayweek" | "sWeek" | "sMonths">
+
 /**
  * Schedule DB 등록 타입 - Smart Custom Monthly on Specific Month and Date
  */

@@ -4,6 +4,7 @@ import { ApiUtils } from "../../../utils/api/api.utils"
 import { asyncContextStorage } from "../../../utils/AsyncContext"
 import { BaseController } from "../../../utils/base/base-controller"
 import { ContextLogger } from "../../../utils/logger/logger.custom"
+import ScheduleRegistResponseDTO from "../dto/response/schedule-response.dto"
 import { ScheduleRegistService } from "../services/schedule-regist.service"
 import { ScheduleRegistRequestBody } from "../types/schedule-regist.type"
 
@@ -38,7 +39,8 @@ export class ScheduleRegistController extends BaseController {
       const resultData = await this.scheduleRegistService.regist({ data })
 
       //  출력 가공
-      ApiUtils.success({ res, data: resultData, message: "Schedule data regist result" })
+      const schedulesDTO = ScheduleRegistResponseDTO.fromEntity({ data: resultData })
+      ApiUtils.success({ res, data: schedulesDTO, message: "Schedule data regist result" })
       asyncContextStorage.addOrder({ component: this.controllerName, method: "regist", state: "end" })
     } catch (error) {
       this.handleControllerError({

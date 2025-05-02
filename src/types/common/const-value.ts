@@ -22,7 +22,7 @@ export const VALID_JOB_TYPE_VALUES = ["full", "inc", "smart"] as const
 export const JOB_STATUS_VALUES = ["run", "complete", "start", "waiting", "cancel", "schedule"] as const
 //  Schedule 활성화 상태
 export const VALID_SCHEDULE_ACTIVATION_VALUES = ["disabled", "enabled"] as const
-//  SChedule 타입
+//  Schedule 타입
 export const VALID_SCHEDULE_TYPE_VALUES = [
   "once",
   "every minute",
@@ -37,3 +37,5 @@ export const VALID_SCHEDULE_TYPE_VALUES = [
   "smart custom monthly on specific month, week and day",
   "smart custom monthly on specific month and date",
 ] as const
+//  Schedule 모드
+export const VALID_SCHEDULE_MODE_VALUES = ["full", "increment", "smart"] as const

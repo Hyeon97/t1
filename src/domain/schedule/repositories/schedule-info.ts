@@ -1,3 +1,4 @@
+import { ResultSetHeader } from "mysql2"
 import { TransactionManager } from "../../../database/connection"
 import { asyncContextStorage } from "../../../utils/AsyncContext"
 import { BaseRepository } from "../../../utils/base/base-repository"
@@ -94,8 +95,22 @@ export class ScheduleRepository extends BaseRepository {
   /**
    * Schedule 정보 추가
    */
-  async insertSchedule({ data, transaction }: { data: any, transaction: TransactionManager }) {
+  async insertSchedule({ data, transaction }: { data: any, transaction: TransactionManager }): Promise<ResultSetHeader> {
+    try {
+      asyncContextStorage.addRepository({ name: this.repositoryName })
+      asyncContextStorage.addOrder({ component: this.repositoryName, method: "insertSchedule", state: "start" })
 
+      const result = await this.insert({ data, transaction, request: `${this.repositoryName}.insertSchedule` })
+
+      asyncContextStorage.addOrder({ component: this.repositoryName, method: "insertSchedule", state: "end" })
+      return result
+    } catch (error) {
+      return this.handleRepositoryError({
+        error,
+        method: "insertSchedule",
+        message: "[Schedule 정보 등록] - 오류가 발생했습니다",
+      })
+    }
   }
 
 }

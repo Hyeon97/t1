@@ -3,7 +3,7 @@ import { asyncContextStorage } from "../../../utils/AsyncContext"
 import { BaseService } from "../../../utils/base/base-service"
 import { DateTimeUtils } from "../../../utils/Dayjs.utils"
 import { reg4NumberOnly, regCommaSeparator, regNumberOnly, regNumbersWithComma, regScheduleTimeInput, regWeekdaysWithComma } from "../../../utils/regex.utils"
-import { ScheduleTypeEnum } from "../types/schedule-common.type"
+import { RegularScheduleData, ScheduleModeType, ScheduleTypeEnum, SmartScheduleData } from "../types/schedule-common.type"
 import { DailyScheduleData, EveryMinuteScheduleData, HourlyScheduleData, MonthlyByDayScheduleData, MonthlyByWeekScheduleData, OnceScheduleData, ScheduleDetail, ScheduleVerifiInput, SmartCustomMonthlyByDateScheduleData, SmartCustomMonthlyByWeekAndDayScheduleData, SmartMonthlyByDateScheduleData, SmartMonthlyByWeekAndWeekdayScheduleData, SmartWeeklyByWeekdayScheduleData, WeeklyScheduleData } from "../types/schedule-regist.type"
 
 export class ScheduleVerifiService extends BaseService {
@@ -16,7 +16,7 @@ export class ScheduleVerifiService extends BaseService {
   /**
    * Schedule 검증 - Main
    */
-  validateSchedule({ scheduleData, type }: { scheduleData: ScheduleVerifiInput; type: ScheduleTypeEnum }) {
+  validateSchedule({ scheduleData, type }: { scheduleData: ScheduleVerifiInput; type: ScheduleTypeEnum }): { processedData: RegularScheduleData | SmartScheduleData, scheduleMode: ScheduleModeType } {
     try {
       asyncContextStorage.addService({ name: this.serviceName })
       asyncContextStorage.addOrder({ component: this.serviceName, method: "validateSchedule", state: "start" })
@@ -109,7 +109,7 @@ export class ScheduleVerifiService extends BaseService {
   /**
    * 타입에 따른 스케줄 데이터 추출
    */
-  private extractScheduleData({ scheduleData, type }: { scheduleData: ScheduleVerifiInput; type: ScheduleTypeEnum }): { data: ScheduleDetail | ScheduleVerifiInput, mode: 'full' | 'increment' | 'smart' } {
+  private extractScheduleData({ scheduleData, type }: { scheduleData: ScheduleVerifiInput; type: ScheduleTypeEnum }): { data: ScheduleDetail | ScheduleVerifiInput, mode: ScheduleModeType } {
     if (type <= 6) {
       // 일반 타입인 경우 full 또는 increment 사용
       if (scheduleData?.full) {
