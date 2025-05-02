@@ -42,3 +42,15 @@
   - > 추후 [{partition:"/", excludeDir:"/test1|/test2..."}] 형식으로 변경
     - 만약 문자열로 들어오면 기존 처럼 전체 파티션에서 동일한 이름을 가진 디렉토리 모두 제외하는 방식으로
     - 객체 배열로 들어오는 경우에는 파티션 별 디렉토리 제외 하는 방식으로
+
+
+{
+  "center":6,
+  "server":28,
+  "type":"full",
+  "partition":[],
+  "repository":{
+		"id":16
+	},
+  "schedule":{}
+}

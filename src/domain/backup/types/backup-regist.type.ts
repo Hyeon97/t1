@@ -6,6 +6,7 @@ import { CompressionType } from "../../../types/common/compression"
 import { EncryptionType } from "../../../types/common/encryption"
 import { AutoStartType } from "../../../types/common/job"
 import { RepositoryBody } from "../../../types/common/repository"
+import { ScheduleBody } from "../../schedule/dto/body/schedule-rergist-body"
 import { BackupType } from "./backup-common.type"
 import { BackupTable } from "./db/job-backup"
 import { BackupInfoTable } from "./db/job-backup-info"
@@ -17,6 +18,8 @@ export type BackupRequestRepository = Omit<RepositoryBody, 'id'> & { id: number 
 /**
  * Backup 작업 등록 user input
  * excludeDir,excludePartition > 사용자 입력 타입: string | 내부 사용값 변환시: string[]
+ * schedule 입력 정의
+ *  - 
  */
 export interface BackupRegistRequestBody {
   //  필수
@@ -29,10 +32,7 @@ export interface BackupRegistRequestBody {
   //  선택
   jobName?: string //  작업 이름
   user?: string | number //  number: user ID, string: user mail
-  schedule?: {
-    full?: number //  등록시에는 zdm에 등록된 schedule ID
-    inc?: number //  등록시에는 zdm에 등록된 schedule ID
-  }
+  schedule?: ScheduleBody
   descroption?: string //  추가 설명
   rotation?: number //  작업 반복 횟수
   compression?: CompressionType //  작업시 압축 여부

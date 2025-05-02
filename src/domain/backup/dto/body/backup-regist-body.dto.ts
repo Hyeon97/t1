@@ -13,7 +13,7 @@ import {
 } from "../../../../types/common/const-value"
 import { EncryptionType } from "../../../../types/common/encryption"
 import { AutoStartType } from "../../../../types/common/job"
-import { JobRegistRepositoryDTO } from "../../../../types/dto/job"
+import { JobRegistRepositoryDTO, JobRegistScheduleDTO } from "../../../../types/dto/job"
 import { stringToNumber } from "../../../../utils/data-convert.utils"
 import { IsEmailOrNumberConstraint } from "../../../../utils/dto.utils"
 import { BackupType } from "../../types/backup-common.type"
@@ -47,9 +47,9 @@ export class BackupRegistBodyDTO implements BackupRegistRequestBody {
   partition!: string[] // 작업 파티션
 
   //  작업 사용 레포지토리
-  @ValidateNested({ message: "repository 객체의 형식이 올바르지 않습니다" })
-  @Type(() => JobRegistRepositoryDTO)
   @IsNotEmpty({ message: "repository가 누락되었습니다" })
+  @Type(() => JobRegistRepositoryDTO)
+  @ValidateNested()
   @Expose()
   repository!: JobRegistRepositoryDTO
 
@@ -65,11 +65,10 @@ export class BackupRegistBodyDTO implements BackupRegistRequestBody {
   user?: string | number = "" //  number: user ID, string: user mail
 
   @IsOptional()
+  @Type(() => JobRegistScheduleDTO)
+  @ValidateNested()
   @Expose()
-  schedule?: {
-    full?: number //  등록시에는 zdm에 등록된 schedule ID
-    inc?: number //  등록시에는 zdm에 등록된 schedule ID
-  } = { full: 0, inc: 0 }
+  schedule?: JobRegistScheduleDTO
 
   @IsOptional()
   @Expose()

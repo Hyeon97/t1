@@ -8,6 +8,16 @@ import { ScheduleTypeEnum } from "../../types/schedule-common.type"
 import { ScheduleDetail, ScheduleDetailInterval, ScheduleRegistRequestBody } from "../../types/schedule-regist.type"
 
 /**
+ * 작업 등록 또는 수정시 schedule 입력 양식
+ */
+export interface ScheduleBody {
+  type?: ScheduleTypeEnum // 0 ~ 11 까지
+  //  숫자만 존재(string): zdm에 등록된 schedule ID || ScheduleDetail: 신규 등록
+  full?: string | ScheduleDetail
+  inc?: string | ScheduleDetail
+}
+
+/**
  * interval 객체 검증
  */
 export class ScheduleDetailBodyIntervalDTO implements ScheduleDetailInterval {

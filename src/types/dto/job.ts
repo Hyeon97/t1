@@ -4,6 +4,9 @@
 
 import { Expose, Transform } from "class-transformer"
 import { IsIn, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator"
+import { ScheduleBody } from "../../domain/schedule/dto/body/schedule-rergist-body"
+import { ScheduleTypeEnum } from "../../domain/schedule/types/schedule-common.type"
+import { ScheduleDetail } from "../../domain/schedule/types/schedule-regist.type"
 import { VALID_REPOSITORY_VALUES } from "../common/const-value"
 import { RepositoryBody, RepositoryType } from "../common/repository"
 
@@ -53,4 +56,21 @@ export class JobEditRepositoryDTO implements RepositoryBody {
   @IsString({ message: "repository.path는 문자열이어야 합니다" })
   @Expose()
   path?: string
-} 
+}
+
+/**
+ * 작업 등록시 schedule 입력 양식
+ */
+export class JobRegistScheduleDTO implements ScheduleBody {
+  @IsOptional()
+  @Expose()
+  type!: ScheduleTypeEnum // 0 ~ 11 까지
+
+  @IsOptional()
+  @Expose()
+  full?: ScheduleDetail //  숫자만 존재(string): zdm에 등록된 schedule ID || ScheduleDetail: 신규 등록
+
+  @IsOptional()
+  @Expose()
+  inc?: ScheduleDetail //  숫자만 존재(string): zdm에 등록된 schedule ID || ScheduleDetail: 신규 등록
+}

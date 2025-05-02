@@ -1,6 +1,7 @@
 import { ValidationError } from "class-validator"
 import { NextFunction, Request, Response } from "express"
 import { ErrorCode, ErrorLayer, ErrorResponse, getUserFriendlyMessage, NewError } from ".."
+import { asyncContextStorage } from "../../utils/AsyncContext"
 import { ContextLogger } from "../../utils/logger/logger.custom"
 
 /**
@@ -49,7 +50,7 @@ function buildUnifiedError(err: Error) {
         layer: ErrorLayer.MIDDLEWARE,
       }
     } else {
-      ;(statusCode = 500),
+      ; (statusCode = 500),
         (clientMessage = "알 수 없는 오류"),
         (clientErrorCode = ErrorCode.UNKNOWN_ERROR),
         (detail = { cause: err.message }),
@@ -92,7 +93,9 @@ export const errorHandler = (err: Error, req: Request, res: Response, next: Next
   // console.log("errorHandler-unifiedError")
   // console.dir(unifiedError, { depth: null })
   // 응답 생성
+
   const errorResponse: ErrorResponse = {
+    requestID: asyncContextStorage.getTaskID() || '-',
     success: false,
     error: {
       code: unifiedError.clientErrorCode,

@@ -5,12 +5,15 @@ import { asyncContextStorage } from "../../../../utils/AsyncContext"
 import { BaseService } from "../../../../utils/base/base-service"
 import { jobUtils } from "../../../../utils/job/job.utils"
 import { ContextLogger } from "../../../../utils/logger/logger.custom"
-import { ServerPartitionService } from "../../../server/services/server-partition.service"
+import { ScheduleVerifiService } from "../../../schedule/services/schedule-verify.service"
+import { ScheduleTypeEnum } from "../../../schedule/types/schedule-common.type"
+import { ScheduleDetail } from "../../../schedule/types/schedule-regist.type"
 import { ServerGetService } from "../../../server/services/server-get.service"
+import { ServerPartitionService } from "../../../server/services/server-partition.service"
 import { ServerBasicTable } from "../../../server/types/db/server-basic"
 import { ServerPartitionTable } from "../../../server/types/db/server-partition"
-import { ZdmRepositoryGetService } from "../../../zdm/services/repository/zdm.repository-get.service"
 import { ZdmGetService } from "../../../zdm/services/common/zdm-get.service"
+import { ZdmRepositoryGetService } from "../../../zdm/services/repository/zdm.repository-get.service"
 import { ZdmInfoTable } from "../../../zdm/types/db/center-info"
 import { ZdmRepositoryTable } from "../../../zdm/types/db/center-repository"
 import { ZdmRepositoryFilterOptions } from "../../../zdm/types/zdm-repository/zdm-repository-filter.type"
@@ -39,6 +42,7 @@ export class BackupRegistService extends BaseService {
   private readonly zdmRepositoryGetService: ZdmRepositoryGetService
   private readonly backupRepository: BackupRepository
   private readonly backupInfoRepository: BackupInfoRepository
+  private readonly scheduleVerifiService: ScheduleVerifiService
 
   constructor({
     serverGetService,
@@ -47,6 +51,7 @@ export class BackupRegistService extends BaseService {
     zdmRepositoryGetService,
     backupRepository,
     backupInfoRepository,
+    scheduleVerifiService
   }: {
     serverGetService: ServerGetService
     serverPartitionService: ServerPartitionService
@@ -54,6 +59,7 @@ export class BackupRegistService extends BaseService {
     zdmRepositoryGetService: ZdmRepositoryGetService
     backupRepository: BackupRepository
     backupInfoRepository: BackupInfoRepository
+    scheduleVerifiService: ScheduleVerifiService
   }) {
     super({
       serviceName: "BackupRegistService",
@@ -64,6 +70,7 @@ export class BackupRegistService extends BaseService {
     this.zdmRepositoryGetService = zdmRepositoryGetService
     this.backupRepository = backupRepository
     this.backupInfoRepository = backupInfoRepository
+    this.scheduleVerifiService = scheduleVerifiService
   }
 
   /**
@@ -236,6 +243,29 @@ export class BackupRegistService extends BaseService {
         error,
         method: "getRepositoryInfo",
         message: "[Backup 정보 등록] - ZDM Repository 정보 조회 오류 발생",
+      })
+    }
+  }
+
+  /**
+   * schedule 정보 검증 or 가져오기
+   */
+  private async setScheduleInfo({ schedule, center }: {
+    schedule: {
+      type?: ScheduleTypeEnum
+      full?: string | ScheduleDetail
+      inc?: string | ScheduleDetail
+    }, center: ZdmInfoTable
+  }) {
+    try {
+      asyncContextStorage.addOrder({ component: this.serviceName, method: "setScheduleInfo", state: "start" })
+      this.scheduleVerifiService.validateSchedule
+      asyncContextStorage.addOrder({ component: this.serviceName, method: "setScheduleInfo", state: "end" })
+    } catch (error) {
+      return this.handleServiceError({
+        error,
+        method: "setScheduleInfo",
+        message: "[Backup 정보 등록] - ZDM Schedule 정보 등록/검증 오류 발생",
       })
     }
   }
@@ -424,7 +454,7 @@ export class BackupRegistService extends BaseService {
       //  repository 정보 가져오기
       const repository = await this.getRepositoryInfo({ repository: data.repository, center })
       //  schedule 정보 가져오기
-
+      // const schedule = await this.setScheduleInfo({ schedule: data.schedule, center })
       //  데이터 전처리(작업제외 파티션)
       if (data.excludePartition) {
         data.excludePartition = this.preprocessExcludePartitions({ excludePartition: data.excludePartition as string })
@@ -438,21 +468,21 @@ export class BackupRegistService extends BaseService {
       // 처리할 파티션 목록 결정
       const partitionsToProcess = data.partition.length
         ? data.partition.map((partition) => {
-            const partitionInfo = partitionList.find((item) => item.sLetter === partition)
-            //  사용자 입력 파티션 검증
-            if (!partitionInfo) {
-              throw ServiceError.badRequest(ServiceError, {
-                method: "regist",
-                message: `[Backup 정보 등록] - 파티션( ${partition} )이 서버( ${server.sSystemName} )에 존재하지 않습니다`,
-                metadata: {
-                  partition,
-                  server: server.sSystemName,
-                },
-              })
-            }
+          const partitionInfo = partitionList.find((item) => item.sLetter === partition)
+          //  사용자 입력 파티션 검증
+          if (!partitionInfo) {
+            throw ServiceError.badRequest(ServiceError, {
+              method: "regist",
+              message: `[Backup 정보 등록] - 파티션( ${partition} )이 서버( ${server.sSystemName} )에 존재하지 않습니다`,
+              metadata: {
+                partition,
+                server: server.sSystemName,
+              },
+            })
+          }
 
-            return partitionInfo
-          })
+          return partitionInfo
+        })
         : partitionList
 
       // 제외 파티션이 아닌 것들만 필터링 후 dataSet 생성

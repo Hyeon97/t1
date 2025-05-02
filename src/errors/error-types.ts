@@ -84,6 +84,7 @@ export interface ErrorParams {
 
 // 에러 응답 인터페이스
 export interface ErrorResponse {
+  requestID: string
   success: boolean
   error: {
     code: string
