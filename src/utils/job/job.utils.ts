@@ -82,7 +82,7 @@ class JobUtils {
       if (type === 'Backup' || type === 'Recovery') {
         if (!server) throw new Error(`작업 타입이 ${type}인 경우 server는 필수 입니다.`)
         partitionName = this.chPartitionName({ server, partition })
-        baseName = jobName ? `${jobName}${partitionName}` : `${server.sSystemName}${partitionName}`
+        baseName = jobName ? `${jobName}${partitionName}` : `${server.sSystemName.split(' (')[0]}${partitionName}`
         matched = await repository.findByJobNameUseLike({
           jobName: baseName,
           filterOptions: {},
