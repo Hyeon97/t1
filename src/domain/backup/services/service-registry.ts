@@ -2,8 +2,9 @@
 //  Backup Service 선언 및 관리  //
 //////////////////////////////////
 
-import { scheduleVerifiService } from "../../schedule/services/service-registry"
+import { scheduleGetService, scheduleRegistService, scheduleVerifiService } from "../../schedule/services/service-registry"
 import { serverGetService, serverPartitionService } from "../../server/services/service-registry"
+import { userService } from "../../user/services/service-registry"
 import { zdmGetService, zdmRepositoryGetService } from "../../zdm/services/service-registry"
 import { BackupActiveRepository } from "../repositories/backup-active.repository"
 import { BackupHistoryRepository } from "../repositories/backup-history.repository"
@@ -41,7 +42,10 @@ export const backupRegistService = new BackupRegistService({
   zdmRepositoryGetService,
   backupRepository,
   backupInfoRepository,
-  scheduleVerifiService
+  scheduleGetService,
+  scheduleVerifiService,
+  scheduleRegistService,
+  userService
 })
 //  Backup 정보 삭제 Service
 export const backupDeleteService = new BackupDeleteService({

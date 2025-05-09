@@ -69,7 +69,7 @@ export class ScheduleRepository extends BaseRepository {
   /**
    * ID로 조회
    */
-  async findById({ id, filterOptions }: { id: number, filterOptions?: ScheduleFilterOptions }): Promise<ScheduleInfoTable[]> {
+  async findById({ id, filterOptions }: { id: number, filterOptions?: ScheduleFilterOptions }): Promise<ScheduleInfoTable | null> {
     try {
       asyncContextStorage.addRepository({ name: this.repositoryName })
       asyncContextStorage.addOrder({ component: this.repositoryName, method: "findById", state: "start" })
@@ -79,7 +79,7 @@ export class ScheduleRepository extends BaseRepository {
       this.applyFilters({ filterOptions })
 
       const query = `SELECT * FROM ${this.tableName} ${this.buildWhereClause()}`
-      const result = await this.executeQuery<ScheduleInfoTable[]>({ sql: query, params: this.params, request: `${this.repositoryName}.findAll` })
+      const result = await this.executeQuerySingle<ScheduleInfoTable>({ sql: query, params: this.params, request: `${this.repositoryName}.findAll` })
 
       asyncContextStorage.addOrder({ component: this.repositoryName, method: "findById", state: "end" })
       return result

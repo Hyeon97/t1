@@ -57,7 +57,7 @@ export const backupEditPath = {
                   example: "connect",
                   description: "변경할 작업 상태"
                 },
-                descroption: {
+                description: {
                   type: "string",
                   example: "주간 백업으로 변경",
                   description: "변경할 작업 설명"
@@ -224,7 +224,7 @@ export const backupEditPath = {
                   example: "connect",
                   description: "변경할 작업 상태"
                 },
-                descroption: {
+                description: {
                   type: "string",
                   example: "주간 백업으로 변경",
                   description: "변경할 작업 설명"

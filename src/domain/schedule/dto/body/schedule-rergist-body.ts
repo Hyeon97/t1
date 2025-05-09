@@ -14,7 +14,7 @@ export interface ScheduleBody {
   type?: ScheduleTypeEnum // 0 ~ 11 까지
   //  숫자만 존재(string): zdm에 등록된 schedule ID || ScheduleDetail: 신규 등록
   full?: string | ScheduleDetail
-  inc?: string | ScheduleDetail
+  increment?: string | ScheduleDetail
 }
 
 /**

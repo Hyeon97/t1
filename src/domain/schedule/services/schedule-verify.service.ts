@@ -14,7 +14,7 @@ export class ScheduleVerifiService extends BaseService {
   }
 
   /**
-   * Schedule 검증 - Main
+   * Schedule 검증 - 순수 스케쥴 등록 시
    */
   validateSchedule({ scheduleData, type }: { scheduleData: ScheduleVerifiInput; type: ScheduleTypeEnum }): { processedData: RegularScheduleData | SmartScheduleData, scheduleMode: ScheduleModeType } {
     try {
@@ -67,17 +67,36 @@ export class ScheduleVerifiService extends BaseService {
           result = this.validateSmartCustomMonthlyByDate({ data: data as Required<ScheduleVerifiInput> })
           break
       }
-      asyncContextStorage.addOrder({ component: this.serviceName, method: "validateSchedule", state: "end" })
       let processedData: any = result
       if (0 <= type && type <= 6) {
         if (mode === 'full') { processedData = { full: result } }
         else if (mode === 'increment') { processedData = { increment: result } }
       }
+
+      asyncContextStorage.addOrder({ component: this.serviceName, method: "validateSchedule", state: "end" })
       return { processedData, scheduleMode: mode }
     } catch (error) {
       return this.handleServiceError({
         error,
         method: "validateSchedule",
+        message: "[Schedule 정보 검증] - Schedule data 검증 중 오류 발생",
+      })
+    }
+  }
+
+  /**
+   * Schedule 검증 - 작업 등록 도중 스케쥴 등록 시
+   */
+  validateScheduleForJobRegistration({ scheduleData, type }: { scheduleData: ScheduleDetail; type: ScheduleTypeEnum }) {
+    try {
+      asyncContextStorage.addService({ name: this.serviceName })
+      asyncContextStorage.addOrder({ component: this.serviceName, method: "validateScheduleForJobRegistration", state: "start" })
+
+      asyncContextStorage.addOrder({ component: this.serviceName, method: "validateScheduleForJobRegistration", state: "end" })
+    } catch (error) {
+      return this.handleServiceError({
+        error,
+        method: "validateScheduleForJobRegistration",
         message: "[Schedule 정보 검증] - Schedule data 검증 중 오류 발생",
       })
     }
@@ -263,8 +282,8 @@ export class ScheduleVerifiService extends BaseService {
   }
 
   /**
- * 공통 검증 조건을 적용하여 validation rules 생성
- */
+   * 공통 검증 조건을 적용하여 validation rules 생성
+   */
   private createValidationRules({ data, type }: { data: any; type: string }): Array<{ condition: () => boolean; message: string }> {
     const rules: Array<{ condition: () => boolean; message: string }> = []
 

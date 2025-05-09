@@ -15,7 +15,7 @@
     full?: number //  등록시에는 zdm에 등록된 schedule ID
     inc?: number //  등록시에는 zdm에 등록된 schedule ID
   }
-  descroption?: string //  추가 설명
+  description?: string //  추가 설명
   rotation?: number //  작업 반복 횟수
   compression?: CompressionType //  작업시 압축 여부
   encryption?: EncryptionType // 작업시 암호화 여부
@@ -43,6 +43,20 @@
     - 만약 문자열로 들어오면 기존 처럼 전체 파티션에서 동일한 이름을 가진 디렉토리 모두 제외하는 방식으로
     - 객체 배열로 들어오는 경우에는 파티션 별 디렉토리 제외 하는 방식으로
 
+* 스케쥴 추가 등록
+  - 기본적으론 문자열 입력 고정 ( 숫자든 아니든 )
+  - 기존에 등록된 스케쥴 사용
+    - 양식: {"full":"ID", "increment":"ID"}
+    - 절차
+      1.  타입값 무시, 숫자만 있는지 판별 ( 작업 타입이 smart 인 경우에는 full, increment 둘다 존재해야함 )
+      2.  해당 ID로 스케쥴 검색
+      3.  스케쥴 존재하는 경우 적용 ( 현재 작업과 일치하는 유형인지 체크 ) / 없는경우 무시하고 진행( or 존재하지 않는 ID 에러 발생 )
+  - 신규 등록
+    - 양식: {"type":"0 ~ 11", "full":"ID", "increment":"ID"}
+      1.  올바른 양식인지 검증 ( 작업 타입이 smart 인 경우에는 full, increment 둘다 존재해야함 )
+      2.  해당 스케쥴 DB등록
+      3.  ID리턴 받아 적용
+      
 
 {
   "center":6,

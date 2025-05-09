@@ -22,7 +22,7 @@ export interface BackupEditRequestBody {
   changeName?: string //  변경할 작업 이름
   type?: BackupType //  작업 타입
   status?: JobStatusType
-  descroption?: string //  추가 설명
+  description?: string //  추가 설명
   rotation?: number //  작업 반복 횟수
   compression?: CompressionType //  작업시 압축 여부
   encryption?: EncryptionType // 작업시 암호화 여부

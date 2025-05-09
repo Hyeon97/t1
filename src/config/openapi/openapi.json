@@ -1569,7 +1569,7 @@
                     },
                     "description": "백업 스케줄 정보"
                   },
-                  "descroption": {
+                  "description": {
                     "type": "string",
                     "example": "월간 전체 백업",
                     "description": "작업 설명"
@@ -1812,7 +1812,7 @@
                     "example": "connect",
                     "description": "변경할 작업 상태"
                   },
-                  "descroption": {
+                  "description": {
                     "type": "string",
                     "example": "주간 백업으로 변경",
                     "description": "변경할 작업 설명"
@@ -2132,7 +2132,7 @@
                     "example": "connect",
                     "description": "변경할 작업 상태"
                   },
-                  "descroption": {
+                  "description": {
                     "type": "string",
                     "example": "주간 백업으로 변경",
                     "description": "변경할 작업 설명"

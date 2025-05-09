@@ -72,7 +72,7 @@ export class ScheduleRegistService extends BaseService {
     }
     if (!centerInfo) {
       throw ServiceError.badRequest(ServiceError, {
-        method: "regist",
+        method: "setCenterInfo",
         message: "[Schedule 정보 등록] - 일치하는 ZDM 정보 없음.",
       })
     }
@@ -87,7 +87,7 @@ export class ScheduleRegistService extends BaseService {
   private async setID(): Promise<number> {
     asyncContextStorage.addOrder({ component: this.serviceName, method: "setID", state: "start" })
     const id = await jobUtils.getRandomNumber({
-      checkExists: async (id) => (await this.scheduleRepository.findById({ id })).length > 0
+      checkExists: async (id) => (await this.scheduleRepository.findById({ id })) !== null
     })
     asyncContextStorage.addOrder({ component: this.serviceName, method: "setID", state: "end" })
     return id
@@ -101,7 +101,7 @@ export class ScheduleRegistService extends BaseService {
     // 두 번째 ID 생성 (첫 번째 ID와 겹치지 않도록)
     const secondID = await jobUtils.getRandomNumber({
       checkExists: async (id) =>
-        id === firstID || (await this.scheduleRepository.findById({ id })).length > 0
+        id === firstID || (await this.scheduleRepository.findById({ id })) !== null
     })
 
     asyncContextStorage.addOrder({ component: this.serviceName, method: "setIDPair", state: "end" })
@@ -156,7 +156,6 @@ export class ScheduleRegistService extends BaseService {
       //  User 정보 가져오기 + 할당
       //  User 정보는 controller 단에서 무조선 존재함
       const user = await this.getUser({ user: data.user! })
-      data.user = user
 
       //  schedule 검증 ( type은 미들웨어 에서 검증됨 )
       const scheduleData: ScheduleVerifiInput = {

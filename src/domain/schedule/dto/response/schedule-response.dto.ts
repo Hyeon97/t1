@@ -12,7 +12,6 @@ import {
   ScheduleGetResponseFields,
   ScheduleRegistResponse,
   ScheduleRegistResponseFields,
-  ScheduleWithCenterItem,
 } from "../../types/schedule-response.type"
 
 /**
@@ -240,7 +239,7 @@ export class ScheduleResponseDTO implements ScheduleGetResponseFields {
   /**
    * 엔티티에서 기본 DTO로 변환하는 정적 메서드
    */
-  static fromEntity({ scheduleData }: { scheduleData: ScheduleWithCenterItem }): ScheduleResponseDTO {
+  static fromEntity({ scheduleData }: { scheduleData: ScheduleDataResponse }): ScheduleResponseDTO {
     const { schedule, center } = scheduleData
     return new ScheduleResponseDTO({
       id: String(schedule.nID),
@@ -259,8 +258,8 @@ export class ScheduleResponseDTO implements ScheduleGetResponseFields {
   /**
    * 엔티티 배열에서 기본 DTO 배열로 변환
    */
-  static fromEntities({ schedules }: { schedules: ScheduleDataResponse }): ScheduleResponseDTO[] {
-    return schedules.items.map((scheduleData) => ScheduleResponseDTO.fromEntity({ scheduleData }))
+  static fromEntities({ schedules }: { schedules: ScheduleDataResponse[] }): ScheduleResponseDTO[] {
+    return schedules.map((scheduleData) => ScheduleResponseDTO.fromEntity({ scheduleData }))
   }
 }
 

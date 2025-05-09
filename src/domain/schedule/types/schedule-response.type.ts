@@ -9,16 +9,11 @@ import { RegularScheduleData, ScheduleStatusType, ScheduleType, SmartScheduleDat
 /**
  * Schedule data 조회 결과 서비스 리턴 타입
  */
-//  단일 객체
-export interface ScheduleWithCenterItem {
+export interface ScheduleDataResponse {
   schedule: ScheduleInfoTable
   center: ZdmInfoTable
 }
 
-//  최종 리턴
-export interface ScheduleDataResponse {
-  items: ScheduleWithCenterItem[]
-}
 
 /**
  * 기본 Schedule 정보 응답 필드 인터페이스

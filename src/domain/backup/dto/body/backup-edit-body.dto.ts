@@ -47,7 +47,7 @@ export class BackupEditBodyDTO implements BackupEditRequestBody {
   //  추가 설명
   @IsOptional()
   @Expose()
-  descroption?: string
+  description?: string
 
   //  작업 반복 횟수
   @IsOptional()

@@ -13,7 +13,8 @@ import {
 } from "../../../../types/common/const-value"
 import { EncryptionType } from "../../../../types/common/encryption"
 import { AutoStartType } from "../../../../types/common/job"
-import { JobRegistRepositoryDTO, JobRegistScheduleDTO } from "../../../../types/dto/job"
+import { JobRegistRepositoryDTO } from "../../../../types/dto/job"
+import { JobRegistScheduleDTO } from "../../../../types/dto/schedule"
 import { stringToNumber } from "../../../../utils/data-convert.utils"
 import { IsEmailOrNumberConstraint } from "../../../../utils/dto.utils"
 import { BackupType } from "../../types/backup-common.type"
@@ -72,7 +73,7 @@ export class BackupRegistBodyDTO implements BackupRegistRequestBody {
 
   @IsOptional()
   @Expose()
-  descroption?: string = "" //  추가 설명
+  description?: string = "" //  추가 설명
 
   @IsOptional()
   @IsInt({ message: "rotation은 정수여야 합니다" })

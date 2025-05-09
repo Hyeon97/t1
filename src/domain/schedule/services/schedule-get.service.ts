@@ -19,7 +19,7 @@ export class ScheduleGetService extends BaseService {
   /**
    * 모든 Schedule 조회
    */
-  async getSchedules({ filterOptions }: { filterOptions?: ScheduleFilterOptions }): Promise<ScheduleDataResponse> {
+  async getSchedules({ filterOptions }: { filterOptions?: ScheduleFilterOptions }): Promise<ScheduleDataResponse[]> {
     try {
       asyncContextStorage.addService({ name: this.serviceName })
       asyncContextStorage.addOrder({ component: this.serviceName, method: "getSchedules", state: "start" })
@@ -43,11 +43,40 @@ export class ScheduleGetService extends BaseService {
       }))
 
       asyncContextStorage.addOrder({ component: this.serviceName, method: "getSchedules", state: "end" })
-      return { items: schedulesWithCenter }
+      return schedulesWithCenter
     } catch (error) {
       return this.handleServiceError({
         error,
         method: "getSchedules",
+        message: `[Schedule 정보 조회] - 오류가 발생했습니다`,
+      })
+    }
+  }
+
+  /**
+   * ID로 조회
+   */
+  async getSchedulesById({ id, filterOptions }: { id: number, filterOptions?: ScheduleFilterOptions }): Promise<ScheduleDataResponse | null> {
+    try {
+      asyncContextStorage.addService({ name: this.serviceName })
+      asyncContextStorage.addOrder({ component: this.serviceName, method: "getSchedulesById", state: "start" })
+
+      // 스케줄 정보 조회
+      const schedule = await this.scheduleRepository.findById({ id, filterOptions })
+      if (!schedule) return null
+
+      // 센터 정보 조회
+      const center = (await this.zdmRepository.findByZdmId({ id: schedule.nCenterID }))!
+
+      // 스케줄과 센터 정보 결합
+      const schedulesWithCenter = { schedule, center }
+
+      asyncContextStorage.addOrder({ component: this.serviceName, method: "getSchedulesById", state: "end" })
+      return schedulesWithCenter
+    } catch (error) {
+      return this.handleServiceError({
+        error,
+        method: "getSchedulesById",
         message: `[Schedule 정보 조회] - 오류가 발생했습니다`,
       })
     }

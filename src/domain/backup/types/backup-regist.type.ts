@@ -32,8 +32,8 @@ export interface BackupRegistRequestBody {
   //  선택
   jobName?: string //  작업 이름
   user?: string | number //  number: user ID, string: user mail
-  schedule?: ScheduleBody
-  descroption?: string //  추가 설명
+  schedule?: ScheduleBody //  기본 형식만 검증, 상세검증은 내부로직
+  description?: string //  추가 설명
   rotation?: number //  작업 반복 횟수
   compression?: CompressionType //  작업시 압축 여부
   encryption?: EncryptionType // 작업시 암호화 여부

@@ -102,7 +102,7 @@ export const backupRegistPath = {
                   },
                   description: "백업 스케줄 정보"
                 },
-                descroption: {
+                description: {
                   type: "string",
                   example: "월간 전체 백업",
                   description: "작업 설명"

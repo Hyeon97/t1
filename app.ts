@@ -74,7 +74,7 @@ class App {
     this.app.use(`${apiPrefix}/servers`, validateToken, new ServerRoutes().router)
     this.app.use(`${apiPrefix}/servers`, validateToken, new ServerRoutes().router)
     this.app.use(`${apiPrefix}/zdms`, validateToken, new ZdmRoutes().router)
-    this.app.use(`${apiPrefix}/backups`, new BackupRoutes().router)
+    this.app.use(`${apiPrefix}/backups`, validateToken, new BackupRoutes().router)
     this.app.use(`${apiPrefix}/schedules`, validateToken, new ScheduleRoutes().router)
   }
 

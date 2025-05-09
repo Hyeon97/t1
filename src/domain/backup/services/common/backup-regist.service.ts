@@ -5,6 +5,10 @@ import { asyncContextStorage } from "../../../../utils/AsyncContext"
 import { BaseService } from "../../../../utils/base/base-service"
 import { jobUtils } from "../../../../utils/job/job.utils"
 import { ContextLogger } from "../../../../utils/logger/logger.custom"
+import { regNumberOnly } from "../../../../utils/regex.utils"
+import { ScheduleBody } from "../../../schedule/dto/body/schedule-rergist-body"
+import { ScheduleGetService } from "../../../schedule/services/schedule-get.service"
+import { ScheduleRegistService } from "../../../schedule/services/schedule-regist.service"
 import { ScheduleVerifiService } from "../../../schedule/services/schedule-verify.service"
 import { ScheduleTypeEnum } from "../../../schedule/types/schedule-common.type"
 import { ScheduleDetail } from "../../../schedule/types/schedule-regist.type"
@@ -12,6 +16,7 @@ import { ServerGetService } from "../../../server/services/server-get.service"
 import { ServerPartitionService } from "../../../server/services/server-partition.service"
 import { ServerBasicTable } from "../../../server/types/db/server-basic"
 import { ServerPartitionTable } from "../../../server/types/db/server-partition"
+import { UserService } from "../../../user/services/user.service"
 import { ZdmGetService } from "../../../zdm/services/common/zdm-get.service"
 import { ZdmRepositoryGetService } from "../../../zdm/services/repository/zdm.repository-get.service"
 import { ZdmInfoTable } from "../../../zdm/types/db/center-info"
@@ -35,6 +40,9 @@ interface BackupDataRegistResultSet {
   failed: Array<{ dataSet: BackupDataSet; error: Error }>
 }
 
+//  Schedule 관련 DataSet 
+interface ScheduleDataSet { nScheduleID?: number, nScheduleID_advanced?: number }
+
 export class BackupRegistService extends BaseService {
   private readonly serverGetService: ServerGetService
   private readonly serverPartitionService: ServerPartitionService
@@ -42,6 +50,9 @@ export class BackupRegistService extends BaseService {
   private readonly zdmRepositoryGetService: ZdmRepositoryGetService
   private readonly backupRepository: BackupRepository
   private readonly backupInfoRepository: BackupInfoRepository
+  private readonly userService: UserService
+  private readonly scheduleGetService: ScheduleGetService
+  private readonly scheduleRegistService: ScheduleRegistService
   private readonly scheduleVerifiService: ScheduleVerifiService
 
   constructor({
@@ -51,7 +62,10 @@ export class BackupRegistService extends BaseService {
     zdmRepositoryGetService,
     backupRepository,
     backupInfoRepository,
-    scheduleVerifiService
+    scheduleGetService,
+    scheduleVerifiService,
+    scheduleRegistService,
+    userService
   }: {
     serverGetService: ServerGetService
     serverPartitionService: ServerPartitionService
@@ -59,7 +73,10 @@ export class BackupRegistService extends BaseService {
     zdmRepositoryGetService: ZdmRepositoryGetService
     backupRepository: BackupRepository
     backupInfoRepository: BackupInfoRepository
+    scheduleGetService: ScheduleGetService
     scheduleVerifiService: ScheduleVerifiService
+    scheduleRegistService: ScheduleRegistService
+    userService: UserService
   }) {
     super({
       serviceName: "BackupRegistService",
@@ -70,7 +87,10 @@ export class BackupRegistService extends BaseService {
     this.zdmRepositoryGetService = zdmRepositoryGetService
     this.backupRepository = backupRepository
     this.backupInfoRepository = backupInfoRepository
+    this.scheduleGetService = scheduleGetService
     this.scheduleVerifiService = scheduleVerifiService
+    this.scheduleRegistService = scheduleRegistService
+    this.userService = userService
   }
 
   /**
@@ -80,10 +100,12 @@ export class BackupRegistService extends BaseService {
     data,
     server,
     center,
+    schedule
   }: {
     data: BackupRegistRequestBody
     server: ServerBasicTable
     center: ZdmInfoTable
+    schedule: ScheduleDataSet
   }): Promise<BackupTableInput> {
     try {
       asyncContextStorage.addOrder({ component: this.serviceName, method: "createBackupObject", state: "start" })
@@ -94,10 +116,10 @@ export class BackupRegistService extends BaseService {
         sJobName: data.jobName || "",
         nJobID: 0,
         nJobStatus: data.autoStart === "use" ? 3 : 2,
-        nScheduleID: 0,
-        nScheduleID_advanced: 0,
+        nScheduleID: schedule?.nScheduleID ?? 0,
+        nScheduleID_advanced: schedule?.nScheduleID_advanced ?? 0,
         sJobResult: "",
-        sDescription: data.descroption || "",
+        sDescription: data.description || "",
         sStartTime: "now()",
         sLastUpdateTime: "now()",
       }
@@ -248,24 +270,345 @@ export class BackupRegistService extends BaseService {
   }
 
   /**
-   * schedule 정보 검증 or 가져오기
+   * user 정보 가져오기
    */
-  private async setScheduleInfo({ schedule, center }: {
-    schedule: {
-      type?: ScheduleTypeEnum
-      full?: string | ScheduleDetail
-      inc?: string | ScheduleDetail
-    }, center: ZdmInfoTable
-  }) {
+  private async getUserIdx({ user }: { user: string }): Promise<string> {
     try {
+      if (regNumberOnly.test(user)) {
+        return user
+      }
+      else {
+        return String((await this.userService.getUserByEmail({ email: user })).idx)
+      }
+    } catch (error) {
+      return this.handleServiceError({
+        error,
+        method: "getUserIdx",
+        message: "[Backup 정보 등록] - User 정보 조회 오류 발생",
+      })
+    }
+  }
+
+  /**
+   * ID 문자열 여부 확인 (숫자로만 구성된 문자열인지 확인)
+   */
+  private isIdString({ value }: { value: any }): boolean {
+    return typeof value === 'string' && regNumberOnly.test(value)
+  }
+
+  /**
+   * 스케줄용 상세 body 생성
+   */
+  private async getScheduleDetailById({ scheduleId }: { scheduleId: number }): Promise<{
+    scheduleDetail: ScheduleDetail; type: number
+  } | null> {
+    try {
+      asyncContextStorage.addOrder({ component: this.serviceName, method: "getScheduleDetailById", state: "start" })
+      let body = null
+      const data = await this.scheduleGetService.getSchedulesById({ id: scheduleId })
+      if (data) {
+        body = {
+          type: data.schedule.nScheduleType,
+          scheduleDetail: {
+            year: data.schedule.sYear || '',
+            month: data.schedule.sMonth || data.schedule.sMonths || '',
+            week: data.schedule.sWeek || '',
+            day: data.schedule.sDay || data.schedule.sDayweek || data.schedule.sDate || '',
+            time: data.schedule.sTime!,
+            interval: {
+              hour: String(data.schedule.nPeriodHour) || '',
+              minute: String(data.schedule.nPeriodMinute) || ''
+            }
+          }
+        }
+      }
+      asyncContextStorage.addOrder({ component: this.serviceName, method: "getScheduleDetailById", state: "end" })
+      return body
+    } catch (error) {
+      return this.handleServiceError({
+        error,
+        method: "getScheduleDetailById",
+        message: "[Backup 정보 등록] - Schedule 정보 등록/검증 오류 발생",
+      })
+    }
+  }
+
+  /**
+   * Smart 스케줄 ID로 조회 및 검증
+   */
+  private async processSmartScheduleWithIds({ fullId, incrementId }: {
+    fullId: string,
+    incrementId: string
+  }): Promise<ScheduleDataSet> {
+    try {
+      asyncContextStorage.addOrder({ component: this.serviceName, method: "processSmartScheduleWithIds", state: "start" })
+      // Full 스케줄 조회
+      const _f = await this.getScheduleDetailById({ scheduleId: Number(fullId) })
+      if (!_f) {
+        throw ServiceError.badRequest(ServiceError, {
+          method: "processSmartScheduleWithIds",
+          message: `[Backup 정보 등록] - 스케줄 ID(${fullId})를 찾을 수 없습니다.`,
+        })
+      }
+
+      // Increment 스케줄 조회
+      const _i = await this.getScheduleDetailById({ scheduleId: Number(incrementId) })
+      if (!_i) {
+        throw ServiceError.badRequest(ServiceError, {
+          method: "processSmartScheduleWithIds",
+          message: `[Backup 정보 등록] - 스케줄 ID(${incrementId})를 찾을 수 없습니다.`,
+        })
+      }
+
+      // 1. 타입 검증
+      if (_f.type !== _i.type) {
+        throw ServiceError.badRequest(ServiceError, {
+          method: "processSmartScheduleWithIds",
+          message: `[Backup 정보 등록] - Smart 스케줄 타입 불일치: full(${_f!.type})과 increment(${_i?.type}) 스케줄은 같은 타입이어야 합니다.`,
+        })
+      }
+
+      // 2. 타입 검증 완료 후 타입이 똑같다는 전제 하 타입 2차검증 (7 ~ 11) 사이인지 확인
+      if (_f.type < ScheduleTypeEnum.SMART_WEEKLY_ON_SPECIFIC_DAY) {
+        throw ServiceError.badRequest(ServiceError, {
+          method: "processSmartScheduleWithIds",
+          message: `[Backup 정보 등록] - 해당 스케쥴은 Smart Schedule이 아닙니다.`,
+        })
+      }
+      asyncContextStorage.addOrder({ component: this.serviceName, method: "processSmartScheduleWithIds", state: "end" })
+      return {
+        nScheduleID: Number(fullId),
+        nScheduleID_advanced: Number(incrementId)
+      }
+    } catch (error) {
+      return this.handleServiceError({
+        error,
+        method: "processSmartScheduleWithIds",
+        message: "[Backup 정보 등록] - Schedule 정보 등록/검증 오류 발생",
+      })
+    }
+  }
+
+  /**
+   * Smart 스케줄 객체로 등록
+   */
+  private async processSmartScheduleWithObjects({
+    fullObj, incrementObj, type, center, user
+  }: {
+    fullObj: ScheduleDetail,
+    incrementObj: ScheduleDetail,
+    type: number,
+    center: ZdmInfoTable,
+    user: string
+  }): Promise<ScheduleDataSet> {
+    try {
+      asyncContextStorage.addOrder({ component: this.serviceName, method: "processSmartScheduleWithObjects", state: "start" })
+      if (type === undefined || type === null || type < ScheduleTypeEnum.SMART_WEEKLY_ON_SPECIFIC_DAY) {
+        throw ServiceError.badRequest(ServiceError, {
+          method: "processSmartScheduleWithIds",
+          message: `[Backup 정보 등록] - Smart Schedule인 경우 Type은 7 ~ 11 만 가능합니다.`,
+        })
+      }
+
+      // 검증
+      const scheduleData = { full: fullObj, increment: incrementObj }
+      await this.scheduleVerifiService.validateSchedule({ scheduleData, type })
+
+      // 검증 통과시 DB 등록
+      // DB 등록 DataSet
+      const data = {
+        center: String(center.nID),
+        type,
+        user,
+        full: fullObj,
+        increment: incrementObj,
+      }
+      //  DB 등록
+      const registResult = await this.scheduleRegistService.regist({ data })
+      asyncContextStorage.addOrder({ component: this.serviceName, method: "processSmartScheduleWithObjects", state: "end" })
+      return {
+        nScheduleID: registResult.scheduleID,
+        nScheduleID_advanced: registResult.scheduleID_advanced
+      }
+    } catch (error) {
+      return this.handleServiceError({
+        error,
+        method: "processSmartScheduleWithObjects",
+        message: "[Backup 정보 등록] - Schedule 정보 등록/검증 오류 발생",
+      })
+    }
+  }
+
+  /**
+   * Full 또는 Increment 스케줄 ID로 조회
+   */
+  private async processSingleScheduleWithId({
+    scheduleId
+  }: {
+    scheduleId: string
+  }): Promise<ScheduleDataSet> {
+    try {
+      asyncContextStorage.addOrder({ component: this.serviceName, method: "processSingleScheduleWithId", state: "start" })
+      const scheduleDetail = await this.getScheduleDetailById({ scheduleId: Number(scheduleId) })
+      if (!scheduleDetail) {
+        throw ServiceError.badRequest(ServiceError, {
+          method: "processSmartScheduleWithIds",
+          message: `[Backup 정보 등록] - 스케줄 ID(${scheduleId})를 찾을 수 없습니다.`,
+        })
+      }
+      asyncContextStorage.addOrder({ component: this.serviceName, method: "processSingleScheduleWithId", state: "end" })
+
+      return { nScheduleID: Number(scheduleId) }
+    } catch (error) {
+      return this.handleServiceError({
+        error,
+        method: "processSingleScheduleWithId",
+        message: "[Backup 정보 등록] - Schedule 정보 등록/검증 오류 발생",
+      })
+    }
+  }
+
+  /**
+   * Full 또는 Increment 스케줄 객체로 등록
+   */
+  private async processSingleScheduleWithObject({
+    scheduleObj, type, center, user, isFullSchedule
+  }: {
+    scheduleObj: ScheduleDetail,
+    type: number,
+    center: ZdmInfoTable,
+    user: string,
+    isFullSchedule: boolean
+  }): Promise<ScheduleDataSet> {
+    try {
+      asyncContextStorage.addOrder({ component: this.serviceName, method: "processSingleScheduleWithObject", state: "start" })
+      if (type === undefined || type === null || type >= ScheduleTypeEnum.SMART_WEEKLY_ON_SPECIFIC_DAY) {
+        throw ServiceError.badRequest(ServiceError, {
+          method: "processSmartScheduleWithIds",
+          message: `[Backup 정보 등록] - Full/Increment Schedule인 경우 Type은 0 ~ 6 만 가능합니다.`,
+        })
+      }
+
+      // 검증
+      const scheduleData = isFullSchedule
+        ? { full: scheduleObj }
+        : { increment: scheduleObj }
+
+      await this.scheduleVerifiService.validateSchedule({ scheduleData, type })
+
+      // 검증 통과시 DB 등록
+      const data = {
+        center: String(center.nID),
+        type,
+        user,
+        ...scheduleData
+      }
+
+      const registResult = await this.scheduleRegistService.regist({ data })
+      asyncContextStorage.addOrder({ component: this.serviceName, method: "processSingleScheduleWithObject", state: "end" })
+      return { nScheduleID: registResult.scheduleID }
+    } catch (error) {
+      return this.handleServiceError({
+        error,
+        method: "processSingleScheduleWithObject",
+        message: "[Backup 정보 등록] - Schedule 정보 등록/검증 오류 발생",
+      })
+    }
+  }
+
+  /**
+   * schedule 정보 검증 or 가져오기
+   * 사용자가 작업을 등록하면서 신규로 스케쥴을 등록하는 경우도 고려
+   * 입력은 숫자 - 숫자 or 신규 - 신규 만 가능 || 숫자 - 신규 \ 신규 - 숫자는 불가능
+   */
+  private async setScheduleInfo({ schedule, center, user }: {
+    schedule?: ScheduleBody, center: ZdmInfoTable, user: string
+  }): Promise<ScheduleDataSet> {
+    try {
+      // 기본 값
+      const defaultResult: ScheduleDataSet = { nScheduleID: 0, nScheduleID_advanced: 0 }
+      if (!schedule) return defaultResult
+
       asyncContextStorage.addOrder({ component: this.serviceName, method: "setScheduleInfo", state: "start" })
-      this.scheduleVerifiService.validateSchedule
+
+      let result: ScheduleDataSet
+      //  smart 스케쥴
+      if (schedule?.full && schedule?.increment) {
+        //  1. ID:ID - 기존 등록 불러오기 >> 별도의 추가 검증 필요 없음. ( 기초검증 schedule type, full schedule 확인 )
+        if (this.isIdString({ value: schedule.full }) && this.isIdString({ value: schedule.increment })) {
+          result = await this.processSmartScheduleWithIds({
+            fullId: schedule.full as string,
+            incrementId: schedule.increment as string
+          })
+        }
+        //  2. 객체:객체 - 신규 등록
+        else if (typeof schedule.full === 'object' && typeof schedule.increment === 'object') {
+          result = await this.processSmartScheduleWithObjects({
+            fullObj: schedule.full as ScheduleDetail,
+            incrementObj: schedule.increment as ScheduleDetail,
+            type: schedule.type!,
+            center,
+            user
+          })
+        }
+        //  그외 - 불가능
+        else {
+          throw ServiceError.badRequest(ServiceError, {
+            method: "processSmartScheduleWithIds",
+            message: `[Backup 정보 등록] - 스케쥴 등록은 ID:ID 또는 객체:객체 형식만 가능합니다.`,
+          })
+        }
+      }
+      //  full 스케쥴
+      else if (schedule?.full) {
+        //  ID - 기존 등록 불러오기
+        if (this.isIdString({ value: schedule.full })) {
+          result = await this.processSingleScheduleWithId({
+            scheduleId: schedule.full as string
+          })
+        }
+        //  객체 - 신규 등록
+        else {
+          result = await this.processSingleScheduleWithObject({
+            scheduleObj: schedule.full as ScheduleDetail,
+            type: schedule.type!,
+            center,
+            user,
+            isFullSchedule: true
+          })
+        }
+      }
+      //  increment 스케쥴 
+      else if (schedule?.increment) {
+        //  ID - 기존 등록 불러오기
+        if (this.isIdString({ value: schedule.increment })) {
+          result = await this.processSingleScheduleWithId({
+            scheduleId: schedule.increment as string
+          })
+        }
+        //  객체 - 신규 등록
+        else {
+          result = await this.processSingleScheduleWithObject({
+            scheduleObj: schedule.increment as ScheduleDetail,
+            type: schedule.type!,
+            center,
+            user,
+            isFullSchedule: true
+          })
+        }
+      }
+      // 어떤 스케줄 타입도 제공되지 않은 경우
+      else {
+        result = defaultResult
+      }
+
       asyncContextStorage.addOrder({ component: this.serviceName, method: "setScheduleInfo", state: "end" })
+      return result
     } catch (error) {
       return this.handleServiceError({
         error,
         method: "setScheduleInfo",
-        message: "[Backup 정보 등록] - ZDM Schedule 정보 등록/검증 오류 발생",
+        message: "[Backup 정보 등록] - Schedule 정보 등록/검증 오류 발생",
       })
     }
   }
@@ -453,8 +796,11 @@ export class BackupRegistService extends BaseService {
       const center = await this.getCenterInfo({ center: data.center })
       //  repository 정보 가져오기
       const repository = await this.getRepositoryInfo({ repository: data.repository, center })
+      //  user 정보 가져오기
+      const user = await this.getUserIdx({ user: data.user as string })
+      data.user = user
       //  schedule 정보 가져오기
-      // const schedule = await this.setScheduleInfo({ schedule: data.schedule, center })
+      const schedule = await this.setScheduleInfo({ schedule: data.schedule, center, user })
       //  데이터 전처리(작업제외 파티션)
       if (data.excludePartition) {
         data.excludePartition = this.preprocessExcludePartitions({ excludePartition: data.excludePartition as string })
@@ -463,7 +809,6 @@ export class BackupRegistService extends BaseService {
       if (data.excludeDir) {
         data.excludeDir = this.preprocessExcludeDir({ excludeDir: data.excludeDir as string })
       }
-
       const dataSet: BackupDataSet[] = []
       // 처리할 파티션 목록 결정
       const partitionsToProcess = data.partition.length
@@ -501,7 +846,7 @@ export class BackupRegistService extends BaseService {
             })
             data.jobName = jobNameResult.jName
             maxIdx = Math.max(maxIdx, jobNameResult.idx)
-            const backupDataObject = await this.createBackupObject({ data, server, center })
+            const backupDataObject = await this.createBackupObject({ data, server, center, schedule })
             const backupInfoDataObject = this.createBackupInfoObject({
               data,
               server,
