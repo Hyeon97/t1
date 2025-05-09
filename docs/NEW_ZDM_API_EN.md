@@ -113,10 +113,10 @@ None
 
 | Field      | Type    | Description                                |
 | ---------- | ------- | ------------------------------------------ |
-| requestID  | string  | Request unique ID .                        |
-| message    | string  | Processing result message .                |
-| success    | boolean | Request success status .                   |
-| data.token | string  | Issued JWT token .                         |
+| requestID  | string  | Request unique ID.                         |
+| message    | string  | Processing result message.                 |
+| success    | boolean | Request success status.                    |
+| data.token | string  | Issued JWT token.                          |
 | timestamp  | string  | Request processing time. (ISO 8601 format) |
 
 > **Note**: The issued token has an expiration period and must be included in the authentication header for subsequent API requests.
@@ -155,10 +155,10 @@ The issued JWT token includes the following information:
 
 | Field         | Type    | Description                                |
 | ------------- | ------- | ------------------------------------------ |
-| requestID     | string  | Request unique ID .                        |
-| success       | boolean | Request success status .                   |
-| error.code    | string  | Error code .                               |
-| error.message | string  | Error message .                            |
+| requestID     | string  | Request unique ID.                         |
+| success       | boolean | Request success status.                    |
+| error.code    | string  | Error code.                                |
+| error.message | string  | Error message.                             |
 | timestamp     | string  | Request processing time. (ISO 8601 format) |
 
 <br><br>
@@ -295,19 +295,19 @@ None
 
 | Field                          | Type    | Description                                           |
 | ------------------------------ | ------- | ----------------------------------------------------- |
-| requestID                      | string  | Request unique ID .                                   |
-| message                        | string  | Processing result message .                           |
-| success                        | boolean | Request success status .                              |
-| data                           | array   | Server information array .                            |
-| data[].id                      | string  | Server ID .                                           |
-| data[].systemName              | string  | Server system name (IP) .                             |
-| data[].systemMode              | string  | Server mode (source/target) .                         |
-| data[].os                      | string  | Operating system .                                    |
-| data[].version                 | string  | OS version information .                              |
-| data[].ip                      | string  | IP address .                                          |
-| data[].status                  | string  | Connection status .                                   |
-| data[].licenseID               | string  | Assigned license ID .                                 |
-| data[].lastUpdated             | string  | Last update time .                                    |
+| requestID                      | string  | Request unique ID.                                    |
+| message                        | string  | Processing result message.                            |
+| success                        | boolean | Request success status.                               |
+| data                           | array   | Server information array.                             |
+| data[].id                      | string  | Server ID.                                            |
+| data[].systemName              | string  | Server system name (IP).                              |
+| data[].systemMode              | string  | Server mode (source/target).                          |
+| data[].os                      | string  | Operating system.                                     |
+| data[].version                 | string  | OS version information.                               |
+| data[].ip                      | string  | IP address.                                           |
+| data[].status                  | string  | Connection status.                                    |
+| data[].licenseID               | string  | Assigned license ID.                                  |
+| data[].lastUpdated             | string  | Last update time.                                     |
 | data[].agent                   | string  | Server agent version. (`detail=true`)                 |
 | data[].model                   | string  | Server model. (`detail=true`)                         |
 | data[].manufacturer            | string  | Server manufacturer. (`detail=true`)                  |
@@ -484,13 +484,13 @@ None
 | requestID                | string  | Request unique ID.                         |
 | message                  | string  | Processing result message.                 |
 | success                  | boolean | Request success status.                    |
-| data[].id                | string  | Job ID .                                   |
+| data[].id                | string  | Job ID.                                    |
 | data[].jobName           | string  | Job Name.                                  |
-| data[].systemName        | string  | Source Server Name .                       |
-| data[].partition         | string  | Source Server Partition .                  |
+| data[].systemName        | string  | Source Server Name.                        |
+| data[].partition         | string  | Source Server Partition.                   |
 | data[].mode              | string  | Job Mode.                                  |
 | data[].result            | string  | Job Result.                                |
-| data[].schedule.basic    | string  | Schedule ID .                              |
+| data[].schedule.basic    | string  | Schedule ID.                               |
 | data[].schedule.advanced | string  | Additional Schedule ID.                    |
 | data[].repository.id     | string  | Center Repository ID.                      |
 | data[].repository.type   | string  | Center Repository Type.                    |
