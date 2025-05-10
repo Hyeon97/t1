@@ -81,10 +81,10 @@ None
 
 #### Body
 
-| Parameter | Type   | Required | Description                |
-| --------- | ------ | -------- | -------------------------- |
-| email     | string | Required | ZDM Portal Login Email.    |
-| password  | string | Required | ZDM Portal Login Password. |
+| Parameter | Type   | Required | Description                | Default | Example             |
+| --------- | ------ | -------- | -------------------------- | ------- | ------------------- |
+| email     | string | Required | ZDM Portal Login Email.    |         | test@zconverter.com |
+| password  | string | Required | ZDM Portal Login Password. |         | 12345               |
 
 ### Request Example
 
@@ -190,9 +190,9 @@ Retrieval the list of Servers registered to the ZDM Center.
 
 #### Headers
 
-| Parameter     | Type   | Required | Description           |
-| ------------- | ------ | -------- | --------------------- |
-| authorization | string | Required | Authentication token. |
+| Parameter     | Type   | Required | Description           | Default | Example |
+| ------------- | ------ | -------- | --------------------- | ------- | ------- |
+| authorization | string | Required | Authentication token. |         | token   |
 
 #### Parameter
 
@@ -366,34 +366,33 @@ None
 
 ## Backup Registration
 
-## Backup Job Retrieval - All
-
 ### URL
 
 ```txt
 - http
-[GET] /api/backups
+[POST] /api/backups
 
 - Curl
-curl --request GET
+curl --request POST
 --url http://localhost:3000/api/backups
 --header "Content-Type: application/json"
---header "authorization: toknes"
+--header "authorization: tokens"
+--data "{/* JSON Data */}"
 ```
 
 ### Description
 
 ```txt
-Retrieval all Backup jobs registered to the ZDM Center.
+Registers a new Backup Job with the ZDM Center.
 ```
 
 ### Request Parameters
 
 #### Headers
 
-| Parameter     | Type   | Required | Description           |
-| ------------- | ------ | -------- | --------------------- |
-| authorization | string | Required | Authentication token. |
+| Parameter     | Type   | Required | Description           | Default | Example |
+| ------------- | ------ | -------- | --------------------- | ------- | ------- |
+| authorization | string | Required | Authentication token. |         | token   |
 
 #### Parameter
 
@@ -403,21 +402,84 @@ None
 
 #### Query
 
-| Parameter      | Type    | Required | Description                                                                      | Default | Example                                                       |
-| -------------- | ------- | -------- | -------------------------------------------------------------------------------- | ------- | ------------------------------------------------------------- |
-| mode           | string  | Optional | Backup job mode. Only `full`, `inc`, `smart` allowed.                            |         | `full`                                                        |
-| partition      | string  | Optional | Backup job target partition. (Currently only single partition query is possible) |         | partition="/test"                                             |
-| status         | string  | Optional | Backup job status.                                                               |         |                                                               |
-| result         | string  | Optional | Backup job result.                                                               |         |                                                               |
-| repositoryID   | string  | Optional | ZDM Repository ID used for Backup job.                                           |         |                                                               |
-| repositoryType | string  | Optional | ZDM Repository Type used for Backup job. Only `smb`, `nfs` allowed.              |         | `smb`                                                         |
-| repositoryPath | string  | Optional | ZDM Repository Path used for Backup job.                                         |         | `smb`: \\\\127.0.0.1\\ZConverter `nfs`: 127.0.0.1:/ZConverter |
-| detail         | boolean | Optional | Show Backup job detailed information.                                            | false   |                                                               |
+```txt
+None
+```
 
 #### Body
 
-```txt
-None
+요청하신 내용대로 Body 표를 수정했습니다:
+
+| Parameter                     | Type             | Required | Description                                                                                                                                | Default        | Example                                                       |
+| ----------------------------- | ---------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------ | -------------- | ------------------------------------------------------------- |
+| center                        | string           | Required | Center ID (numeric) or Center name (string).                                                                                               | -              | "123" or "Main Center"                                        |
+| server                        | string           | Required | Job server ID (numeric) or server name (string).                                                                                           | -              | "456" or "source-server-01"                                   |
+| type                          | string           | Required | Job type. (Only `full`, `inc`, `smart` are allowed.)                                                                                       | -              | `full`                                                        |
+| partition                     | string[]         | Required | Job partitions. (If omitted, all partitions will be registered.)                                                                           | All partitions | ["/", "/test", "/test2"]                                      |
+| repository                    | object           | Required | Repository to be used for the job.                                                                                                         | -              | see below                                                     |
+| repository.id                 | string           | Required | Repository ID.                                                                                                                             | -              | "789"                                                         |
+| repository.type               | string           | Optional | Repository type.(Only `smb`, `nfs` are allowed.)                                                                                           | -              | `smb`                                                         |
+| repository.path               | string           | Optional | Repository path.                                                                                                                           | -              | `smb`: \\\\127.0.0.1\\ZConverter `nfs`: 127.0.0.1:/ZConverter |
+| jobName                       | string           | Optional | Job name.                                                                                                                                  | -              | "Daily-DB-Backup"                                             |
+| user                          | string           | Optional | User ID (numeric) or user email (string).                                                                                                  | -              | "101" or "admin@example.com"                                  |
+| schedule                      | object           | Optional | Schedule to be used for the job. For `full` or `inc` type, use only relevant key. For `smart` type, both `full` and `inc` must be present. | -              | see below                                                     |
+| schedule.type                 | string           | Optional | Schedule type. (`0-6` for `full` and `inc`, `7-11` for `smart`)                                                                            | -              | "5"                                                           |
+| schedule.full                 | string or object | Optional | Registered schedule ID (numeric) or new schedule configuration.                                                                            | -              | "202" or see below                                            |
+| schedule.full.year            | string           | Optional | Year configuration. Must be in `YYYY` format. (varies by schedule type.)                                                                   | -              | "2025"                                                        |
+| schedule.full.month           | string           | Optional | Month configuration. Values from `1 to 12` only. (varies by schedule type.)                                                                | -              | "1,3,5,7,9,11"                                                |
+| schedule.full.week            | string           | Optional | Week configuration. Values from `1 to 5` only. (varies by schedule type.)                                                                  | -              | "0,3,6"                                                       |
+| schedule.full.day             | string           | Optional | Day configuration. Values from `1 to 31` only. (varies by schedule type.)                                                                  | -              | "1,15" or "mon, sat, sun"                                     |
+| schedule.full.time            | string           | Optional | Time configuration. Must be in `HH:MM` format (00:00 - 24:00). (varies by schedule type.)                                                  | -              | "02:00"                                                       |
+| schedule.full.interval.hour   | string           | Optional | Hour interval. (varies by schedule type.)                                                                                                  | -              | "4"                                                           |
+| schedule.full.interval.minute | string           | Optional | Minute interval. (varies by schedule type.)                                                                                                | -              | "30"                                                          |
+| schedule.increment            | string or object | Optional | Same structure as schedule.full but for incremental backup.                                                                                | -              | Same structure as schedule.full                               |
+| description                   | string           | Optional | Additional description.                                                                                                                    | ""             | "Weekly system backup"                                        |
+| rotation                      | string           | Optional | Number of job repetitions. `(1-31)`                                                                                                        | "1"            | "7"                                                           |
+| compression                   | string           | Optional | Whether to use compression for the job.                                                                                                    | "use"          | "use" or "not use"                                            |
+| encryption                    | string           | Optional | Whether to use encryption for the job.                                                                                                     | "not use"      | "use" or "not use"                                            |
+| excludeDir                    | string           | Optional | Directories to exclude from the job, separated by `\|`.                                                                                    | ""             | "dir1\|dir2\|dir3"                                            |
+| excludePartition              | string           | Optional | Partitions to exclude from the job, separated by `\|`.                                                                                     | ""             | "/\|/test\|/test2"                                            |
+| mailEvent                     | string           | Optional | Email to receive job event notifications.                                                                                                  | user value     | "alerts@example.com"                                          |
+| networkLimit                  | string           | Optional | Job network speed limit.                                                                                                                   | Unlimited      | "100"                                                         |
+| autoStart                     | string           | Optional | Whether to start automatically.                                                                                                            | "not use"      | "use" or "not use"                                            |
+
+```json
+- ex)
+{
+  "center": 6 | "zdm-center",
+  "server": 28 | "source-server-v1",
+  "type": "full",
+  "partition": [] | ["/", "/test"],
+  "repository": {
+    "id": 16,
+    "type":"smb",
+    "path":"\\\\127.0.0.1\\ZConverter",
+  },
+  "schedule": {
+    "full": {
+      "year": "",
+      "month": "4",
+      "week": "1",
+      "day": "mon",
+      "time": "12:00",
+      "interval": {
+        "minute": "",
+        "hour": ""
+      }
+    },
+    "increment": {
+      "year": "",
+      "month": "4,6",
+      "week": "1,3",
+      "day": "mon,tue,wed,thu",
+      "time": "12:00",
+      "interval": {
+        "minute": "",
+        "hour": ""
+      }
+    }
+  }
+}
 ```
 
 ### Request Example
@@ -425,6 +487,9 @@ None
 ```txt
 - Retrieval all jobs
 [GET] /api/backups
+
+- Retrieval all jobs including additional information
+[GET] /api/backups?detail=true
 
 - Retrieval only Increment Backup jobs
 [GET] /api/backups?mode=inc
@@ -466,6 +531,12 @@ None
         "type": "SMB",
         "path": "\\\\192.168.1.93\\zconverter"
       },
+      "option": {
+        "rotation": "1",
+        "excludeDir": "-",
+        "compression": "Use",
+        "encryption": "Use"
+      },
       "timestamp": {
         "start": "2024-12-18T20:32:27.000Z",
         "end": "2024-12-19 05:34:51",
@@ -479,30 +550,34 @@ None
 
 ### Response Structure
 
-| Field                    | Type    | Description                                |
-| ------------------------ | ------- | ------------------------------------------ |
-| requestID                | string  | Request unique ID.                         |
-| message                  | string  | Processing result message.                 |
-| success                  | boolean | Request success status.                    |
-| data[].id                | string  | Job ID.                                    |
-| data[].jobName           | string  | Job Name.                                  |
-| data[].systemName        | string  | Source Server Name.                        |
-| data[].partition         | string  | Source Server Partition.                   |
-| data[].mode              | string  | Job Mode.                                  |
-| data[].result            | string  | Job Result.                                |
-| data[].schedule.basic    | string  | Schedule ID.                               |
-| data[].schedule.advanced | string  | Additional Schedule ID.                    |
-| data[].repository.id     | string  | Center Repository ID.                      |
-| data[].repository.type   | string  | Center Repository Type.                    |
-| data[].repository.path   | string  | Center Repository Path.                    |
-| data[].timestamp.start   | string  | Job Start Time.                            |
-| data[].timestamp.end     | string  | Job End Time.                              |
-| data[].timestamp.elapsed | string  | Job Elapsed Time.                          |
-| timestamp                | string  | Request processing time. (ISO 8601 format) |
+| Field                     | Type    | Description                                   |
+| ------------------------- | ------- | --------------------------------------------- |
+| requestID                 | string  | Request unique ID.                            |
+| message                   | string  | Processing result message.                    |
+| success                   | boolean | Request success status.                       |
+| data[].id                 | string  | Job ID.                                       |
+| data[].jobName            | string  | Job Name.                                     |
+| data[].systemName         | string  | Source Server Name.                           |
+| data[].partition          | string  | Source Server Partition.                      |
+| data[].mode               | string  | Job Mode.                                     |
+| data[].result             | string  | Job Result.                                   |
+| data[].schedule.basic     | string  | Schedule ID.                                  |
+| data[].schedule.advanced  | string  | Additional Schedule ID.                       |
+| data[].repository.id      | string  | Center Repository ID.                         |
+| data[].repository.type    | string  | Center Repository Type.                       |
+| data[].repository.path    | string  | Center Repository Path.                       |
+| data[].option.rotation    | string  | Number of Job iterations. (`detail=true`)     |
+| data[].option.excludeDir  | string  | Job exclusion directory. (`detail=true`)      |
+| data[].option.compression | string  | Whether to compress Job data. (`detail=true`) |
+| data[].option.encryption  | string  | Whether to encrypt Job data. (`detail=true`)  |
+| data[].timestamp.start    | string  | Job Start Time.                               |
+| data[].timestamp.end      | string  | Job End Time.                                 |
+| data[].timestamp.elapsed  | string  | Job Elapsed Time.                             |
+| timestamp                 | string  | Request processing time. (ISO 8601 format)    |
 
 <br>
 
-## Backup Job Retrieval - By Job ID
+## Backup Job Retrieval - All
 
 ### URL
 
@@ -511,23 +586,25 @@ None
 [GET] /api/backups
 
 - Curl
-curl --request POST
+curl --request GET
 --url http://localhost:3000/api/backups
 --header "Content-Type: application/json"
---header "authorization: toknes"
+--header "authorization: tokens"
 ```
 
 ### Description
 
+```txt
 Retrieval all Backup jobs registered to the ZDM Center.
+```
 
 ### Request Parameters
 
 #### Headers
 
-```txt
-None
-```
+| Parameter     | Type   | Required | Description           | Default | Example |
+| ------------- | ------ | -------- | --------------------- | ------- | ------- |
+| authorization | string | Required | Authentication token. |         | token   |
 
 #### Parameter
 
@@ -537,16 +614,119 @@ None
 
 #### Query
 
+| Parameter      | Type    | Required | Description                                                                      | Default | Example                                                       |
+| -------------- | ------- | -------- | -------------------------------------------------------------------------------- | ------- | ------------------------------------------------------------- |
+| mode           | string  | Optional | Backup job mode. (Only `full`, `inc`, `smart` allowed.)                          |         | `full`                                                        |
+| partition      | string  | Optional | Backup job target partition. (Currently only single partition query is possible) |         | partition="/test"                                             |
+| status         | string  | Optional | Backup job status.                                                               |         |                                                               |
+| result         | string  | Optional | Backup job result.                                                               |         |                                                               |
+| repositoryID   | string  | Optional | ZDM Repository ID used for Backup job.                                           |         |                                                               |
+| repositoryType | string  | Optional | ZDM Repository Type used for Backup job. (Only `smb`, `nfs` allowed.)            |         | `smb`                                                         |
+| repositoryPath | string  | Optional | ZDM Repository Path used for Backup job.                                         |         | `smb`: \\\\127.0.0.1\\ZConverter `nfs`: 127.0.0.1:/ZConverter |
+| detail         | boolean | Optional | Show Backup job detailed information.                                            | false   |                                                               |
+
+#### Body
+
 ```txt
 None
 ```
 
-#### Body
+### Request Example
 
-| Parameter | Type   | Required | Description               |
-| --------- | ------ | -------- | ------------------------- |
-| email     | string | Required | ZDM Portal Login Email    |
-| password  | string | Required | ZDM Portal Login Password |
+```txt
+- Retrieval all jobs
+[GET] /api/backups
+
+- Retrieval all jobs including additional information
+[GET] /api/backups?detail=true
+
+- Retrieval only Increment Backup jobs
+[GET] /api/backups?mode=inc
+
+- Retrieval only jobs for /test partition
+[GET] /api/backups?partition=/test
+
+- Retrieval jobs using specific repository - by ID
+[GET] /api/backups?repositoryID=12
+
+- Retrieval jobs using specific repository - by path
+[GET] /api/backups?repositoryPath=\\\\127.0.0.1\\ZConverter
+
+- Retrieval jobs by repository type
+[GET] /api/backups?repositoryType=nfs
+```
+
+### Response Example (Success)
+
+```json
+{
+  "requestID": "f122e6ce-652d-412e-a099-cb2212f340e6",
+  "message": "Backup information list",
+  "success": true,
+  "data": [
+    {
+      "id": "22",
+      "jobName": "rim-centos7-bios_ROOT",
+      "systemName": "rim-centos7-bios (192.168.0.134)",
+      "partition": "/",
+      "mode": "Full Backup",
+      "result": "COMPLETE",
+      "schedule": {
+        "basic": "-",
+        "advanced": "-"
+      },
+      "repository": {
+        "id": "16",
+        "type": "SMB",
+        "path": "\\\\192.168.1.93\\zconverter"
+      },
+      "option": {
+        "rotation": "1",
+        "excludeDir": "-",
+        "compression": "Use",
+        "encryption": "Use"
+      },
+      "timestamp": {
+        "start": "2024-12-18T20:32:27.000Z",
+        "end": "2024-12-19 05:34:51",
+        "elapsed": "0 day, 00:02:24"
+      },
+      "lastUpdate": "2024-12-18T20:34:51.000Z"
+    }
+  ]
+}
+```
+
+### Response Structure
+
+| Field                     | Type    | Description                                   |
+| ------------------------- | ------- | --------------------------------------------- |
+| requestID                 | string  | Request unique ID.                            |
+| message                   | string  | Processing result message.                    |
+| success                   | boolean | Request success status.                       |
+| data[].id                 | string  | Job ID.                                       |
+| data[].jobName            | string  | Job Name.                                     |
+| data[].systemName         | string  | Source Server Name.                           |
+| data[].partition          | string  | Source Server Partition.                      |
+| data[].mode               | string  | Job Mode.                                     |
+| data[].result             | string  | Job Result.                                   |
+| data[].schedule.basic     | string  | Schedule ID.                                  |
+| data[].schedule.advanced  | string  | Additional Schedule ID.                       |
+| data[].repository.id      | string  | Center Repository ID.                         |
+| data[].repository.type    | string  | Center Repository Type.                       |
+| data[].repository.path    | string  | Center Repository Path.                       |
+| data[].option.rotation    | string  | Number of Job iterations. (`detail=true`)     |
+| data[].option.excludeDir  | string  | Job exclusion directory. (`detail=true`)      |
+| data[].option.compression | string  | Whether to compress Job data. (`detail=true`) |
+| data[].option.encryption  | string  | Whether to encrypt Job data. (`detail=true`)  |
+| data[].timestamp.start    | string  | Job Start Time.                               |
+| data[].timestamp.end      | string  | Job End Time.                                 |
+| data[].timestamp.elapsed  | string  | Job Elapsed Time.                             |
+| timestamp                 | string  | Request processing time. (ISO 8601 format)    |
+
+<br>
+
+## Backup Job Retrieval - By Job ID
 
 <br>
 
