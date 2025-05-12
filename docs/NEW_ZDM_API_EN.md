@@ -40,6 +40,12 @@
 
 ## Token Issuance
 
+### Description
+
+```txt
+Obtain a token for API usage.
+```
+
 ### URL
 
 ```txt
@@ -51,12 +57,6 @@ curl --request POST
 --url http://localhost:3000/api/token/issue
 --header "Content-Type: application/json"
 --data "{\"email\":\"test@zconverter.com\",\"password\":\"12345\"}"
-```
-
-### Description
-
-```txt
-Obtain a token for API usage.
 ```
 
 ### Request Parameters
@@ -167,6 +167,12 @@ The issued JWT token includes the following information:
 
 ## Server List Retrieval
 
+### Description
+
+```txt
+Retrieval the list of Servers registered to the ZDM Center.
+```
+
 ### URL
 
 ```txt
@@ -178,12 +184,6 @@ curl --request GET
 --url http://localhost:3000/api/servers
 --header "Content-Type: application/json"
 --header "authorization: tokens"
-```
-
-### Description
-
-```txt
-Retrieval the list of Servers registered to the ZDM Center.
 ```
 
 ### Request Parameters
@@ -366,6 +366,12 @@ None
 
 ## Backup Registration
 
+### Description
+
+```txt
+Registers a new Backup Job with the ZDM Center.
+```
+
 ### URL
 
 ```txt
@@ -378,12 +384,6 @@ curl --request POST
 --header "Content-Type: application/json"
 --header "authorization: tokens"
 --data "{/* JSON Data */}"
-```
-
-### Description
-
-```txt
-Registers a new Backup Job with the ZDM Center.
 ```
 
 ### Request Parameters
@@ -727,6 +727,151 @@ None
 <br>
 
 ## Backup Job Retrieval - By Job ID
+
+### Description
+
+```txt
+Retrieval all Backup jobs registered to the ZDM Center.
+```
+
+### URL
+
+```txt
+- http
+[GET] /api/backups/job-id/:jobId
+
+- Curl
+curl --request GET
+--url http://localhost:3000/api/backups/job-id/{jobID}
+--header "Content-Type: application/json"
+--header "authorization: tokens"
+```
+
+### Request Parameters
+
+#### Headers
+
+| Parameter     | Type   | Required | Description           | Default | Example |
+| ------------- | ------ | -------- | --------------------- | ------- | ------- |
+| authorization | string | Required | Authentication token. |         | token   |
+
+#### Parameter
+
+| Parameter     | Type   | Required | Description           | Default | Example |
+| ------------- | ------ | -------- | --------------------- | ------- | ------- |
+| jobID | string | Required | The unique ID of the backup job to be retrieved. |         | 12   |
+
+#### Query
+
+| Parameter      | Type    | Required | Description                                                                      | Default | Example                                                       |
+| -------------- | ------- | -------- | -------------------------------------------------------------------------------- | ------- | ------------------------------------------------------------- |
+| mode           | string  | Optional | Backup job mode. (Only `full`, `inc`, `smart` allowed.)                          |         | `full`                                                        |
+| partition      | string  | Optional | Backup job target partition. (Currently only single partition query is possible) |         | partition="/test"                                             |
+| status         | string  | Optional | Backup job status.                                                               |         |                                                               |
+| result         | string  | Optional | Backup job result.                                                               |         |                                                               |
+| repositoryID   | string  | Optional | ZDM Repository ID used for Backup job.                                           |         |                                                               |
+| repositoryType | string  | Optional | ZDM Repository Type used for Backup job. (Only `smb`, `nfs` allowed.)            |         | `smb`                                                         |
+| repositoryPath | string  | Optional | ZDM Repository Path used for Backup job.                                         |         | `smb`: \\\\127.0.0.1\\ZConverter `nfs`: 127.0.0.1:/ZConverter |
+| detail         | boolean | Optional | Show Backup job detailed information.                                            | false   |                                                               |
+
+#### Body
+
+```txt
+None
+```
+
+### Request Example
+
+```txt
+- Retrieval all jobs
+[GET] /api/backups
+
+- Retrieval all jobs including additional information
+[GET] /api/backups?detail=true
+
+- Retrieval only Increment Backup jobs
+[GET] /api/backups?mode=inc
+
+- Retrieval only jobs for /test partition
+[GET] /api/backups?partition=/test
+
+- Retrieval jobs using specific repository - by ID
+[GET] /api/backups?repositoryID=12
+
+- Retrieval jobs using specific repository - by path
+[GET] /api/backups?repositoryPath=\\\\127.0.0.1\\ZConverter
+
+- Retrieval jobs by repository type
+[GET] /api/backups?repositoryType=nfs
+```
+
+### Response Example (Success)
+
+```json
+{
+  "requestID": "f122e6ce-652d-412e-a099-cb2212f340e6",
+  "message": "Backup information list",
+  "success": true,
+  "data": [
+    {
+      "id": "22",
+      "jobName": "rim-centos7-bios_ROOT",
+      "systemName": "rim-centos7-bios (192.168.0.134)",
+      "partition": "/",
+      "mode": "Full Backup",
+      "result": "COMPLETE",
+      "schedule": {
+        "basic": "-",
+        "advanced": "-"
+      },
+      "repository": {
+        "id": "16",
+        "type": "SMB",
+        "path": "\\\\192.168.1.93\\zconverter"
+      },
+      "option": {
+        "rotation": "1",
+        "excludeDir": "-",
+        "compression": "Use",
+        "encryption": "Use"
+      },
+      "timestamp": {
+        "start": "2024-12-18T20:32:27.000Z",
+        "end": "2024-12-19 05:34:51",
+        "elapsed": "0 day, 00:02:24"
+      },
+      "lastUpdate": "2024-12-18T20:34:51.000Z"
+    }
+  ]
+}
+```
+
+### Response Structure
+
+| Field                     | Type    | Description                                   |
+| ------------------------- | ------- | --------------------------------------------- |
+| requestID                 | string  | Request unique ID.                            |
+| message                   | string  | Processing result message.                    |
+| success                   | boolean | Request success status.                       |
+| data[].id                 | string  | Job ID.                                       |
+| data[].jobName            | string  | Job Name.                                     |
+| data[].systemName         | string  | Source Server Name.                           |
+| data[].partition          | string  | Source Server Partition.                      |
+| data[].mode               | string  | Job Mode.                                     |
+| data[].result             | string  | Job Result.                                   |
+| data[].schedule.basic     | string  | Schedule ID.                                  |
+| data[].schedule.advanced  | string  | Additional Schedule ID.                       |
+| data[].repository.id      | string  | Center Repository ID.                         |
+| data[].repository.type    | string  | Center Repository Type.                       |
+| data[].repository.path    | string  | Center Repository Path.                       |
+| data[].option.rotation    | string  | Number of Job iterations. (`detail=true`)     |
+| data[].option.excludeDir  | string  | Job exclusion directory. (`detail=true`)      |
+| data[].option.compression | string  | Whether to compress Job data. (`detail=true`) |
+| data[].option.encryption  | string  | Whether to encrypt Job data. (`detail=true`)  |
+| data[].timestamp.start    | string  | Job Start Time.                               |
+| data[].timestamp.end      | string  | Job End Time.                                 |
+| data[].timestamp.elapsed  | string  | Job Elapsed Time.                             |
+| timestamp                 | string  | Request processing time. (ISO 8601 format)    |
 
 <br>
 
