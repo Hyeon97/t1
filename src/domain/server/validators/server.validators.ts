@@ -1,19 +1,13 @@
 import { validationMiddleware } from "../../../middlewares/validation/validationMiddleware"
-import { ServerQueryFilterDTO } from "../dto/query/server-query-filter.dto"
-import { SpecificServerFilterDTO } from "../dto/query/specific-server-query-filter.dto"
-import { SpecificServerParamDTO } from "../dto/query/specific-server-param-filter.dto"
+import { ServerGetByIdDTO, ServerGetByNameDTO } from "../dto/param/server-get-param.dto"
+import { ServerGetQueryDTO } from "../dto/query/server-query-filter.dto"
 
 /**
- * 특정 server 조회 요청 parameter 검증
+ * Server 정보 조회
  */
-export const validateSpecificServerParams = validationMiddleware.validateParams(SpecificServerParamDTO)
-
-/**
- * 특정 server 조회 요청 queryString 검증
- */
-export const validateSpecificServerQuery = validationMiddleware.validateQuery(SpecificServerFilterDTO)
-
-/**
- * 전체 server 조회 요청 queryString 검증
- */
-export const validateServerListQuery = validationMiddleware.validateQuery(ServerQueryFilterDTO)
+//  server 정보 조회 공통 queryString 검증
+export const validateServerGetQuery = validationMiddleware.validateQuery(ServerGetQueryDTO)
+//  server Name으로 조회 Parameter 검증
+export const validateServerGetByServerNameParams = validationMiddleware.validateParams(ServerGetByNameDTO)
+//  server ID로 조회 Parameter 검증
+export const validateServerGetByServerIdParams = validationMiddleware.validateParams(ServerGetByIdDTO)
