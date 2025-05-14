@@ -27,7 +27,7 @@
   - [License Deletion](#license-deletion)
   - [License Assignment](#license-assignment)
 - [Backup](#backup)
-  - [Backup Registration](#backup-registration)
+  - [Backup Job Registration](#backup-job-registration)
   - [Backup Job Retrieval - All](#backup-job-retrieval---all)
   - [Backup Job Retrieval - By Job ID](#backup-job-retrieval---by-job-id)
   - [Backup Job Retrieval - By Job Name](#backup-job-retrieval---by-job-name)
@@ -46,7 +46,7 @@
   - [Schedule Retrieval](#schedule-retrieval)
   - [Schedule Deletion](#schedule-deletion)
 - [Process Flow](#process-flow)
-  - [Backup Job Registration](#backup-job-registration)
+  - [Backup Job Registration Flow](#backup-job-registration-flow)
 
 ## Basic Information
 
@@ -1488,7 +1488,7 @@ None
 
 # Backup
 
-## Backup Registration
+## Backup Job Registration
 
 ### Description
 
@@ -1549,14 +1549,14 @@ None
 | schedule.full                 | string or object | Optional | Registered schedule ID (numeric) or new schedule configuration.                                                                            |                | "202" or see below                                            |
 | schedule.full.year            | string           | Optional | Year configuration. Must be in `YYYY` format. (varies by schedule type.)                                                                   |                | "2025"                                                        |
 | schedule.full.month           | string           | Optional | Month configuration. Values from `1 to 12` only. (varies by schedule type.)                                                                |                | "1,3,5,7,9,11"                                                |
-| schedule.full.week            | string           | Optional | Week configuration. Values from `1 to 5` only. (varies by schedule type.)                                                                  |                | "0,3,6"                                                       |
+| schedule.full.week            | string           | Optional | Week configuration. Values from `1 to 5` only. (varies by schedule type.)                                                                  |                | "1,3,4"                                                       |
 | schedule.full.day             | string           | Optional | Day configuration. Values from `1 to 31` only. (varies by schedule type.)                                                                  |                | "1,15" or "mon, sat, sun"                                     |
 | schedule.full.time            | string           | Optional | Time configuration. Must be in `HH:MM` format (00:00 - 24:00). (varies by schedule type.)                                                  |                | "02:00"                                                       |
 | schedule.full.interval.hour   | string           | Optional | Hour interval. (varies by schedule type.)                                                                                                  |                | "4"                                                           |
 | schedule.full.interval.minute | string           | Optional | Minute interval. (varies by schedule type.)                                                                                                |                | "30"                                                          |
 | schedule.increment            | string or object | Optional | Same structure as schedule.full but for incremental backup.                                                                                |                | Same structure as schedule.full                               |
 | description                   | string           | Optional | Additional description.                                                                                                                    | ""             | "Weekly system backup"                                        |
-| rotation                      | string           | Optional | Number of job repetitions. `(1-31)`                                                                                                        | "1"            | "7"                                                           |
+| rotation                      | string           | Optional | Number of job repetitions. (`1 to 31`)                                                                                                        | "1"            | "7"                                                           |
 | compression                   | string           | Optional | Whether to use compression for the job.                                                                                                    | "use"          | "use" or "not use"                                            |
 | encryption                    | string           | Optional | Whether to use encryption for the job.                                                                                                     | "not use"      | "use" or "not use"                                            |
 | excludeDir                    | string           | Optional | Directories to exclude from the job, separated by `\|`.                                                                                    | ""             | "dir1\|dir2\|dir3"                                            |
@@ -1566,8 +1566,66 @@ None
 | autoStart                     | string           | Optional | Whether to start automatically.                                                                                                            | "not use"      | "use" or "not use"                                            |
 
 ### Request Example
+<details>
+<summary>Click to expand/collapse</summary>
 
 ```json
+# Backup Job Registration Example
+- Register a job for only the "/" partition, full backup.
+- Register job using Center ID and Server ID.
+- Specify Repo ID, type and path are automatically registered.
+- Job name is automatically assigned.
+- No schedule used, no separate description.
+- Use data compression and encryption.
+- Rotation 7 times.
+- Exclude directories: tmp, cache, logs.
+{
+  "center": "6",
+  "server": "28",
+  "type": "full",
+  "partition": ["/"],
+  "repository": {
+    "id": "16"
+  },
+  "rotation": "7",
+  "compression": "use",
+  "encryption": "use",
+  "excludeDir": "tmp|cache|logs"
+}
+
+# Backup Job Registration Example
+- Register job for all partitions, increment backup
+- Register job using Center name and Server name
+- Specify Repo ID, user-defined type and path
+- Job name is automatically assigned
+- Use increment schedule, no separate description
+{
+  "center": "rim-zdm-rocky8",
+  "server": "rim-ubuntu24-uefi (192.168.1.12)",
+  "type": "inc",
+  "partition":[],
+  "repository": {
+    "id": "16",
+    "type":"smb",
+   "path":"\\\\192.168.1.93\\ZConverter"
+  },
+  "jobName": "Weekly-System-Backup",
+  "schedule": {
+    "type": "5",
+    "increment": {
+      "year": "",
+      "month": "4",
+      "week": "1",
+      "day": "mon",
+      "time": "12:00",
+      "interval": {
+        "minute": "",
+        "hour": ""
+      }
+    }
+  }
+}
+
 {
   "center": "6",
   "server": "28",
@@ -1580,8 +1638,19 @@ None
   },
   "jobName": "Weekly-System-Backup",
   "schedule": {
-    "type": "5",
+    "type": "10",
     "full": {
+      "year": "",
+      "month": "4",
+      "week": "1",
+      "day": "mon",
+      "time": "12:00",
+      "interval": {
+        "minute": "",
+        "hour": ""
+      }
+    },
+    "increment": {
       "year": "",
       "month": "4",
       "week": "1",
@@ -1601,66 +1670,60 @@ None
   "autoStart": "use"
 }
 ```
+</details>
 
 ### Response Example (Success)
 
 ```json
 {
-  "requestID": "f122e6ce-652d-412e-a099-cb2212f340e6",
-  "message": "Backup job has been successfully registered",
+  "requestID": "15a698f9-af56-45b1-8fc6-187accdc3b98",
+  "message": "Backup job data regist result",
   "success": true,
-  "data": {
-    "id": "22",
-    "jobName": "Weekly-System-Backup",
-    "systemName": "rim-ubuntu24-uefi (192.168.1.12)",
-    "centerId": "6",
-    "partition": ["/", "/test"],
-    "mode": "Full Backup",
-    "schedule": {
-      "basic": "5",
-      "advanced": "-"
+  "data": [
+    {
+      "state": "success",
+      "job_name": "Weekly-System-Backup_ROOT_1",
+      "partition": "/",
+      "job_type": "Increment Backup",
+      "auto_start": "not use",
+      "use_schedule": "Increment Schedule"
     },
-    "repository": {
-      "id": "16",
-      "type": "SMB",
-      "path": "\\\\127.0.0.1\\ZConverter"
+    {
+      "state": "success",
+      "job_name": "Weekly-System-Backup_boot_efi_1",
+      "partition": "/boot/efi",
+      "job_type": "Increment Backup",
+      "auto_start": "not use",
+      "use_schedule": "Increment Schedule"
     },
-    "option": {
-      "rotation": "7",
-      "excludeDir": "tmp|cache|logs",
-      "compression": "Use",
-      "encryption": "Use"
-    },
-    "createdAt": "2025-05-12T05:14:27.000Z"
-  },
-  "timestamp": "2025-05-12T05:14:27.000Z"
+    {
+      "state": "success",
+      "job_name": "Weekly-System-Backup_boot_1",
+      "partition": "/boot",
+      "job_type": "Increment Backup",
+      "auto_start": "not use",
+      "use_schedule": "Increment Schedule"
+    }
+  ],
+  "timestamp": "2025-05-13T07:26:59.802Z"
 }
 ```
 
 ### Response Structure
 
-| Field                     | Type    | Description                                   |
-| ------------------------- | ------- | --------------------------------------------- |
-| requestID                 | string  | Request unique ID.                            |
-| message                   | string  | Processing result message.                    |
-| success                   | boolean | Request success status.                       |
-| data.id                   | string  | Job ID.                                       |
-| data.jobName              | string  | Job Name.                                     |
-| data.systemName           | string  | Source Server Name.                           |
-| data.centerId             | string  | Center ID.                                    |
-| data.partition            | array   | Source Server Partitions.                     |
-| data.mode                 | string  | Job Mode.                                     |
-| data.schedule.basic       | string  | Schedule Type.                                |
-| data.schedule.advanced    | string  | Additional Schedule Type.                     |
-| data.repository.id        | string  | Center Repository ID.                         |
-| data.repository.type      | string  | Center Repository Type.                       |
-| data.repository.path      | string  | Center Repository Path.                       |
-| data.option.rotation      | string  | Number of Job iterations.                     |
-| data.option.excludeDir    | string  | Job exclusion directory.                      |
-| data.option.compression   | string  | Whether to compress Job data.                 |
-| data.option.encryption    | string  | Whether to encrypt Job data.                  |
-| data.createdAt            | string  | Job creation time.                            |
-| timestamp                 | string  | Request processing time. (ISO 8601 format)    |
+| Field            | Type    | Description                                                  |
+| ---------------- | ------- | ------------------------------------------------------------ |
+| requestID        | string  | Request unique ID.                                           |
+| message          | string  | Processing result message.                                   |
+| success          | boolean | Request success status.                                      |
+| data             | array   | Array of registered job information.                         |
+| data[].state     | string  | Registration result status for each job.                     |
+| data[].job_name  | string  | Name of the registered job.                                  |
+| data[].partition | string  | Target partition for the job.                                |
+| data[].job_type  | string  | Type of backup job. (Full Backup, Increment Backup, etc.)   |
+| data[].auto_start| string  | Auto start setting. Only `use` or `not use` values.         |
+| data[].use_schedule | string | Schedule setting. `-` if not used, otherwise `Full Schedule`, `Increment Schedule`, or `Smart Schedule`. |
+| timestamp        | string  | Request processing time. (ISO 8601 format)                   |
 
 ## Backup Job Retrieval - All
 
@@ -1718,6 +1781,9 @@ None
 
 ### Request Example
 
+<details>
+<summary>Click to expand/collapse examples</summary>
+
 ```txt
 # Retrieve all jobs
 [GET] /api/backups
@@ -1749,8 +1815,12 @@ None
 # Combined filtering
 [GET] /api/backups?mode=full&status=completed&result=success&detail=true
 ```
+</details>
 
 ### Response Example (Success)
+
+<details>
+<summary>Click to expand/collapse examples</summary>
 
 ```json
 {
@@ -1822,8 +1892,12 @@ None
   "timestamp": "2025-05-12T05:45:30.123Z"
 }
 ```
+</details>
 
 ### Response Structure
+
+<details>
+<summary>Click to expand/collapse examples</summary>
 
 | Field                     | Type    | Description                                   |
 | ------------------------- | ------- | --------------------------------------------- |
@@ -1835,8 +1909,8 @@ None
 | data[].systemName         | string  | Source Server Name.                           |
 | data[].partition          | string  | Source Server Partition(s).                   |
 | data[].mode               | string  | Job Mode.                                     |
-| data[].status             | string  | Job Status (running, completed, failed).      |
-| data[].result             | string  | Job Result (success, failure, partial).       |
+| data[].status             | string  | Job Status. (running, completed, failed)      |
+| data[].result             | string  | Job Result. (success, failure, partial)       |
 | data[].schedule.basic     | string  | Schedule Type.                                |
 | data[].schedule.advanced  | string  | Additional Schedule Type.                     |
 | data[].repository.id      | string  | Center Repository ID.                         |
@@ -1851,6 +1925,7 @@ None
 | data[].timestamp.elapsed  | string  | Job Elapsed Time.                             |
 | data[].lastUpdate         | string  | Last time job information was updated.        |
 | timestamp                 | string  | Request processing time. (ISO 8601 format)    |
+</details>
 
 ## Backup Job Retrieval - By Job ID
 
@@ -1888,11 +1963,7 @@ curl --request GET \
 | jobID     | string | Required | The unique ID of the backup job to be retrieved.|        | 22      |
 
 #### Query
-
-| Parameter | Type    | Required | Description                        | Default | Example |
-| --------- | ------- | -------- | ---------------------------------- | ------- | ------- |
-| detail    | boolean | Optional | Show Backup job detailed information. | false | `true`  |
-| history   | boolean | Optional | Include job execution history.      | false   | `true`  |
+> This endpoint uses the same query parameters as [Backup Job Retrieval - All](#backup-job-retrieval---all)
 
 #### Body
 
@@ -1902,6 +1973,8 @@ None
 
 ### Request Example
 
+> This example can be used in the same way by only changing the endpoint from `/api/backups/` to `/api/backups/job-id/{jobID}` format from [Backup Job Retrieval - All](#backup-job-retrieval---all)
+
 ```txt
 # Retrieve job with ID 22
 [GET] /api/backups/job-id/22
@@ -1909,119 +1982,15 @@ None
 # Retrieve job with ID 22 with detailed information
 [GET] /api/backups/job-id/22?detail=true
 
-# Retrieve job with ID 22 with detailed information and execution history
-[GET] /api/backups/job-id/22?detail=true&history=true
 ```
 
 ### Response Example (Success)
 
-```json
-{
-  "requestID": "a7b6c5d4-e3f2-g1h0-i9j8-k7l6m5n4o3p2",
-  "message": "Backup job information",
-  "success": true,
-  "data": {
-    "id": "22",
-    "jobName": "rim-centos7-bios_ROOT",
-    "systemName": "rim-centos7-bios (192.168.0.134)",
-    "partition": "/",
-    "mode": "Full Backup",
-    "status": "completed",
-    "result": "success",
-    "schedule": {
-      "basic": "-",
-      "advanced": "-"
-    },
-    "repository": {
-      "id": "16",
-      "type": "SMB",
-      "path": "\\\\192.168.1.93\\zconverter"
-    },
-    "option": {
-      "rotation": "1",
-      "excludeDir": "-",
-      "compression": "Use",
-      "encryption": "Use",
-      "networkLimit": "Unlimited",
-      "autoStart": "not use"
-    },
-    "timestamp": {
-      "start": "2025-05-08T20:32:27.000Z",
-      "end": "2025-05-08T20:34:51.000Z",
-      "elapsed": "0 day, 00:02:24"
-    },
-    "history": [
-      {
-        "id": "158",
-        "date": "2025-05-08T20:32:27.000Z",
-        "result": "success",
-        "elapsed": "00:02:24",
-        "details": {
-          "dataSize": "4.28 GB",
-          "backupSize": "2.15 GB",
-          "compressionRatio": "50.2%",
-          "backupSpeed": "15.3 MB/s"
-        }
-      },
-      {
-        "id": "152",
-        "date": "2025-05-01T20:30:12.000Z",
-        "result": "success",
-        "elapsed": "00:02:32",
-        "details": {
-          "dataSize": "4.26 GB",
-          "backupSize": "2.14 GB",
-          "compressionRatio": "50.1%",
-          "backupSpeed": "14.8 MB/s"
-        }
-      }
-    ],
-    "lastUpdate": "2025-05-08T20:34:51.000Z"
-  },
-  "timestamp": "2025-05-12T06:02:45.678Z"
-}
-```
+> This structure is identical to the **Response Example (Success)** of [Backup Job Retrieval - All](#backup-job-retrieval---all)
 
-### Response Structure
+### Response Structure (Success)
 
-| Field                         | Type    | Description                                   |
-| ----------------------------- | ------- | --------------------------------------------- |
-| requestID                     | string  | Request unique ID.                            |
-| message                       | string  | Processing result message.                    |
-| success                       | boolean | Request success status.                       |
-| data.id                       | string  | Job ID.                                       |
-| data.jobName                  | string  | Job Name.                                     |
-| data.systemName               | string  | Source Server Name.                           |
-| data.partition                | string  | Source Server Partition(s).                   |
-| data.mode                     | string  | Job Mode.                                     |
-| data.status                   | string  | Job Status.                                   |
-| data.result                   | string  | Job Result.                                   |
-| data.schedule.basic           | string  | Schedule Type.                                |
-| data.schedule.advanced        | string  | Additional Schedule Type.                     |
-| data.repository.id            | string  | Center Repository ID.                         |
-| data.repository.type          | string  | Center Repository Type.                       |
-| data.repository.path          | string  | Center Repository Path.                       |
-| data.option.rotation          | string  | Number of Job iterations. (`detail=true`)     |
-| data.option.excludeDir        | string  | Job exclusion directory. (`detail=true`)      |
-| data.option.compression       | string  | Whether to compress Job data. (`detail=true`) |
-| data.option.encryption        | string  | Whether to encrypt Job data. (`detail=true`)  |
-| data.option.networkLimit      | string  | Network speed limit. (`detail=true`)          |
-| data.option.autoStart         | string  | Auto start setting. (`detail=true`)           |
-| data.timestamp.start          | string  | Job Start Time.                               |
-| data.timestamp.end            | string  | Job End Time.                                 |
-| data.timestamp.elapsed        | string  | Job Elapsed Time.                             |
-| data.history                  | array   | Job execution history. (`history=true`)       |
-| data.history[].id             | string  | History entry ID.                             |
-| data.history[].date           | string  | Execution date.                               |
-| data.history[].result         | string  | Execution result.                             |
-| data.history[].elapsed        | string  | Execution time.                               |
-| data.history[].details        | object  | Execution details.                            |
-| data.history[].details.dataSize | string | Size of source data.                         |
-| data.history[].details.backupSize | string | Size of backup data.                       |
-| data.history[].details.compressionRatio | string | Compression ratio.                   |
-| data.history[].details.backupSpeed | string | Backup speed.                             |
-| data.lastUpdate               | string  | Last time job information was updated.        |
-| timestamp                     | string  | Request processing time. (ISO 8601 format)    |
+> This structure is identical to the **Response Structure (Success)** of [Backup Job Retrieval - All](#backup-job-retrieval---all)
 
 ## Backup Job Retrieval - By Job Name
 
@@ -2060,10 +2029,7 @@ curl --request GET \
 
 #### Query
 
-| Parameter | Type    | Required | Description                           | Default | Example |
-| --------- | ------- | -------- | ------------------------------------- | ------- | ------- |
-| detail    | boolean | Optional | Show Backup job detailed information. | false   | `true`  |
-| history   | boolean | Optional | Include job execution history.        | false   | `true`  |
+> This endpoint uses the same query parameters as [Backup Job Retrieval - All](#backup-job-retrieval---all)
 
 #### Body
 
@@ -2072,6 +2038,8 @@ None
 ```
 
 ### Request Example
+
+> This example can be used in the same way by only changing the endpoint from `/api/backups/` to `/api/backups/job-name/{jobName}` format from [Backup Job Retrieval - All](#backup-job-retrieval---all)
 
 ```txt
 # Retrieve job with name "Weekly-System-Backup"
@@ -2083,50 +2051,11 @@ None
 
 ### Response Example (Success)
 
-```json
-{
-  "requestID": "q9w8e7r6-t5y4-u3i2-o1p0-a9s8d7f6g5h4",
-  "message": "Backup job information",
-  "success": true,
-  "data": {
-    "id": "23",
-    "jobName": "Weekly-System-Backup",
-    "systemName": "rim-ubuntu24-uefi (192.168.1.12)",
-    "partition": "/,/test",
-    "mode": "Full Backup",
-    "status": "completed",
-    "result": "success",
-    "schedule": {
-      "basic": "5",
-      "advanced": "-"
-    },
-    "repository": {
-      "id": "16",
-      "type": "SMB",
-      "path": "\\\\127.0.0.1\\ZConverter"
-    },
-    "option": {
-      "rotation": "7",
-      "excludeDir": "tmp|cache|logs",
-      "compression": "Use",
-      "encryption": "Use",
-      "networkLimit": "Unlimited",
-      "autoStart": "not use"
-    },
-    "timestamp": {
-      "start": "2025-05-12T05:30:00.000Z",
-      "end": "2025-05-12T05:52:15.000Z",
-      "elapsed": "0 day, 00:22:15"
-    },
-    "lastUpdate": "2025-05-12T05:52:15.000Z"
-  },
-  "timestamp": "2025-05-12T06:12:30.456Z"
-}
-```
+> This structure is identical to the **Response Example (Success)** of [Backup Job Retrieval - All](#backup-job-retrieval---all)
 
-### Response Structure
+### Response Structure (Success)
 
-The response structure is identical to the "Backup Job Retrieval - By Job ID" endpoint.
+> This structure is identical to the **Response Structure (Success)** of [Backup Job Retrieval - All](#backup-job-retrieval---all)
 
 ## Backup Job Retrieval - By Source Server Name
 
@@ -2165,12 +2094,11 @@ curl --request GET \
 
 #### Query
 
+> This endpoint uses the same query parameters as [Backup Job Retrieval - All](#backup-job-retrieval---all)
+
 | Parameter | Type    | Required | Description                           | Default | Example |
 | --------- | ------- | -------- | ------------------------------------- | ------- | ------- |
-| detail    | boolean | Optional | Show Backup job detailed information. | false   | `true`  |
-| status    | string  | Optional | Filter by job status.                 |         | `running` |
-| result    | string  | Optional | Filter by job result.                 |         | `success` |
-| mode      | string  | Optional | Filter by job mode.                   |         | `full`    |
+| serverType | string  | Optional | When retrieving by server name, specify whether to search from source or target. Only `source`, `target` allowed. Default is to search from all. | All | `source` |
 
 #### Body
 
@@ -2179,6 +2107,8 @@ None
 ```
 
 ### Request Example
+
+> This example can be used in the same way by only changing the endpoint from `/api/backups/` to `/api/backups/server-name/{serverName}` format from [Backup Job Retrieval - All](#backup-job-retrieval---all)
 
 ```txt
 # Retrieve all jobs for server "rim-ubuntu24-uefi"
@@ -2193,80 +2123,11 @@ None
 
 ### Response Example (Success)
 
-```json
-{
-  "requestID": "q9w8e7r6-t5y4-u3i2-o1p0-a9s8d7f6g5h4",
-  "message": "Backup job information for server",
-  "success": true,
-  "data": [
-    {
-      "id": "23",
-      "jobName": "Weekly-System-Backup",
-      "systemName": "rim-ubuntu24-uefi (192.168.1.12)",
-      "partition": "/,/test",
-      "mode": "Full Backup",
-      "status": "completed",
-      "result": "success",
-      "schedule": {
-        "basic": "5",
-        "advanced": "-"
-      },
-      "repository": {
-        "id": "16",
-        "type": "SMB",
-        "path": "\\\\127.0.0.1\\ZConverter"
-      },
-      "option": {
-        "rotation": "7",
-        "excludeDir": "tmp|cache|logs",
-        "compression": "Use",
-        "encryption": "Use"
-      },
-      "timestamp": {
-        "start": "2025-05-12T05:30:00.000Z",
-        "end": "2025-05-12T05:52:15.000Z",
-        "elapsed": "0 day, 00:22:15"
-      },
-      "lastUpdate": "2025-05-12T05:52:15.000Z"
-    },
-    {
-      "id": "24",
-      "jobName": "Daily-Data-Backup",
-      "systemName": "rim-ubuntu24-uefi (192.168.1.12)",
-      "partition": "/data",
-      "mode": "Incremental Backup",
-      "status": "scheduled",
-      "result": "-",
-      "schedule": {
-        "basic": "2",
-        "advanced": "-"
-      },
-      "repository": {
-        "id": "16",
-        "type": "SMB",
-        "path": "\\\\127.0.0.1\\ZConverter"
-      },
-      "option": {
-        "rotation": "14",
-        "excludeDir": "tmp",
-        "compression": "Use",
-        "encryption": "Use"
-      },
-      "timestamp": {
-        "start": "-",
-        "end": "-",
-        "elapsed": "-"
-      },
-      "lastUpdate": "2025-05-12T06:00:00.000Z"
-    }
-  ],
-  "timestamp": "2025-05-12T06:15:32.456Z"
-}
-```
+> This structure is identical to the **Response Example (Success)** of [Backup Job Retrieval - All](#backup-job-retrieval---all)
 
-### Response Structure
+### Response Structure (Success)
 
-The response structure is similar to the "Backup Job Retrieval - All" endpoint, with data being an array of job objects.
+> This structure is identical to the **Response Structure (Success)** of [Backup Job Retrieval - All](#backup-job-retrieval---all)
 
 
 ## Backup Job Modification - By Job ID
@@ -3334,33 +3195,60 @@ None
   "message": "Schedule has been successfully registered",
   "success": true,
   "data": {
-    "id": "36",
-    "type": "5",
-    "name": "Weekly Monday",
-    "configuration": {
-      "day": "mon",
-      "time": "02:00"
-    },
-    "description": "Every Monday at 2AM"
-  },
+		"type": " Smart Custom Monthly on Specific Month and Date",
+		"scheduleID": "323622",
+		"scheduleID_advanced": "645938",
+		"description": [
+			"[Basic] Start working on April 19 at 12:00",
+			"[Advanced] Start working at 12:00 on the October, November of 25, 28"
+		]
+	},
   "timestamp": "2025-05-12T07:25:15.789Z"
 }
 ```
 
-### Response Structure
+### Response Structure (Success)
 
-| Field                 | Type    | Description                                |
-| --------------------- | ------- | ------------------------------------------ |
-| requestID             | string  | Request unique ID.                         |
-| message               | string  | Processing result message.                 |
-| success               | boolean | Request success status.                    |
-| data.id               | string  | ID of the registered schedule.             |
-| data.type             | string  | Schedule type.                             |
-| data.name             | string  | Schedule name.                             |
-| data.configuration    | object  | Schedule configuration.                    |
-| data.configuration.*  | various | Configuration details based on type.       |
-| data.description      | string  | Schedule description.                      |
-| timestamp             | string  | Request processing time. (ISO 8601 format) |
+| Field                     | Type    | Description                                                           |
+| ------------------------- | ------- | --------------------------------------------------------------------- |
+| requestID                 | string  | Request unique ID.                                                    |
+| message                   | string  | Processing result message.                                            |
+| success                   | boolean | Request success status.                                               |
+| data.type                 | string  | Schedule type.                                                        |
+| data.scheduleID           | string  | ID of the stored basic schedule.                                      |
+| data.scheduleID_advanced  | string  | ID of the stored advanced schedule. (for Smart backup types)          |
+| data.description          | array   | Array of summary information for the assigned schedules.              |
+| data.description[]        | string  | Human-readable description of each assigned schedule configuration.   |
+| timestamp                 | string  | Request processing time. (ISO 8601 format)                            |
+
+### Response Example (Failure)
+
+```json
+{
+  "requestID": "2a37f681-da8a-4045-a591-b73008d6a575",
+  "success": false,
+  "error": {
+    "code": "BAD_REQUEST",
+    "message": "[Schedule 정보 검증] - Schedule data 검증 중 오류 발생 ( Smart Custom Monthly By Date )",
+    "details": {
+      "cause": "month값이 누락되었습니다."
+    }
+  },
+  "timestamp": "2025-05-13T02:23:31.017Z"
+}
+```
+
+### Response Structure (Failure)
+
+| Field               | Type    | Description                                |
+| ------------------- | ------- | ------------------------------------------ |
+| requestID           | string  | Request unique ID.                         |
+| success             | boolean | Request success status.                    |
+| error.code          | string  | Error code.                                |
+| error.message       | string  | Error message.                             |
+| error.details       | object  | Additional error details.                  |
+| error.details.cause | string  | Specific cause of the error.             |
+| timestamp           | string  | Request processing time. (ISO 8601 format) |
 
 ## Schedule Retrieval
 
@@ -3399,10 +3287,9 @@ None
 
 #### Query
 
-| Parameter | Type   | Required | Description          | Default | Example |
-| --------- | ------ | -------- | -------------------- | ------- | ------- |
-| type      | string | Optional | Schedule type filter.|         | "5"     |
-| name      | string | Optional | Schedule name filter.|         | "Weekly"|
+| Parameter | Type   | Required | Description                                         | Default | Example    |
+| --------- | ------ | -------- | --------------------------------------------------- | ------- | ---------- |
+| state     | string | Optional | Schedule state filter. Only `disabled`, `enabled` allowed. | All     | "enabled"  |
 
 #### Body
 
@@ -3416,68 +3303,61 @@ None
 # Retrieve all schedules
 [GET] /api/schedules
 
-# Retrieve schedules with type 5 (weekly)
-[GET] /api/schedules?type=5
+# Retrieve only enabled schedules
+[GET] /api/schedules?state=enabled
 
-# Retrieve schedules with "Weekly" in the name
-[GET] /api/schedules?name=Weekly
+# Retrieve only disabled schedules
+[GET] /api/schedules?state=disabled
 ```
 
 ### Response Example (Success)
 
 ```json
 {
-  "requestID": "w1e2r3t4-y5u6-i7o8-p9a0-s1d2f3g4h5j6",
-  "message": "Schedule information list",
+  "requestID": "577073d5-8790-46d5-bc9d-e405169458b6",
+  "message": "Schedule infomation list",
   "success": true,
   "data": [
     {
-      "id": "36",
-      "type": "5",
-      "name": "Weekly Monday",
-      "configuration": {
-        "day": "mon",
-        "time": "02:00"
+      "id": "450789",
+      "center": {
+        "id": "6",
+        "name": "rim-zdm-rocky8"
       },
-      "description": "Every Monday at 2AM",
-      "lastUpdated": "2025-05-12T07:25:15.789Z"
-    },
-    {
-      "id": "22",
-      "type": "2",
-      "name": "Daily 3AM",
-      "configuration": {
-        "time": "03:00"
-      },
-      "description": "Every day at 3AM",
-      "lastUpdated": "2025-04-15T14:22:10.456Z"
+      "type": "Once",
+      "state": "Enabled",
+      "jobName": "rim-centos8-uefi_boot",
+      "lastRunTime": "2024-11-22T05:19:03.000Z",
+      "description": "[Basic] Start working on 22/11/2024 14:19."
     }
   ],
   "timestamp": "2025-05-12T07:30:45.123Z"
 }
 ```
 
-### Response Structure
+### Response Structure (Success)
 
-| Field                 | Type    | Description                                |
-| --------------------- | ------- | ------------------------------------------ |
-| requestID             | string  | Request unique ID.                         |
-| message               | string  | Processing result message.                 |
-| success               | boolean | Request success status.                    |
-| data                  | array   | Schedule information array.                |
-| data[].id             | string  | Schedule ID.                               |
-| data[].type           | string  | Schedule type.                             |
-| data[].name           | string  | Schedule name.                             |
-| data[].configuration  | object  | Schedule configuration.                    |
-| data[].configuration.*| various | Configuration details based on type.       |
-| data[].description    | string  | Schedule description.                      |
-| data[].lastUpdated    | string  | Last update time.                          |
-| timestamp             | string  | Request processing time. (ISO 8601 format) |
+| Field              | Type    | Description                                |
+| ------------------ | ------- | ------------------------------------------ |
+| requestID          | string  | Request unique ID.                         |
+| message            | string  | Processing result message.                 |
+| success            | boolean | Request success status.                    |
+| data               | array   | Schedule information array.                |
+| data[].id          | string  | Schedule ID.                               |
+| data[].center      | object  | Center where the schedule is stored.       |
+| data[].center.id   | string  | ID of the center.                          |
+| data[].center.name | string  | Name of the center.                        |
+| data[].type        | string  | Schedule type.                             |
+| data[].state       | string  | Schedule state. (Enabled or Disabled)      |
+| data[].jobName     | string  | Name of the job assigned to this schedule. |
+| data[].lastRunTime | string  | Last execution time of the schedule.       |
+| data[].description | string  | Human-readable schedule description.       |
+| timestamp          | string  | Request processing time. (ISO 8601 format) |
 
 ## Schedule Deletion
 
 ### Description
-
+> **Warning!** This feature is currently not supported. (will be supported in the future)
 ```txt
 Delete a schedule from the ZDM Portal.
 ```
@@ -3548,7 +3428,7 @@ None
 
 # Process Flow
 
-## Backup Job Registration
+## Backup Job Registration Flow
 
 ```txt
 Backup Job Registration Procedure:
