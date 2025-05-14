@@ -79,7 +79,7 @@ export class ZdmRepository extends BaseRepository {
       asyncContextStorage.addRepository({ name: this.repositoryName })
       asyncContextStorage.addOrder({ component: this.repositoryName, method: "findByZdmName", state: "start" })
       this.resetQueryState()
-      this.addCondition({ condition: "sZdmName = ?", params: [name] })
+      this.addCondition({ condition: "sCenterName = ?", params: [name] })
       this.applyFilters({ filterOptions })
 
       const query = `SELECT * FROM ${this.tableName} ${this.buildWhereClause()}`
