@@ -46,14 +46,14 @@ export class BackupGetController extends BaseController {
     } catch (error) {
       throw ControllerError.badRequest(ControllerError, {
         method: "extractFilterOptions",
-        message: "[Backup 조회 필터 옵션 추출] - 필터 옵션 확인필요",
+        message: "[Backup 정보 조회 필터 옵션 추출] - 필터 옵션 확인필요",
         error,
       })
     }
   }
 
   /**
-   * 공통 Backup 조회 핸들러
+   * 공통 Backup 정보 조회 핸들러
    */
   private async handleBackupGet<T>({
     req,
@@ -73,7 +73,7 @@ export class BackupGetController extends BaseController {
     serviceMethod: (params: any) => Promise<any>
   }): Promise<void> {
     try {
-      ContextLogger.debug({ message: `Backup 작업 조회 시작 - ${methodName}` })
+      ContextLogger.debug({ message: `Backup 작업 정보 조회 시작 - ${methodName}` })
       asyncContextStorage.setController({ name: this.controllerName })
       asyncContextStorage.addOrder({ component: this.controllerName, method: methodName, state: "start" })
 
@@ -99,9 +99,7 @@ export class BackupGetController extends BaseController {
         backupsData: Array.isArray(backupsData) ? backupsData : [backupsData],
       })
 
-      const resultMessage = `총 ${Array.isArray(backupsData) ? backupsData.length : 1}개의 Backup 작업 정보를 조회했습니다. 상세 정보 포함: ${
-        filterOptions.detail
-      }`
+      const resultMessage = `총 ${Array.isArray(backupsData) ? backupsData.length : 1}개의 Backup 작업 정보를 조회했습니다. 상세 정보 포함: ${filterOptions.detail}`
       ContextLogger.info({ message: resultMessage })
 
       ApiUtils.success({ res, data: backupsDTO, message: "Backup information list" })
