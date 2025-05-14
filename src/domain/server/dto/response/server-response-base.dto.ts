@@ -5,8 +5,8 @@
 import { OSTypeMap } from "../../../../types/common/os"
 import { SystemModeMap } from "../../types/server-common.type"
 import { ArrayPropertyName, DEFAULT_VALUES_SERVER_RESPONSE, ServerDataResponse, ServerResponseBaseFields } from "../../types/server-response.type"
-import { ServerNetworkInfoDTO } from "../network/server.network.dto"
 import { ServerDiskInfoDTO } from "./disk/server.disk.dto"
+import { ServerNetworkInfoDTO } from "./network/server.network.dto"
 import { ServerPartitionInfoDTO } from "./partition/server.partition.dto"
 
 export class ServerResponseBaseDTO implements ServerResponseBaseFields {
