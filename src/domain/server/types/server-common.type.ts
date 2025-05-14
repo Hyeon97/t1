@@ -2,12 +2,7 @@
 //  server 공통 사용 type 정의  //
 /////////////////////////////////
 
-import { VALID_STATE_VALUES, VALID_LICENSE_VALUES, VALID_SYSTEM_MODE_VALUES } from "../../../types/common/const-value"
-
-/**
- * 시스템 조회시 조회 타입
- */
-export type SystemSearchType = "name" | "id"
+import { VALID_LICENSE_VALUES, VALID_STATE_VALUES, VALID_SYSTEM_MODE_VALUES } from "../../../types/common/const-value"
 
 /**
  * 시스템 연결 상태 정의
