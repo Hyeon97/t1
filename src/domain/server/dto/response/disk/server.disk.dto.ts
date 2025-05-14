@@ -2,9 +2,9 @@
 //  디스크 정보 DTO  //
 //////////////////////
 
-import { DiskTypeMap } from "../../../../types/common/disk"
-import { formatDiskSize } from "../../../../utils/data-convert.utils"
-import { ServerDiskTable } from "../../types/db/server-disk"
+import { DiskTypeMap } from "../../../../../types/common/disk"
+import { formatDiskSize } from "../../../../../utils/data-convert.utils"
+import { ServerDiskTable } from "../../../types/db/server-disk"
 
 export class ServerDiskInfoDTO {
   device: string

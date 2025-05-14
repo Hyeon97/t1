@@ -2,7 +2,7 @@
 //  네트워크 정보 DTO  //
 ////////////////////////
 
-import { ServerNetworkTable } from "../../types/db/server-network"
+import { ServerNetworkTable } from "../../../types/db/server-network"
 
 export class ServerNetworkInfoDTO {
   name: string

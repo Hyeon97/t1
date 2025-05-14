@@ -4,10 +4,10 @@
 
 import { OSTypeMap } from "../../../../types/common/os"
 import { SystemModeMap } from "../../types/server-common.type"
-import { ServerResponseBaseFields, ServerDataResponse, DEFAULT_VALUES_SERVER_RESPONSE, ArrayPropertyName } from "../../types/server-response.type"
-import { ServerDiskInfoDTO } from "../disk/server.disk.dto"
+import { ArrayPropertyName, DEFAULT_VALUES_SERVER_RESPONSE, ServerDataResponse, ServerResponseBaseFields } from "../../types/server-response.type"
 import { ServerNetworkInfoDTO } from "../network/server.network.dto"
-import { ServerPartitionInfoDTO } from "../partition/server.partition.dto"
+import { ServerDiskInfoDTO } from "./disk/server.disk.dto"
+import { ServerPartitionInfoDTO } from "./partition/server.partition.dto"
 
 export class ServerResponseBaseDTO implements ServerResponseBaseFields {
   id: string
