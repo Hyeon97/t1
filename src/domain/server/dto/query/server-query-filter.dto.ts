@@ -8,7 +8,7 @@ import { OSType } from "../../../../types/common/os"
 import { LicenseAssignType, SystemConnectType, SystemModeType } from "../../types/server-common.type"
 import { ServerFilterOptions } from "../../types/server-filter.type"
 
-export class ServerQueryFilterDTO implements ServerFilterOptions {
+export class ServerGetQueryDTO implements ServerFilterOptions {
   //  일반 필터링
   @IsOptional()
   @IsIn(["source", "target"], { message: "mode는 'source' 또는 'target'만 가능합니다" })
