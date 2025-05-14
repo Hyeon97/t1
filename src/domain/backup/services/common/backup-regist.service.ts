@@ -806,9 +806,9 @@ export class BackupRegistService extends BaseService {
         data.excludePartition = this.preprocessExcludePartitions({ excludePartition: data.excludePartition as string })
       }
       //  데이터 전처리(작업제외 디렉토리)
-      if (data.excludeDir) {
-        data.excludeDir = this.preprocessExcludeDir({ excludeDir: data.excludeDir as string })
-      }
+      // if (data.excludeDir) {
+      //   data.excludeDir = this.preprocessExcludeDir({ excludeDir: data.excludeDir as string })
+      // }
       const dataSet: BackupDataSet[] = []
       // 처리할 파티션 목록 결정
       const partitionsToProcess = data.partition.length
