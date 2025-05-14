@@ -254,7 +254,7 @@ None
 | network    | boolean | Optional | Show server network additional information.                              | `false` | `true`    |
 | disk       | boolean | Optional | Show server disk additional information.                                 | `false` | `true`    |
 | partition  | boolean | Optional | Show server partition additional information.                            | `false` | `true`    |
-| repository | boolean | Optional | Show server repository additional information.                           | `false` | `true`    |
+| repository | boolean | Optional | Show server repository additional information. Only works when server OS is `Windows`. | false | true |
 | detail     | boolean | Optional | Show server additional information.                                      | `false` | `true`    |
 
 #### Body
@@ -828,7 +828,7 @@ None
 
 | Parameter | Type   | Required | Description                                              | Default | Example                         |
 | --------- | ------ | -------- | -------------------------------------------------------- | ------- | ------------------------------- |
-| type      | string | Required | Repository type. (Only `smb`, `nfs` are allowed.)        |         | `smb`                           |
+| type      | string | Required | Repository type. Only `smb`, `nfs` are allowed.       |         | `smb`                           |
 | path      | string | Required | Repository path.                                         |         | `\\192.168.1.93\zconverter`     |
 | user      | string | Optional | Username for authentication (required for SMB).          |         | `admin`                         |
 | password  | string | Optional | Password for authentication (required for SMB).          |         | `password`                      |
@@ -1536,11 +1536,11 @@ None
 | ----------------------------- | ---------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------ | -------------- | ------------------------------------------------------------- |
 | center                        | string           | Required | Center ID (numeric) or Center name (string).                                                                                               |                | "123" or "Main Center"                                        |
 | server                        | string           | Required | Job server ID (numeric) or server name (string).                                                                                           |                | "456" or "source-server-01"                                   |
-| type                          | string           | Required | Job type. (Only `full`, `inc`, `smart` are allowed.)                                                                                       |                | `full`                                                        |
+| type                          | string           | Required | Job type. Only `full`, `inc`, `smart` are allowed.                                                                                       |                | `full`                                                        |
 | partition                     | string[]         | Required | Job partitions. (If omitted, all partitions will be registered.)                                                                           | All partitions | ["/", "/test", "/test2"]                                      |
 | repository                    | object           | Required | Repository to be used for the job.                                                                                                         |                | see below                                                     |
 | repository.id                 | string           | Required | Repository ID.                                                                                                                             |                | "789"                                                         |
-| repository.type               | string           | Optional | Repository type.(Only `smb`, `nfs` are allowed.)                                                                                           |                | `smb`                                                         |
+| repository.type               | string           | Optional | Repository type. Only `smb`, `nfs` are allowed.                                                                                           |                | `smb`                                                         |
 | repository.path               | string           | Optional | Repository path.                                                                                                                           |                | `smb`: \\\\127.0.0.1\\ZConverter `nfs`: 127.0.0.1:/ZConverter |
 | jobName                       | string           | Optional | Job name.                                                                                                                                  |                | "Daily-DB-Backup"                                             |
 | user                          | string           | Optional | User ID (numeric) or user email (string).                                                                                                  |                | "101" or "admin@example.com"                                  |
@@ -1764,12 +1764,12 @@ None
 
 | Parameter      | Type    | Required | Description                                                                      | Default | Example                                                       |
 | -------------- | ------- | -------- | -------------------------------------------------------------------------------- | ------- | ------------------------------------------------------------- |
-| mode           | string  | Optional | Backup job mode. (Only `full`, `inc`, `smart` allowed.)                          |         | `full`                                                        |
+| mode           | string  | Optional | Backup job mode. Only `full`, `inc`, `smart` allowed.                          |         | `full`                                                        |
 | partition      | string  | Optional | Backup job target partition. (Currently only single partition query is possible) |         | partition="/test"                                             |
 | status         | string  | Optional | Backup job status.                                                               |         | `running`, `completed`, `failed`                             |
 | result         | string  | Optional | Backup job result.                                                               |         | `success`, `failure`, `partial`                               |
 | repositoryID   | string  | Optional | ZDM Repository ID used for Backup job.                                           |         | `16`                                                         |
-| repositoryType | string  | Optional | ZDM Repository Type used for Backup job. (Only `smb`, `nfs` allowed.)            |         | `smb`                                                         |
+| repositoryType | string  | Optional | ZDM Repository Type used for Backup job. Only `smb`, `nfs` allowed.            |         | `smb`                                                         |
 | repositoryPath | string  | Optional | ZDM Repository Path used for Backup job.                                         |         | `smb`: \\\\127.0.0.1\\ZConverter `nfs`: 127.0.0.1:/ZConverter |
 | detail         | boolean | Optional | Show Backup job detailed information.                                            | false   | `true`                                                        |
 
