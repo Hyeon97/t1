@@ -2,9 +2,9 @@
 //  server 정보 조회 응답 type  //
 /////////////////////////////////
 
-import { ServerDiskInfoDTO } from "../dto/disk/server.disk.dto"
-import { ServerNetworkInfoDTO } from "../dto/network/server.network.dto"
-import { ServerPartitionInfoDTO } from "../dto/partition/server.partition.dto"
+import { ServerDiskInfoDTO } from "../dto/response/disk/server.disk.dto"
+import { ServerNetworkInfoDTO } from "../dto/response/network/server.network.dto"
+import { ServerPartitionInfoDTO } from "../dto/response/partition/server.partition.dto"
 import { ServerBasicTable } from "./db/server-basic"
 import { ServerDiskTable } from "./db/server-disk"
 import { ServerNetworkTable } from "./db/server-network"
