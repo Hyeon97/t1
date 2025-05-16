@@ -126,8 +126,8 @@ export class ServerGetController extends BaseController {
   }
 
   /**
- * 서버 응답 데이터 생성 및 로깅
- */
+   * 서버 응답 데이터 생성 및 로깅
+   */
   private processServerResponse({
     serversData,
     filterOptions,
