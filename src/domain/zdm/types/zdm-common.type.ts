@@ -5,11 +5,6 @@
 import { VALID_CENTER_ACTIVATION_VALUES, VALID_STATE_VALUES } from "../../../types/common/const-value"
 
 /**
- * ZDM 조회 타입
- */
-export type ZDMSearchType = "name" | "id"
-
-/**
  * ZDM 연결 상태 정의
  */
 export type ZDMConnectType = (typeof VALID_STATE_VALUES)[number]
