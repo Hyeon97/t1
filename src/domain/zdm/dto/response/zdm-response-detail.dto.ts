@@ -11,7 +11,7 @@ export class ZdmResponseDetailDTO extends ZdmResponseBaseDTO implements ZdmRespo
   centerVersion: string
   osVersion: string
   model: string
-  privateIP: string
+  privateIP: string[]
   organization: string
   manufacturer: string
   sytemType: string
@@ -24,7 +24,7 @@ export class ZdmResponseDetailDTO extends ZdmResponseBaseDTO implements ZdmRespo
     this.centerVersion = props.centerVersion || DEFAULT_VALUES_ZDM_RESPONSE.centerVersion
     this.osVersion = props.osVersion || DEFAULT_VALUES_ZDM_RESPONSE.osVersion
     this.model = props.model || DEFAULT_VALUES_ZDM_RESPONSE.model
-    this.privateIP = props.privateIP || DEFAULT_VALUES_ZDM_RESPONSE.privateIP
+    this.privateIP = (typeof props.privateIP === 'string' ? props.privateIP.split("|").filter(el => el) : props.privateIP) || DEFAULT_VALUES_ZDM_RESPONSE.privateIP
     this.organization = props.organization || DEFAULT_VALUES_ZDM_RESPONSE.organization
     this.manufacturer = props.manufacturer || DEFAULT_VALUES_ZDM_RESPONSE.manufacturer
     this.sytemType = props.sytemType || DEFAULT_VALUES_ZDM_RESPONSE.sytemType
@@ -85,7 +85,7 @@ export class ZdmResponseDetailDTO extends ZdmResponseBaseDTO implements ZdmRespo
       centerVersion: zdm.sCenterVersion,
       osVersion: zdm.sOSVersion,
       model: zdm.sModel,
-      privateIP: zdm.sPrivateIPAddress,
+      privateIP: zdm.sPrivateIPAddress.split('|').filter(el => el),
       organization: OSTypeMap.stringToString({ str: zdm.sOrganization }),
       manufacturer: zdm.sManufacturer,
       sytemType: zdm.sSystemType,

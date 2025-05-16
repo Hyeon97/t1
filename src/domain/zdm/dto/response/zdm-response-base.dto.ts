@@ -2,11 +2,12 @@
 //  기본 ZDM 정보 응답 DTO  //
 /////////////////////////////
 
-import { DEFAULT_VALUES_ZDM_RESPONSE, ZdmResponseBaseFields, ArrayPropertyName, ZdmDataResponse } from "../../types/zdm/zdm-response.type"
-import { ZdmDiskInfoDTO } from "../disk/zdm.disk.dto"
-import { ZdmNetworkInfoDTO } from "../network/zdm.network.dto"
-import { ZdmPartitionInfoDTO } from "../partition/zdm.partition.dto"
-import { ZdmRepositoryInfoDTO } from "../repository/zdm.repository.dto"
+import { ArrayPropertyName, DEFAULT_VALUES_ZDM_RESPONSE, ZdmDataResponse, ZdmResponseBaseFields } from "../../types/zdm/zdm-response.type"
+import { ZdmDiskInfoDTO } from "./disk/zdm.disk.dto"
+import { ZdmNetworkInfoDTO } from "./network/zdm.network.dto"
+import { ZdmPartitionInfoDTO } from "./partition/zdm.partition.dto"
+import { ZdmRepositoryInfoDTO } from "./repository/zdm.repository.dto"
+import { ZdmZosRepositoryInfoDTO } from "./zos-repository/zdm.zos-repository.dto"
 
 export class ZdmResponseBaseDTO implements ZdmResponseBaseDTO {
   centerName: string
@@ -18,7 +19,7 @@ export class ZdmResponseBaseDTO implements ZdmResponseBaseDTO {
   network?: ZdmNetworkInfoDTO[]
   partition?: ZdmPartitionInfoDTO[]
   repository?: ZdmRepositoryInfoDTO[]
-  zosRepository?: any[]
+  zosRepository?: ZdmZosRepositoryInfoDTO[]
   constructor({
     centerName = DEFAULT_VALUES_ZDM_RESPONSE.centerName,
     hostName = DEFAULT_VALUES_ZDM_RESPONSE.hostName,
@@ -114,7 +115,10 @@ export class ZdmResponseBaseDTO implements ZdmResponseBaseDTO {
         entities: repository,
         transformer: (entities) => ZdmRepositoryInfoDTO.fromEntities({ repositories: entities }),
       }),
-      zosRepository: zosRepository && zosRepository.length > 0 ? zosRepository : undefined,
+      zosRepository: ZdmResponseBaseDTO.transformEntities({
+        entities: zosRepository,
+        transformer: (entities) => ZdmZosRepositoryInfoDTO.fromEntities({ repositories: entities }),
+      }),
     })
   }
 
