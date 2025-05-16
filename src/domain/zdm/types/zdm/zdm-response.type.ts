@@ -2,10 +2,11 @@
 //  ZDM 정보 조회 응답 정의  //
 //////////////////////////////
 
-import { ZdmDiskInfoDTO } from "../../dto/disk/zdm.disk.dto"
-import { ZdmNetworkInfoDTO } from "../../dto/network/zdm.network.dto"
-import { ZdmPartitionInfoDTO } from "../../dto/partition/zdm.partition.dto"
-import { ZdmRepositoryInfoDTO } from "../../dto/repository/zdm.repository.dto"
+import { ZdmDiskInfoDTO } from "../../dto/response/disk/zdm.disk.dto"
+import { ZdmNetworkInfoDTO } from "../../dto/response/network/zdm.network.dto"
+import { ZdmPartitionInfoDTO } from "../../dto/response/partition/zdm.partition.dto"
+import { ZdmRepositoryInfoDTO } from "../../dto/response/repository/zdm.repository.dto"
+import { ZdmZosRepositoryInfoDTO } from "../../dto/response/zos-repository/zdm.zos-repository.dto"
 import { ZdmInfoTable } from "../db/center-info"
 import { ZdmInfoDiskTable } from "../db/center-info-disk"
 import { ZdmInfoNetworkTable } from "../db/center-info-network"
@@ -27,7 +28,7 @@ export interface ZdmResponseBaseFields {
   network?: ZdmNetworkInfoDTO[]
   partition?: ZdmPartitionInfoDTO[]
   repository?: ZdmRepositoryInfoDTO[]
-  zosRepository?: any[]
+  zosRepository?: ZdmZosRepositoryInfoDTO[]
 }
 
 /**
@@ -37,7 +38,7 @@ export interface ZdmResponseDetailFields extends ZdmResponseBaseFields {
   centerVersion: string
   osVersion: string
   model: string
-  privateIP: string
+  privateIP: string | string[]
   organization: string
   manufacturer: string
   sytemType: string
@@ -59,7 +60,7 @@ export const DEFAULT_VALUES_ZDM_RESPONSE = {
   centerVersion: "Unknown",
   osVersion: "Unknown",
   model: "Unknown",
-  privateIP: "-",
+  privateIP: [],
   organization: "Unknown",
   manufacturer: "Unknown",
   sytemType: "Unknown",
