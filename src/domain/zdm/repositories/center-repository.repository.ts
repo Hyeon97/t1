@@ -3,6 +3,7 @@ import { RepositoryTypeMap } from "../../../types/common/repository"
 import { asyncContextStorage } from "../../../utils/AsyncContext"
 import { BaseRepository } from "../../../utils/base/base-repository"
 import { ContextLogger } from "../../../utils/logger/logger.custom"
+import { regNumberOnly } from "../../../utils/regex.utils"
 import { ZdmRepositoryTable } from "../types/db/center-repository"
 import { ZdmRepositoryFilterOptions } from "../types/zdm-repository/zdm-repository-filter.type"
 
@@ -21,9 +22,14 @@ export class ZdmRepositoryRepository extends BaseRepository {
       if (!filterOptions) return
       asyncContextStorage.addOrder({ component: this.repositoryName, method: "applyFilters", state: "start" })
       //  center 필터 적용
-      //  filterOptions.center 값이 center name 인 경우 별도 처리 필요 ( center 정보 가져와야 함 )
       if (filterOptions.center) {
-        this.addCondition({ condition: "nCenterID = ?", params: [filterOptions.center] })
+        if (regNumberOnly.test(filterOptions.center)) {
+          //  숫자만 > Center ID
+          this.addCondition({ condition: "nCenterID = ?", params: [filterOptions.center] })
+        }
+        else {
+          this.addCondition({ condition: "sSystemName = ?", params: [filterOptions.center] })
+        }
       }
       // OS 필터 적용
       if (filterOptions.os) {
