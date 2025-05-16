@@ -23,11 +23,9 @@ export class ServerRoutes {
     //  Server ID로 조회
     this.router.get('/server-id/:serverId', validateServerGetByServerIdParams, validateServerGetQuery, serverGetController.getServerById)
     //  [Server 정보 삭제]
-    //  특정 조건으로 삭제 ( 기준 : server name | server id )
-    this.router.delete("/:identifier")
     //  Server 이름으로 삭제
     this.router.delete('/server-name/:serverName')
     //  Server ID로 삭제
-    this.router.delete('/server-id/:serverID')
+    this.router.delete('/server-id/:serverId')
   }
 }
