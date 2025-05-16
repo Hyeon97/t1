@@ -10,6 +10,8 @@ export const VALID_CENTER_ACTIVATION_VALUES = ["ok", "fail"] as const
 export const VALID_LICENSE_VALUES = ["assign", "unassign"] as const
 //  Repository 타입
 export const VALID_REPOSITORY_VALUES = ["smb", "nfs", "ssh"] as const
+//  Server Repository 타입
+export const VALID_SERVER_REPOSITORY_VALUES = ['source server', 'target server', 'VSM server', 'Network', 'Cloud Storage']
 //  압축 옵션 사용 여부
 export const VALID_COMPRESSION_VALUES = ["use", "not use"] as const
 //  암호화 옵션 사용 여부
