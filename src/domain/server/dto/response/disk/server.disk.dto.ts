@@ -1,6 +1,6 @@
-//////////////////////
-//  디스크 정보 DTO  //
-//////////////////////
+/////////////////////////////////
+//  Server 디스크 정보 출력 DTO  //
+/////////////////////////////////
 
 import { DiskTypeMap } from "../../../../../types/common/disk"
 import { formatDiskSize } from "../../../../../utils/data-convert.utils"
@@ -13,7 +13,7 @@ export class ServerDiskInfoDTO {
   lastUpdated: string
 
   constructor({ disk }: { disk: ServerDiskTable }) {
-    this.device = disk.sDevice
+    this.device = disk.sDevice || 'Unknown'
     this.diskType = DiskTypeMap.toString({ value: disk.nDiskType })
     this.diskSize = disk.sDiskSize // 원본 크기만 저장
     this.lastUpdated = disk.sLastUpdateTime || "Unknown" // 철자 수정

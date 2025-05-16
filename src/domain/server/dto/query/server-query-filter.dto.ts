@@ -32,22 +32,22 @@ export class ServerGetQueryDTO implements ServerFilterOptions {
 
   //  추가 정보
   @IsOptional()
-  @IsIn(["true"], { message: "network는 'true'만 가능합니다" })
+  @IsIn(["true", "false"], { message: "network는 'true','false'만 가능합니다" })
   @Expose()
   network?: string
 
   @IsOptional()
-  @IsIn(["true"], { message: "disk는 'true'만 가능합니다" })
+  @IsIn(["true", "false"], { message: "disk는 'true','false'만 가능합니다" })
   @Expose()
   disk?: string
 
   @IsOptional()
-  @IsIn(["true"], { message: "partition은 'true'만 가능합니다" })
+  @IsIn(["true", "false"], { message: "partition은 'true','false'만 가능합니다" })
   @Expose()
   partition?: string
 
   @IsOptional()
-  @IsIn(["true"], { message: "repository는 'true'만 가능합니다" })
+  @IsIn(["true", "false"], { message: "repository는 'true','false'만 가능합니다" })
   @Expose()
   repository?: string
 

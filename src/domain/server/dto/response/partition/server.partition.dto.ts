@@ -1,19 +1,19 @@
-//////////////////////
-//  파티션 정보 DTO  //
-//////////////////////
+/////////////////////////////////
+//  Server 파티션 정보 출력 DTO  //
+/////////////////////////////////
 
 import { formatDiskSize } from "../../../../../utils/data-convert.utils"
 import { ServerPartitionTable } from "../../../types/db/server-partition"
 
 export class ServerPartitionInfoDTO {
-  size: string
-  used: string
-  free: string
-  usage: string
-  letter: string
-  device: string
-  fileSystem: string
-  lastUpdated: string
+  size: string  //  전체 파티션 크기
+  used: string  //  사용 중인 용량
+  free: string  //  남은 용량
+  usage: string //  사용율
+  letter: string  //  마운트 포인트(Lin) / 드라이브 분자(Win)
+  device: string  //  디바이스 경로
+  fileSystem: string  //  파일 시스템 타입
+  lastUpdated: string //  마지막 정보 업데이트 시간
 
   constructor({ partition }: { partition: ServerPartitionTable }) {
     // 원본 값 저장
