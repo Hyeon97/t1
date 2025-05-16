@@ -14,10 +14,11 @@ import { ZdmInfoDiskTable } from "../../types/db/center-info-disk"
 import { ZdmInfoNetworkTable } from "../../types/db/center-info-network"
 import { ZdmInfoPartitionTable } from "../../types/db/center-info-partition"
 import { ZdmRepositoryTable } from "../../types/db/center-repository"
+import { ZdmZosRepositoryTable } from "../../types/db/center-zos-repository"
 import { ZdmFilterOptions } from "../../types/zdm/zdm-filter.type"
 import { ZdmDataResponse } from "../../types/zdm/zdm-response.type"
 
-type AdditionalInfoKey = "disks" | "networks" | "partitions" | "repositories"
+type AdditionalInfoKey = "disks" | "networks" | "partitions" | "repositories" | "zosRepositories"
 type ZdmDataPropertyKey = Exclude<keyof ZdmDataResponse, "zdm">
 
 export class ZdmGetService extends BaseService {
@@ -65,6 +66,7 @@ export class ZdmGetService extends BaseService {
           networks: [] as ZdmInfoNetworkTable[],
           partitions: [] as ZdmInfoPartitionTable[],
           repositories: [] as ZdmRepositoryTable[],
+          zosRepositories: [] as ZdmZosRepositoryTable[]
         }
       }
       // 요청된 데이터만 조회하도록 Promise 배열 구성
@@ -106,6 +108,12 @@ export class ZdmGetService extends BaseService {
           repository: this.zdmRepositoryRepository,
           errorMessage: "레포지토리 정보 조회 - 오류 발생",
         },
+        {
+          condition: !!filterOptions?.zosRepository,
+          type: "zosRepositories",
+          repository: this.zdmZosRepositoryRepository,
+          errorMessage: "레포지토리 정보 조회 - 오류 발생",
+        },
       ]
 
       // 조건에 따라 프로미스 생성
@@ -135,6 +143,7 @@ export class ZdmGetService extends BaseService {
         networks: [] as ZdmInfoNetworkTable[],
         partitions: [] as ZdmInfoPartitionTable[],
         repositories: [] as ZdmRepositoryTable[],
+        zosRepositories: [] as ZdmZosRepositoryTable[]
       }
 
       // 성공한 결과만 처리
@@ -162,6 +171,7 @@ export class ZdmGetService extends BaseService {
         networks: [] as ZdmInfoNetworkTable[],
         partitions: [] as ZdmInfoPartitionTable[],
         repositories: [] as ZdmRepositoryTable[],
+        zosRepositories: [] as ZdmZosRepositoryTable[]
       }
     }
   }
@@ -175,12 +185,14 @@ export class ZdmGetService extends BaseService {
     networks = [],
     partitions = [],
     repositories = [],
+    zosRepositories = []
   }: {
     zdms: ZdmInfoTable[]
     disks?: ZdmInfoDiskTable[]
     networks?: ZdmInfoNetworkTable[]
     partitions?: ZdmInfoPartitionTable[]
     repositories?: ZdmRepositoryTable[]
+    zosRepositories?: ZdmZosRepositoryTable[]
   }): ZdmDataResponse[] {
     try {
       asyncContextStorage.addOrder({ component: this.serviceName, method: "combineZdmData", state: "start" })
@@ -200,7 +212,7 @@ export class ZdmGetService extends BaseService {
               zdmResponse[propertyName as ZdmDataPropertyKey] = []
             }
             // 타입스크립트 타입 단언 필요
-            ;(zdmResponse[propertyName] as any[]).push(item)
+            ; (zdmResponse[propertyName] as any[]).push(item)
           }
         })
       }
@@ -210,6 +222,8 @@ export class ZdmGetService extends BaseService {
       addRelatedData({ items: networks, propertyName: "network" })
       addRelatedData({ items: partitions, propertyName: "partition" })
       addRelatedData({ items: repositories, propertyName: "repository" })
+      addRelatedData({ items: zosRepositories, propertyName: "zosRepository" })
+
       asyncContextStorage.addOrder({ component: this.serviceName, method: "combineZdmData", state: "end" })
       return Array.from(zdmMap.values())
     } catch (error) {
@@ -232,7 +246,7 @@ export class ZdmGetService extends BaseService {
       //  기본 ZDM 정보 조회
       const zdms = await this.zdmRepository.findAll({ filterOptions })
       const systemNames = zdms.map((zdm) => zdm.sCenterName)
-      const { disks, networks, partitions, repositories } = await this.getAdditionalInfo({ filterOptions, systemNames })
+      const { disks, networks, partitions, repositories, zosRepositories } = await this.getAdditionalInfo({ filterOptions, systemNames })
       // 데이터 조합
       const result = this.combineZdmData({
         zdms,
@@ -240,6 +254,7 @@ export class ZdmGetService extends BaseService {
         networks,
         partitions,
         repositories,
+        zosRepositories
       })
 
       asyncContextStorage.addOrder({ component: this.serviceName, method: "getZdms", state: "end" })
@@ -291,7 +306,7 @@ export class ZdmGetService extends BaseService {
       // getZdmInfoByName 함수를 재사용하여 ZDM 정보 조회
       const zdm = await this.getZdmInfoByName({ name, filterOptions })
 
-      const { disks, networks, partitions, repositories } = await this.getAdditionalInfo({ filterOptions, systemNames: [name] })
+      const { disks, networks, partitions, repositories, zosRepositories } = await this.getAdditionalInfo({ filterOptions, systemNames: [name] })
 
       // 데이터 조합
       const result = this.combineZdmData({
@@ -300,6 +315,7 @@ export class ZdmGetService extends BaseService {
         networks,
         partitions,
         repositories,
+        zosRepositories
       })
 
       asyncContextStorage.addOrder({ component: this.serviceName, method: "getZdmByName", state: "end" })
@@ -357,7 +373,7 @@ export class ZdmGetService extends BaseService {
       // getZdmInfoById 함수를 재사용하여 ZDM 정보 조회
       const zdm = await this.getZdmInfoById({ id, filterOptions })
 
-      const { disks, networks, partitions, repositories } = await this.getAdditionalInfo({
+      const { disks, networks, partitions, repositories, zosRepositories } = await this.getAdditionalInfo({
         filterOptions,
         systemNames: [zdm.sCenterName],
       })
@@ -369,6 +385,7 @@ export class ZdmGetService extends BaseService {
         networks,
         partitions,
         repositories,
+        zosRepositories
       })
       asyncContextStorage.addOrder({ component: this.serviceName, method: "getZdmById", state: "end" })
       return result[0]
