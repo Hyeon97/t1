@@ -3,7 +3,7 @@
 //////////////////////////////////////////
 
 import { OSTypeEnum } from "../../../../types/common/os"
-import { ServerRepositoryTypeEnum } from "../server-common.type"
+import { ServerRepositoryTypeEnum } from "../server-repository.type"
 
 export interface ServerRepositoryTable {
   nID: number
