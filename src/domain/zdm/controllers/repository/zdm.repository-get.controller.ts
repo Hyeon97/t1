@@ -5,8 +5,8 @@ import { ApiUtils } from "../../../../utils/api/api.utils"
 import { asyncContextStorage } from "../../../../utils/AsyncContext"
 import { BaseController } from "../../../../utils/base/base-controller"
 import { ContextLogger } from "../../../../utils/logger/logger.custom"
-import { ZdmRepositoryFilterDTO } from "../../dto/query/zdm-repository/zdm-repository-query-filter.dto"
-import { ZdmRepositoryInfoDTO } from "../../dto/repository/zdm.repository.dto"
+import { ZdmRepositoryGetQueryDTO } from "../../dto/query/zdm-repository/zdm-repository-query-filter.dto"
+import { ZdmRepositoryInfoDTO } from "../../dto/response/repository/zdm.repository.dto"
 import { ZdmRepositoryGetService } from "../../services/repository/zdm.repository-get.service"
 import { ZdmRepositoryFilterOptions } from "../../types/zdm-repository/zdm-repository-filter.type"
 
@@ -21,7 +21,7 @@ export class ZdmRepositoryGetController extends BaseController {
   /**
    * ZDM Repository 조회 옵션 추출
    */
-  private extractFilterOptions({ query }: { query: ZdmRepositoryFilterDTO }): ZdmRepositoryFilterOptions {
+  private extractFilterOptions({ query }: { query: ZdmRepositoryGetQueryDTO }): ZdmRepositoryFilterOptions {
     try {
       asyncContextStorage.addOrder({ component: this.controllerName, method: "extractFilterOptions", state: "start" })
       const filterOptions: ZdmRepositoryFilterOptions = {
@@ -29,7 +29,6 @@ export class ZdmRepositoryGetController extends BaseController {
         type: query.type || "",
         os: query.os || "",
         path: query.path || "",
-        // identifierType: query.identifierType || "",
         center: query.center || "",
       }
       asyncContextStorage.addOrder({ component: this.controllerName, method: "extractFilterOptions", state: "end" })
@@ -53,7 +52,7 @@ export class ZdmRepositoryGetController extends BaseController {
       ContextLogger.debug({ message: `ZDM Repository 목록 조회 시작` })
 
       // 필터 옵션 추출
-      const query = req.query as unknown as ZdmRepositoryFilterDTO
+      const query = req.query as unknown as ZdmRepositoryGetQueryDTO
       const filterOptions = this.extractFilterOptions({ query })
       ContextLogger.debug({ message: `적용된 필터 옵션`, meta: filterOptions })
 
