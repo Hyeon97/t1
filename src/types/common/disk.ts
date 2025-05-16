@@ -25,7 +25,7 @@ export const DiskTypeMap = {
       case DiskTypeEnum.GPT:
         return "Gpt"
       default:
-        throw new Error(`Unknown Disk type: ${value}`)
+        return `Unknown Disk type: ${value}`
     }
   },
 }
