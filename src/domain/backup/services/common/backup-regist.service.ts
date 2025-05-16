@@ -253,7 +253,7 @@ export class BackupRegistService extends BaseService {
     try {
       asyncContextStorage.addOrder({ component: this.serviceName, method: "getRepositoryInfo", state: "start" })
       const filterOptions: ZdmRepositoryFilterOptions = {
-        center: center.nID,
+        center: String(center.nID),
         type: repository.type || "",
         path: repository.path || "",
       }
