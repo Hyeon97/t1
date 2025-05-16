@@ -8,6 +8,7 @@ import { ArrayPropertyName, DEFAULT_VALUES_SERVER_RESPONSE, ServerDataResponse, 
 import { ServerDiskInfoDTO } from "./disk/server.disk.dto"
 import { ServerNetworkInfoDTO } from "./network/server.network.dto"
 import { ServerPartitionInfoDTO } from "./partition/server.partition.dto"
+import { ServerRepositoryInfoDTO } from "./repository/server.repository.dto"
 
 export class ServerResponseBaseDTO implements ServerResponseBaseFields {
   id: string
@@ -22,7 +23,7 @@ export class ServerResponseBaseDTO implements ServerResponseBaseFields {
   disk?: ServerDiskInfoDTO[]
   network?: ServerNetworkInfoDTO[]
   partition?: ServerPartitionInfoDTO[]
-  repository?: any[]
+  repository?: ServerRepositoryInfoDTO[]
 
   constructor({
     id = DEFAULT_VALUES_SERVER_RESPONSE.id,
@@ -128,7 +129,10 @@ export class ServerResponseBaseDTO implements ServerResponseBaseFields {
         entities: partition,
         transformer: (entities) => ServerPartitionInfoDTO.fromEntities({ partitions: entities }),
       }),
-      repository: repository && repository.length > 0 ? repository : undefined,
+      repository: ServerResponseBaseDTO.transformEntities({
+        entities: repository,
+        transformer: (entities) => ServerRepositoryInfoDTO.fromEntities({ repositories: entities }),
+      }),
     })
   }
 
