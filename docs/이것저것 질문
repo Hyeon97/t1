@@ -31,3 +31,31 @@ id가 99이면서 system이 linux인 객체를 삭제하려면
 DELETE /api/objects/system/linux?system=linux&id=99
 이런식으로 엔드포인트를 추가 설계해야하지 않나?
 
+<details>
+<summary>Click to expand/collapse examples</summary>
+
+| Parameter | Type   | Required | Description                                    | Default | Example |
+| --------- | ------ | -------- | ---------------------------------------------- | ------- | ------- |
+| jobID     | string | Required | The unique ID of the backup job to be retrieved.|        | 22      |
+
+#### Query
+> This endpoint uses the same query parameters as [Backup Job Retrieval - All](#backup-job-retrieval---all)
+
+### Request Example
+
+> This example can be used in the same way by only changing the endpoint from `/api/backups/` to `/api/backups/job-id/{jobID}` format from [Backup Job Retrieval - All](#backup-job-retrieval---all)
+
+### Response Example (Success)
+
+> This structure is identical to the **Response Example (Success)** of [Backup Job Retrieval - All](#backup-job-retrieval---all)
+
+### Response Structure (Success)
+
+> This structure is identical to the **Response Structure (Success)** of [Backup Job Retrieval - All](#backup-job-retrieval---all)
+
+### Response Example (Success)
+> This structure is nearly identical to the **Response Example (Success)** of [Center Retrieval - All](#zdm-retrieval---all), but with the difference that the data array will contain only a single zdm object instead of multiple zdms.
+
+| Parameter | Type   | Required | Description                                    | Default | Example |
+| --------- | ------ | -------- | ---------------------------------------------- | ------- | ------- |
+| zdmName     | string | Required | Name of the zdm to retrieve.|        | test-source-zdm-1      |

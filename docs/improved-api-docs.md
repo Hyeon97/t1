@@ -2,6 +2,22 @@
 
 - Last updated: 2025-05-12
 - Version: 1.0.1
+- 진행 상황
+  - Auth
+    - Token Issue
+  - Server
+    - Server Retrieval - All  
+    - Server Retrieval - By Server Name
+  - Center
+    - Center Retrieval - All
+    - Center Retrieval - By Center ID
+  - License
+  - Backup
+    - Backup Job Registration
+  - Schedule
+    - Schedule Registration  
+    - Schedule Retrieval
+            
 
 ## Table of Contents
 
@@ -10,11 +26,14 @@
 - [Auth](#auth)
   - [Token Issuance](#token-issuance)
 - [Server](#server)
-  - [Server List Retrieval](#server-list-retrieval)
+  - [Server Retrieval - All](#server-retrieval---all)
+  - [Server Retrieval - By Server Name](#server-retrieval---by-server-name)
   - [Server Deletion - By ID](#server-deletion---by-id)
   - [Server Deletion - By Server Name](#server-deletion---by-server-name)
 - [Center - ZDM Portal](#center---zdm-portal)
-  - [Center Retrieval](#center-retrieval)
+  - [Center Retrieval - All](#center-retrieval---all)
+  - [Center Retrieval - By ID](#center-retrieval---by-id)
+  - [Center Retrieval - By Center Name](#center-retrieval---by-center-name)
   - [Center Deletion - By ID](#center-deletion---by-id)
   - [Center Deletion - By Center Name](#center-deletion---by-center-name)
   - [Center Repository Registration](#center-repository-registration)
@@ -165,7 +184,7 @@ None
 }
 ```
 
-### Response Structure
+### Response Structure (Success)
 
 | Field      | Type    | Description                                |
 | ---------- | ------- | ------------------------------------------ |
@@ -208,12 +227,12 @@ None
 
 # Server
 
-## Server List Retrieval
+## Server Retrieval - All
 
 ### Description
 
 ```txt
-Retrieval the list of Servers registered to the ZDM Center.
+Retrieve the list of Servers registered to the ZDM Center.
 ```
 
 ### URL
@@ -254,7 +273,7 @@ None
 | network    | boolean | Optional | Show server network additional information.                              | `false` | `true`    |
 | disk       | boolean | Optional | Show server disk additional information.                                 | `false` | `true`    |
 | partition  | boolean | Optional | Show server partition additional information.                            | `false` | `true`    |
-| repository | boolean | Optional | Show server repository additional information. Only works when server OS is `Windows`. | false | true |
+| repository | boolean | Optional | Show server repository additional information. | `false` | `true` |
 | detail     | boolean | Optional | Show server additional information.                                      | `false` | `true`    |
 
 #### Body
@@ -266,6 +285,12 @@ None
 ### Request Example
 
 ```txt
+# Filter Combinations
+You can combine multiple filters to narrow down the server list:
+- Windows source servers: mode=source&os=win
+- Disconnected Linux servers: os=lin&connection=disconnect
+- Unassigned Windows servers with full details: os=win&license=unassign&detail=true
+
 - Show all additional information
 [GET] /api/servers?disk=true&network=true&partition=true&repository=true&detail=true
 
@@ -284,57 +309,84 @@ None
 
 ### Response Example (Success)
 
+<details>
+<summary>Click to expand/collapse examples</summary>
+
 ```json
 {
-  "requestID": "af55bd77-4cc4-4426-ba7b-1bba74d91fb5",
-  "message": "Server information list",
-  "success": true,
-  "data": [
-    {
-      "id": "28",
-      "systemName": "rim-ubuntu24-uefi (192.168.1.12)",
-      "systemMode": "source",
-      "os": "Linux",
-      "version": "Ubuntu 24.04 LTS, 6.8.0-45-generic",
-      "ip": "218.145.120.34",
-      "status": "disconnect",
-      "licenseID": 74,
-      "lastUpdated": "2025-05-07 11:46:20",
-      "agent": "v7 build 7039",
-      "model": "VMware7,1",
-      "manufacturer": "VMware, Inc.",
-      "cpu": "Intel(R) Xeon(R) Silver 4216 CPU @ 2.10GHz",
-      "cpuCount": "1",
-      "memory": "2063138816 (1.92 GB)",
-      "network": [
-        {
-          "name": "ens160",
-          "ipAddress": "192.168.1.12",
-          "subNet": "255.255.252.0",
-          "gateWay": "192.168.0.1",
-          "macAddress": "00:50:56:a8:b8:8",
-          "lastUpdated": "2024-11-11 20:44:15"
-        }
-      ],
-      "partition": [
-        {
-          "size": "10464022528 (9.75 GB)",
-          "used": "5864058880 (5.46 GB)",
-          "free": "4599963648 (4.28 GB)",
-          "usage": "56.04%",
-          "letter": "/",
-          "device": "/dev/mapper/ubuntu--vg-ubuntu--lv",
-          "fileSystem": "ext4",
-          "lastUpdated": "2024-11-11 20:44:15"
-        }
-      ]
-    }
-  ],
-  "timestamp": "2025-05-08T07:19:24.739Z"
+	"requestID": "8507220f-89b8-413c-af2b-5a2d4073a89c",
+	"message": "Server information list",
+	"success": true,
+	"data": [
+{
+		"id": "50",
+		"systemName": "RIM-WIN2008 (192.168.2.138)",
+		"systemMode": "source",
+		"os": "Window",
+		"version": "Windows Server (R) 2008 Datacenter[64bit]",
+		"ip": "218.145.120.34",
+		"status": "disconnect",
+		"licenseID": 74,
+		"lastUpdated": "2025-05-07 11:46:20",
+		"network": [
+			{
+				"name": "Intel(R) PRO/1000 MT Network Connection",
+				"ipAddress": "192.168.2.138",
+				"subNet": "255.255.252.0",
+				"gateWay": "192.168.0.1",
+				"macAddress": "00:50:56:A8:BA:83",
+				"lastUpdated": "2024-11-21 10:32:26"
+			},
+		],
+		"partition": [
+			{
+				"size": "37578858496 (35.00 GB)",
+				"used": "23387344896 (21.78 GB)",
+				"free": "14191513600 (13.22 GB)",
+				"usage": "62.24%",
+				"letter": "C:",
+				"device": "Disk 0, Partion 1",
+				"fileSystem": "NTFS",
+				"lastUpdated": "2024-11-21 10:32:26"
+			},
+		],
+		"repository": [
+			{
+				"id": "5",
+				"os": "Window",
+				"size": "20326709770 (18.93 GB)",
+				"used": "6135196170 (5.71 GB)",
+				"free": "14191513600 (13.22 GB)",
+				"usage": "30.18%",
+				"type": "Source Server",
+				"localPath": "C:\\ZConverter",
+				"remotePath": "",
+				"remoteUser": "",
+				"ipAddress": [
+					"192.168.2.138",
+					"192.168.2.47",
+					"192.168.0.10"
+				],
+				"port": "50005",
+				"lastUpdated": "2024-11-21 10:32:26"
+			},
+		],
+		"agent": "v7 build 7016",
+		"model": "VMware Virtual Platform",
+		"manufacturer": "VMware, Inc.",
+		"cpu": "Intel(R) Xeon(R) Silver 4216 CPU @ 2.10GHz",
+		"cpuCount": "2",
+		"memory": "4293414912 (4.00 GB)"
+	}],
+	"timestamp": "2025-05-15T03:24:04.430Z"
 }
 ```
+</details>
 
-### Response Structure
+### Response Structure (Success)
+
+<details>
+<summary>Click to expand/collapse examples</summary>
 
 | Field                          | Type    | Description                                           |
 | ------------------------------ | ------- | ----------------------------------------------------- |
@@ -357,12 +409,14 @@ None
 | data[].cpu                     | string  | Server CPU information. (`detail=true`)               |
 | data[].cpuCount                | string  | Server CPU count. (`detail=true`)                     |
 | data[].memory                  | string  | Server memory size. (`detail=true`)                   |
+| data[].network                 | array   | Server network information array. (`network=true`) |
 | data[].network[].name          | string  | Server network name. (`network=true`)                 |
 | data[].network[].ipAddress     | string  | Server network IP address. (`network=true`)           |
 | data[].network[].subNet        | string  | Server network subnet mask. (`network=true`)          |
 | data[].network[].gateWay       | string  | Server network gateway address. (`network=true`)      |
 | data[].network[].macAddress    | string  | Server MAC address. (`network=true`)                  |
 | data[].network[].lastUpdated   | string  | Server network last update time. (`network=true`)     |
+| data[].partition               | array   | Server partition information array. (`partition=true`) |
 | data[].partition[].size        | string  | Server partition total size. (`partition=true`)       |
 | data[].partition[].used        | string  | Server partition used size. (`partition=true`)        |
 | data[].partition[].free        | string  | Server partition free size. (`partition=true`)        |
@@ -371,25 +425,42 @@ None
 | data[].partition[].device      | string  | Server partition path. (`partition=true`)             |
 | data[].partition[].fileSystem  | string  | Server partition file system. (`partition=true`)      |
 | data[].partition[].lastUpdated | string  | Server partition last update time. (`partition=true`) |
+| data[].repository              | array   | Server repository information array. (`repository=true`) |
+| data[].repository[].id         | string  | Server repository ID.(`repository=true`)                            |
+| data[].repository[].os         | string  | Server repository OS type. (`repository=true`)                      |
+| data[].repository[].size       | string  | Server repository total size. (`repository=true`)                   |
+| data[].repository[].used       | string  | Server repository used space. (`repository=true`)                   |
+| data[].repository[].free       | string  | Server repository free space. (`repository=true`)                   |
+| data[].repository[].usage      | string  | Server repository usage percentage. (`repository=true`)             |
+| data[].repository[].type       | string  | Server repository type. (`repository=true`)                         |
+| data[].repository[].localPath  | string  | Server repository local path. (`repository=true`)                   |
+| data[].repository[].remotePath | string  | Server repository remote path. (`repository=true`)                  |
+| data[].repository[].remoteUser | string  | Server repository remote user. (`repository=true`)                  |
+| data[].repository[].ipAddress  | array   | Server repository IP addresses. (`repository=true`)                 |
+| data[].repository[].port       | string  | Server repository port.(`repository=true`)                          |
+| data[].repository[].lastUpdated| string  | Server repository information last update time. (`repository=true`) |
 | timestamp                      | string  | Request processing time. (ISO 8601 format)            |
 
-## Server Deletion - By ID
+</details>
+
+## Server Retrieval - by Server Name
 
 ### Description
-> **Warning!** This feature is currently not supported. (will be supported in the future)
+
 ```txt
-Delete a server registered to the ZDM Center using its ID.
+Retrieve specific server information by server name
 ```
 
 ### URL
 
 ```txt
 - http
-[DELETE] /api/servers/server-id/{serverID}
+[GET] /api/servers/server-name/{serverName}
 
 - Curl
-curl --request DELETE \
-  --url http://localhost:3000/api/servers/server-id/{serverID} \
+curl --request GET \
+  --url http://localhost:3000/api/server-name/{serverName} \
+  --header "Content-Type: application/json" \
   --header "authorization: token"
 ```
 
@@ -405,7 +476,192 @@ curl --request DELETE \
 
 | Parameter | Type   | Required | Description                                    | Default | Example |
 | --------- | ------ | -------- | ---------------------------------------------- | ------- | ------- |
-| serverID  | string | Required | ID of the server to be deleted from ZDM Center |         | 28      |
+| serverName     | string | Required | Name of the server to retrieve.|        | test-source-server-1      |
+
+#### Query
+
+> This endpoint uses the same query parameters as [Server Retrieval - All](#server-retrieval---all)
+
+#### Body
+
+```txt
+None
+```
+
+### Request Example
+
+> This example can be used in the same way by only changing the endpoint from `/api/servers/` to `/api/servers/server-name/{serverName}` format from [Server Retrieval - All](#server-retrieval---all)
+
+```txt
+- Show all additional information
+[GET] /api/servers/server-name/{serverName}?disk=true&network=true&partition=true&repository=true&detail=true
+
+- Retrieval only target servers
+[GET] /api/servers/server-name/{serverName}?mode=target
+
+- Retrieval only Windows servers
+[GET] /api/servers/server-name/{serverName}?os=win
+
+- Retrieval only servers connected to the center
+[GET] /api/servers/server-name/{serverName}?connection=connect
+
+- Retrieval only servers without license assignment
+[GET] /api/servers/server-name/{serverName}?license=unassign
+```
+
+### Response Example (Success)
+> This structure is nearly identical to the **Response Example (Success)** of [Server Retrieval - All](#server-retrieval---all), but with the difference that the data array will contain only a single server object instead of multiple servers.
+
+<details>
+<summary>Click to expand/collapse examples</summary>
+
+```json
+{
+	"requestID": "8507220f-89b8-413c-af2b-5a2d4073a89c",
+	"message": "Server information list",
+	"success": true,
+	"data": {
+		"id": "50",
+		"systemName": "RIM-WIN2008 (192.168.2.138)",
+		"systemMode": "source",
+		"os": "Window",
+		"version": "Windows Server (R) 2008 Datacenter[64bit]",
+		"ip": "218.145.120.34",
+		"status": "disconnect",
+		"licenseID": 74,
+		"lastUpdated": "2025-05-07 11:46:20",
+		"network": [
+			{
+				"name": "Intel(R) PRO/1000 MT Network Connection",
+				"ipAddress": "192.168.2.138",
+				"subNet": "255.255.252.0",
+				"gateWay": "192.168.0.1",
+				"macAddress": "00:50:56:A8:BA:83",
+				"lastUpdated": "2024-11-21 10:32:26"
+			},
+		],
+		"partition": [
+			{
+				"size": "37578858496 (35.00 GB)",
+				"used": "23387344896 (21.78 GB)",
+				"free": "14191513600 (13.22 GB)",
+				"usage": "62.24%",
+				"letter": "C:",
+				"device": "Disk 0, Partion 1",
+				"fileSystem": "NTFS",
+				"lastUpdated": "2024-11-21 10:32:26"
+			},
+		],
+		"repository": [
+			{
+				"id": "5",
+				"os": "Window",
+				"size": "20326709770 (18.93 GB)",
+				"used": "6135196170 (5.71 GB)",
+				"free": "14191513600 (13.22 GB)",
+				"usage": "30.18%",
+				"type": "Source Server",
+				"localPath": "C:\\ZConverter",
+				"remotePath": "",
+				"remoteUser": "",
+				"ipAddress": [
+					"192.168.2.138",
+					"192.168.2.47",
+					"192.168.0.10"
+				],
+				"port": "50005",
+				"lastUpdated": "2024-11-21 10:32:26"
+			},
+		],
+		"agent": "v7 build 7016",
+		"model": "VMware Virtual Platform",
+		"manufacturer": "VMware, Inc.",
+		"cpu": "Intel(R) Xeon(R) Silver 4216 CPU @ 2.10GHz",
+		"cpuCount": "2",
+		"memory": "4293414912 (4.00 GB)"
+	},
+	"timestamp": "2025-05-15T03:24:04.430Z"
+}
+```
+
+</details>
+
+### Response Structure (Success)
+<details>
+<summary>Click to expand/collapse examples</summary>
+
+| Field                          | Type    | Description                                           |
+| ------------------------------ | ------- | ----------------------------------------------------- |
+| requestID                      | string  | Request unique ID.                                    |
+| message                        | string  | Processing result message.                            |
+| success                        | boolean | Request success status.                               |
+| data                           | object  | Server information.                             |
+| data.id                        | string  | Server ID.                                            |
+| data.systemName                | string  | Server system name. (IP)                              |
+| data.systemMode                | string  | Server mode. (`source`/`target`)                      |
+| data.os                        | string  | Server Operating system.                              |
+| data.version                   | string  | Server OS version information.                        |
+| data.ip                        | string  | Server IP address.                                    |
+| data.status                    | string  | Server's connection status with the ZDM Center.       |
+| data.licenseID                 | string  | Assigned license ID.                                  |
+| data.lastUpdated               | string  | Last update time.                                     |
+| data.agent                     | string  | Server agent version. (`detail=true`)                 |
+| data.model                     | string  | Server model. (`detail=true`)                         |
+| data.manufacturer              | string  | Server manufacturer. (`detail=true`)                  |
+| data.cpu                       | string  | Server CPU information. (`detail=true`)               |
+| data.cpuCount                  | string  | Server CPU count. (`detail=true`)                     |
+| data.memory                    | string  | Server memory size. (`detail=true`)                   |
+| data.network[].name            | string  | Server network name. (`network=true`)                 |
+| data.network[].ipAddress       | string  | Server network IP address. (`network=true`)           |
+| data.network[].subNet          | string  | Server network subnet mask. (`network=true`)          |
+| data.network[].gateWay         | string  | Server network gateway address. (`network=true`)      |
+| data.network[].macAddress      | string  | Server MAC address. (`network=true`)                  |
+| data.network[].lastUpdated     | string  | Server network last update time. (`network=true`)     |
+| data.partition[].size          | string  | Server partition total size. (`partition=true`)       |
+| data.partition[].used          | string  | Server partition used size. (`partition=true`)        |
+| data.partition[].free          | string  | Server partition free size. (`partition=true`)        |
+| data.partition[].usage         | string  | Server partition usage rate. (`partition=true`)       |
+| data.partition[].letter        | string  | Server partition mount point. (`partition=true`)      |
+| data.partition[].device        | string  | Server partition path. (`partition=true`)             |
+| data.partition[].fileSystem    | string  | Server partition file system. (`partition=true`)      |
+| data.partition[].lastUpdated   | string  | Server partition last update time. (`partition=true`) |
+| timestamp                      | string  | Request processing time. (ISO 8601 format)            |
+
+</details>
+
+## Server Deletion - By ID
+
+### Description
+> **Warning!** This feature is currently not supported. (will be supported in the future)
+```txt
+Delete a server registered to the ZDM Center using its ID.
+```
+
+### URL
+
+```txt
+- http
+[DELETE] /api/servers/server-id/{serverId}
+
+- Curl
+curl --request DELETE \
+  --url http://localhost:3000/api/servers/server-id/{serverId} \
+  --header "authorization: token"
+```
+
+### Request Parameters
+
+#### Headers
+
+| Parameter     | Type   | Required | Description           | Default | Example |
+| ------------- | ------ | -------- | --------------------- | ------- | ------- |
+| authorization | string | Required | Authentication token. |         | token   |
+
+#### Parameter
+
+| Parameter | Type   | Required | Description                                    | Default | Example |
+| --------- | ------ | -------- | ---------------------------------------------- | ------- | ------- |
+| serverId  | string | Required | ID of the server to be deleted from ZDM Center |         | 28      |
 
 #### Query
 
@@ -433,7 +689,7 @@ None
 }
 ```
 
-### Response Structure
+### Response Structure (Success)
 
 | Field     | Type    | Description                                |
 | --------- | ------- | ------------------------------------------ |
@@ -504,7 +760,7 @@ None
 }
 ```
 
-### Response Structure
+### Response Structure (Success)
 
 | Field      | Type    | Description                                |
 | ---------- | ------- | ------------------------------------------ |
@@ -519,7 +775,7 @@ None
 
 # Center - ZDM Portal
 
-## Center Retrieval
+## Center Retrieval - All
 
 ### Description
 
@@ -573,73 +829,434 @@ None
 None
 ```
 
+### Request Example
+
+```txt
+# Filter Combinations
+You can combine multiple filters to narrow down the ZDM Center list:
+- Connected centers: connection=connect
+- Centers with activation status OK: activation=ok
+- Detailed information for connected centers: connection=connect&detail=true
+
+# Examples:
+# Retrieve all ZDM Centers
+[GET] /api/zdms
+
+# Retrieve all ZDM Centers with detailed information
+[GET] /api/zdms?detail=true
+
+# Retrieve all ZDM Centers including all additional information
+[GET] /api/zdms?disk=true&network=true&partition=true&repository=true&zosRepository=true&detail=true
+
+# Retrieve only connected ZDM Centers
+[GET] /api/zdms?connection=connect
+
+# Retrieve only ZDM Centers with activation status OK
+[GET] /api/zdms?activation=ok
+
+# Retrieve only connected ZDM Centers with detailed information
+[GET] /api/zdms?connection=connect&detail=true
+
+# Retrieve ZDM Centers with repository information
+[GET] /api/zdms?repository=true
+
+# Retrieve ZDM Centers with ZOS repository information
+[GET] /api/zdms?zosRepository=true
+```
+
+
 ### Response Example (Success)
+
+<details>
+<summary>Click to expand/collapse examples</summary>
 
 ```json
 {
-  "requestID": "ba12c43d-8677-4f0e-a36d-f1294e3c5a9b",
-  "message": "Center information list",
-  "success": true,
-  "data": [
-    {
-      "id": "6",
-      "name": "ZDM-Center-01",
-      "status": "connect",
-      "ip": "192.168.1.100",
-      "version": "v7.0.123",
-      "lastUpdated": "2025-05-11 14:22:15",
-      "detail": {
-        "osName": "CentOS 7.9",
-        "memory": "8589934592 (8.00 GB)",
-        "cpu": "Intel(R) Xeon(R) CPU E5-2680 v3 @ 2.50GHz",
-        "cores": "4"
-      },
-      "repository": [
-        {
-          "id": "16",
-          "type": "SMB",
-          "path": "\\\\192.168.1.93\\zconverter",
-          "capacity": "1073741824000 (1.00 TB)",
-          "used": "214748364800 (200.00 GB)",
-          "free": "858993459200 (800.00 GB)",
-          "lastUpdated": "2025-05-11 14:22:15"
-        }
-      ]
-    }
-  ],
-  "timestamp": "2025-05-12T02:45:38.721Z"
+	"requestID": "c7b58bf7-fded-4e0b-ab2d-97993834f41b",
+	"message": "Zdm information list",
+	"success": true,
+	"data": [
+		{
+			"centerName": "rim-zdm-rocky8",
+			"hostName": "rim-zdm-rocky8",
+			"ip": "192.168.1.93",
+			"state": "connect",
+			"activation": "ok",
+			"disk": [
+				{
+					"diskType": "Bios",
+					"diskSize": "53687091200 (50.00 GB)",
+					"diskCaption": "-",
+					"lastUpdated": "2025-05-13 10:20:56"
+				}
+			],
+			"network": [
+				{
+					"name": "ens192",
+					"ipAddress": "192.168.1.93",
+					"subNet": "255.255.252.0",
+					"gateWay": "192.168.0.1",
+					"macAddress": "00:50:56:a4:ee:4b",
+					"lastUpdated": "2025-05-13 10:20:56"
+				}
+			],
+			"partition": [
+				{
+					"size": "613184000 (584.78 MB)",
+					"used": "5928000 (5.65 MB)",
+					"free": "607256000 (579.12 MB)",
+					"usage": "0.97%",
+					"letter": "/boot/efi",
+					"device": "/dev/sda1",
+					"fileSystem": "vfat",
+					"lastUpdated": "2025-05-13 10:20:56"
+				},
+			],
+			"repository": [
+				{
+					"id": "15",
+					"centerName": "rim-zdm-rocky8",
+					"os": "Linux",
+					"type": "NFS",
+					"size": "524032000000 (488.04 GB)",
+					"used": "184189676000 (171.54 GB)",
+					"free": "339842324000 (316.50 GB)",
+					"usage": "35.15%",
+					"remotePath": "192.168.1.93:/ZConverter",
+					"ipAddress": [
+						"192.168.1.93"
+					],
+					"port": "2049",
+					"lastUpdated": "2025-05-13 10:20:56"
+				},
+			],
+			"zosRepository": [
+				{
+					"id": "24",
+					"centerName": "rim-zdm-rocky8",
+					"size": "0",
+					"platform": "aws",
+					"cloudKeyId": "11",
+					"bucketName": "aws-velero-bucket-zconverter",
+					"created": "-",
+					"lastUpdated": "2025-04-02T07:40:41.000Z"
+				},
+			],
+			"centerVersion": "v7 build 7035",
+			"osVersion": "Linux Rocky Linux release 8.10 (Green Obsidian), 4.18.0-553.27.1.el8_10.x86_64",
+			"model": "VMware7,1",
+			"privateIP": [
+				"192.168.1.93"
+			],
+			"organization": "Linux",
+			"manufacturer": "VMware, Inc.",
+			"sytemType": "x86_64",
+			"cpu": "Intel(R) Xeon(R) Silver 4216 CPU @ 2.10GHz",
+			"cpuCount": "2",
+			"memory": "3843182592 (3.58 GB)",
+			"machineID": "dca42442-7fa9-689b-8304-412cb7d103c3"
+		}
+	],
+	"timestamp": "2025-05-16T02:52:01.641Z"
 }
 ```
+</details>
 
-### Response Structure
+### Response Structure (Success)
 
-| Field                         | Type    | Description                                   |
-| ----------------------------- | ------- | --------------------------------------------- |
-| requestID                     | string  | Request unique ID.                            |
-| message                       | string  | Processing result message.                    |
-| success                       | boolean | Request success status.                       |
-| data                          | array   | Center information array.                     |
-| data[].id                     | string  | Center ID.                                    |
-| data[].name                   | string  | Center name.                                  |
-| data[].status                 | string  | Connection status.                            |
-| data[].ip                     | string  | IP address.                                   |
-| data[].version                | string  | Center version.                               |
-| data[].lastUpdated            | string  | Last update time.                             |
-| data[].detail                 | object  | Additional center details (`detail=true`).    |
-| data[].detail.osName          | string  | Center OS name.                               |
-| data[].detail.memory          | string  | Center memory size.                           |
-| data[].detail.cpu             | string  | Center CPU information.                       |
-| data[].detail.cores           | string  | Center CPU core count.                        |
-| data[].repository             | array   | Center repository list (`repository=true`).   |
-| data[].repository[].id        | string  | Repository ID.                                |
-| data[].repository[].type      | string  | Repository type.                              |
-| data[].repository[].path      | string  | Repository path.                              |
-| data[].repository[].capacity  | string  | Repository total capacity.                    |
-| data[].repository[].used      | string  | Repository used space.                        |
-| data[].repository[].free      | string  | Repository free space.                        |
-| data[].repository[].lastUpdated | string | Repository information last update time.     |
-| timestamp                     | string  | Request processing time. (ISO 8601 format)    |
+<details>
+<summary>Click to expand/collapse examples</summary>
 
+| Field                              | Type    | Description                                         |
+| ---------------------------------- | ------- | --------------------------------------------------- |
+| requestID                          | string  | Request unique ID.                                  |
+| message                            | string  | Processing result message.                          |
+| success                            | boolean | Request success status.                             |
+| data                               | array   | Center information array.                           |
+| data[].centerName                  | string  | Center name.                                        |
+| data[].hostName                    | string  | Center Host name.                                          |
+| data[].ip                          | string  | Center IP address.                                         |
+| data[].state                       | string  | Center Connection status.                                  |
+| data[].activation                  | string  | Center Activation status.                                  |
+| data[].disk                        | array   | Center Disk information array. (`disk=true`)              |
+| data[].disk[].diskType             | string  | Disk type. (`disk=true`)|
+| data[].disk[].diskSize             | string  | Disk size. (`disk=true`)|
+| data[].disk[].diskCaption          | string  | Disk caption. (`disk=true`)|
+| data[].disk[].lastUpdated          | string  | Disk information last update time. (`disk=true`)|
+| data[].network                     | array   | Center Network information array. (`network=true`)         |
+| data[].network[].name              | string  | Network interface name. (`network=true`)|
+| data[].network[].ipAddress         | string  | Network IP address. (`network=true`)|
+| data[].network[].subNet            | string  | Network subnet mask. (`network=true`)|
+| data[].network[].gateWay           | string  | Network gateway address. (`network=true`)|
+| data[].network[].macAddress        | string  | Network MAC address. (`network=true`)|
+| data[].network[].lastUpdated       | string  | Network information last update time. (`network=true`)|
+| data[].partition                   | array   | Center Partition information array. (`partition=true`)     |
+| data[].partition[].size            | string  | Partition total size. (`partition=true`) |
+| data[].partition[].used            | string  | Partition used space. (`partition=true`) |
+| data[].partition[].free            | string  | Partition free space. (`partition=true`) |
+| data[].partition[].usage           | string  | Partition usage percentage. (`partition=true`) |
+| data[].partition[].letter          | string  | Mount point. (`partition=true`) |
+| data[].partition[].device          | string  | Device path. (`partition=true`) |
+| data[].partition[].fileSystem      | string  | File system type. (`partition=true`) |
+| data[].partition[].lastUpdated     | string  | Partition information last update time. (`partition=true`) |
+| data[].repository                  | array   | Center Repository information array. (`repository=true`)   |
+| data[].repository[].id             | string  | Repository ID. (`repository=true`) |
+| data[].repository[].centerName     | string  | Center name of the repository. (`repository=true`) |
+| data[].repository[].os             | string  | Repository OS type. (`repository=true`) |
+| data[].repository[].type           | string  | Repository type. (`repository=true`) |
+| data[].repository[].size           | string  | Repository total size. (`repository=true`) |
+| data[].repository[].used           | string  | Repository used space. (`repository=true`) |
+| data[].repository[].free           | string  | Repository free space. (`repository=true`) |
+| data[].repository[].usage          | string  | Repository usage percentage. (`repository=true`) |
+| data[].repository[].remotePath     | string  | Repository remote path. (`repository=true`) |
+| data[].repository[].ipAddress      | array   | Repository IP addresses. (`repository=true`) |
+| data[].repository[].port           | string  | Repository port. (`repository=true`) |
+| data[].repository[].lastUpdated    | string  | Repository information last update time. (`repository=true`) |
+| data[].zosRepository               | array   | Center ZOS repository information. (`zosRepository=true`)  |
+| data[].zosRepository[].id          | string  | ZOS repository ID. (`zosRepository=true`) |
+| data[].zosRepository[].centerName  | string  | Center name of the ZOS repository. (`zosRepository=true`) |
+| data[].zosRepository[].size        | string  | ZOS repository size. (`zosRepository=true`) |
+| data[].zosRepository[].platform    | string  | Cloud platform type. (`zosRepository=true`) |
+| data[].zosRepository[].cloudKeyId  | string  | Cloud key ID. (`zosRepository=true`) |
+| data[].zosRepository[].bucketName  | string  | Storage bucket name. (`zosRepository=true`) |
+| data[].zosRepository[].created     | string  | Creation date. (`zosRepository=true`) |
+| data[].zosRepository[].lastUpdated | string  | ZOS repository last update time. (`zosRepository=true`) |
+| data[].centerVersion               | string  | Center version. (`detail=true`)                     |
+| data[].osVersion                   | string  | Center Operating system version. (`detail=true`)           |
+| data[].model                       | string  | Center Hardware model. (`detail=true`)                     |
+| data[].privateIP                   | array   | Center Private IP addresses. (`detail=true`)               |
+| data[].organization                | string  | Center Organization information. (`detail=true`)           |
+| data[].manufacturer                | string  | Center Hardware manufacturer. (`detail=true`)              |
+| data[].sytemType                   | string  | Center System architecture type. (`detail=true`)           |
+| data[].cpu                         | string  | Center CPU information. (`detail=true`)                    |
+| data[].cpuCount                    | string  | Center CPU count. (`detail=true`)                          |
+| data[].memory                      | string  | Center Memory size. (`detail=true`)                        |
+| data[].machineID                   | string  | Center Unique machine identifier. (`detail=true`)          |
+| timestamp                          | string  | Request processing time. (ISO 8601 format)          |
+
+</details>
+
+## Center Retrieval - By ID
+
+### Description
+
+```txt
+Retrieve specific ZDM Center information by ZDM Center name.
+```.
+
+### URL
+
+```txt
+- http
+[GET] /api/zdms/zdm-id/{zdmId}
+
+- Curl
+curl --request GET \
+  --url http://localhost:3000/api/zdms/zdm-id/{zdmId} \
+  --header "Content-Type: application/json" \
+  --header "authorization: token"
+```
+
+### Request Parameters
+
+#### Headers
+
+| Parameter     | Type   | Required | Description           | Default | Example |
+| ------------- | ------ | -------- | --------------------- | ------- | ------- |
+| authorization | string | Required | Authentication token. |         | token   |
+
+#### Parameter
+
+| Parameter | Type   | Required | Description                                    | Default | Example |
+| --------- | ------ | -------- | ---------------------------------------------- | ------- | ------- |
+| zdmId     | string | Required | ID of the ZDM Center to retrieve.|        | 1      |
+
+#### Query
+
+> This endpoint uses the same query parameters as [Center Retrieval - All](#center-retrieval---all)
+
+#### Body
+
+```txt
+None
+```
+
+### Request Example
+
+> This example can be used in the same way by only changing the endpoint from `/api/zdms/` to `/api/zdms/zdm-id/{zdmId}` format from [Center Retrieval - All](#center-retrieval---all)
+
+### Response Example (Success)
+
+> This structure is nearly identical to the **Response Example (Success)** of [Center Retrieval - All](#center-retrieval---all), but with the difference that the data is provided as a single object rather than an array.
+
+<details>
+<summary>Click to expand/collapse examples</summary>
+
+```json
+{
+	"requestID": "c7b58bf7-fded-4e0b-ab2d-97993834f41b",
+	"message": "Zdm information list",
+	"success": true,
+	"data": {
+			"centerName": "rim-zdm-rocky8",
+			"hostName": "rim-zdm-rocky8",
+			"ip": "192.168.1.93",
+			"state": "connect",
+			"activation": "ok",
+			"disk": [
+				{
+					"diskType": "Bios",
+					"diskSize": "53687091200 (50.00 GB)",
+					"diskCaption": "-",
+					"lastUpdated": "2025-05-13 10:20:56"
+				}
+			],
+			"network": [
+				{
+					"name": "ens192",
+					"ipAddress": "192.168.1.93",
+					"subNet": "255.255.252.0",
+					"gateWay": "192.168.0.1",
+					"macAddress": "00:50:56:a4:ee:4b",
+					"lastUpdated": "2025-05-13 10:20:56"
+				}
+			],
+			"partition": [
+				{
+					"size": "613184000 (584.78 MB)",
+					"used": "5928000 (5.65 MB)",
+					"free": "607256000 (579.12 MB)",
+					"usage": "0.97%",
+					"letter": "/boot/efi",
+					"device": "/dev/sda1",
+					"fileSystem": "vfat",
+					"lastUpdated": "2025-05-13 10:20:56"
+				},
+			],
+			"repository": [
+				{
+					"id": "15",
+					"centerName": "rim-zdm-rocky8",
+					"os": "Linux",
+					"type": "NFS",
+					"size": "524032000000 (488.04 GB)",
+					"used": "184189676000 (171.54 GB)",
+					"free": "339842324000 (316.50 GB)",
+					"usage": "35.15%",
+					"remotePath": "192.168.1.93:/ZConverter",
+					"ipAddress": [
+						"192.168.1.93"
+					],
+					"port": "2049",
+					"lastUpdated": "2025-05-13 10:20:56"
+				},
+			],
+			"zosRepository": [
+				{
+					"id": "24",
+					"centerName": "rim-zdm-rocky8",
+					"size": "0",
+					"platform": "aws",
+					"cloudKeyId": "11",
+					"bucketName": "aws-velero-bucket-zconverter",
+					"created": "-",
+					"lastUpdated": "2025-04-02T07:40:41.000Z"
+				},
+			],
+			"centerVersion": "v7 build 7035",
+			"osVersion": "Linux Rocky Linux release 8.10 (Green Obsidian), 4.18.0-553.27.1.el8_10.x86_64",
+			"model": "VMware7,1",
+			"privateIP": [
+				"192.168.1.93"
+			],
+			"organization": "Linux",
+			"manufacturer": "VMware, Inc.",
+			"sytemType": "x86_64",
+			"cpu": "Intel(R) Xeon(R) Silver 4216 CPU @ 2.10GHz",
+			"cpuCount": "2",
+			"memory": "3843182592 (3.58 GB)",
+			"machineID": "dca42442-7fa9-689b-8304-412cb7d103c3"
+		},
+	"timestamp": "2025-05-16T02:52:01.641Z"
+}
+```
+</details>
+
+### Response Structure (Success)
+
+<details>
+<summary>Click to expand/collapse examples</summary>
+
+| Field                         | Type    | Description                                         |
+| ----------------------------- | ------- | --------------------------------------------------- |
+| requestID                     | string  | Request unique ID.                                  |
+| message                       | string  | Processing result message.                          |
+| success                       | boolean | Request success status.                             |
+| data                          | object  | Center information object.                          |
+| data.centerName               | string  | Center name.                                        |
+| data.hostName                 | string  | Center Host name.                                   |
+| data.ip                       | string  | Center IP address.                                  |
+| data.state                    | string  | Center Connection status.                           |
+| data.activation               | string  | Center Activation status.                           |
+| data.disk                     | array   | Center Disk information array. (`disk=true`)        |
+| data.disk[].diskType          | string  | Disk type. (`disk=true`)                           |
+| data.disk[].diskSize          | string  | Disk size. (`disk=true`)                           |
+| data.disk[].diskCaption       | string  | Disk caption. (`disk=true`)                        |
+| data.disk[].lastUpdated       | string  | Disk information last update time. (`disk=true`)   |
+| data.network                  | array   | Center Network information array. (`network=true`) |
+| data.network[].name           | string  | Network interface name. (`network=true`)           |
+| data.network[].ipAddress      | string  | Network IP address. (`network=true`)               |
+| data.network[].subNet         | string  | Network subnet mask. (`network=true`)              |
+| data.network[].gateWay        | string  | Network gateway address. (`network=true`)          |
+| data.network[].macAddress     | string  | Network MAC address. (`network=true`)              |
+| data.network[].lastUpdated    | string  | Network information last update time. (`network=true`) |
+| data.partition                | array   | Center Partition information array. (`partition=true`) |
+| data.partition[].size         | string  | Partition total size. (`partition=true`)           |
+| data.partition[].used         | string  | Partition used space. (`partition=true`)           |
+| data.partition[].free         | string  | Partition free space. (`partition=true`)           |
+| data.partition[].usage        | string  | Partition usage percentage. (`partition=true`)     |
+| data.partition[].letter       | string  | Mount point. (`partition=true`)                    |
+| data.partition[].device       | string  | Device path. (`partition=true`)                    |
+| data.partition[].fileSystem   | string  | File system type. (`partition=true`)               |
+| data.partition[].lastUpdated  | string  | Partition information last update time. (`partition=true`) |
+| data.repository               | array   | Center Repository information array. (`repository=true`) |
+| data.repository[].id          | string  | Repository ID. (`repository=true`)                 |
+| data.repository[].centerName  | string  | Center name of the repository. (`repository=true`) |
+| data.repository[].os          | string  | Repository OS type. (`repository=true`)            |
+| data.repository[].type        | string  | Repository type. (`repository=true`)               |
+| data.repository[].size        | string  | Repository total size. (`repository=true`)         |
+| data.repository[].used        | string  | Repository used space. (`repository=true`)         |
+| data.repository[].free        | string  | Repository free space. (`repository=true`)         |
+| data.repository[].usage       | string  | Repository usage percentage. (`repository=true`)   |
+| data.repository[].remotePath  | string  | Repository remote path. (`repository=true`)        |
+| data.repository[].ipAddress   | array   | Repository IP addresses. (`repository=true`)       |
+| data.repository[].port        | string  | Repository port. (`repository=true`)               |
+| data.repository[].lastUpdated | string  | Repository information last update time. (`repository=true`) |
+| data.zosRepository            | array   | Center ZOS repository information. (`zosRepository=true`) |
+| data.zosRepository[].id       | string  | ZOS repository ID. (`zosRepository=true`)          |
+| data.zosRepository[].centerName | string | Center name of the ZOS repository. (`zosRepository=true`) |
+| data.zosRepository[].size     | string  | ZOS repository size. (`zosRepository=true`)        |
+| data.zosRepository[].platform | string  | Cloud platform type. (`zosRepository=true`)        |
+| data.zosRepository[].cloudKeyId | string | Cloud key ID. (`zosRepository=true`)             |
+| data.zosRepository[].bucketName | string | Storage bucket name. (`zosRepository=true`)      |
+| data.zosRepository[].created  | string  | Creation date. (`zosRepository=true`)              |
+| data.zosRepository[].lastUpdated | string | ZOS repository last update time. (`zosRepository=true`) |
+| data.centerVersion            | string  | Center version. (`detail=true`)                    |
+| data.osVersion                | string  | Center Operating system version. (`detail=true`)   |
+| data.model                    | string  | Center Hardware model. (`detail=true`)             |
+| data.privateIP                | array   | Center Private IP addresses. (`detail=true`)       |
+| data.organization             | string  | Center Organization information. (`detail=true`)   |
+| data.manufacturer             | string  | Center Hardware manufacturer. (`detail=true`)      |
+| data.sytemType                | string  | Center System architecture type. (`detail=true`)   |
+| data.cpu                      | string  | Center CPU information. (`detail=true`)            |
+| data.cpuCount                 | string  | Center CPU count. (`detail=true`)                  |
+| data.memory                   | string  | Center Memory size. (`detail=true`)                |
+| data.machineID                | string  | Center Unique machine identifier. (`detail=true`)  |
+| timestamp                     | string  | Request processing time. (ISO 8601 format)         |
+
+</details>
+
+## Center Retrieval - By Center Name
 ## Center Deletion - By ID
 
 ### Description
@@ -700,7 +1317,7 @@ None
 }
 ```
 
-### Response Structure
+### Response Structure (Success)
 
 | Field     | Type    | Description                                |
 | --------- | ------- | ------------------------------------------ |
@@ -771,7 +1388,7 @@ None
 }
 ```
 
-### Response Structure
+### Response Structure (Success)
 
 | Field      | Type    | Description                                |
 | ---------- | ------- | ------------------------------------------ |
@@ -863,7 +1480,7 @@ None
 }
 ```
 
-### Response Structure
+### Response Structure (Success)
 
 | Field        | Type    | Description                                |
 | ------------ | ------- | ------------------------------------------ |
@@ -888,11 +1505,11 @@ Retrieve repositories of a ZDM Center.
 
 ```txt
 - http
-[GET] /api/zdms/{centerID}/repositories
+[GET] /api/zdms/repositories
 
 - Curl
 curl --request GET \
-  --url http://localhost:3000/api/zdms/{centerID}/repositories \
+  --url http://localhost:3000/api/zdms/repositories \
   --header "Content-Type: application/json" \
   --header "authorization: token"
 ```
@@ -907,9 +1524,9 @@ curl --request GET \
 
 #### Parameter
 
-| Parameter | Type   | Required | Description                       | Default | Example |
-| --------- | ------ | -------- | --------------------------------- | ------- | ------- |
-| centerID  | string | Required | ID of the center to get repositories from |   | 6       |
+```txt
+None
+```
 
 #### Query
 
@@ -925,28 +1542,231 @@ None
 
 ### Response Example (Success)
 
+<details>
+<summary>Click to expand/collapse examples</summary>
+
 ```json
 {
-  "requestID": "a9b8c7d6-e5f4-3210-g1h2-i3j4k5l6m7n8",
-  "message": "Repository information list",
-  "success": true,
-  "data": [
-    {
-      "id": "16",
-      "type": "SMB",
-      "path": "\\\\192.168.1.93\\zconverter",
-      "name": "Main Backup Storage",
-      "capacity": "1073741824000 (1.00 TB)",
-      "used": "214748364800 (200.00 GB)",
-      "free": "858993459200 (800.00 GB)",
-      "lastUpdated": "2025-05-11 14:22:15"
-    }
-  ],
-  "timestamp": "2025-05-12T03:35:22.789Z"
+	"requestID": "8507220f-89b8-413c-af2b-5a2d4073a89c",
+	"message": "Server information",
+	"success": true,
+	"data": {
+		"id": "50",
+		"systemName": "RIM-WIN2008 (192.168.2.138)",
+		"systemMode": "source",
+		"os": "Window",
+		"version": "Windows Server (R) 2008 Datacenter[64bit]",
+		"ip": "218.145.120.34",
+		"status": "disconnect",
+		"licenseID": 74,
+		"lastUpdated": "2025-05-07 11:46:20",
+		"network": [
+			{
+				"name": "Intel(R) PRO/1000 MT Network Connection",
+				"ipAddress": "192.168.2.138",
+				"subNet": "255.255.252.0",
+				"gateWay": "192.168.0.1",
+				"macAddress": "00:50:56:A8:BA:83",
+				"lastUpdated": "2024-11-21 10:32:26"
+			},
+			{
+				"name": "VMware PCI Ethernet Adapter",
+				"ipAddress": "192.168.2.47",
+				"subNet": "255.255.252.0",
+				"gateWay": "192.168.0.1",
+				"macAddress": "00:50:56:A8:7B:F3",
+				"lastUpdated": "2024-11-21 10:32:26"
+			},
+			{
+				"name": "vmxnet3 이더넷 어댑터",
+				"ipAddress": "192.168.0.10",
+				"subNet": "255.255.252.0",
+				"gateWay": "192.168.0.1",
+				"macAddress": "00:50:56:A8:B5:40",
+				"lastUpdated": "2024-11-21 10:32:26"
+			}
+		],
+		"partition": [
+			{
+				"size": "37578858496 (35.00 GB)",
+				"used": "23387344896 (21.78 GB)",
+				"free": "14191513600 (13.22 GB)",
+				"usage": "62.24%",
+				"letter": "C:",
+				"device": "Disk 0, Partion 1",
+				"fileSystem": "NTFS",
+				"lastUpdated": "2024-11-21 10:32:26"
+			},
+			{
+				"size": "1073737728 (1024.00 MB)",
+				"used": "36728832 (35.03 MB)",
+				"free": "1037008896 (988.97 MB)",
+				"usage": "3.42%",
+				"letter": "H:",
+				"device": "Disk 0, Partion 2",
+				"fileSystem": "NTFS",
+				"lastUpdated": "2024-11-21 10:32:26"
+			},
+			{
+				"size": "4292866048 (4.00 GB)",
+				"used": "56864768 (54.23 MB)",
+				"free": "4236001280 (3.95 GB)",
+				"usage": "1.32%",
+				"letter": "L:",
+				"device": "Disk 0, Partion 3",
+				"fileSystem": "NTFS",
+				"lastUpdated": "2024-11-21 10:32:26"
+			},
+			{
+				"size": "3145723904 (2.93 GB)",
+				"used": "51081216 (48.71 MB)",
+				"free": "3094642688 (2.88 GB)",
+				"usage": "1.62%",
+				"letter": "F:",
+				"device": "Disk 1, Partion 2",
+				"fileSystem": "NTFS",
+				"lastUpdated": "2024-11-21 10:32:26"
+			},
+			{
+				"size": "2186276864 (2.04 GB)",
+				"used": "46268416 (44.13 MB)",
+				"free": "2140008448 (1.99 GB)",
+				"usage": "2.12%",
+				"letter": "M:",
+				"device": "Disk 1, Partion 3",
+				"fileSystem": "NTFS",
+				"lastUpdated": "2024-11-21 10:32:26"
+			}
+		],
+		"repository": [
+			{
+				"id": "5",
+				"os": "Window",
+				"size": "20326709770 (18.93 GB)",
+				"used": "6135196170 (5.71 GB)",
+				"free": "14191513600 (13.22 GB)",
+				"usage": "30.18%",
+				"type": "Source Server",
+				"localPath": "C:\\ZConverter",
+				"remotePath": "",
+				"remoteUser": "",
+				"ipAddress": [
+					"192.168.2.138",
+					"192.168.2.47",
+					"192.168.0.10"
+				],
+				"port": "50005",
+				"lastUpdated": "2024-11-21 10:32:26"
+			},
+			{
+				"id": "6",
+				"os": "Window",
+				"size": "3094642688 (2.88 GB)",
+				"used": "0 (0)",
+				"free": "3094642688 (2.88 GB)",
+				"usage": "0.00%",
+				"type": "Source Server",
+				"localPath": "F:\\ZConverter",
+				"remotePath": "",
+				"remoteUser": "",
+				"ipAddress": [
+					"192.168.2.138",
+					"192.168.2.47",
+					"192.168.0.10"
+				],
+				"port": "50005",
+				"lastUpdated": "2024-11-21 10:32:26"
+			},
+			{
+				"id": "7",
+				"os": "Window",
+				"size": "2146369536 (2.00 GB)",
+				"used": "0 (0)",
+				"free": "2146369536 (2.00 GB)",
+				"usage": "0.00%",
+				"type": "Source Server",
+				"localPath": "Z:\\ZConverter",
+				"remotePath": "",
+				"remoteUser": "",
+				"ipAddress": [
+					"192.168.2.138"
+				],
+				"port": "50005",
+				"lastUpdated": "2024-11-11 21:54:15"
+			},
+			{
+				"id": "29",
+				"os": "Window",
+				"size": "1037008896 (988.97 MB)",
+				"used": "0 (0)",
+				"free": "1037008896 (988.97 MB)",
+				"usage": "0.00%",
+				"type": "Source Server",
+				"localPath": "H:\\ZConverter",
+				"remotePath": "",
+				"remoteUser": "",
+				"ipAddress": [
+					"192.168.2.138",
+					"192.168.2.47",
+					"192.168.0.10"
+				],
+				"port": "50005",
+				"lastUpdated": "2024-11-21 10:32:26"
+			},
+			{
+				"id": "30",
+				"os": "Window",
+				"size": "4236001280 (3.95 GB)",
+				"used": "0 (0)",
+				"free": "4236001280 (3.95 GB)",
+				"usage": "0.00%",
+				"type": "Source Server",
+				"localPath": "L:\\ZConverter",
+				"remotePath": "",
+				"remoteUser": "",
+				"ipAddress": [
+					"192.168.2.138",
+					"192.168.2.47",
+					"192.168.0.10"
+				],
+				"port": "50005",
+				"lastUpdated": "2024-11-21 10:32:26"
+			},
+			{
+				"id": "31",
+				"os": "Window",
+				"size": "2140008448 (1.99 GB)",
+				"used": "0 (0)",
+				"free": "2140008448 (1.99 GB)",
+				"usage": "0.00%",
+				"type": "Source Server",
+				"localPath": "M:\\ZConverter",
+				"remotePath": "",
+				"remoteUser": "",
+				"ipAddress": [
+					"192.168.2.138",
+					"192.168.2.47",
+					"192.168.0.10"
+				],
+				"port": "50005",
+				"lastUpdated": "2024-11-21 10:32:26"
+			}
+		],
+		"agent": "v7 build 7016",
+		"model": "VMware Virtual Platform",
+		"manufacturer": "VMware, Inc.",
+		"cpu": "Intel(R) Xeon(R) Silver 4216 CPU @ 2.10GHz",
+		"cpuCount": "2",
+		"memory": "4293414912 (4.00 GB)"
+	},
+	"timestamp": "2025-05-15T03:24:04.430Z"
 }
 ```
+</details>
 
-### Response Structure
+### Response Structure (Success)
+<details>
+<summary>Click to expand/collapse examples</summary>
 
 | Field               | Type    | Description                                |
 | ------------------- | ------- | ------------------------------------------ |
@@ -963,6 +1783,7 @@ None
 | data[].free         | string  | Repository free space.                     |
 | data[].lastUpdated  | string  | Repository information last update time.   |
 | timestamp           | string  | Request processing time. (ISO 8601 format) |
+</details>
 
 ## Center Repository Modification
 
@@ -1043,7 +1864,7 @@ None
 }
 ```
 
-### Response Structure
+### Response Structure (Success)
 
 | Field        | Type    | Description                                |
 | ------------ | ------- | ------------------------------------------ |
@@ -1119,7 +1940,7 @@ None
 }
 ```
 
-### Response Structure
+### Response Structure (Success)
 
 | Field        | Type    | Description                                |
 | ------------ | ------- | ------------------------------------------ |
@@ -1210,7 +2031,7 @@ None
 }
 ```
 
-### Response Structure
+### Response Structure (Success)
 
 | Field          | Type    | Description                                |
 | -------------- | ------- | ------------------------------------------ |
@@ -1309,7 +2130,7 @@ None
 }
 ```
 
-### Response Structure
+### Response Structure (Success)
 
 | Field                | Type    | Description                                |
 | -------------------- | ------- | ------------------------------------------ |
@@ -1392,7 +2213,7 @@ None
 }
 ```
 
-### Response Structure
+### Response Structure (Success)
 
 | Field     | Type    | Description                                |
 | --------- | ------- | ------------------------------------------ |
@@ -1474,7 +2295,7 @@ None
 }
 ```
 
-### Response Structure
+### Response Structure (Success)
 
 | Field         | Type    | Description                                |
 | ------------- | ------- | ------------------------------------------ |
@@ -1709,7 +2530,7 @@ None
 }
 ```
 
-### Response Structure
+### Response Structure (Success)
 
 | Field            | Type    | Description                                                  |
 | ---------------- | ------- | ------------------------------------------------------------ |
@@ -1894,7 +2715,7 @@ None
 ```
 </details>
 
-### Response Structure
+### Response Structure (Success)
 
 <details>
 <summary>Click to expand/collapse examples</summary>
@@ -2226,7 +3047,7 @@ The request body can include any of the parameters from the Backup Registration 
 }
 ```
 
-### Response Structure
+### Response Structure (Success)
 
 | Field              | Type    | Description                                |
 | ------------------ | ------- | ------------------------------------------ |
@@ -2324,7 +3145,7 @@ The request body is identical to the "Backup Job Modification - By Job ID" endpo
 }
 ```
 
-### Response Structure
+### Response Structure (Success)
 
 The response structure is identical to the "Backup Job Modification - By Job ID" endpoint.
 
@@ -2389,7 +3210,7 @@ None
 }
 ```
 
-### Response Structure
+### Response Structure (Success)
 
 | Field         | Type    | Description                                |
 | ------------- | ------- | ------------------------------------------ |
@@ -2461,7 +3282,7 @@ None
 }
 ```
 
-### Response Structure
+### Response Structure (Success)
 
 The response structure is identical to the "Backup Job Deletion - By Job ID" endpoint.
 
@@ -2698,7 +3519,7 @@ None
 
 The response for a non-running job is identical to the "Backup Job Monitoring - By Job ID" endpoint.
 
-### Response Structure
+### Response Structure (Success)
 
 The response structure is identical to the "Backup Job Monitoring - By Job ID" endpoint, with separate formats for running and non-running jobs.
 
@@ -2796,7 +3617,7 @@ None
 }
 ```
 
-### Response Structure
+### Response Structure (Success)
 
 The response includes an array of job monitoring information objects, with each object following the structure of either the "Running Job" or "Non-Running Job" as described in the "Backup Job Monitoring - By Job ID" endpoint.
 
@@ -2930,7 +3751,7 @@ None
 }
 ```
 
-### Response Structure
+### Response Structure (Success)
 
 | Field                        | Type    | Description                             |
 | ---------------------------- | ------- | --------------------------------------- |
@@ -3087,7 +3908,7 @@ None
 }
 ```
 
-### Response Structure
+### Response Structure (Success)
 
 | Field                  | Type    | Description                             |
 | ---------------------- | ------- | --------------------------------------- |
@@ -3415,7 +4236,7 @@ None
 }
 ```
 
-### Response Structure
+### Response Structure (Success)
 
 | Field         | Type    | Description                                |
 | ------------- | ------- | ------------------------------------------ |
@@ -3434,7 +4255,7 @@ None
 Backup Job Registration Procedure:
 1.  Token Issuance
     [POST] /api/token/issue
-2.  Server List Retrieval
+2.  Server Retrieval - All
     [GET] /api/servers
     2-1. Server Partition List Retrieval (Not needed if registering all partitions of the Server)
 3.  License List Retrieval
