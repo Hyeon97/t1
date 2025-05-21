@@ -1,6 +1,6 @@
 import { validationMiddleware } from "../../../middlewares/validation/validationMiddleware"
 import { ServerGetByIdDTO, ServerGetByNameDTO } from "../dto/param/server-get-param.dto"
-import { ServerGetQueryDTO } from "../dto/query/server-query-filter.dto"
+import { ServerGetQueryDTO } from "../dto/query/server-get-query"
 
 /**
  * Server 정보 조회
