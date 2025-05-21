@@ -3,7 +3,7 @@
 /////////////////////////////////
 
 import { JobResult } from "../../../types/common/job"
-import { RepositoryType } from "../../../types/common/repository"
+import { AllRepositoryType } from "../../../types/common/repository"
 import { BackupType } from "./backup-common.type"
 import { BackupTable } from "./db/job-backup"
 import { BackupInfoTable } from "./db/job-backup-info"
@@ -24,7 +24,7 @@ export interface BackupResponseFields {
   }
   repository: {
     id: string
-    type: RepositoryType | string
+    type: AllRepositoryType | string
     path: string
   }
   timestamp: {

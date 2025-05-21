@@ -5,13 +5,6 @@
 import { Expose } from "class-transformer"
 import { IsNotEmpty, IsNumber, IsString } from "class-validator"
 
-export class SpecificBackupGetParamDTO {
-  @IsString()
-  @IsNotEmpty({ message: "Backup 식별자는 필수입니다" })
-  @Expose()
-  identifier!: string
-}
-
 /**
  * 작업 이름으로 모니터링
  */

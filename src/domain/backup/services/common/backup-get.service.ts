@@ -59,9 +59,7 @@ export class BackupGetService extends BaseService {
       // Backup 기본 정보 조회
       const backups = await this.backupRepository.findAll({ filterOptions })
 
-      if (!backups.length) {
-        return { backups: [], backupInfos: [] }
-      }
+      if (!backups.length) { return { backups: [], backupInfos: [] } }
 
       // 조회된 backup의 JobName 목록 추출
       const jobNames = backups.map((backup: BackupTable) => backup.sJobName)
@@ -158,72 +156,89 @@ export class BackupGetService extends BaseService {
     }
   }
 
-  // /**
-  //  * Backup 작업 이름으로 조회
-  //  */
-  // async getBackupByName({ name, filterOptions }: { name: string; filterOptions: BackupFilterOptions }): Promise<BackupDataResponse> {
-  //   try {
-  //     const nameFilter = { ...filterOptions, name }
-  //     const { backups, backupInfos } = await this.getBackupsByBackupFirst({
-  //       filterOptions: nameFilter,
-  //     })
+  /**
+   * Backup 작업 이름으로 조회
+   */
+  async getBackupByName({ name, filterOptions }: { name: string; filterOptions: BackupFilterOptions }): Promise<BackupDataResponse> {
+    try {
+      asyncContextStorage.addService({ name: this.serviceName })
+      asyncContextStorage.addOrder({ component: this.serviceName, method: "getBackupByName", state: "start" })
 
-  //     const results = this.combineBackupInfoData({ backups, backupInfos })
+      const nameFilter = { ...filterOptions, jobName: name }
+      const { backups, backupInfos } = await this.getBackupsByBackupFirst({
+        filterOptions: nameFilter,
+      })
 
-  //     if (results.length === 0) {
-  //       throw ApiError.notFound({ message: `'${name}' Backup 작업을 찾을 수 없습니다` })
-  //     }
+      const results = this.combineBackupInfoData({ backups, backupInfos })
 
-  //     return results[0]
-  //   } catch (error) {
-  //     if (error instanceof ApiError) throw error
-  //     throw ApiError.internal({ message: "Backup 작업을 조회하는 중에 예기치 못한 오류 발생" })
-  //   }
-  // }
+      if (results.length === 0) {
+        throw new Error(`'${name}' Backup 작업을 찾을 수 없습니다`)
+      }
 
-  // /**
-  //  * Backup 작업 ID로 조회
-  //  */
-  // async getBackupById({ id, filterOptions }: { id: number; filterOptions: BackupFilterOptions }): Promise<BackupDataResponse> {
-  //   try {
-  //     const idFilter = { ...filterOptions, id }
-  //     const { backups, backupInfos } = await this.getBackupsByBackupFirst({
-  //       filterOptions: idFilter,
-  //     })
+      asyncContextStorage.addOrder({ component: this.serviceName, method: "getBackupByName", state: "end" })
+      return results[0]
+    } catch (error) {
+      return this.handleServiceError({
+        error,
+        method: "getBackupByName",
+        message: `[Backup 정보 조회] - '${name}' Backup 작업을 조회하는 중에 예기치 못한 오류 발생`,
+      })
+    }
+  }
 
-  //     const results = this.combineBackupInfoData({ backups, backupInfos })
+  /**
+   * Backup 작업 ID로 조회
+   */
+  async getBackupById({ id, filterOptions }: { id: number; filterOptions: BackupFilterOptions }): Promise<BackupDataResponse> {
+    try {
+      asyncContextStorage.addService({ name: this.serviceName })
+      asyncContextStorage.addOrder({ component: this.serviceName, method: "getBackupById", state: "start" })
 
-  //     if (results.length === 0) {
-  //       throw ApiError.notFound({ message: `ID가 '${id}'인 Backup 작업을 찾을 수 없습니다` })
-  //     }
+      const idFilter = { ...filterOptions, jobId: id }
+      const { backups, backupInfos } = await this.getBackupsByBackupFirst({
+        filterOptions: idFilter,
+      })
 
-  //     return results[0]
-  //   } catch (error) {
-  //     if (error instanceof ApiError) throw error
-  //     throw ApiError.internal({ message: "Backup 작업을 조회하는 중에 예기치 못한 오류 발생" })
-  //   }
-  // }
+      const results = this.combineBackupInfoData({ backups, backupInfos })
 
-  // /**
-  //  * Backup 작업 대상 Server 이름으로 조회
-  //  */
-  // async getBackupsByServerName({
-  //   serverName,
-  //   filterOptions,
-  // }: {
-  //   serverName: string
-  //   filterOptions: BackupFilterOptions
-  // }): Promise<BackupDataResponse[]> {
-  //   try {
-  //     const serverFilter = { ...filterOptions, serverName }
-  //     const { backups, backupInfos } = await this.getBackupsByBackupFirst({
-  //       filterOptions: serverFilter,
-  //     })
+      if (results.length === 0) {
+        throw new Error(`ID가 '${id}'인 Backup 작업을 찾을 수 없습니다`)
+      }
 
-  //     return this.combineBackupInfoData({ backups, backupInfos })
-  //   } catch (error) {
-  //     if (error instanceof ApiError) throw error
-  //     throw ApiError.internal({ message: "Backup 작업을 조회하는 중에 예기치 못한 오류 발생" })
-  //   }
-  // }
+      asyncContextStorage.addOrder({ component: this.serviceName, method: "getBackupById", state: "end" })
+      return results[0]
+    } catch (error) {
+      return this.handleServiceError({
+        error,
+        method: "getBackupById",
+        message: `[Backup 정보 조회] - ID가 '${id}'인 Backup 작업을 조회하는 중에 예기치 못한 오류 발생`,
+      })
+    }
+  }
+
+  /**
+   * Backup 작업 대상 Server 이름으로 조회
+   */
+  async getBackupsByServerName({ serverName, filterOptions, }: { serverName: string, filterOptions: BackupFilterOptions, }): Promise<BackupDataResponse[]> {
+    try {
+      asyncContextStorage.addService({ name: this.serviceName })
+      asyncContextStorage.addOrder({ component: this.serviceName, method: "getBackupsByServerName", state: "start" })
+
+      const serverFilter = { ...filterOptions, serverName }
+      const { backups, backupInfos } = await this.getBackupsByBackupFirst({
+        filterOptions: serverFilter,
+      })
+
+      const results = this.combineBackupInfoData({ backups, backupInfos })
+
+      asyncContextStorage.addOrder({ component: this.serviceName, method: "getBackupsByServerName", state: "end" })
+      return results
+    } catch (error) {
+      return this.handleServiceError({
+        error,
+        method: "getBackupsByServerName",
+        message: `[Backup 정보 조회] - Server '${serverName}'의 Backup 작업을 조회하는 중에 예기치 못한 오류 발생`,
+      })
+    }
+  }
 }

@@ -4,9 +4,6 @@
 
 import { JobType } from "../../../types/common/job"
 
-//  Backup 조회 타입
-export type BackupSearchType = "id" | "name" | "serverName"
-
 //  backup 타입 정의
 export type BackupType = JobType
 export enum BackupTypeEnum {

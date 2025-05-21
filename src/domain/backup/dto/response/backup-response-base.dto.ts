@@ -3,7 +3,7 @@
 ////////////////////////////////
 
 import { JobResult } from "../../../../types/common/job"
-import { RepositoryConnectionTypeMap, RepositoryType } from "../../../../types/common/repository"
+import { AllRepositoryType, RepositoryConnectionTypeMap } from "../../../../types/common/repository"
 import { BackupTypeMap } from "../../../backup/types/backup-common.type"
 import { BackupType } from "../../types/backup-common.type"
 import { BackupDataResponse, BackupResponseFields, DEFAULT_VALUES_BACKUP_RESPONSE } from "../../types/backup-response.type"
@@ -21,7 +21,7 @@ export class BackupResponseBaseDTO implements BackupResponseFields {
   }
   repository: {
     id: string
-    type: RepositoryType | string
+    type: AllRepositoryType | string
     path: string
   }
   timestamp: {

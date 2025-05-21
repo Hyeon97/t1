@@ -6,7 +6,7 @@ import { Expose } from "class-transformer"
 import { IsIn, IsOptional, IsString } from "class-validator"
 import { VALID_SYSTEM_MODE_VALUES } from "../../../../types/common/const-value"
 import { JobResult, JobStatusType } from "../../../../types/common/job"
-import { RepositoryType } from "../../../../types/common/repository"
+import { RepositoryTypeNonSSH } from "../../../../types/common/repository"
 import { SystemModeType } from "../../../server/types/server-common.type"
 import { BackupType } from "../../types/backup-common.type"
 import { BackupFilterOptions } from "../../types/backup-get.type"
@@ -45,7 +45,7 @@ export class BackupGetQueryDTO implements BackupFilterOptions {
   @IsOptional()
   @IsIn(["smb", "nfs"], { message: "repositoryType은 'smb', 'nfs'만 가능합니다" })
   @Expose()
-  repositoryType?: RepositoryType
+  repositoryType?: RepositoryTypeNonSSH
 
   //  작업 사용 repository Path
   @IsOptional()

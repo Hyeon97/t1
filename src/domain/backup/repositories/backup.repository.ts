@@ -30,6 +30,18 @@ export class BackupRepository extends BaseRepository {
       if (filterOptions.status) {
         this.addCondition({ condition: "nJobStatus = ?", params: [filterOptions.status] })
       }
+      //  server name 필터 적용
+      if (filterOptions.serverName) {
+        this.addCondition({ condition: "sSystemName = ?", params: [filterOptions.serverName] })
+      }
+      //  job id 필터 적용
+      if (filterOptions.jobId) {
+        this.addCondition({ condition: "nID = ?", params: [filterOptions.jobId] })
+      }
+      //  job name 필터 적용
+      if (filterOptions.jobName) {
+        this.addCondition({ condition: "sJobName = ?", params: [filterOptions.jobName] })
+      }
       ContextLogger.debug({ message: `필터 옵션 적용됨` })
       asyncContextStorage.addOrder({ component: this.repositoryName, method: "applyFilters", state: "end" })
     } catch (error) {

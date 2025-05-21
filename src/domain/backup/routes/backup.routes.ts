@@ -1,8 +1,8 @@
 import { Router } from "express"
 import {
-  backupGetController,
   backupDeleteController,
   backupEditController,
+  backupGetController,
   backupMonitoringController,
   backupRegistController,
 } from "../controllers/controller-registry"
@@ -43,11 +43,11 @@ export class BackupRoutes {
     //  전체 목록 조회
     this.router.get("/", validateBackupGetQuery, backupGetController.getBackups)
     //  작업 ID로 조회
-    this.router.get("/job-id/:jobId", validateBackupGetByJobIdParams, validateBackupGetQuery)
+    this.router.get("/job-id/:jobId", validateBackupGetByJobIdParams, validateBackupGetQuery, backupGetController.getBackupByJobId)
     //  작업 이름으로 조회
-    this.router.get("/job-name/:jobName", validateBackupGetByJobNameParams, validateBackupGetQuery)
+    this.router.get("/job-name/:jobName", validateBackupGetByJobNameParams, validateBackupGetQuery, backupGetController.getBackupByJobName)
     //  작업 대상 서버 이름으로 조회
-    this.router.get("/server-name/:serverName", validateBackupGetByServerNameParams, validateBackupGetQuery)
+    this.router.get("/server-name/:serverName", validateBackupGetByServerNameParams, validateBackupGetQuery, backupGetController.getBackupByServerName)
 
     //  [Backup 작업 삭제]
     //  작업 ID로 삭제
