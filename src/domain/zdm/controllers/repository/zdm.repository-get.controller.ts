@@ -57,7 +57,7 @@ export class ZdmRepositoryGetController extends BaseController {
       ContextLogger.debug({ message: `적용된 필터 옵션`, meta: filterOptions })
 
       //  서비스 호출
-      const repositories = await this.zdmRepositoryGetService.getRepositoryList({ filterOptions })
+      const repositories = (await this.zdmRepositoryGetService.getRepositoryList({ filterOptions })).items
 
       //  출력 가공
       const repositoriesDTO = ZdmRepositoryInfoDTO.fromEntities({ repositories })
