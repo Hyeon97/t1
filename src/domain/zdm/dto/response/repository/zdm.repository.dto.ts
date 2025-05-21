@@ -6,7 +6,6 @@ import { OSTypeMap } from "../../../../../types/common/os"
 import { RepositoryTypeMap } from "../../../../../types/common/repository"
 import { formatDiskSize } from "../../../../../utils/data-convert.utils"
 import { ZdmRepositoryTable } from "../../../types/db/center-repository"
-import { ZdmRepositoryDataResponse } from "../../../types/zdm-repository/zdm-repository-response.type"
 
 export class ZdmRepositoryInfoDTO {
   id: string
@@ -18,6 +17,7 @@ export class ZdmRepositoryInfoDTO {
   free: string
   usage: string
   remotePath: string
+  localPath: string
   ipAddress: string[]
   port: string
   lastUpdated: string
@@ -27,6 +27,7 @@ export class ZdmRepositoryInfoDTO {
     this.os = OSTypeMap.toString({ value: repo.nOS })
     this.type = RepositoryTypeMap.toString({ value: repo.nType })
     this.remotePath = repo.sRemotePath
+    this.localPath = repo.sLocalPath
     this.ipAddress = repo.sIPAddress.split('|').filter(el => el)
     this.port = String(repo.nZConverterPort)
     this.lastUpdated = repo.sLastUpdateTime || "Unknwon"
@@ -67,6 +68,7 @@ export class ZdmRepositoryInfoDTO {
       free: this.formatSize({ size: this.free }),
       usage: this.usage,
       remotePath: this.remotePath,
+      localPath: this.localPath,
       ipAddress: this.ipAddress,
       port: this.port,
       lastUpdated: this.lastUpdated,
@@ -77,11 +79,7 @@ export class ZdmRepositoryInfoDTO {
     return new ZdmRepositoryInfoDTO({ repo: repositories })
   }
 
-  static fromEntities({ repositories }: { repositories: ZdmRepositoryDataResponse | ZdmRepositoryTable[] }): ZdmRepositoryInfoDTO[] {
-    if ("items" in repositories) {
-      return repositories.items.map((repositories) => ZdmRepositoryInfoDTO.fromEntity({ repositories }))
-    } else {
-      return repositories.map((repositories) => ZdmRepositoryInfoDTO.fromEntity({ repositories }))
-    }
+  static fromEntities({ repositories }: { repositories: ZdmRepositoryTable[] }): ZdmRepositoryInfoDTO[] {
+    return repositories.map((repositories) => ZdmRepositoryInfoDTO.fromEntity({ repositories }))
   }
 }
