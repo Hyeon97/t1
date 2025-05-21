@@ -59,3 +59,15 @@ DELETE /api/objects/system/linux?system=linux&id=99
 | Parameter | Type   | Required | Description                                    | Default | Example |
 | --------- | ------ | -------- | ---------------------------------------------- | ------- | ------- |
 | zdmName     | string | Required | Name of the zdm to retrieve.|        | test-source-zdm-1      |
+
+### Request Example
+
+> The request examples are identical to those in the [Backup Job Modification - By Job ID](#backup-job-modification---by-job-id) endpoint.
+
+### Response Example (Success)
+
+> The success response format is identical to that of the [Backup Job Modification - By Job ID](#backup-job-modification---by-job-id) endpoint.
+
+### Response Structure (Success)
+
+> The response structure is identical to the [Backup Job Modification - By Job ID](#backup-job-modification---by-job-id) endpoint.

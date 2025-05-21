@@ -1,0 +1,79 @@
+# 기본 양식
+# 대제목
+## 서브 제목
+### Description
+> **Warning!** This feature is currently not supported. (will be supported in the future)
+```txt
+```
+### URL
+```txt
+```
+### Request Parameters
+양식은 
+```txt
+```
+or
+| Parameter | Type | Required | Description | Default | Example |
+| --------- | ---- | -------- | ----------- | ------- | ------- |
+####  Headers
+#### Parameter
+#### Query
+> This endpoint uses the same query parameters as [Server Retrieval - All](#server-retrieval---all).
+#### Body
+### Request Example
+```txt
+```
+or
+```json
+```
+or
+> This example can be used in the same way by only changing the endpoint from `/api/servers/` to `/api/servers/server-name/{serverName}` format from [Server Retrieval - All](#server-retrieval---all)
+### Response Example (Success)
+<details>
+<summary>Click to expand/collapse examples</summary>
+```json
+```
+</details>
+# 단일 객체 리턴시
+> This structure is nearly identical to the **Response Example (Success)** of [Center Retrieval - All](#center-retrieval---all), but with the difference that the data is provided as a single object rather than an array.
+# 단일 객체 배열 리턴시
+> This structure is nearly identical to the **Response Example (Success)** of [Server Retrieval - All](#server-retrieval---all), but with the difference that the data array will contain only a single server object instead of multiple servers.
+
+### Response Structure (Success)
+<details>
+<summary>Click to expand/collapse examples</summary>
+| Field | Type | Description |
+| ----- | ---- | ----------- |
+</details>
+<br><br>
+
+
+# 공용 문구
+#### Query
+> The query parameters are identical to those of the [Backup Job Modification - By Job ID](#backup-job-modification---by-job-id) endpoint.
+
+#### Parameter
+> The path parameters are identical to those of the [Backup Job Modification - By Job ID](#backup-job-modification---by-job-id) endpoint.
+
+#### Body
+> The request body structure is identical to that of the [Backup Job Modification - By Job ID](#backup-job-modification---by-job-id) endpoint. All the same parameters and formats apply.
+
+#### Request Example
+<!-- > The request examples are identical to those in the [Backup Job Modification - By Job ID](#backup-job-modification---by-job-id) endpoint.
+
+> This example can be used in the same way by only changing the endpoint from `/api/backups/` to `/api/backups/job-id/{jobId}` format from [Backup Job Retrieval - All](#backup-job-retrieval---all) -->
+
+> The request examples from [Backup Job Retrieval - All](#backup-job-retrieval---all) can be used with this endpoint by simply changing the URL path from `/api/backups/` to `/api/backups/job-id/{jobId}`.
+
+#### Response Example (Success)
+<!-- > The response example structure is identical to that of the [Backup Job Modification - By Job ID](#backup-job-modification---by-job-id) endpoint. -->
+- 양식 설명시에는 format
+<!-- > The success response format is identical to that of the **Response Example (Success)** of [Backup Job Retrieval - All](#backup-job-retrieval---all) -->
+
+> The success response format is identical to that of the **Response Example (Success)** section in the [Backup Job Modification - By Job ID](#backup-job-modification---by-job-id) endpoint.
+
+#### Response Structure (Success)
+- 양식에 대한 각각의 구조 설명시에는 structure
+<!-- > The response structure is identical to that of the [Backup Job Modification - By Job ID](#backup-job-modification---by-job-id) endpoint. -->
+
+> The response structure is identical to that of the **Response Structure (Success)** section in the [Backup Job Retrieval - All](#backup-job-retrieval---all) endpoint.

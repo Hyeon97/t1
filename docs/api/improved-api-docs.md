@@ -11,9 +11,16 @@
   - Center
     - Center Retrieval - All
     - Center Retrieval - By Center ID
+    - Center Repository Retrieval
   - License
   - Backup
     - Backup Job Registration
+    - Backup Job Reterieval - All ( 작업 상태 추가 작성 필요 )
+    - Backup Job Reterieval - By Job ID
+    - Backup Job Reterieval - By Job Name
+    - Backup Job Reterieval - By Server Name
+    - Backup Job Modification - By Job ID
+    - Backup Job Modification - By Job Name
   - Schedule
     - Schedule Registration  
     - Schedule Retrieval
@@ -28,23 +35,23 @@
 - [Server](#server)
   - [Server Retrieval - All](#server-retrieval---all)
   - [Server Retrieval - By Server Name](#server-retrieval---by-server-name)
-  - [Server Deletion - By ID](#server-deletion---by-id)
-  - [Server Deletion - By Server Name](#server-deletion---by-server-name)
+  - [Server Deletion - By ID]
+  - [Server Deletion - By Server Name]
 - [Center - ZDM Portal](#center---zdm-portal)
   - [Center Retrieval - All](#center-retrieval---all)
   - [Center Retrieval - By ID](#center-retrieval---by-id)
-  - [Center Retrieval - By Center Name](#center-retrieval---by-center-name)
-  - [Center Deletion - By ID](#center-deletion---by-id)
-  - [Center Deletion - By Center Name](#center-deletion---by-center-name)
-  - [Center Repository Registration](#center-repository-registration)
+  - [Center Retrieval - By Center Name]
+  - [Center Deletion - By ID]
+  - [Center Deletion - By Center Name]
+  - [Center Repository Registration]
   - [Center Repository Retrieval](#center-repository-retrieval)
-  - [Center Repository Modification](#center-repository-modification)
-  - [Center Repository Deletion](#center-repository-deletion)
+  - [Center Repository Modification]
+  - [Center Repository Deletion]
 - [License](#license)
-  - [License Registration](#license-registration)
-  - [License Retrieval](#license-retrieval)
-  - [License Deletion](#license-deletion)
-  - [License Assignment](#license-assignment)
+  - [License Registration]
+  - [License Retrieval]
+  - [License Deletion]
+  - [License Assignment]
 - [Backup](#backup)
   - [Backup Job Registration](#backup-job-registration)
   - [Backup Job Retrieval - All](#backup-job-retrieval---all)
@@ -55,15 +62,15 @@
   - [Backup Job Modification - By Job Name](#backup-job-modification---by-job-name)
   - [Backup Job Deletion - By Job ID](#backup-job-deletion---by-job-id)
   - [Backup Job Deletion - By Job Name](#backup-job-deletion---by-job-name)
-  - [Backup Job Monitoring - By Job ID](#backup-job-monitoring---by-job-id)
-  - [Backup Job Monitoring - By Job Name](#backup-job-monitoring---by-job-name)
-  - [Backup Job Monitoring - By Source Server Name](#backup-job-monitoring---by-source-server-name)
-  - [Backup Job History](#backup-job-history)
-  - [Backup Job Logs](#backup-job-logs)
+  - [Backup Job Monitoring - By Job ID]
+  - [Backup Job Monitoring - By Job Name]
+  - [Backup Job Monitoring - By Source Server Name]
+  - [Backup Job History]
+  - [Backup Job Logs]
 - [Schedule](#schedule)
   - [Schedule Registration](#schedule-registration)
   - [Schedule Retrieval](#schedule-retrieval)
-  - [Schedule Deletion](#schedule-deletion)
+  - [Schedule Deletion]
 - [Process Flow](#process-flow)
   - [Backup Job Registration Flow](#backup-job-registration-flow)
 
@@ -74,7 +81,7 @@
 
 ## Authentication Method
 
-After obtaining an API token, all subsequent API requests must include the following authentication header:
+> After obtaining an API token, all subsequent API requests must include the following authentication header:
 
 ```txt
 authorization: {issued token}
@@ -82,7 +89,7 @@ authorization: {issued token}
 
 ## Common Response Format
 
-All API responses follow this structure:
+> All API responses follow this structure:
 
 ```json
 {
@@ -94,7 +101,7 @@ All API responses follow this structure:
 }
 ```
 
-Error responses follow this structure:
+> Error responses follow this structure:
 
 ```json
 {
@@ -116,6 +123,7 @@ Error responses follow this structure:
 ## Token Issuance
 
 ### Description
+> **Note**: The issued token has an expiration period of 1 hour and must be included in the authentication header for subsequent API requests.
 
 ```txt
 Obtain a token for API usage.
@@ -171,6 +179,8 @@ None
 ```
 
 ### Response Example (Success)
+<details>
+<summary>Click to expand/collapse examples</summary>
 
 ```json
 {
@@ -178,13 +188,16 @@ None
   "message": "Token has been successfully issued",
   "success": true,
   "data": {
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWR4IjoxLCJlbWFpbCI6ImFkbWluQHpjb252ZXJ0ZXIuY29tIiwicGFzc3dvcmQiOiI2YzExMGE5ZWYyZTY3MWExYWJmMDBhMWFkNGY0MmNiYjY2OTExOWRiZjA0MTZhOTU3N2ExMDVjODA0ZDcwM2RjIiwiaWF0IjoxNzQ2Njg4NzY0LCJleHAiOjE3NDY2OTIzNjR9.PSaDjwu-vuduCA4D0Ag_WeLa-657EW1K1QGjUZHOX64"
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaLCJl..."
   },
   "timestamp": "2025-05-08T07:19:24.739Z"
 }
 ```
+</details>
 
 ### Response Structure (Success)
+<details>
+<summary>Click to expand/collapse examples</summary>
 
 | Field      | Type    | Description                                |
 | ---------- | ------- | ------------------------------------------ |
@@ -193,36 +206,7 @@ None
 | success    | boolean | Request success status.                    |
 | data.token | string  | Issued JWT token.                          |
 | timestamp  | string  | Request processing time. (ISO 8601 format) |
-
-> **Note**: The issued token has an expiration period and must be included in the authentication header for subsequent API requests.
-
-### Response Example (Failure)
-
-```json
-{
-  "requestID": "3e0e74f1-3feb-4e11-8988-4d1dfcc42263",
-  "success": false,
-  "error": {
-    "code": "NOT_FOUND",
-    "message": "User with email 'admin@zcoverter.com' could not be found",
-    "details": {
-      "cause": ""
-    }
-  },
-  "timestamp": "2025-05-09T06:19:16.885Z"
-}
-```
-
-### Response Structure (Error)
-
-| Field         | Type    | Description                                |
-| ------------- | ------- | ------------------------------------------ |
-| requestID     | string  | Request unique ID.                         |
-| success       | boolean | Request success status.                    |
-| error.code    | string  | Error code.                                |
-| error.message | string  | Error message.                             |
-| timestamp     | string  | Request processing time. (ISO 8601 format) |
-
+</details>
 <br><br>
 
 # Server
@@ -291,19 +275,19 @@ You can combine multiple filters to narrow down the server list:
 - Disconnected Linux servers: os=lin&connection=disconnect
 - Unassigned Windows servers with full details: os=win&license=unassign&detail=true
 
-- Show all additional information
+# Show all additional information
 [GET] /api/servers?disk=true&network=true&partition=true&repository=true&detail=true
 
-- Retrieval only target servers
+# Retrieval only target servers
 [GET] /api/servers?mode=target
 
-- Retrieval only Windows servers
+# Retrieval only Windows servers
 [GET] /api/servers?os=win
 
-- Retrieval only servers connected to the center
+# Retrieval only servers connected to the center
 [GET] /api/servers?connection=connect
 
-- Retrieval only servers without license assignment
+# Retrieval only servers without license assignment
 [GET] /api/servers?license=unassign
 ```
 
@@ -480,7 +464,7 @@ curl --request GET \
 
 #### Query
 
-> This endpoint uses the same query parameters as [Server Retrieval - All](#server-retrieval---all)
+> The query parameters are identical to those of the [Server Retrieval - All](#server-retrieval---all) endpoint.
 
 #### Body
 
@@ -490,7 +474,7 @@ None
 
 ### Request Example
 
-> This example can be used in the same way by only changing the endpoint from `/api/servers/` to `/api/servers/server-name/{serverName}` format from [Server Retrieval - All](#server-retrieval---all)
+> The request examples from [Server Retrieval - All](#server-retrieval---all) can be used with this endpoint by simply changing the URL path from `/api/servers/` to `/api/servers/server-name/{serverName}`.
 
 ```txt
 - Show all additional information
@@ -630,146 +614,7 @@ None
 </details>
 
 ## Server Deletion - By ID
-
-### Description
-> **Warning!** This feature is currently not supported. (will be supported in the future)
-```txt
-Delete a server registered to the ZDM Center using its ID.
-```
-
-### URL
-
-```txt
-- http
-[DELETE] /api/servers/server-id/{serverId}
-
-- Curl
-curl --request DELETE \
-  --url http://localhost:3000/api/servers/server-id/{serverId} \
-  --header "authorization: token"
-```
-
-### Request Parameters
-
-#### Headers
-
-| Parameter     | Type   | Required | Description           | Default | Example |
-| ------------- | ------ | -------- | --------------------- | ------- | ------- |
-| authorization | string | Required | Authentication token. |         | token   |
-
-#### Parameter
-
-| Parameter | Type   | Required | Description                                    | Default | Example |
-| --------- | ------ | -------- | ---------------------------------------------- | ------- | ------- |
-| serverId  | string | Required | ID of the server to be deleted from ZDM Center |         | 28      |
-
-#### Query
-
-```txt
-None
-```
-
-#### Body
-
-```txt
-None
-```
-
-### Response Example (Success)
-
-```json
-{
-  "requestID": "d7c3f51c-80a9-4f7a-a49c-eaf488d59bbe",
-  "message": "Server has been successfully deleted",
-  "success": true,
-  "data": {
-    "id": "28"
-  },
-  "timestamp": "2025-05-12T02:45:38.721Z"
-}
-```
-
-### Response Structure (Success)
-
-| Field     | Type    | Description                                |
-| --------- | ------- | ------------------------------------------ |
-| requestID | string  | Request unique ID.                         |
-| message   | string  | Processing result message.                 |
-| success   | boolean | Request success status.                    |
-| data.id   | string  | ID of the deleted server.                  |
-| timestamp | string  | Request processing time. (ISO 8601 format) |
-
 ## Server Deletion - By Server Name
-
-### Description
-> **Warning!** This feature is currently not supported. (will be supported in the future)
-```txt
-Delete a server registered to the ZDM Center using its name.
-```
-
-### URL
-
-```txt
-- http
-[DELETE] /api/servers/server-name/{serverName}
-
-- Curl
-curl --request DELETE \
-  --url http://localhost:3000/api/servers/server-name/{serverName} \
-  --header "authorization: token"
-```
-
-### Request Parameters
-
-#### Headers
-
-| Parameter     | Type   | Required | Description           | Default | Example |
-| ------------- | ------ | -------- | --------------------- | ------- | ------- |
-| authorization | string | Required | Authentication token. |         | token   |
-
-#### Parameter
-
-| Parameter  | Type   | Required | Description                                      | Default | Example           |
-| ---------- | ------ | -------- | ------------------------------------------------ | ------- | ----------------- |
-| serverName | string | Required | Name of the server to be deleted from ZDM Center |         | rim-ubuntu24-uefi |
-
-#### Query
-
-```txt
-None
-```
-
-#### Body
-
-```txt
-None
-```
-
-### Response Example (Success)
-
-```json
-{
-  "requestID": "e8d4f5c6-b7a8-9123-d4e5-f6a7b8c9d0e1",
-  "message": "Server has been successfully deleted",
-  "success": true,
-  "data": {
-    "id": "28",
-    "name": "rim-ubuntu24-uefi"
-  },
-  "timestamp": "2025-05-12T03:12:45.567Z"
-}
-```
-
-### Response Structure (Success)
-
-| Field      | Type    | Description                                |
-| ---------- | ------- | ------------------------------------------ |
-| requestID  | string  | Request unique ID.                         |
-| message    | string  | Processing result message.                 |
-| success    | boolean | Request success status.                    |
-| data.id    | string  | ID of the deleted server.                  |
-| data.name  | string  | Name of the deleted server.                |
-| timestamp  | string  | Request processing time. (ISO 8601 format) |
 
 <br><br>
 
@@ -1042,7 +887,7 @@ You can combine multiple filters to narrow down the ZDM Center list:
 
 ```txt
 Retrieve specific ZDM Center information by ZDM Center name.
-```.
+```
 
 ### URL
 
@@ -1073,7 +918,7 @@ curl --request GET \
 
 #### Query
 
-> This endpoint uses the same query parameters as [Center Retrieval - All](#center-retrieval---all)
+> The query parameters are identical to those of the [Center Retrieval - All](#center-retrieval---all) endpoint.
 
 #### Body
 
@@ -1083,7 +928,7 @@ None
 
 ### Request Example
 
-> This example can be used in the same way by only changing the endpoint from `/api/zdms/` to `/api/zdms/zdm-id/{zdmId}` format from [Center Retrieval - All](#center-retrieval---all)
+> The request examples from [Center Retrieval - All](#center-retrieval---all) can be used with this endpoint by simply changing the URL path from `/api/zdms/` to `/api/zdms/zdm-id/{zdmId}`.
 
 ### Response Example (Success)
 
@@ -1258,241 +1103,8 @@ None
 
 ## Center Retrieval - By Center Name
 ## Center Deletion - By ID
-
-### Description
-> **Warning!** This feature is currently not supported. (will be supported in the future)
-```txt
-Delete a ZDM Center using its ID.
-```
-
-### URL
-
-```txt
-- http
-[DELETE] /api/zdms/center-id/{centerID}
-
-- Curl
-curl --request DELETE \
-  --url http://localhost:3000/api/zdms/center-id/{centerID} \
-  --header "authorization: token"
-```
-
-### Request Parameters
-
-#### Headers
-
-| Parameter     | Type   | Required | Description           | Default | Example |
-| ------------- | ------ | -------- | --------------------- | ------- | ------- |
-| authorization | string | Required | Authentication token. |         | token   |
-
-#### Parameter
-
-| Parameter | Type   | Required | Description                                  | Default | Example |
-| --------- | ------ | -------- | -------------------------------------------- | ------- | ------- |
-| centerID  | string | Required | ID of the center to be deleted from ZDM Portal |       | 6       |
-
-#### Query
-
-```txt
-None
-```
-
-#### Body
-
-```txt
-None
-```
-
-### Response Example (Success)
-
-```json
-{
-  "requestID": "c23d45e6-7f8a-9b0c-d1e2-f3a4b5c6d7e8",
-  "message": "Center has been successfully deleted",
-  "success": true,
-  "data": {
-    "id": "6"
-  },
-  "timestamp": "2025-05-12T03:15:42.123Z"
-}
-```
-
-### Response Structure (Success)
-
-| Field     | Type    | Description                                |
-| --------- | ------- | ------------------------------------------ |
-| requestID | string  | Request unique ID.                         |
-| message   | string  | Processing result message.                 |
-| success   | boolean | Request success status.                    |
-| data.id   | string  | ID of the deleted center.                  |
-| timestamp | string  | Request processing time. (ISO 8601 format) |
-
 ## Center Deletion - By Center Name
-
-### Description
-> **Warning!** This feature is currently not supported. (will be supported in the future)
-```txt
-Delete a ZDM Center using its name.
-```
-
-### URL
-
-```txt
-- http
-[DELETE] /api/zdms/center-name/{centerName}
-
-- Curl
-curl --request DELETE \
-  --url http://localhost:3000/api/zdms/center-name/{centerName} \
-  --header "authorization: token"
-```
-
-### Request Parameters
-
-#### Headers
-
-| Parameter     | Type   | Required | Description           | Default | Example |
-| ------------- | ------ | -------- | --------------------- | ------- | ------- |
-| authorization | string | Required | Authentication token. |         | token   |
-
-#### Parameter
-
-| Parameter  | Type   | Required | Description                                      | Default | Example       |
-| ---------- | ------ | -------- | ------------------------------------------------ | ------- | ------------- |
-| centerName | string | Required | Name of the center to be deleted from ZDM Portal |         | ZDM-Center-01 |
-
-#### Query
-
-```txt
-None
-```
-
-#### Body
-
-```txt
-None
-```
-
-### Response Example (Success)
-
-```json
-{
-  "requestID": "f9e8d7c6-b5a4-3210-1234-f5e6d7c8b9a0",
-  "message": "Center has been successfully deleted",
-  "success": true,
-  "data": {
-    "id": "6",
-    "name": "ZDM-Center-01"
-  },
-  "timestamp": "2025-05-12T03:25:18.456Z"
-}
-```
-
-### Response Structure (Success)
-
-| Field      | Type    | Description                                |
-| ---------- | ------- | ------------------------------------------ |
-| requestID  | string  | Request unique ID.                         |
-| message    | string  | Processing result message.                 |
-| success    | boolean | Request success status.                    |
-| data.id    | string  | ID of the deleted center.                  |
-| data.name  | string  | Name of the deleted center.                |
-| timestamp  | string  | Request processing time. (ISO 8601 format) |
-
 ## Center Repository Registration
-
-### Description
-> **Warning!** This feature is currently not supported. (will be supported in the future)
-```txt
-Register a new repository to a ZDM Center.
-```
-
-### URL
-
-```txt
-- http
-[POST] /api/zdms/{centerID}/repositories
-
-- Curl
-curl --request POST \
-  --url http://localhost:3000/api/zdms/{centerID}/repositories \
-  --header "Content-Type: application/json" \
-  --header "authorization: token" \
-  --data "{\"type\":\"smb\",\"path\":\"\\\\\\\\192.168.1.93\\\\zconverter\",\"user\":\"admin\",\"password\":\"password\"}"
-```
-
-### Request Parameters
-
-#### Headers
-
-| Parameter     | Type   | Required | Description           | Default | Example |
-| ------------- | ------ | -------- | --------------------- | ------- | ------- |
-| authorization | string | Required | Authentication token. |         | token   |
-
-#### Parameter
-
-| Parameter | Type   | Required | Description                            | Default | Example |
-| --------- | ------ | -------- | -------------------------------------- | ------- | ------- |
-| centerID  | string | Required | ID of the center to add repository to  |         | 6       |
-
-#### Query
-
-```txt
-None
-```
-
-#### Body
-
-| Parameter | Type   | Required | Description                                              | Default | Example                         |
-| --------- | ------ | -------- | -------------------------------------------------------- | ------- | ------------------------------- |
-| type      | string | Required | Repository type. Only `smb`, `nfs` are allowed.       |         | `smb`                           |
-| path      | string | Required | Repository path.                                         |         | `\\192.168.1.93\zconverter`     |
-| user      | string | Optional | Username for authentication (required for SMB).          |         | `admin`                         |
-| password  | string | Optional | Password for authentication (required for SMB).          |         | `password`                      |
-| name      | string | Optional | Custom name for the repository.                          |         | `Main Backup Storage`           |
-
-### Request Example
-
-```json
-{
-  "type": "smb",
-  "path": "\\\\192.168.1.93\\zconverter",
-  "user": "admin",
-  "password": "password",
-  "name": "Main Backup Storage"
-}
-```
-
-### Response Example (Success)
-
-```json
-{
-  "requestID": "f7e6d5c4-b3a2-9180-7f6e-5d4c3b2a1098",
-  "message": "Repository has been successfully registered",
-  "success": true,
-  "data": {
-    "id": "17",
-    "centerId": "6",
-    "type": "SMB",
-    "path": "\\\\192.168.1.93\\zconverter"
-  },
-  "timestamp": "2025-05-12T03:28:17.456Z"
-}
-```
-
-### Response Structure (Success)
-
-| Field        | Type    | Description                                |
-| ------------ | ------- | ------------------------------------------ |
-| requestID    | string  | Request unique ID.                         |
-| message      | string  | Processing result message.                 |
-| success      | boolean | Request success status.                    |
-| data.id      | string  | ID of the registered repository.           |
-| data.centerId| string  | ID of the center.                          |
-| data.type    | string  | Repository type.                           |
-| data.path    | string  | Repository path.                           |
-| timestamp    | string  | Request processing time. (ISO 8601 format) |
-
 ## Center Repository Retrieval
 
 ### Description
@@ -1530,14 +1142,57 @@ None
 
 #### Query
 
-| Parameter | Type    | Required | Description                    | Default | Example |
-| --------- | ------- | -------- | ------------------------------ | ------- | ------- |
-| detail    | boolean | Optional | Show repository details.       | `false` | `true`  |
+| Parameter | Type    | Required | Description                                                              | Default | Example |
+| --------- | ------- | -------- | ------------------------------------------------------------------------ | ------- | ------- |
+| center    | string  | Optional | Center ID where the repository is registered. Used to filter repositories by center location. |  | `1` |
+| type      | string  | Optional | Repository type. Only `smb`, `nfs` are allowed.  Specifies the network file system protocol used for the repository. |  | `nfs` |
+| os        | string  | Optional | Operating system of the repository. Only `win` (Windows) and `lin` (Linux) are allowed. |  | `lin` |
+| path      | string  | Optional | Remote path of the repository. This is the network location where the repository is mounted or accessed from. |  | `/test/test1` |
 
 #### Body
 
 ```txt
 None
+```
+
+### Request Example
+```txt
+# Filter Combinations
+You can combine multiple filters to narrow down the repository list
+
+# Examples:
+# Retrieve all repositories
+[GET] /api/zdms/repositories
+
+# Retrieve repositories for a specific center
+[GET] /api/zdms/repositories?center=1
+
+# Retrieve only NFS repositories
+[GET] /api/zdms/repositories?type=nfs
+
+# Retrieve only SMB repositories
+[GET] /api/zdms/repositories?type=smb
+
+# Retrieve only Linux repositories
+[GET] /api/zdms/repositories?os=lin
+
+# Retrieve only Windows repositories
+[GET] /api/zdms/repositories?os=win
+
+# Retrieve repositories with a specific path
+[GET] /api/zdms/repositories?path=/ZConverter
+
+# Combined filters - NFS repositories on a specific center
+[GET] /api/zdms/repositories?center=1&type=nfs
+
+# Combined filters - Linux repositories using NFS
+[GET] /api/zdms/repositories?os=lin&type=nfs
+
+# Combined filters - Windows repositories using SMB on center ID 2
+[GET] /api/zdms/repositories?center=2&os=win&type=smb
+
+# Combined filters - Repositories with specific path on a specific center
+[GET] /api/zdms/repositories?center=1&path=/backup/data
 ```
 
 ### Response Example (Success)
@@ -1547,219 +1202,46 @@ None
 
 ```json
 {
-	"requestID": "8507220f-89b8-413c-af2b-5a2d4073a89c",
-	"message": "Server information",
+	"requestID": "0db11206-b077-4553-9be3-95ae6c38fc9e",
+	"message": "ZDM Repository infomation list",
 	"success": true,
-	"data": {
-		"id": "50",
-		"systemName": "RIM-WIN2008 (192.168.2.138)",
-		"systemMode": "source",
-		"os": "Window",
-		"version": "Windows Server (R) 2008 Datacenter[64bit]",
-		"ip": "218.145.120.34",
-		"status": "disconnect",
-		"licenseID": 74,
-		"lastUpdated": "2025-05-07 11:46:20",
-		"network": [
-			{
-				"name": "Intel(R) PRO/1000 MT Network Connection",
-				"ipAddress": "192.168.2.138",
-				"subNet": "255.255.252.0",
-				"gateWay": "192.168.0.1",
-				"macAddress": "00:50:56:A8:BA:83",
-				"lastUpdated": "2024-11-21 10:32:26"
-			},
-			{
-				"name": "VMware PCI Ethernet Adapter",
-				"ipAddress": "192.168.2.47",
-				"subNet": "255.255.252.0",
-				"gateWay": "192.168.0.1",
-				"macAddress": "00:50:56:A8:7B:F3",
-				"lastUpdated": "2024-11-21 10:32:26"
-			},
-			{
-				"name": "vmxnet3 이더넷 어댑터",
-				"ipAddress": "192.168.0.10",
-				"subNet": "255.255.252.0",
-				"gateWay": "192.168.0.1",
-				"macAddress": "00:50:56:A8:B5:40",
-				"lastUpdated": "2024-11-21 10:32:26"
-			}
-		],
-		"partition": [
-			{
-				"size": "37578858496 (35.00 GB)",
-				"used": "23387344896 (21.78 GB)",
-				"free": "14191513600 (13.22 GB)",
-				"usage": "62.24%",
-				"letter": "C:",
-				"device": "Disk 0, Partion 1",
-				"fileSystem": "NTFS",
-				"lastUpdated": "2024-11-21 10:32:26"
-			},
-			{
-				"size": "1073737728 (1024.00 MB)",
-				"used": "36728832 (35.03 MB)",
-				"free": "1037008896 (988.97 MB)",
-				"usage": "3.42%",
-				"letter": "H:",
-				"device": "Disk 0, Partion 2",
-				"fileSystem": "NTFS",
-				"lastUpdated": "2024-11-21 10:32:26"
-			},
-			{
-				"size": "4292866048 (4.00 GB)",
-				"used": "56864768 (54.23 MB)",
-				"free": "4236001280 (3.95 GB)",
-				"usage": "1.32%",
-				"letter": "L:",
-				"device": "Disk 0, Partion 3",
-				"fileSystem": "NTFS",
-				"lastUpdated": "2024-11-21 10:32:26"
-			},
-			{
-				"size": "3145723904 (2.93 GB)",
-				"used": "51081216 (48.71 MB)",
-				"free": "3094642688 (2.88 GB)",
-				"usage": "1.62%",
-				"letter": "F:",
-				"device": "Disk 1, Partion 2",
-				"fileSystem": "NTFS",
-				"lastUpdated": "2024-11-21 10:32:26"
-			},
-			{
-				"size": "2186276864 (2.04 GB)",
-				"used": "46268416 (44.13 MB)",
-				"free": "2140008448 (1.99 GB)",
-				"usage": "2.12%",
-				"letter": "M:",
-				"device": "Disk 1, Partion 3",
-				"fileSystem": "NTFS",
-				"lastUpdated": "2024-11-21 10:32:26"
-			}
-		],
-		"repository": [
-			{
-				"id": "5",
-				"os": "Window",
-				"size": "20326709770 (18.93 GB)",
-				"used": "6135196170 (5.71 GB)",
-				"free": "14191513600 (13.22 GB)",
-				"usage": "30.18%",
-				"type": "Source Server",
-				"localPath": "C:\\ZConverter",
-				"remotePath": "",
-				"remoteUser": "",
-				"ipAddress": [
-					"192.168.2.138",
-					"192.168.2.47",
-					"192.168.0.10"
-				],
-				"port": "50005",
-				"lastUpdated": "2024-11-21 10:32:26"
-			},
-			{
-				"id": "6",
-				"os": "Window",
-				"size": "3094642688 (2.88 GB)",
-				"used": "0 (0)",
-				"free": "3094642688 (2.88 GB)",
-				"usage": "0.00%",
-				"type": "Source Server",
-				"localPath": "F:\\ZConverter",
-				"remotePath": "",
-				"remoteUser": "",
-				"ipAddress": [
-					"192.168.2.138",
-					"192.168.2.47",
-					"192.168.0.10"
-				],
-				"port": "50005",
-				"lastUpdated": "2024-11-21 10:32:26"
-			},
-			{
-				"id": "7",
-				"os": "Window",
-				"size": "2146369536 (2.00 GB)",
-				"used": "0 (0)",
-				"free": "2146369536 (2.00 GB)",
-				"usage": "0.00%",
-				"type": "Source Server",
-				"localPath": "Z:\\ZConverter",
-				"remotePath": "",
-				"remoteUser": "",
-				"ipAddress": [
-					"192.168.2.138"
-				],
-				"port": "50005",
-				"lastUpdated": "2024-11-11 21:54:15"
-			},
-			{
-				"id": "29",
-				"os": "Window",
-				"size": "1037008896 (988.97 MB)",
-				"used": "0 (0)",
-				"free": "1037008896 (988.97 MB)",
-				"usage": "0.00%",
-				"type": "Source Server",
-				"localPath": "H:\\ZConverter",
-				"remotePath": "",
-				"remoteUser": "",
-				"ipAddress": [
-					"192.168.2.138",
-					"192.168.2.47",
-					"192.168.0.10"
-				],
-				"port": "50005",
-				"lastUpdated": "2024-11-21 10:32:26"
-			},
-			{
-				"id": "30",
-				"os": "Window",
-				"size": "4236001280 (3.95 GB)",
-				"used": "0 (0)",
-				"free": "4236001280 (3.95 GB)",
-				"usage": "0.00%",
-				"type": "Source Server",
-				"localPath": "L:\\ZConverter",
-				"remotePath": "",
-				"remoteUser": "",
-				"ipAddress": [
-					"192.168.2.138",
-					"192.168.2.47",
-					"192.168.0.10"
-				],
-				"port": "50005",
-				"lastUpdated": "2024-11-21 10:32:26"
-			},
-			{
-				"id": "31",
-				"os": "Window",
-				"size": "2140008448 (1.99 GB)",
-				"used": "0 (0)",
-				"free": "2140008448 (1.99 GB)",
-				"usage": "0.00%",
-				"type": "Source Server",
-				"localPath": "M:\\ZConverter",
-				"remotePath": "",
-				"remoteUser": "",
-				"ipAddress": [
-					"192.168.2.138",
-					"192.168.2.47",
-					"192.168.0.10"
-				],
-				"port": "50005",
-				"lastUpdated": "2024-11-21 10:32:26"
-			}
-		],
-		"agent": "v7 build 7016",
-		"model": "VMware Virtual Platform",
-		"manufacturer": "VMware, Inc.",
-		"cpu": "Intel(R) Xeon(R) Silver 4216 CPU @ 2.10GHz",
-		"cpuCount": "2",
-		"memory": "4293414912 (4.00 GB)"
-	},
-	"timestamp": "2025-05-15T03:24:04.430Z"
+	"data": [
+		{
+			"id": "15",
+			"centerName": "rim-zdm-rocky8",
+			"os": "Linux",
+			"type": "NFS",
+			"size": "524032000000 (488.04 GB)",
+			"used": "184189676000 (171.54 GB)",
+			"free": "339842324000 (316.50 GB)",
+			"usage": "35.15%",
+			"remotePath": "192.168.1.93:/ZConverter",
+			"localPath": "/ZConverter",
+			"ipAddress": [
+				"192.168.1.93"
+			],
+			"port": "2049",
+			"lastUpdated": "2025-05-13 10:20:56"
+		},
+		{
+			"id": "16",
+			"centerName": "rim-zdm-rocky8",
+			"os": "Window",
+			"type": "SMB",
+			"size": "524032000000 (488.04 GB)",
+			"used": "184189676000 (171.54 GB)",
+			"free": "339842324000 (316.50 GB)",
+			"usage": "35.15%",
+			"remotePath": "\\\\192.168.1.93\\ZConverter",
+			"localPath": "/ZConverter",
+			"ipAddress": [
+				"192.168.1.93"
+			],
+			"port": "445",
+			"lastUpdated": "2025-05-13 10:20:56"
+		}
+	],
+	"timestamp": "2025-05-19T02:45:17.303Z"
 }
 ```
 </details>
@@ -1768,547 +1250,40 @@ None
 <details>
 <summary>Click to expand/collapse examples</summary>
 
-| Field               | Type    | Description                                |
-| ------------------- | ------- | ------------------------------------------ |
-| requestID           | string  | Request unique ID.                         |
-| message             | string  | Processing result message.                 |
-| success             | boolean | Request success status.                    |
-| data                | array   | Repository information array.              |
-| data[].id           | string  | Repository ID.                             |
-| data[].type         | string  | Repository type.                           |
-| data[].path         | string  | Repository path.                           |
-| data[].name         | string  | Repository name.                           |
-| data[].capacity     | string  | Repository total capacity.                 |
-| data[].used         | string  | Repository used space.                     |
-| data[].free         | string  | Repository free space.                     |
-| data[].lastUpdated  | string  | Repository information last update time.   |
-| timestamp           | string  | Request processing time. (ISO 8601 format) |
+| Field               | Type    | Description                                           |
+| ------------------- | ------- | ----------------------------------------------------- |
+| requestID           | string  | Request unique ID.                                    |
+| message             | string  | Processing result message.                            |
+| success             | boolean | Request success status.                               |
+| data                | array   | Repository information array.                         |
+| data[].id           | string  | Repository ID.                                        |
+| data[].centerName   | string  | Center name of the repository.                        |
+| data[].os           | string  | Repository OS type. (`Linux` or `Window`)             |
+| data[].type         | string  | Repository type. (`NFS` or `SMB`)                     |
+| data[].size         | string  | Repository total size.                                |
+| data[].used         | string  | Repository used space.                                |
+| data[].free         | string  | Repository free space.                                |
+| data[].usage        | string  | Repository usage percentage.                          |
+| data[].remotePath   | string  | Repository remote path.                               |
+| data[].localPath    | string  | Repository local path.                                |
+| data[].ipAddress    | array   | Repository IP addresses.                              |
+| data[].port         | string  | Repository port.                                      |
+| data[].lastUpdated  | string  | Repository information last update time.              |
+| timestamp           | string  | Request processing time. (ISO 8601 format)            |
 </details>
 
 ## Center Repository Modification
-
-### Description
-
-```txt
-Modify a repository of a ZDM Center.
-```
-
-### URL
-
-```txt
-- http
-[PUT] /api/zdms/{centerID}/repositories/{repositoryID}
-
-- Curl
-curl --request PUT \
-  --url http://localhost:3000/api/zdms/{centerID}/repositories/{repositoryID} \
-  --header "Content-Type: application/json" \
-  --header "authorization: token" \
-  --data "{\"name\":\"Updated Backup Storage\",\"user\":\"admin\",\"password\":\"newpassword\"}"
-```
-
-### Request Parameters
-
-#### Headers
-
-| Parameter     | Type   | Required | Description           | Default | Example |
-| ------------- | ------ | -------- | --------------------- | ------- | ------- |
-| authorization | string | Required | Authentication token. |         | token   |
-
-#### Parameter
-
-| Parameter    | Type   | Required | Description                  | Default | Example |
-| ------------ | ------ | -------- | ---------------------------- | ------- | ------- |
-| centerID     | string | Required | ID of the center             |         | 6       |
-| repositoryID | string | Required | ID of the repository to modify |       | 16      |
-
-#### Query
-
-```txt
-None
-```
-
-#### Body
-
-| Parameter | Type   | Required | Description                                 | Default | Example                |
-| --------- | ------ | -------- | ------------------------------------------- | ------- | ---------------------- |
-| user      | string | Optional | New username for authentication.            |         | `admin`                |
-| password  | string | Optional | New password for authentication.            |         | `newpassword`          |
-| name      | string | Optional | New name for the repository.                |         | `Updated Backup Storage` |
-
-### Request Example
-
-```json
-{
-  "name": "Updated Backup Storage",
-  "user": "admin",
-  "password": "newpassword"
-}
-```
-
-### Response Example (Success)
-
-```json
-{
-  "requestID": "p9o8i7u6-y5t4-r3e2-w1q0-p9o8i7u6y5t4",
-  "message": "Repository has been successfully updated",
-  "success": true,
-  "data": {
-    "id": "16",
-    "centerId": "6",
-    "type": "SMB",
-    "path": "\\\\192.168.1.93\\zconverter",
-    "name": "Updated Backup Storage"
-  },
-  "timestamp": "2025-05-12T03:42:33.567Z"
-}
-```
-
-### Response Structure (Success)
-
-| Field        | Type    | Description                                |
-| ------------ | ------- | ------------------------------------------ |
-| requestID    | string  | Request unique ID.                         |
-| message      | string  | Processing result message.                 |
-| success      | boolean | Request success status.                    |
-| data.id      | string  | Repository ID.                             |
-| data.centerId| string  | Center ID.                                 |
-| data.type    | string  | Repository type.                           |
-| data.path    | string  | Repository path.                           |
-| data.name    | string  | Updated repository name.                   |
-| timestamp    | string  | Request processing time. (ISO 8601 format) |
-
 ## Center Repository Deletion
-
-### Description
-
-```txt
-Delete a repository from a ZDM Center.
-```
-
-### URL
-
-```txt
-- http
-[DELETE] /api/zdms/{centerID}/repositories/{repositoryID}
-
-- Curl
-curl --request DELETE \
-  --url http://localhost:3000/api/zdms/{centerID}/repositories/{repositoryID} \
-  --header "authorization: token"
-```
-
-### Request Parameters
-
-#### Headers
-
-| Parameter     | Type   | Required | Description           | Default | Example |
-| ------------- | ------ | -------- | --------------------- | ------- | ------- |
-| authorization | string | Required | Authentication token. |         | token   |
-
-#### Parameter
-
-| Parameter    | Type   | Required | Description                  | Default | Example |
-| ------------ | ------ | -------- | ---------------------------- | ------- | ------- |
-| centerID     | string | Required | ID of the center             |         | 6       |
-| repositoryID | string | Required | ID of the repository to delete |       | 16      |
-
-#### Query
-
-```txt
-None
-```
-
-#### Body
-
-```txt
-None
-```
-
-### Response Example (Success)
-
-```json
-{
-  "requestID": "z1x2c3v4-b5n6-m7l8-k9j0-h1g2f3d4s5a6",
-  "message": "Repository has been successfully deleted",
-  "success": true,
-  "data": {
-    "id": "16",
-    "centerId": "6"
-  },
-  "timestamp": "2025-05-12T03:48:55.789Z"
-}
-```
-
-### Response Structure (Success)
-
-| Field        | Type    | Description                                |
-| ------------ | ------- | ------------------------------------------ |
-| requestID    | string  | Request unique ID.                         |
-| message      | string  | Processing result message.                 |
-| success      | boolean | Request success status.                    |
-| data.id      | string  | ID of the deleted repository.              |
-| data.centerId| string  | ID of the center.                          |
-| timestamp    | string  | Request processing time. (ISO 8601 format) |
-
 <br><br>
 
 # License
-
 ## License Registration
-
-### Description
-
-```txt
-Register a new license in the ZDM Portal.
-```
-
-### URL
-
-```txt
-- http
-[POST] /api/licenses
-
-- Curl
-curl --request POST \
-  --url http://localhost:3000/api/licenses \
-  --header "Content-Type: application/json" \
-  --header "authorization: token" \
-  --data "{\"key\":\"ZDMC-XXXX-XXXX-XXXX-XXXX\",\"name\":\"Enterprise License\"}"
-```
-
-### Request Parameters
-
-#### Headers
-
-| Parameter     | Type   | Required | Description           | Default | Example |
-| ------------- | ------ | -------- | --------------------- | ------- | ------- |
-| authorization | string | Required | Authentication token. |         | token   |
-
-#### Parameter
-
-```txt
-None
-```
-
-#### Query
-
-```txt
-None
-```
-
-#### Body
-
-| Parameter | Type   | Required | Description                   | Default | Example                   |
-| --------- | ------ | -------- | ----------------------------- | ------- | ------------------------- |
-| key       | string | Required | License key.                  |         | `ZDMC-XXXX-XXXX-XXXX-XXXX` |
-| name      | string | Optional | Custom name for the license.  |         | `Enterprise License`      |
-
-### Request Example
-
-```json
-{
-  "key": "ZDMC-XXXX-XXXX-XXXX-XXXX",
-  "name": "Enterprise License"
-}
-```
-
-### Response Example (Success)
-
-```json
-{
-  "requestID": "q1w2e3r4-t5y6-u7i8-o9p0-a1s2d3f4g5h6",
-  "message": "License has been successfully registered",
-  "success": true,
-  "data": {
-    "id": "74",
-    "key": "ZDMC-XXXX-XXXX-XXXX-XXXX",
-    "type": "Server Backup License",
-    "expiration": "2026-05-12",
-    "status": "Active"
-  },
-  "timestamp": "2025-05-12T04:12:37.890Z"
-}
-```
-
-### Response Structure (Success)
-
-| Field          | Type    | Description                                |
-| -------------- | ------- | ------------------------------------------ |
-| requestID      | string  | Request unique ID.                         |
-| message        | string  | Processing result message.                 |
-| success        | boolean | Request success status.                    |
-| data.id        | string  | ID of the registered license.              |
-| data.key       | string  | License key.                               |
-| data.type      | string  | License type.                              |
-| data.expiration| string  | License expiration date.                   |
-| data.status    | string  | License status.                            |
-| timestamp      | string  | Request processing time. (ISO 8601 format) |
-
 ## License Retrieval
-
-### Description
-
-```txt
-Retrieve licenses registered in the ZDM Portal.
-```
-
-### URL
-
-```txt
-- http
-[GET] /api/licenses
-
-- Curl
-curl --request GET \
-  --url http://localhost:3000/api/licenses \
-  --header "Content-Type: application/json" \
-  --header "authorization: token"
-```
-
-### Request Parameters
-
-#### Headers
-
-| Parameter     | Type   | Required | Description           | Default | Example |
-| ------------- | ------ | -------- | --------------------- | ------- | ------- |
-| authorization | string | Required | Authentication token. |         | token   |
-
-#### Parameter
-
-```txt
-None
-```
-
-#### Query
-
-| Parameter | Type    | Required | Description                | Default | Example |
-| --------- | ------- | -------- | -------------------------- | ------- | ------- |
-| status    | string  | Optional | License status filter.     |         | `active` |
-| type      | string  | Optional | License type filter.       |         | `backup` |
-| assigned  | boolean | Optional | License assignment filter. | `false` | `true`  |
-| detail    | boolean | Optional | Show license details.      | `false` | `true`  |
-
-#### Body
-
-```txt
-None
-```
-
-### Response Example (Success)
-
-```json
-{
-  "requestID": "j9k8l7m6-n5b4-v3c2-x1z0-j9k8l7m6n5b4",
-  "message": "License information list",
-  "success": true,
-  "data": [
-    {
-      "id": "74",
-      "key": "ZDMC-XXXX-XXXX-XXXX-XXXX",
-      "type": "Server Backup License",
-      "expiration": "2026-05-12",
-      "status": "Active",
-      "assigned": true,
-      "assignedTo": {
-        "id": "28",
-        "name": "rim-ubuntu24-uefi (192.168.1.12)"
-      },
-      "detail": {
-        "registeredDate": "2025-05-05T10:15:22.345Z",
-        "lastUpdated": "2025-05-12T04:12:37.890Z",
-        "features": [
-          "Full Backup",
-          "Incremental Backup",
-          "Smart Backup",
-          "Encryption"
-        ]
-      }
-    }
-  ],
-  "timestamp": "2025-05-12T04:18:45.123Z"
-}
-```
-
-### Response Structure (Success)
-
-| Field                | Type    | Description                                |
-| -------------------- | ------- | ------------------------------------------ |
-| requestID            | string  | Request unique ID.                         |
-| message              | string  | Processing result message.                 |
-| success              | boolean | Request success status.                    |
-| data                 | array   | License information array.                 |
-| data[].id            | string  | License ID.                                |
-| data[].key           | string  | License key.                               |
-| data[].type          | string  | License type.                              |
-| data[].expiration    | string  | License expiration date.                   |
-| data[].status        | string  | License status.                            |
-| data[].assigned      | boolean | License assignment status.                 |
-| data[].assignedTo    | object  | Server information if assigned.            |
-| data[].assignedTo.id | string  | Server ID.                                 |
-| data[].assignedTo.name | string | Server name.                              |
-| data[].detail        | object  | Additional license details (`detail=true`).|
-| data[].detail.registeredDate | string | License registration date.          |
-| data[].detail.lastUpdated | string | License last update time.              |
-| data[].detail.features | array | Features provided by the license.          |
-| timestamp            | string  | Request processing time. (ISO 8601 format) |
-
 ## License Deletion
-
-### Description
-
-```txt
-Delete a license from the ZDM Portal.
-```
-
-### URL
-
-```txt
-- http
-[DELETE] /api/licenses/{licenseID}
-
-- Curl
-curl --request DELETE \
-  --url http://localhost:3000/api/licenses/{licenseID} \
-  --header "authorization: token"
-```
-
-### Request Parameters
-
-#### Headers
-
-| Parameter     | Type   | Required | Description           | Default | Example |
-| ------------- | ------ | -------- | --------------------- | ------- | ------- |
-| authorization | string | Required | Authentication token. |         | token   |
-
-#### Parameter
-
-| Parameter | Type   | Required | Description                    | Default | Example |
-| --------- | ------ | -------- | ------------------------------ | ------- | ------- |
-| licenseID | string | Required | ID of the license to delete    |         | 74      |
-
-#### Query
-
-```txt
-None
-```
-
-#### Body
-
-```txt
-None
-```
-
-### Response Example (Success)
-
-```json
-{
-  "requestID": "a7s8d9f0-g6h5-j4k3-l2m1-n0b9v8c7x6z5",
-  "message": "License has been successfully deleted",
-  "success": true,
-  "data": {
-    "id": "74"
-  },
-  "timestamp": "2025-05-12T04:25:12.345Z"
-}
-```
-
-### Response Structure (Success)
-
-| Field     | Type    | Description                                |
-| --------- | ------- | ------------------------------------------ |
-| requestID | string  | Request unique ID.                         |
-| message   | string  | Processing result message.                 |
-| success   | boolean | Request success status.                    |
-| data.id   | string  | ID of the deleted license.                 |
-| timestamp | string  | Request processing time. (ISO 8601 format) |
-
 ## License Assignment
-
-### Description
-
-```txt
-Assign a license to a server.
-```
-
-### URL
-
-```txt
-- http
-[POST] /api/licenses/{licenseID}/assign
-
-- Curl
-curl --request POST \
-  --url http://localhost:3000/api/licenses/{licenseID}/assign \
-  --header "Content-Type: application/json" \
-  --header "authorization: token" \
-  --data "{\"serverId\":\"28\"}"
-```
-
-### Request Parameters
-
-#### Headers
-
-| Parameter     | Type   | Required | Description           | Default | Example |
-| ------------- | ------ | -------- | --------------------- | ------- | ------- |
-| authorization | string | Required | Authentication token. |         | token   |
-
-#### Parameter
-
-| Parameter | Type   | Required | Description                         | Default | Example |
-| --------- | ------ | -------- | ----------------------------------- | ------- | ------- |
-| licenseID | string | Required | ID of the license to assign         |         | 74      |
-
-#### Query
-
-```txt
-None
-```
-
-#### Body
-
-| Parameter | Type   | Required | Description                 | Default | Example |
-| --------- | ------ | -------- | --------------------------- | ------- | ------- |
-| serverId  | string | Required | ID of the server to assign  |         | 28      |
-
-### Request Example
-
-```json
-{
-  "serverId": "28"
-}
-```
-
-### Response Example (Success)
-
-```json
-{
-  "requestID": "p1o2i3u4-y5t6-r7e8-w9q0-a1s2d3f4g5h6",
-  "message": "License has been successfully assigned",
-  "success": true,
-  "data": {
-    "licenseId": "74",
-    "serverId": "28",
-    "serverName": "rim-ubuntu24-uefi (192.168.1.12)"
-  },
-  "timestamp": "2025-05-12T04:32:18.765Z"
-}
-```
-
-### Response Structure (Success)
-
-| Field         | Type    | Description                                |
-| ------------- | ------- | ------------------------------------------ |
-| requestID     | string  | Request unique ID.                         |
-| message       | string  | Processing result message.                 |
-| success       | boolean | Request success status.                    |
-| data.licenseId| string  | ID of the assigned license.                |
-| data.serverId | string  | ID of the server.                          |
-| data.serverName| string | Name of the server.                        |
-| timestamp     | string  | Request processing time. (ISO 8601 format) |
+<br><br>
 
 # Backup
-
 ## Backup Job Registration
 
 ### Description
@@ -2509,22 +1484,6 @@ None
       "auto_start": "not use",
       "use_schedule": "Increment Schedule"
     },
-    {
-      "state": "success",
-      "job_name": "Weekly-System-Backup_boot_efi_1",
-      "partition": "/boot/efi",
-      "job_type": "Increment Backup",
-      "auto_start": "not use",
-      "use_schedule": "Increment Schedule"
-    },
-    {
-      "state": "success",
-      "job_name": "Weekly-System-Backup_boot_1",
-      "partition": "/boot",
-      "job_type": "Increment Backup",
-      "auto_start": "not use",
-      "use_schedule": "Increment Schedule"
-    }
   ],
   "timestamp": "2025-05-13T07:26:59.802Z"
 }
@@ -2543,7 +1502,7 @@ None
 | data[].partition | string  | Target partition for the job.                                |
 | data[].job_type  | string  | Type of backup job. (Full Backup, Increment Backup, etc.)   |
 | data[].auto_start| string  | Auto start setting. Only `use` or `not use` values.         |
-| data[].use_schedule | string | Schedule setting. `-` if not used, otherwise `Full Schedule`, `Increment Schedule`, or `Smart Schedule`. |
+| data[].use_schedule | string | Schedule setting. Displays `-` when no schedule is used. For scheduled jobs, displays `Full Schedule`, `Increment Schedule`, or `Smart Schedule` depending on the schedule type. |
 | timestamp        | string  | Request processing time. (ISO 8601 format)                   |
 
 ## Backup Job Retrieval - All
@@ -2678,36 +1637,6 @@ None
         "elapsed": "0 day, 00:02:24"
       },
       "lastUpdate": "2025-05-08T20:34:51.000Z"
-    },
-    {
-      "id": "23",
-      "jobName": "Weekly-System-Backup",
-      "systemName": "rim-ubuntu24-uefi (192.168.1.12)",
-      "partition": "/,/test",
-      "mode": "Full Backup",
-      "status": "running",
-      "result": "-",
-      "schedule": {
-        "basic": "5",
-        "advanced": "-"
-      },
-      "repository": {
-        "id": "16",
-        "type": "SMB",
-        "path": "\\\\127.0.0.1\\ZConverter"
-      },
-      "option": {
-        "rotation": "7",
-        "excludeDir": "tmp|cache|logs",
-        "compression": "Use",
-        "encryption": "Use"
-      },
-      "timestamp": {
-        "start": "2025-05-12T05:30:00.000Z",
-        "end": "-",
-        "elapsed": "0 day, 00:15:27"
-      },
-      "lastUpdate": "2025-05-12T05:45:27.000Z"
     }
   ],
   "timestamp": "2025-05-12T05:45:30.123Z"
@@ -2725,23 +1654,27 @@ None
 | requestID                 | string  | Request unique ID.                            |
 | message                   | string  | Processing result message.                    |
 | success                   | boolean | Request success status.                       |
+| data                      | array   | Job information array.                        |
 | data[].id                 | string  | Job ID.                                       |
 | data[].jobName            | string  | Job Name.                                     |
 | data[].systemName         | string  | Source Server Name.                           |
 | data[].partition          | string  | Source Server Partition(s).                   |
 | data[].mode               | string  | Job Mode.                                     |
-| data[].status             | string  | Job Status. (running, completed, failed)      |
-| data[].result             | string  | Job Result. (success, failure, partial)       |
-| data[].schedule.basic     | string  | Schedule Type.                                |
-| data[].schedule.advanced  | string  | Additional Schedule Type.                     |
+| data[].result             | string  | Job Result. (COMPLETE, FAILURE, PARTIAL)      |
+| data[].schedule           | object  | Schedule information.                         |
+| data[].schedule.basic     | string  | Basic Schedule setting.                       |
+| data[].schedule.advanced  | string  | Advanced Schedule setting.                    |
+| data[].repository         | object  | Repository information.                       |
 | data[].repository.id      | string  | Center Repository ID.                         |
 | data[].repository.type    | string  | Center Repository Type.                       |
 | data[].repository.path    | string  | Center Repository Path.                       |
+| data[].option             | object  | Job options. (`detail=true`)                  |
 | data[].option.rotation    | string  | Number of Job iterations. (`detail=true`)     |
 | data[].option.excludeDir  | string  | Job exclusion directory. (`detail=true`)      |
 | data[].option.compression | string  | Whether to compress Job data. (`detail=true`) |
 | data[].option.encryption  | string  | Whether to encrypt Job data. (`detail=true`)  |
-| data[].timestamp.start    | string  | Job Start Time.                               |
+| data[].timestamp          | object  | Time information.                             |
+| data[].timestamp.start    | string  | Job Start Time. (ISO 8601 format)             |
 | data[].timestamp.end      | string  | Job End Time.                                 |
 | data[].timestamp.elapsed  | string  | Job Elapsed Time.                             |
 | data[].lastUpdate         | string  | Last time job information was updated.        |
@@ -2760,11 +1693,11 @@ Retrieve a specific backup job by its ID.
 
 ```txt
 - http
-[GET] /api/backups/job-id/{jobID}
+[GET] /api/backups/job-id/{jobId}
 
 - Curl
 curl --request GET \
-  --url http://localhost:3000/api/backups/job-id/{jobID} \
+  --url http://localhost:3000/api/backups/job-id/{jobId} \
   --header "Content-Type: application/json" \
   --header "authorization: token"
 ```
@@ -2781,10 +1714,10 @@ curl --request GET \
 
 | Parameter | Type   | Required | Description                                    | Default | Example |
 | --------- | ------ | -------- | ---------------------------------------------- | ------- | ------- |
-| jobID     | string | Required | The unique ID of the backup job to be retrieved.|        | 22      |
+| jobId     | string | Required | The unique ID of the backup job to be retrieved.|        | 22      |
 
 #### Query
-> This endpoint uses the same query parameters as [Backup Job Retrieval - All](#backup-job-retrieval---all)
+> The query parameters are identical to those of the [Backup Job Retrieval - All](#backup-job-retrieval---all) endpoint.
 
 #### Body
 
@@ -2794,7 +1727,7 @@ None
 
 ### Request Example
 
-> This example can be used in the same way by only changing the endpoint from `/api/backups/` to `/api/backups/job-id/{jobID}` format from [Backup Job Retrieval - All](#backup-job-retrieval---all)
+> The request examples from [Backup Job Retrieval - All](#backup-job-retrieval---all) can be used with this endpoint by simply changing the URL path from `/api/backups/` to `/api/backups/job-id/{jobId}`.
 
 ```txt
 # Retrieve job with ID 22
@@ -2807,11 +1740,11 @@ None
 
 ### Response Example (Success)
 
-> This structure is identical to the **Response Example (Success)** of [Backup Job Retrieval - All](#backup-job-retrieval---all)
+> The success response format is identical to that of the **Response Example (Success)** section in the [Backup Job Retrieval - All](#backup-job-retrieval---all) endpoint.
 
 ### Response Structure (Success)
 
-> This structure is identical to the **Response Structure (Success)** of [Backup Job Retrieval - All](#backup-job-retrieval---all)
+> The response structure is identical to that of the **Response Structure (Success)** section in the [Backup Job Retrieval - All](#backup-job-retrieval---all) endpoint.
 
 ## Backup Job Retrieval - By Job Name
 
@@ -2850,7 +1783,7 @@ curl --request GET \
 
 #### Query
 
-> This endpoint uses the same query parameters as [Backup Job Retrieval - All](#backup-job-retrieval---all)
+> The query parameters are identical to those of the [Backup Job Retrieval - All](#backup-job-retrieval---all) endpoint.
 
 #### Body
 
@@ -2860,7 +1793,7 @@ None
 
 ### Request Example
 
-> This example can be used in the same way by only changing the endpoint from `/api/backups/` to `/api/backups/job-name/{jobName}` format from [Backup Job Retrieval - All](#backup-job-retrieval---all)
+> The request examples from [Backup Job Retrieval - All](#backup-job-retrieval---all) can be used with this endpoint by simply changing the URL path from `/api/backups/` to `/api/backups/job-name/{jobName}`.
 
 ```txt
 # Retrieve job with name "Weekly-System-Backup"
@@ -2872,11 +1805,11 @@ None
 
 ### Response Example (Success)
 
-> This structure is identical to the **Response Example (Success)** of [Backup Job Retrieval - All](#backup-job-retrieval---all)
+> The success response format is identical to that of the **Response Example (Success)** section in the [Backup Job Retrieval - All](#backup-job-retrieval---all) endpoint.
 
 ### Response Structure (Success)
 
-> This structure is identical to the **Response Structure (Success)** of [Backup Job Retrieval - All](#backup-job-retrieval---all)
+> The response structure is identical to that of the **Response Structure (Success)** section in the [Backup Job Retrieval - All](#backup-job-retrieval---all) endpoint.
 
 ## Backup Job Retrieval - By Source Server Name
 
@@ -2915,11 +1848,7 @@ curl --request GET \
 
 #### Query
 
-> This endpoint uses the same query parameters as [Backup Job Retrieval - All](#backup-job-retrieval---all)
-
-| Parameter | Type    | Required | Description                           | Default | Example |
-| --------- | ------- | -------- | ------------------------------------- | ------- | ------- |
-| serverType | string  | Optional | When retrieving by server name, specify whether to search from source or target. Only `source`, `target` allowed. Default is to search from all. | All | `source` |
+> The query parameters are identical to those of the [Backup Job Retrieval - All](#backup-job-retrieval---all) endpoint.
 
 #### Body
 
@@ -2929,7 +1858,7 @@ None
 
 ### Request Example
 
-> This example can be used in the same way by only changing the endpoint from `/api/backups/` to `/api/backups/server-name/{serverName}` format from [Backup Job Retrieval - All](#backup-job-retrieval---all)
+> The request examples from [Backup Job Retrieval - All](#backup-job-retrieval---all) can be used with this endpoint by simply changing the URL path from `/api/backups/` to `/api/backups/server-name/{serverName}`.
 
 ```txt
 # Retrieve all jobs for server "rim-ubuntu24-uefi"
@@ -2944,12 +1873,11 @@ None
 
 ### Response Example (Success)
 
-> This structure is identical to the **Response Example (Success)** of [Backup Job Retrieval - All](#backup-job-retrieval---all)
+> The success response format is identical to that of the **Response Example (Success)** section in the [Backup Job Retrieval - All](#backup-job-retrieval---all) endpoint.
 
 ### Response Structure (Success)
 
-> This structure is identical to the **Response Structure (Success)** of [Backup Job Retrieval - All](#backup-job-retrieval---all)
-
+> The response structure is identical to that of the **Response Structure (Success)** section in the [Backup Job Retrieval - All](#backup-job-retrieval---all) endpoint.
 
 ## Backup Job Modification - By Job ID
 
@@ -2963,11 +1891,11 @@ Modify a backup job by its ID.
 
 ```txt
 - http
-[PUT] /api/backups/job-id/{jobID}
+[PUT] /api/backups/job-id/{jobId}
 
 - Curl
 curl --request PUT \
-  --url http://localhost:3000/api/backups/job-id/{jobID} \
+  --url http://localhost:3000/api/backups/job-id/{jobId} \
   --header "Content-Type: application/json" \
   --header "authorization: token" \
   --data "{/* JSON Data */}"
@@ -2985,7 +1913,7 @@ curl --request PUT \
 
 | Parameter | Type   | Required | Description                         | Default | Example |
 | --------- | ------ | -------- | ----------------------------------- | ------- | ------- |
-| jobID     | string | Required | The ID of the backup job to modify. |         | 23      |
+| jobId     | string | Required | The ID of the backup job to modify. |         | 23      |
 
 #### Query
 
@@ -2995,73 +1923,120 @@ None
 
 #### Body
 
-The request body can include any of the parameters from the Backup Registration endpoint that you wish to modify. Only the parameters that are included will be updated.
+> The request body can include any of the parameters from the Backup Registration endpoint that you wish to modify. Only the parameters that are included will be updated.
 
-| Parameter                     | Type             | Required | Description                                                | Default | Example                 |
-| ----------------------------- | ---------------- | -------- | ---------------------------------------------------------- | ------- | ----------------------- |
-| jobName                       | string           | Optional | New job name.                                              |         | "Updated-Backup-Job"    |
-| repository                    | object           | Optional | New repository to be used for the job.                     |         | { "id": "17" }          |
-| schedule                      | object           | Optional | New schedule configuration.                                |         | See Backup Registration |
-| description                   | string           | Optional | New description.                                           |         | "Updated description"   |
-| rotation                      | string           | Optional | New number of job repetitions. `(1-31)`                    |         | "10"                    |
-| compression                   | string           | Optional | New compression setting.                                   |         | "not use"               |
-| encryption                    | string           | Optional | New encryption setting.                                    |         | "use"                   |
-| excludeDir                    | string           | Optional | New directories to exclude.                                |         | "dir1\|dir2\|dir3"      |
-| excludePartition              | string           | Optional | New partitions to exclude.                                 |         | "/test"                 |
-| mailEvent                     | string           | Optional | New email for notifications.                               |         | "newalerts@example.com" |
-| networkLimit                  | string           | Optional | New network speed limit.                                   |         | "200"                   |
-| autoStart                     | string           | Optional | New auto start setting.                                    |         | "use"                   |
+| Parameter       | Type             | Required | Description                                                                                                                                  | Default    | Example                 |
+| --------------- | ---------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------- | ---------- | ----------------------- |
+| changeName      | string           | Optional | New job name. Used to rename the backup job.                                                                                                 |            | "Updated-Backup-Job"    |
+| partition       | string[]         | Optional | Target partitions for the job. Specify partitions to include in the backup.                                                                  |            | ["/", "/home"]          |
+| type            | string           | Optional | Job type. Only `full`, `inc`, `smart` are allowed.                                                                                           |            | "full"                  |
+| status          | string           | Optional | Job status. Allowed values: `run`, `complete`, `start`, `waiting`, `cancel`, `schedule`.                                                     |            | "schedule"              |
+| repository      | object           | Optional | New repository to be used for the job.                                                                                                       |            | { "id": "17" }          |
+| repository.id   | string    | Optional | Repository ID.                                                                                                                               |            | "17"                    |
+| repository.type | string           | Optional | Repository type. Only `smb`, `nfs` are allowed.                                                                                              |            | "smb"                   |
+| repository.path | string           | Optional | Repository path.                                                                                                                             |            | "\\\\server\\share"     |
+| schedule        | object           | Optional | New schedule configuration. See Backup Registration for full details on schedule options.                                                     |            | See example below       |
+| schedule.full   | string           | Optional | Full backup schedule. Can be an existing schedule ID (numeric) or a new schedule configuration that will be registered before being applied. |            | "202" or schedule object|
+| schedule.inc    | string           | Optional | Incremental backup schedule. Can be an existing schedule ID (numeric) or a new schedule configuration.                                        |            | "203" or schedule object|
+| description     | string           | Optional | New description for the backup job.                                                                                                          |            | "Updated description"   |
+| rotation        | string    | Optional | New number of job repetitions. Valid range: `1-31`.                                                                                          | "1"        | "10"                    |
+| compression     | string           | Optional | Whether to use compression. Only `use`, `not use` are allowed.                                                                               | "use"      | "not use"               |
+| encryption      | string           | Optional | Whether to use encryption. Only `use`, `not use` are allowed.                                                                                | "not use"  | "use"                   |
+| excludeDir      | string           | Optional | Directories to exclude from the backup, separated by `\|`.                                                                                   |            | "dir1\|dir2\|dir3"      |
+| mailEvent       | string           | Optional | Email address to receive job event notifications.                                                                                            |            | "alerts@example.com"    |
+| networkLimit    | string/number    | Optional | Network speed limit for the job (in Mbps).                                                                                                   | Unlimited  | "200"                   |
 
 ### Request Example
 
+<details>
+<summary>Click to expand/collapse examples</summary>
+
 ```json
+// Example 1: Change backup type and compression setting
 {
-  "jobName": "Updated-Weekly-System-Backup",
-  "rotation": "10",
-  "excludeDir": "tmp|cache|logs|temp",
-  "networkLimit": "200",
-  "autoStart": "use"
+  "type": "inc",
+  "compression": "not use",
+  "description": "Changed to incremental backup without compression"
+}
+// Example 2: Update repository and partition
+{
+  "partition": ["/", "/home", "/var"],
+  "repository": {
+    "id": "17",
+    "type": "smb",
+    "path": "\\\\192.168.1.93\\backup"
+  }
+}
+// Example 3: Update schedule using an existing schedule ID for full backup and new configuration for incremental
+{
+  "schedule": {
+    "full": "202",
+    "inc": {
+      "year": "",
+      "month": "",
+      "week": "",
+      "day": "mon,wed,fri",
+      "time": "22:00"
+    }
+  },
+  "mailEvent": "backup-alerts@company.com"
+}
+// Example 4: Complex update with multiple changes
+{
+  "changeName": "Critical-System-Backup",
+  "type": "smart",
+  "description": "Enhanced critical system backup with encryption",
+  "rotation": "7",
+  "compression": "use",
+  "encryption": "use",
+  "excludeDir": "tmp|cache|logs|temp|downloads",
+  "networkLimit": "150",
+  "schedule": {
+    "full": {
+      "day": "sun",
+      "time": "01:00"
+    },
+    "inc": {
+      "day": "mon,tue,wed,thu,fri",
+      "time": "23:00"
+    }
+  }
 }
 ```
+</details>
 
 ### Response Example (Success)
 
 ```json
 {
-  "requestID": "j2k3l4m5-n6b7-v8c9-x0z1-j2k3l4m5n6b7",
-  "message": "Backup job has been successfully updated",
-  "success": true,
-  "data": {
-    "id": "23",
-    "jobName": "Updated-Weekly-System-Backup",
-    "systemName": "rim-ubuntu24-uefi (192.168.1.12)",
-    "partition": "/,/test",
-    "mode": "Full Backup",
-    "rotation": "10",
-    "excludeDir": "tmp|cache|logs|temp",
-    "networkLimit": "200",
-    "autoStart": "use",
-    "lastUpdate": "2025-05-12T06:25:45.789Z"
-  },
-  "timestamp": "2025-05-12T06:25:45.789Z"
+	"requestID": "02357040-3b6a-45be-9595-cd6710b94d48",
+	"message": "Backup job data edit result",
+	"success": true,
+	"data": {
+		"job_name": "test",
+		"job_id": "315",
+		"changedFields": [
+			"JobName"
+		]
+	},
+	"timestamp": "2025-05-19T07:11:21.973Z"
 }
 ```
 
 ### Response Structure (Success)
 
-| Field              | Type    | Description                                |
-| ------------------ | ------- | ------------------------------------------ |
-| requestID          | string  | Request unique ID.                         |
-| message            | string  | Processing result message.                 |
-| success            | boolean | Request success status.                    |
-| data.id            | string  | Job ID.                                    |
-| data.jobName       | string  | Updated job name.                          |
-| data.systemName    | string  | Source server name.                        |
-| data.partition     | string  | Job partitions.                            |
-| data.mode          | string  | Job mode.                                  |
-| data.*             | various | Other modified fields.                     |
-| data.lastUpdate    | string  | Last update time.                          |
-| timestamp          | string  | Request processing time. (ISO 8601 format) |
+| Field                | Type     | Description                                                                                            |
+| -------------------- | -------- | ------------------------------------------------------------------------------------------------------ |
+| requestID            | string   | Request unique ID.                                                                                     |
+| message              | string   | Processing result message.                                                                             |
+| success              | boolean  | Request success status.                                                                                |
+| data                 | object   | Result data object.                                                                                    |
+| data.job_name        | string   | Updated job name.                                                                                      |
+| data.job_id          | string   | Job ID of the modified backup job.                                                                     |
+| data.changedFields   | array    | List of fields that were successfully modified in this request.                                        |
+| data.changedFields[] | string   | Field names that were changed. Values can include: `JobName`, `Type`, `Partition`, `Repository`, `Schedule`, `Description`, `Rotation`, `Compression`, `Encryption`, `ExcludeDir`, `MailEvent`, `NetworkLimit`, etc. |
+| timestamp            | string   | Request processing time. (ISO 8601 format)                                                             |
+<br><br>
 
 ## Backup Job Modification - By Job Name
 
@@ -3107,47 +2082,19 @@ None
 
 #### Body
 
-The request body is identical to the "Backup Job Modification - By Job ID" endpoint.
+> The request body is identical to that of the [Backup Job Modification - By Job ID](#backup-job-modification---by-job-id) endpoint. All the same parameters and formats apply.
 
 ### Request Example
 
-```json
-{
-  "description": "Updated weekly backup description",
-  "rotation": "10",
-  "excludeDir": "tmp|cache|logs|temp",
-  "networkLimit": "200",
-  "autoStart": "use"
-}
-```
+> The request examples from [Backup Job Modification - By Job ID](#backup-job-modification---by-job-id) can be used with this endpoint by simply changing the URL path from `/api/backups/job-id/{jobId}` to `/api/backups/job-name/{jobName}`.
 
 ### Response Example (Success)
 
-```json
-{
-  "requestID": "a9s8d7f6-g5h4-j3k2-l1m0-n9b8v7c6x5z4",
-  "message": "Backup job has been successfully updated",
-  "success": true,
-  "data": {
-    "id": "23",
-    "jobName": "Weekly-System-Backup",
-    "systemName": "rim-ubuntu24-uefi (192.168.1.12)",
-    "partition": "/,/test",
-    "mode": "Full Backup",
-    "description": "Updated weekly backup description",
-    "rotation": "10",
-    "excludeDir": "tmp|cache|logs|temp",
-    "networkLimit": "200",
-    "autoStart": "use",
-    "lastUpdate": "2025-05-12T06:28:39.123Z"
-  },
-  "timestamp": "2025-05-12T06:28:39.123Z"
-}
-```
+> The response structure is identical to that of the **Response Structure (Success)** section in the [Backup Job Modification - By Job ID](#backup-job-modification---by-job-id) endpoint.
 
 ### Response Structure (Success)
 
-The response structure is identical to the "Backup Job Modification - By Job ID" endpoint.
+> The response structure is identical to that of the [Backup Job Modification - By Job ID](#backup-job-modification---by-job-id) endpoint.
 
 ## Backup Job Deletion - By Job ID
 
@@ -3161,11 +2108,11 @@ Delete a backup job by its ID.
 
 ```txt
 - http
-[DELETE] /api/backups/job-id/{jobID}
+[DELETE] /api/backups/job-id/{jobId}
 
 - Curl
 curl --request DELETE \
-  --url http://localhost:3000/api/backups/job-id/{jobID} \
+  --url http://localhost:3000/api/backups/job-id/{jobId} \
   --header "authorization: token"
 ```
 
@@ -3181,7 +2128,7 @@ curl --request DELETE \
 
 | Parameter | Type   | Required | Description                         | Default | Example |
 | --------- | ------ | -------- | ----------------------------------- | ------- | ------- |
-| jobID     | string | Required | The ID of the backup job to delete. |         | 23      |
+| jobId     | string | Required | The ID of the backup job to delete. |         | 23      |
 
 #### Query
 
@@ -3195,31 +2142,46 @@ None
 None
 ```
 
+### Request Example
+
+```txt
+# Delete a backup job with ID 23
+[DELETE] /api/backups/job-id/23
+```
+
 ### Response Example (Success)
 
 ```json
 {
-  "requestID": "v1c2x3z4-b5n6-m7l8-k9j0-h1g2f3d4s5a6",
-  "message": "Backup job has been successfully deleted",
-  "success": true,
-  "data": {
-    "id": "23",
-    "jobName": "Updated-Weekly-System-Backup"
-  },
-  "timestamp": "2025-05-12T06:35:12.345Z"
+	"requestID": "89a43c86-0cb2-4ab3-8cfb-0a24a86eff64",
+	"message": "Backup job data delete result",
+	"success": true,
+	"data": {
+		"job_id": "314",
+		"delete_state": {
+			"data": "success",
+			"log": "success",
+			"history": "success"
+		}
+	},
+	"timestamp": "2025-05-20T02:07:13.122Z"
 }
 ```
 
 ### Response Structure (Success)
 
-| Field         | Type    | Description                                |
-| ------------- | ------- | ------------------------------------------ |
-| requestID     | string  | Request unique ID.                         |
-| message       | string  | Processing result message.                 |
-| success       | boolean | Request success status.                    |
-| data.id       | string  | ID of the deleted job.                     |
-| data.jobName  | string  | Name of the deleted job.                   |
-| timestamp     | string  | Request processing time. (ISO 8601 format) |
+| Field                   | Type    | Description                                                            |
+| ----------------------- | ------- | ---------------------------------------------------------------------- |
+| requestID               | string  | Request unique ID.                                                     |
+| message                 | string  | Processing result message.                                             |
+| success                 | boolean | Request success status.                                                |
+| data                    | object  | Result data object.                                                    |
+| data.job_id             | string  | ID of the deleted job.                                                 |
+| data.delete_state       | object  | Status of different deletion operations.                               |
+| data.delete_state.data  | string  | Status of job data deletion. Returns `success` or `fail`.              |
+| data.delete_state.log   | string  | Status of job log deletion. Returns `success` or `fail`.               |
+| data.delete_state.history | string | Status of job history deletion. Returns `success` or `fail`.          |
+| timestamp               | string  | Request processing time. (ISO 8601 format)                             |
 
 ## Backup Job Deletion - By Job Name
 
@@ -3267,24 +2229,21 @@ None
 None
 ```
 
+### Request Example
+> The request examples from [Backup Job Deletion - By Job ID](#backup-job-deletion---by-job-id) can be used with this endpoint by simply changing the URL path from `/api/backups/` to `/api/backups/job-name/{jobName}`.
+
+```txt
+# Delete a backup job with name "Daily-Data-Backup"
+[DELETE] /api/backups/job-name/Daily-Data-Backup
+```
+
 ### Response Example (Success)
 
-```json
-{
-  "requestID": "p1o2i3u4-y5t6-r7e8-w9q0-a1s2d3f4g5h6",
-  "message": "Backup job has been successfully deleted",
-  "success": true,
-  "data": {
-    "id": "23",
-    "jobName": "Updated-Weekly-System-Backup"
-  },
-  "timestamp": "2025-05-12T06:38:24.567Z"
-}
-```
+> The success response format is identical to that of the **Response Example (Success)** section in the [Backup Job Deletion - By Job ID](#backup-job-deletion---by-job-id) endpoint.
 
 ### Response Structure (Success)
 
-The response structure is identical to the "Backup Job Deletion - By Job ID" endpoint.
+> The response structure is identical to that of the **Response Structure (Success)** section in the [Backup Job Deletion - By Job ID](#backup-job-deletion---by-job-id) endpoint.
 
 ## Backup Job Monitoring - By Job ID
 
@@ -3298,11 +2257,11 @@ Monitor a backup job's current status and progress by its ID.
 
 ```txt
 - http
-[GET] /api/backups/job-id/{jobID}/monitoring
+[GET] /api/backups/job-id/{jobId}/monitoring
 
 - Curl
 curl --request GET \
-  --url http://localhost:3000/api/backups/job-id/{jobID}/monitoring \
+  --url http://localhost:3000/api/backups/job-id/{jobId}/monitoring \
   --header "Content-Type: application/json" \
   --header "authorization: token"
 ```
@@ -3319,7 +2278,7 @@ curl --request GET \
 
 | Parameter | Type   | Required | Description                          | Default | Example |
 | --------- | ------ | -------- | ------------------------------------ | ------- | ------- |
-| jobID     | string | Required | The ID of the backup job to monitor. |         | 25      |
+| jobId     | string | Required | The ID of the backup job to monitor. |         | 25      |
 
 #### Query
 
@@ -3633,13 +2592,13 @@ Retrieve execution history for a specific backup job.
 
 ```txt
 - http
-[GET] /api/backups/job-id/{jobID}/histories
+[GET] /api/backups/job-id/{jobId}/histories
 [GET] /api/backups/job-name/{jobName}/histories
 [GET] /api/backups/server-name/{serverName}/histories
 
 - Curl
 curl --request GET \
-  --url http://localhost:3000/api/backups/job-id/{jobID}/histories \
+  --url http://localhost:3000/api/backups/job-id/{jobId}/histories \
   --header "Content-Type: application/json" \
   --header "authorization: token"
 ```
@@ -3656,7 +2615,7 @@ curl --request GET \
 
 | Parameter  | Type   | Required | Description                                 | Default | Example              |
 | ---------- | ------ | -------- | ------------------------------------------- | ------- | -------------------- |
-| jobID      | string | Required | The ID of the backup job (for job-id).      |         | 23                   |
+| jobId      | string | Required | The ID of the backup job (for job-id).      |         | 23                   |
 | jobName    | string | Required | The name of the backup job (for job-name).  |         | Daily-Data-Backup    |
 | serverName | string | Required | The name of the server (for server-name).   |         | rim-ubuntu24-uefi    |
 
@@ -3787,13 +2746,13 @@ Retrieve logs for a specific backup job execution.
 
 ```txt
 - http
-[GET] /api/backups/job-id/{jobID}/logs
+[GET] /api/backups/job-id/{jobId}/logs
 [GET] /api/backups/job-name/{jobName}/logs
 [GET] /api/backups/server-name/{serverName}/logs
 
 - Curl
 curl --request GET \
-  --url http://localhost:3000/api/backups/job-id/{jobID}/logs \
+  --url http://localhost:3000/api/backups/job-id/{jobId}/logs \
   --header "Content-Type: application/json" \
   --header "authorization: token"
 ```
@@ -3810,7 +2769,7 @@ curl --request GET \
 
 | Parameter  | Type   | Required | Description                               | Default | Example              |
 | ---------- | ------ | -------- | ----------------------------------------- | ------- | -------------------- |
-| jobID      | string | Required | The ID of the backup job (for job-id).    |         | 23                   |
+| jobId      | string | Required | The ID of the backup job (for job-id).    |         | 23                   |
 | jobName    | string | Required | The name of the backup job (for job-name).|         | Daily-Data-Backup    |
 | serverName | string | Required | The name of the server (for server-name). |         | rim-ubuntu24-uefi    |
 
@@ -3991,22 +2950,305 @@ None
 | description      | string | Optional | Additional description.                                       | ""      | "Every Monday at 2AM" |
 
 ### Request Example
+<details>
+<summary>Click to expand/collapse examples</summary>
 
 ```json
+# Schedule Examples
+- 0 to 6 requires only full or increment
+- 7 to 11 requires both full and increment
+
+# (0) - Once
+- Run once on 2025/04/29 at 12: 00
 {
-  "type": "5",
-  "name": "Weekly Monday",
-  "month": "",
-  "week": "",
-  "day": "mon",
-  "time": "02:00",
-  "interval": {
-    "hour": "",
-    "minute": ""
-  },
-  "description": "Every Monday at 2AM"
+	"center": 6,
+	"type": 0,
+	"full": {
+		"year": 2025,
+		"month": 4,
+		"week": "",
+		"day": "29",
+		"time": "12:00",
+		"interval": {
+			"hour": "",
+			"minute": ""
+		}
+	}
+}
+
+# (1) - Every Minute
+- Run every 5 minutes starting from 12: 00
+{
+	"center": 6,
+	"type": 1,
+	"full": {
+		"year": "",
+		"month": "",
+		"week": "",
+		"day": "",
+		"time": "12:00",
+		"interval": {
+			"hour": "",
+			"minute": "5"
+		}
+	}
+}
+
+# (2) - Hourly
+- Run every hour starting from 12: 00
+{
+	"center": 6,
+	"type": 2,
+	"full": {
+		"year": "",
+		"month": "",
+		"week": "",
+		"day": "",
+		"time": "12:00",
+		"interval": {
+			"hour": "1",
+			"minute": ""
+		}
+	}
+}
+
+# (3) - Daily
+- Run daily at 12: 00
+{
+	"center": 6,
+	"type": 3,
+	"full": {
+		"year": "",
+		"month": "",
+		"week": "",
+		"day": "",
+		"time": "12:00",
+		"interval": {
+			"hour": "",
+			"minute": ""
+		}
+	}
+}
+
+# (4) - Weekly
+- Run every Tuesday at 12: 00 (multiple days of the week can be selected)
+{
+	"center": 6,
+	"type": 4,
+	"full": {
+		"year": "",
+		"month": "",
+		"week": "",
+		"day": "tue",
+		"time": "12:00",
+		"interval": {
+			"hour": "",
+			"minute": ""
+		}
+	}
+}
+
+# (5) - Monthly on Specific Week
+- Run on Wednesday of the 1st and 3rd week of each month at 12: 00 (multiple weeks can be selected)
+{
+	"center": 6,
+	"type": 5,
+	"full": {
+		"year": "",
+		"month": "",
+		"week": "1,3",
+		"day": "wed",
+		"time": "12:00",
+		"interval": {
+			"hour": "",
+			"minute": ""
+		}
+	}
+}
+
+# (6) - Monthly on Specific Day
+- Run on the 10th and 20th of each month at 12: 00 (multiple dates can be selected)
+{
+	"center": 6,
+	"type": 6,
+	"full": {
+		"year": "",
+		"month": "",
+		"week": "",
+		"day": "10, 20",
+		"time": "12:00",
+		"interval": {
+			"hour": "",
+			"minute": ""
+		}
+	}
+}
+
+# (7) - Smart Weekly By Weekday
+- full
+	Run every Wednesday at 12: 00 (multiple days cannot be selected)
+-	increment
+	Run every Monday, Thursday, and Friday at 12: 00 (multiple days can be selected)
+{
+	"center": 6,
+	"type": 7,
+	"full": {
+		"year": "",
+		"month": "",
+		"week": "",
+		"day": "wed",
+		"time": "12:00",
+		"interval": {
+			"hour": "",
+			"minute": ""
+		}
+	},
+	"increment": {
+		"year": "",
+		"month": "",
+		"week": "",
+		"day": "mon, thu, fri",
+		"time": "12:00",
+		"interval": {
+			"hour": "",
+			"minute": ""
+		}
+	}
+}
+
+# (8) - Smart Monthly By Week And Weekday
+- full
+	Run on Monday of the 2nd week of each month at 12: 00 (multiple weeks cannot be selected | multiple days cannot be selected)
+-	increment
+	Run on Tuesday and Thursday of the 1st and 3rd week of each month at 12: 00 (multiple weeks can be selected | multiple days can be selected)
+{
+	"center": 6,
+	"type": 8,
+	"full": {
+		"year": "",
+		"month": "",
+		"week": "2",
+		"day": "mon",
+		"time": "12:00",
+		"interval": {
+			"hour": "",
+			"minute": ""
+		}
+	},
+	"increment": {
+		"year": "",
+		"month": "",
+		"week": "1,3",
+		"day": "tue, thu",
+		"time": "12:00",
+		"interval": {
+			"hour": "",
+			"minute": ""
+		}
+	}
+}
+
+# (9) - Smart Monthly By Date
+- full
+	Run on the 15th of each month at 12: 00 (multiple dates cannot be selected)
+-	increment
+	Run on the 2nd and 25th of each month at 12: 00 (multiple dates can be selected)
+{
+	"center": 6,
+	"type": 9,
+	"full": {
+		"year": "",
+		"month": "",
+		"week": "",
+		"day": "15",
+		"time": "12:00",
+		"interval": {
+			"hour": "",
+			"minute": ""
+		}
+	},
+	"increment": {
+		"year": "",
+		"month": "",
+		"week": "",
+		"day": "2, 25",
+		"time": "12:00",
+		"interval": {
+			"hour": "",
+			"minute": ""
+		}
+	}
+}
+
+# (10) - Smart Custom Monthly By Week And Day
+- full
+	Run on Saturday of the 2nd week of May each year at 12: 00 
+	(multiple months cannot be selected | multiple weeks cannot be selected | multiple days cannot be selected)
+-	increment
+	Run on Wednesday and Sunday of the 2nd and 4th week of January and June each year at 12: 00 
+	(multiple months can be selected | multiple weeks can be selected | multiple days can be selected)
+{
+	"center": 6,
+	"type": 10,
+	"full": {
+		"year": "",
+		"month": "5",
+		"week": "2",
+		"day": "sat",
+		"time": "12:00",
+		"interval": {
+			"hour": "",
+			"minute": ""
+		}
+	},
+	"increment": {
+		"year": "",
+		"month": "1,6",
+		"week": "2,4",
+		"day": "wed, sun",
+		"time": "12:00",
+		"interval": {
+			"hour": "",
+			"minute": ""
+		}
+	}
+}
+
+# (11) - Smart Custom Monthly By Date
+- full
+	Run on April 19 each year at 12: 00
+	(multiple months cannot be selected | multiple dates cannot be selected)
+-	increment
+	Run on the 25th and 28th of October and November each year at 12: 00
+	(multiple months can be selected | multiple dates can be selected)
+{
+	"center": 6,
+	"type": 11,
+	"full": {
+		"year": "",
+		"month": "4",
+		"week": "",
+		"day": "19",
+		"time": "12:00",
+		"interval": {
+			"hour": "",
+			"minute": ""
+		}
+	},
+	"increment": {
+		"year": "",
+		"month": "10, 11",
+		"week": "",
+		"day": "25, 28",
+		"time": "12:00",
+		"interval": {
+			"hour": "",
+			"minute": ""
+		}
+	}
 }
 ```
+</details>
 
 ### Response Example (Success)
 
@@ -4041,35 +3283,6 @@ None
 | data.description          | array   | Array of summary information for the assigned schedules.              |
 | data.description[]        | string  | Human-readable description of each assigned schedule configuration.   |
 | timestamp                 | string  | Request processing time. (ISO 8601 format)                            |
-
-### Response Example (Failure)
-
-```json
-{
-  "requestID": "2a37f681-da8a-4045-a591-b73008d6a575",
-  "success": false,
-  "error": {
-    "code": "BAD_REQUEST",
-    "message": "[Schedule 정보 검증] - Schedule data 검증 중 오류 발생 ( Smart Custom Monthly By Date )",
-    "details": {
-      "cause": "month값이 누락되었습니다."
-    }
-  },
-  "timestamp": "2025-05-13T02:23:31.017Z"
-}
-```
-
-### Response Structure (Failure)
-
-| Field               | Type    | Description                                |
-| ------------------- | ------- | ------------------------------------------ |
-| requestID           | string  | Request unique ID.                         |
-| success             | boolean | Request success status.                    |
-| error.code          | string  | Error code.                                |
-| error.message       | string  | Error message.                             |
-| error.details       | object  | Additional error details.                  |
-| error.details.cause | string  | Specific cause of the error.             |
-| timestamp           | string  | Request processing time. (ISO 8601 format) |
 
 ## Schedule Retrieval
 
@@ -4176,76 +3389,6 @@ None
 | timestamp          | string  | Request processing time. (ISO 8601 format) |
 
 ## Schedule Deletion
-
-### Description
-> **Warning!** This feature is currently not supported. (will be supported in the future)
-```txt
-Delete a schedule from the ZDM Portal.
-```
-
-### URL
-
-```txt
-- http
-[DELETE] /api/schedules/{scheduleID}
-
-- Curl
-curl --request DELETE \
-  --url http://localhost:3000/api/schedules/{scheduleID} \
-  --header "authorization: token"
-```
-
-### Request Parameters
-
-#### Headers
-
-| Parameter     | Type   | Required | Description           | Default | Example |
-| ------------- | ------ | -------- | --------------------- | ------- | ------- |
-| authorization | string | Required | Authentication token. |         | token   |
-
-#### Parameter
-
-| Parameter  | Type   | Required | Description                     | Default | Example |
-| ---------- | ------ | -------- | ------------------------------- | ------- | ------- |
-| scheduleID | string | Required | ID of the schedule to delete.   |         | 36      |
-
-#### Query
-
-```txt
-None
-```
-
-#### Body
-
-```txt
-None
-```
-
-### Response Example (Success)
-
-```json
-{
-  "requestID": "q1w2e3r4-t5y6-u7i8-o9p0-a1s2d3f4g5h6",
-  "message": "Schedule has been successfully deleted",
-  "success": true,
-  "data": {
-    "id": "36",
-    "name": "Weekly Monday"
-  },
-  "timestamp": "2025-05-12T07:35:22.789Z"
-}
-```
-
-### Response Structure (Success)
-
-| Field         | Type    | Description                                |
-| ------------- | ------- | ------------------------------------------ |
-| requestID     | string  | Request unique ID.                         |
-| message       | string  | Processing result message.                 |
-| success       | boolean | Request success status.                    |
-| data.id       | string  | ID of the deleted schedule.                |
-| data.name     | string  | Name of the deleted schedule.              |
-| timestamp     | string  | Request processing time. (ISO 8601 format) |
 
 # Process Flow
 
