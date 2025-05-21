@@ -1,6 +1,6 @@
-////////////////////////////////
+///////////////////////////////
 //  기본 Backup 정보 응답 DTO  //
-////////////////////////////////
+///////////////////////////////
 
 import { JobResult } from "../../../../types/common/job"
 import { AllRepositoryType, RepositoryConnectionTypeMap } from "../../../../types/common/repository"
