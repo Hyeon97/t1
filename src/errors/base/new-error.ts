@@ -29,7 +29,7 @@ export class NewError extends Error {
    * 공통 팩토리 메서드 - 하위 클래스에서 사용할 기본 구현
    */
 
-  // 일반 에러를 BaseError로 변환하는 메서드
+  // 일반 에러를 BaseError로 변환
   static createFrom<T extends NewError>(constructor: new (params: ErrorParams) => T, params: ErrorParams): T {
     return new constructor(params as ErrorParams)
   }
