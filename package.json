@@ -8,7 +8,7 @@
     "start": "cross-env NODE_ENV=production node dist/server.js",
     "dev": "cross-env NODE_ENV=development nodemon --exec ts-node server.ts",
     "build": "tsc",
-    "package": "npm run build && pkg ."
+    "package": "npm run build && pkg . --compress --options max_old_space_size=256 --no-toplevel --no-builtins --no-lazy --no-fullpath --no-harmony-async-iteration --no-heap-copy --no-seal --no-unbox-opts --debug"
   },
   "pkg": {
     "assets": [
