@@ -3,9 +3,10 @@
 ///////////////////////////////////////////////////
 
 import { Expose } from "class-transformer"
-import { IsOptional } from "class-validator"
+import { IsIn, IsOptional } from "class-validator"
+import { NON_SSH_REPOSITORY_VALUES } from "../../../../../types/common/const-value"
 import { OSType } from "../../../../../types/common/os"
-import { RepositoryType } from "../../../../../types/common/repository"
+import { RepositoryTypeNonSSH } from "../../../../../types/common/repository"
 import { ZdmRepositoryFilterOptions } from "../../../types/zdm-repository/zdm-repository-filter.type"
 
 export class ZdmRepositoryGetQueryDTO implements ZdmRepositoryFilterOptions {
@@ -15,12 +16,15 @@ export class ZdmRepositoryGetQueryDTO implements ZdmRepositoryFilterOptions {
   center?: string
 
   @IsOptional()
+  @IsIn(NON_SSH_REPOSITORY_VALUES, {
+    message: `type은 ${NON_SSH_REPOSITORY_VALUES.join(", ")}중 하나여야 합니다`,
+  })
   @Expose()
-  type?: RepositoryType | ""
+  type?: RepositoryTypeNonSSH
 
   @IsOptional()
   @Expose()
-  os?: OSType | ""
+  os?: OSType
 
   //  repository sRemotePath
   @IsOptional()

@@ -4,8 +4,8 @@
 
 import { Expose, Transform } from "class-transformer"
 import { IsIn, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator"
-import { VALID_REPOSITORY_VALUES } from "../common/const-value"
-import { RepositoryBody, RepositoryType } from "../common/repository"
+import { NON_SSH_REPOSITORY_VALUES } from "../common/const-value"
+import { RepositoryBody, RepositoryTypeNonSSH } from "../common/repository"
 
 /**
  * 작업 등록시 repository 입력 양식
@@ -18,11 +18,11 @@ export class JobRegistRepositoryDTO implements RepositoryBody {
 
   @IsOptional()
   @IsNotEmpty({ message: "repository.type이 누락되었습니다" })
-  @IsIn(VALID_REPOSITORY_VALUES, {
-    message: `repository.type은 ${VALID_REPOSITORY_VALUES.join(", ")}중 하나여야 합니다`,
+  @IsIn(NON_SSH_REPOSITORY_VALUES, {
+    message: `repository.type은 ${NON_SSH_REPOSITORY_VALUES.join(", ")}중 하나여야 합니다`,
   })
   @Expose()
-  type?: RepositoryType
+  type?: RepositoryTypeNonSSH
 
   @IsOptional()
   @IsString({ message: "repository.path는 문자열이어야 합니다" })
@@ -43,11 +43,11 @@ export class JobEditRepositoryDTO implements RepositoryBody {
 
 
   @IsOptional()
-  @IsIn(VALID_REPOSITORY_VALUES, {
-    message: `repository.type은 ${VALID_REPOSITORY_VALUES.join(", ")}중 하나여야 합니다`,
+  @IsIn(NON_SSH_REPOSITORY_VALUES, {
+    message: `repository.type은 ${NON_SSH_REPOSITORY_VALUES.join(", ")}중 하나여야 합니다`,
   })
   @Expose()
-  type?: RepositoryType
+  type?: RepositoryTypeNonSSH
 
   @IsOptional()
   @IsString({ message: "repository.path는 문자열이어야 합니다" })

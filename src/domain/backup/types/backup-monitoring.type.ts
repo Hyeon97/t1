@@ -2,7 +2,7 @@
 //  Backup Monitoring 필터링 옵션 인터페이스  //
 //////////////////////////////////////////////
 
-import { RepositoryType } from "../../../types/common/repository"
+import { AllRepositoryType } from "../../../types/common/repository"
 import { BackupType } from "./backup-common.type"
 
 /**
@@ -12,7 +12,7 @@ export interface BackupMonitoringFilterOptions {
   //  필터 옵션
   mode?: BackupType | ""
   partition?: string
-  repositoryType?: RepositoryType | ""
+  repositoryType?: AllRepositoryType | ""
   repositoryPath?: string
   //  추가 정보
   detail?: string | boolean

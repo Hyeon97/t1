@@ -2,7 +2,7 @@
 //  Repository 관련 타입 정의  //
 ////////////////////////////////
 
-import { VALID_REPOSITORY_VALUES } from "./const-value"
+import { NON_SSH_REPOSITORY_VALUES, VALID_REPOSITORY_VALUES } from "./const-value"
 
 /**
  * 작업 등록 또는 정보 수정 시 repository 입력 양식
@@ -11,7 +11,7 @@ export interface RepositoryBody {
   //  repository id
   id?: number
   //  repository type
-  type?: RepositoryType
+  type?: RepositoryTypeNonSSH
   //  repository path
   path?: string
 }
@@ -19,7 +19,8 @@ export interface RepositoryBody {
 /**
  * 일반적인 Repository 타입 정의
  */
-export type RepositoryType = (typeof VALID_REPOSITORY_VALUES)[number]
+export type AllRepositoryType = (typeof VALID_REPOSITORY_VALUES)[number]
+export type RepositoryTypeNonSSH = (typeof NON_SSH_REPOSITORY_VALUES)[number]
 export enum RepositoryEnum {
   SMB = 20,
   NFS = 21,

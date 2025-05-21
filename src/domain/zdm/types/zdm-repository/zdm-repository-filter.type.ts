@@ -3,11 +3,11 @@
 ///////////////////////////////////////////////
 
 import { OSType } from "../../../../types/common/os"
-import { RepositoryType } from "../../../../types/common/repository"
+import { RepositoryTypeNonSSH } from "../../../../types/common/repository"
 
 export interface ZdmRepositoryFilterOptions {
   center?: string //  레포지토리가 속한 센터 name 또는 id (숫자만 있는경우)
-  type?: RepositoryType | ""
+  type?: RepositoryTypeNonSSH | ""
   os?: OSType | ""
   path?: string
 }
