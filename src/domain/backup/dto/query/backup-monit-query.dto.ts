@@ -4,7 +4,7 @@
 
 import { Expose } from "class-transformer"
 import { IsIn, IsOptional, IsString } from "class-validator"
-import { RepositoryType } from "../../../../types/common/repository"
+import { RepositoryTypeNonSSH } from "../../../../types/common/repository"
 import { BackupType } from "../../types/backup-common.type"
 import { BackupMonitoringFilterOptions } from "../../types/backup-monitoring.type"
 
@@ -25,7 +25,7 @@ export class BackupMonitoringQueryDTO implements BackupMonitoringFilterOptions {
   @IsOptional()
   @IsIn(["smb", "nfs"], { message: "repositoryType은 'smb', 'nfs'만 가능합니다" })
   @Expose()
-  repositoryType?: RepositoryType
+  repositoryType?: RepositoryTypeNonSSH
 
   //  작업 사용 repository path
   @IsOptional()
