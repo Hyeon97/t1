@@ -50,7 +50,7 @@ export class BackupDeleteService extends BaseService {
     try {
       asyncContextStorage.addOrder({ component: this.serviceName, method: "processResult", state: "start" })
       let returnObject: BackupDataDeleteResponse | null = null
-      const mainResult = data.mainResults.filter((el) => el.status === "fulfilled").length === 2 ? "success" : "false"
+      const mainResult = data.mainResults.filter((el) => el.status === "fulfilled").length === 2 ? "success" : "fail"
       const log = data.additionalResults.find((el) => el.type === "Log") ?? null
       const logResult = !log ? "fail" : log.status === "fulfilled" ? "success" : "fail"
       const history = data.additionalResults.find((el) => el.type === "History") ?? null
@@ -232,6 +232,7 @@ export class BackupDeleteService extends BaseService {
       })
       const result = this.processResult({ data: transactionResult, jobId })
       asyncContextStorage.addOrder({ component: this.serviceName, method: "deleteBackupByJobId", state: "end" })
+      return result
     } catch (error) {
       return this.handleServiceError({
         error,
