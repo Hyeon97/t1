@@ -4,7 +4,7 @@
 
 import { Expose } from "class-transformer"
 import { IsIn, IsOptional, IsString } from "class-validator"
-import { VALID_SYSTEM_MODE_VALUES } from "../../../../types/common/const-value"
+import { VALID_JOB_TYPE_VALUES, VALID_SYSTEM_MODE_VALUES } from "../../../../types/common/const-value"
 import { JobResult, JobStatusType } from "../../../../types/common/job"
 import { RepositoryTypeNonSSH } from "../../../../types/common/repository"
 import { SystemModeType } from "../../../server/types/server-common.type"
@@ -15,7 +15,7 @@ export class BackupGetQueryDTO implements BackupFilterOptions {
   //  필터 옵션
   //  작업 모드
   @IsOptional()
-  @IsIn(["full", "inc", "smart"], { message: "mode는 'full', 'inc', 'smart'만 가능합니다" })
+  @IsIn(VALID_JOB_TYPE_VALUES, { message: `mode는 ${VALID_JOB_TYPE_VALUES.join(', ')}만 가능합니다` })
   @Expose()
   mode?: BackupType
 
