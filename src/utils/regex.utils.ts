@@ -26,3 +26,5 @@ export const regNfsPath =
   /^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9]|[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}):(\/([\w.-]+))*\/?$/
 //  쉼표를 제외한 모든 공백 제거
 export const regCommaSeparator = /\s*,\s*/g
+//  YYYY-MM-DD 형식
+export const regDateFormatYYYYMMDD = /^\d{4}-\d{2}-\d{2}$/
