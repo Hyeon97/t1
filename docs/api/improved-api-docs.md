@@ -2,28 +2,8 @@
 
 - Last updated: 2025-05-12
 - Version: 1.0.1
-- 진행 상황
-  - Auth
-    - Token Issue
-  - Server
-    - Server Retrieval - All  
-    - Server Retrieval - By Server Name
-  - Center
-    - Center Retrieval - All
-    - Center Retrieval - By Center ID
-    - Center Repository Retrieval
-  - License
-  - Backup
-    - Backup Job Registration
-    - Backup Job Reterieval - All ( 작업 상태 추가 작성 필요 )
-    - Backup Job Reterieval - By Job ID
-    - Backup Job Reterieval - By Job Name
-    - Backup Job Reterieval - By Server Name
-    - Backup Job Modification - By Job ID
-    - Backup Job Modification - By Job Name
-  - Schedule
-    - Schedule Registration  
-    - Schedule Retrieval
+- 확인 필요
+  - Backup Job Reterieval - All ( 작업 상태 추가 작성 필요 )
             
 
 ## Table of Contents
@@ -49,7 +29,7 @@
   - [Center Repository Deletion]
 - [License](#license)
   - [License Registration]
-  - [License Retrieval]
+  - [License Retrieval - All](#license-retrieval---all)
   - [License Deletion]
   - [License Assignment]
 - [Backup](#backup)
@@ -132,10 +112,10 @@ Obtain a token for API usage.
 ### URL
 
 ```txt
-- http
+# Http
 [POST] /api/token/issue
 
-- Curl
+# Curl
 curl --request POST \
   --url http://localhost:3000/api/token/issue \
   --header "Content-Type: application/json" \
@@ -222,10 +202,10 @@ Retrieve the list of Servers registered to the ZDM Center.
 ### URL
 
 ```txt
-- http
+# Http
 [GET] /api/servers
 
-- Curl
+# Curl
 curl --request GET \
   --url http://localhost:3000/api/servers \
   --header "Content-Type: application/json" \
@@ -438,10 +418,10 @@ Retrieve specific server information by server name
 ### URL
 
 ```txt
-- http
+# Http
 [GET] /api/servers/server-name/{serverName}
 
-- Curl
+# Curl
 curl --request GET \
   --url http://localhost:3000/api/server-name/{serverName} \
   --header "Content-Type: application/json" \
@@ -631,10 +611,10 @@ Retrieve information about ZDM Centers.
 ### URL
 
 ```txt
-- http
+# Http
 [GET] /api/zdms
 
-- Curl
+# Curl
 curl --request GET \
   --url http://localhost:3000/api/zdms \
   --header "Content-Type: application/json" \
@@ -892,10 +872,10 @@ Retrieve specific ZDM Center information by ZDM Center name.
 ### URL
 
 ```txt
-- http
+# Http
 [GET] /api/zdms/zdm-id/{zdmId}
 
-- Curl
+# Curl
 curl --request GET \
   --url http://localhost:3000/api/zdms/zdm-id/{zdmId} \
   --header "Content-Type: application/json" \
@@ -1116,10 +1096,10 @@ Retrieve repositories of a ZDM Center.
 ### URL
 
 ```txt
-- http
+# Http
 [GET] /api/zdms/repositories
 
-- Curl
+# Curl
 curl --request GET \
   --url http://localhost:3000/api/zdms/repositories \
   --header "Content-Type: application/json" \
@@ -1278,7 +1258,107 @@ You can combine multiple filters to narrow down the repository list
 
 # License
 ## License Registration
-## License Retrieval
+## License Retrieval - All
+
+### Description
+```txt
+Retrieve the list of licenses registered in the ZDM Center.
+```
+
+### URL
+```txt
+# Http
+[GET] /api/licenses
+
+# Curl
+curl --request POST \
+  --url http://localhost:3000/api/licenses \
+  --header "Content-Type: application/json" \
+  --header "authorization: token" \
+```
+
+### Request Parameters
+
+#### Headers
+
+| Parameter     | Type   | Required | Description           | Default | Example |
+| ------------- | ------ | -------- | --------------------- | ------- | ------- |
+| authorization | string | Required | Authentication token. |         | token   |
+
+#### Parameter
+
+```txt
+None
+```
+
+#### Query
+
+| Parameter | Type | Required | Description | Default | Example |
+| --------- | ---- | -------- | ----------- | ------- | ------- |
+|category|string|Optional|License category. Only `zdm(backup)`, `zdm(dr)`, `zdm(migration)` are allowed.||`zdm(dr)`|
+|created|string|Optional|License creation (issuance) date. Must be in `YYYY-MM-DD` format.||`2025-05-22`|
+|exp|string|Optional|License expiration date. Must be in `YYYY-MM-DD` format.||`2025-05-22`|
+
+#### Body
+```txt
+None
+```
+
+### Request Example
+```txt
+# Retrieve all licenses
+[GET] /api/licenses
+
+# Retrieve licenses by category
+[GET] /api/licenses?category=zdm(dr)
+
+# Retrieve licenses by creation date
+[GET] /api/licenses?created=2025-05-22
+
+# Retrieve licenses by expiration date
+[GET] /api/licenses?exp=2025-05-22
+
+# Combined filters
+[GET] /api/licenses?category=zdm(backup)&created=2025-05-22&exp=2025-12-31
+```
+
+### Response Example (Success)
+```json
+{
+	"requestID": "958b3518-3866-4070-a297-271b867af79d",
+	"message": "License information list",
+	"success": true,
+	"data": [
+		{
+			"id": "74",
+			"licenseCategory": "ZDM(DR)",
+			"licenseCopyNumber": "500",
+			"licenseUseCopyNumber": "28",
+			"licenseKey": "License Key",
+			"licenseExpirationDate": "2024-12-31 23:59:59",
+			"licenseCreateDate": "2024-11-10 20:34:48"
+		}
+	],
+	"timestamp": "2025-05-22T05:38:36.449Z"
+}
+```
+
+### Response Structure (Success)
+| Field | Type | Description |
+| ----- | ---- | ----------- |
+| requestID | string | Request unique ID. |
+| message | string | Processing result message. |
+| success | boolean | Request success status. |
+| data | array | License information array. |
+| data[].id | string | License ID. |
+| data[].licenseCategory | string | License category type. |
+| data[].licenseCopyNumber | string | Total number of license copies. |
+| data[].licenseUseCopyNumber | string | Number of license copies currently in use. |
+| data[].licenseKey | string | License key. |
+| data[].licenseExpirationDate | string | License expiration date and time. |
+| data[].licenseCreateDate | string | License creation date and time. |
+| timestamp | string | Request processing time. (ISO 8601 format) |
+
 ## License Deletion
 ## License Assignment
 <br><br>
@@ -1295,10 +1375,10 @@ Registers a new Backup Job with the ZDM Center.
 ### URL
 
 ```txt
-- http
+# Http
 [POST] /api/backups
 
-- Curl
+# Curl
 curl --request POST \
   --url http://localhost:3000/api/backups \
   --header "Content-Type: application/json" \
@@ -1516,10 +1596,10 @@ Retrieve all Backup jobs registered to the ZDM Center.
 ### URL
 
 ```txt
-- http
+# Http
 [GET] /api/backups
 
-- Curl
+# Curl
 curl --request GET \
   --url http://localhost:3000/api/backups \
   --header "Content-Type: application/json" \
@@ -1692,10 +1772,10 @@ Retrieve a specific backup job by its ID.
 ### URL
 
 ```txt
-- http
+# Http
 [GET] /api/backups/job-id/{jobId}
 
-- Curl
+# Curl
 curl --request GET \
   --url http://localhost:3000/api/backups/job-id/{jobId} \
   --header "Content-Type: application/json" \
@@ -1757,10 +1837,10 @@ Retrieve a specific backup job by its name.
 ### URL
 
 ```txt
-- http
+# Http
 [GET] /api/backups/job-name/{jobName}
 
-- Curl
+# Curl
 curl --request GET \
   --url http://localhost:3000/api/backups/job-name/{jobName} \
   --header "Content-Type: application/json" \
@@ -1822,10 +1902,10 @@ Retrieve all backup jobs for a specific source server.
 ### URL
 
 ```txt
-- http
+# Http
 [GET] /api/backups/server-name/{serverName}
 
-- Curl
+# Curl
 curl --request GET \
   --url http://localhost:3000/api/backups/server-name/{serverName} \
   --header "Content-Type: application/json" \
@@ -1890,10 +1970,10 @@ Modify a backup job by its ID.
 ### URL
 
 ```txt
-- http
+# Http
 [PUT] /api/backups/job-id/{jobId}
 
-- Curl
+# Curl
 curl --request PUT \
   --url http://localhost:3000/api/backups/job-id/{jobId} \
   --header "Content-Type: application/json" \
@@ -2049,10 +2129,10 @@ Modify a backup job by its name.
 ### URL
 
 ```txt
-- http
+# Http
 [PUT] /api/backups/job-name/{jobName}
 
-- Curl
+# Curl
 curl --request PUT \
   --url http://localhost:3000/api/backups/job-name/{jobName} \
   --header "Content-Type: application/json" \
@@ -2107,10 +2187,10 @@ Delete a backup job by its ID.
 ### URL
 
 ```txt
-- http
+# Http
 [DELETE] /api/backups/job-id/{jobId}
 
-- Curl
+# Curl
 curl --request DELETE \
   --url http://localhost:3000/api/backups/job-id/{jobId} \
   --header "authorization: token"
@@ -2194,10 +2274,10 @@ Delete a backup job by its name.
 ### URL
 
 ```txt
-- http
+# Http
 [DELETE] /api/backups/job-name/{jobName}
 
-- Curl
+# Curl
 curl --request DELETE \
   --url http://localhost:3000/api/backups/job-name/{jobName} \
   --header "authorization: token"
@@ -2256,10 +2336,10 @@ Monitor a backup job's current status and progress by its ID.
 ### URL
 
 ```txt
-- http
+# Http
 [GET] /api/backups/job-id/{jobId}/monitoring
 
-- Curl
+# Curl
 curl --request GET \
   --url http://localhost:3000/api/backups/job-id/{jobId}/monitoring \
   --header "Content-Type: application/json" \
@@ -2406,10 +2486,10 @@ Monitor a backup job's current status and progress by its name.
 ### URL
 
 ```txt
-- http
+# Http
 [GET] /api/backups/job-name/{jobName}/monitoring
 
-- Curl
+# Curl
 curl --request GET \
   --url http://localhost:3000/api/backups/job-name/{jobName}/monitoring \
   --header "Content-Type: application/json" \
@@ -2493,10 +2573,10 @@ Monitor all backup jobs' current status and progress for a specific server.
 ### URL
 
 ```txt
-- http
+# Http
 [GET] /api/backups/server-name/{serverName}/monitoring
 
-- Curl
+# Curl
 curl --request GET \
   --url http://localhost:3000/api/backups/server-name/{serverName}/monitoring \
   --header "Content-Type: application/json" \
@@ -2591,12 +2671,12 @@ Retrieve execution history for a specific backup job.
 ### URL
 
 ```txt
-- http
+# Http
 [GET] /api/backups/job-id/{jobId}/histories
 [GET] /api/backups/job-name/{jobName}/histories
 [GET] /api/backups/server-name/{serverName}/histories
 
-- Curl
+# Curl
 curl --request GET \
   --url http://localhost:3000/api/backups/job-id/{jobId}/histories \
   --header "Content-Type: application/json" \
@@ -2745,12 +2825,12 @@ Retrieve logs for a specific backup job execution.
 ### URL
 
 ```txt
-- http
+# Http
 [GET] /api/backups/job-id/{jobId}/logs
 [GET] /api/backups/job-name/{jobName}/logs
 [GET] /api/backups/server-name/{serverName}/logs
 
-- Curl
+# Curl
 curl --request GET \
   --url http://localhost:3000/api/backups/job-id/{jobId}/logs \
   --header "Content-Type: application/json" \
@@ -2903,10 +2983,10 @@ Register a new schedule in the ZDM Portal.
 ### URL
 
 ```txt
-- http
+# Http
 [POST] /api/schedules
 
-- Curl
+# Curl
 curl --request POST \
   --url http://localhost:3000/api/schedules \
   --header "Content-Type: application/json" \
@@ -3295,10 +3375,10 @@ Retrieve schedules registered in the ZDM Portal.
 ### URL
 
 ```txt
-- http
+# Http
 [GET] /api/schedules
 
-- Curl
+# Curl
 curl --request GET \
   --url http://localhost:3000/api/schedules \
   --header "Content-Type: application/json" \
