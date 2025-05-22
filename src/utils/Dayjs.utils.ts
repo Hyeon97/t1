@@ -148,4 +148,143 @@ export class DateTimeUtils {
   static isValidDate({ dateString, format = "YYYY-MM-DD" }: { dateString: string; format?: string }): boolean {
     return dayjs(dateString, format, true).isValid()
   }
+
+  /**
+   * 날짜에 일수를 더하거나 빼기
+   * @param date 기준 날짜 (문자열 또는 Date 객체)
+   * @param days 더할 일수 (음수면 빼기)
+   * @returns YYYY-MM-DD 형식의 날짜 문자열
+   */
+  static addDays({ date, days }: { date: string | Date; days: number }): string {
+    return dayjs(date).add(days, 'day').format('YYYY-MM-DD')
+  }
+
+  /**
+   * 다음 날짜 구하기
+   * @param date 기준 날짜 (문자열 또는 Date 객체)
+   * @returns YYYY-MM-DD 형식의 다음 날짜 문자열
+   */
+  static getNextDay({ date }: { date: string | Date }): string {
+    return this.addDays({ date, days: 1 })
+  }
+
+  /**
+   * 이전 날짜 구하기
+   * @param date 기준 날짜 (문자열 또는 Date 객체)
+   * @returns YYYY-MM-DD 형식의 이전 날짜 문자열
+   */
+  static getPreviousDay({ date }: { date: string | Date }): string {
+    return this.addDays({ date, days: -1 })
+  }
+
+  /**
+   * 날짜에 월수를 더하거나 빼기
+   * @param date 기준 날짜 (문자열 또는 Date 객체)
+   * @param months 더할 월수 (음수면 빼기)
+   * @returns YYYY-MM-DD 형식의 날짜 문자열
+   */
+  static addMonths({ date, months }: { date: string | Date; months: number }): string {
+    return dayjs(date).add(months, 'month').format('YYYY-MM-DD')
+  }
+
+  /**
+   * 날짜에 년수를 더하거나 빼기
+   * @param date 기준 날짜 (문자열 또는 Date 객체)
+   * @param years 더할 년수 (음수면 빼기)
+   * @returns YYYY-MM-DD 형식의 날짜 문자열
+   */
+  static addYears({ date, years }: { date: string | Date; years: number }): string {
+    return dayjs(date).add(years, 'year').format('YYYY-MM-DD')
+  }
+
+  /**
+   * 날짜에 시간을 더하거나 빼기
+   * @param date 기준 날짜 (문자열 또는 Date 객체)
+   * @param hours 더할 시간수 (음수면 빼기)
+   * @returns YYYY-MM-DD HH:mm:ss 형식의 날짜시간 문자열
+   */
+  static addHours({ date, hours }: { date: string | Date; hours: number }): string {
+    return dayjs(date).add(hours, 'hour').format('YYYY-MM-DD HH:mm:ss')
+  }
+
+  /**
+   * 날짜에 분을 더하거나 빼기
+   * @param date 기준 날짜 (문자열 또는 Date 객체)
+   * @param minutes 더할 분수 (음수면 빼기)
+   * @returns YYYY-MM-DD HH:mm:ss 형식의 날짜시간 문자열
+   */
+  static addMinutes({ date, minutes }: { date: string | Date; minutes: number }): string {
+    return dayjs(date).add(minutes, 'minute').format('YYYY-MM-DD HH:mm:ss')
+  }
+
+  /**
+   * 월의 시작일 구하기
+   * @param date 기준 날짜 (문자열 또는 Date 객체)
+   * @returns YYYY-MM-DD 형식의 월 시작일 문자열
+   */
+  static getStartOfMonth({ date }: { date: string | Date }): string {
+    return dayjs(date).startOf('month').format('YYYY-MM-DD')
+  }
+
+  /**
+   * 월의 마지막일 구하기
+   * @param date 기준 날짜 (문자열 또는 Date 객체)
+   * @returns YYYY-MM-DD 형식의 월 마지막일 문자열
+   */
+  static getEndOfMonth({ date }: { date: string | Date }): string {
+    return dayjs(date).endOf('month').format('YYYY-MM-DD')
+  }
+
+  /**
+   * 년의 시작일 구하기
+   * @param date 기준 날짜 (문자열 또는 Date 객체)
+   * @returns YYYY-MM-DD 형식의 년 시작일 문자열
+   */
+  static getStartOfYear({ date }: { date: string | Date }): string {
+    return dayjs(date).startOf('year').format('YYYY-MM-DD')
+  }
+
+  /**
+   * 년의 마지막일 구하기
+   * @param date 기준 날짜 (문자열 또는 Date 객체)
+   * @returns YYYY-MM-DD 형식의 년 마지막일 문자열
+   */
+  static getEndOfYear({ date }: { date: string | Date }): string {
+    return dayjs(date).endOf('year').format('YYYY-MM-DD')
+  }
+
+  /**
+   * 현재 날짜를 YYYY-MM-DD 형식으로 반환
+   */
+  static getCurrentDate(): string {
+    return dayjs().format('YYYY-MM-DD')
+  }
+
+  /**
+   * 날짜 문자열을 Date 객체로 변환
+   * @param dateString 날짜 문자열
+   * @returns Date 객체
+   */
+  static toDate({ dateString }: { dateString: string }): Date {
+    return dayjs(dateString).toDate()
+  }
+
+  /**
+   * 요일 구하기 (0: 일요일, 1: 월요일, ..., 6: 토요일)
+   * @param date 날짜 (문자열 또는 Date 객체)
+   * @returns 요일 번호 (0-6)
+   */
+  static getDayOfWeek({ date }: { date: string | Date }): number {
+    return dayjs(date).day()
+  }
+
+  /**
+   * 요일 이름 구하기
+   * @param date 날짜 (문자열 또는 Date 객체)
+   * @param locale 언어 설정 (기본값: 'en')
+   * @returns 요일 이름
+   */
+  static getDayName({ date, locale = 'en' }: { date: string | Date; locale?: string }): string {
+    return dayjs(date).locale(locale).format('dddd')
+  }
 }
