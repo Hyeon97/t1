@@ -50,7 +50,7 @@ export class ServerGetService extends BaseService {
   /**
    * 서버 추가정보 가져오기
    */
-  private async getAdditionalInfo({ filterOptions, systemNames = [] }: { filterOptions: ServerFilterOptions; systemNames?: string[] }) {
+  private async getAdditionalInfo({ filterOptions, systemNames = [] }: { filterOptions?: ServerFilterOptions; systemNames?: string[] }) {
     try {
       asyncContextStorage.addOrder({ component: this.serviceName, method: "getAdditionalInfo", state: "start" })
       // 시스템 이름이 없거나 빈 배열이면 빈 결과 반환
@@ -76,32 +76,36 @@ export class ServerGetService extends BaseService {
       }
 
       // 레포지토리 매핑 정의
-      const repositoryMappings: RepositoryMapping[] = [
-        {
-          condition: !!filterOptions.disk,
-          type: "disks",
-          repository: this.serverDiskRepository,
-          errorMessage: "디스크 정보 조회 - 오류 발생",
-        },
-        {
-          condition: !!filterOptions.network,
-          type: "networks",
-          repository: this.serverNetworkRepository,
-          errorMessage: "네트워크 정보 조회 - 오류 발생",
-        },
-        {
-          condition: !!filterOptions.partition,
-          type: "partitions",
-          repository: this.serverPartitionRepository,
-          errorMessage: "파티션 정보 조회 - 오류 발생",
-        },
-        {
-          condition: !!filterOptions.repository,
-          type: "repositories",
-          repository: this.serverRepositoryRepository,
-          errorMessage: "레포지토리 정보 조회 - 오류 발생",
-        },
-      ]
+      let repositoryMappings: RepositoryMapping[] = []
+      if (!filterOptions) repositoryMappings = []
+      else {
+        repositoryMappings = [
+          {
+            condition: !!filterOptions.disk,
+            type: "disks",
+            repository: this.serverDiskRepository,
+            errorMessage: "디스크 정보 조회 - 오류 발생",
+          },
+          {
+            condition: !!filterOptions.network,
+            type: "networks",
+            repository: this.serverNetworkRepository,
+            errorMessage: "네트워크 정보 조회 - 오류 발생",
+          },
+          {
+            condition: !!filterOptions.partition,
+            type: "partitions",
+            repository: this.serverPartitionRepository,
+            errorMessage: "파티션 정보 조회 - 오류 발생",
+          },
+          {
+            condition: !!filterOptions.repository,
+            type: "repositories",
+            repository: this.serverRepositoryRepository,
+            errorMessage: "레포지토리 정보 조회 - 오류 발생",
+          },
+        ]
+      }
 
       // 조건에 따라 프로미스 생성
       repositoryMappings.forEach((mapping) => {
@@ -196,7 +200,7 @@ export class ServerGetService extends BaseService {
               serverResponse[propertyName as ServerDataPropertyKey] = []
             }
             // 타입스크립트 타입 단언 필요
-            ;(serverResponse[propertyName] as any[]).push(item)
+            ; (serverResponse[propertyName] as any[]).push(item)
           }
         })
       }
@@ -254,7 +258,7 @@ export class ServerGetService extends BaseService {
   /**
    * 서버 이름으로 조회
    */
-  async getServerByName({ name, filterOptions }: { name: string; filterOptions: ServerFilterOptions }): Promise<ServerDataResponse> {
+  async getServerByName({ name, filterOptions }: { name: string; filterOptions?: ServerFilterOptions }): Promise<ServerDataResponse> {
     try {
       asyncContextStorage.addService({ name: this.serviceName })
       asyncContextStorage.addOrder({ component: this.serviceName, method: "getServerByName", state: "start" })
@@ -294,7 +298,7 @@ export class ServerGetService extends BaseService {
   /**
    * 서버 ID로 조회
    */
-  async getServerById({ id, filterOptions }: { id: string; filterOptions: ServerFilterOptions }): Promise<ServerDataResponse> {
+  async getServerById({ id, filterOptions }: { id: string; filterOptions?: ServerFilterOptions }): Promise<ServerDataResponse> {
     try {
       asyncContextStorage.addService({ name: this.serviceName })
       asyncContextStorage.addOrder({ component: this.serviceName, method: "getServerById", state: "start" })

@@ -17,8 +17,9 @@ export class ServerBasicRepository extends BaseRepository {
   /**
    * 필터 옵션 적용
    */
-  private applyFilters({ filterOptions }: { filterOptions: ServerFilterOptions }): void {
+  private applyFilters({ filterOptions }: { filterOptions?: ServerFilterOptions }): void {
     try {
+      if (!filterOptions) return
       asyncContextStorage.addOrder({ component: this.repositoryName, method: "applyFilters", state: "start" })
       // OS 필터 적용
       if (filterOptions.os) {
@@ -88,7 +89,7 @@ export class ServerBasicRepository extends BaseRepository {
   /**
    * 특정 서버 조회 ( by Name )
    */
-  async findByServerName({ name, filterOptions }: { name: string; filterOptions: ServerFilterOptions }): Promise<ServerBasicTable | null> {
+  async findByServerName({ name, filterOptions }: { name: string; filterOptions?: ServerFilterOptions }): Promise<ServerBasicTable | null> {
     try {
       asyncContextStorage.addRepository({ name: this.repositoryName })
       asyncContextStorage.addOrder({ component: this.repositoryName, method: "findByServerName", state: "start" })
@@ -118,7 +119,7 @@ export class ServerBasicRepository extends BaseRepository {
   /**
    * 특정 서버 조회 ( By ID )
    */
-  async findByServerId({ id, filterOptions }: { id: number; filterOptions: ServerFilterOptions }): Promise<ServerBasicTable | null> {
+  async findByServerId({ id, filterOptions }: { id: number; filterOptions?: ServerFilterOptions }): Promise<ServerBasicTable | null> {
     try {
       asyncContextStorage.addRepository({ name: this.repositoryName })
       asyncContextStorage.addOrder({ component: this.repositoryName, method: "findByServerId", state: "start" })
