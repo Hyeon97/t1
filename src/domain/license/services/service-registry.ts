@@ -2,7 +2,9 @@
 //  License Service 선언 및 관리  //
 //////////////////////////////////
 
+import { serverGetService } from "../../server/services/service-registry"
 import { ZconLicenseRepository } from "../repositories/zcon-license.repository"
+import { LicenseAssignService } from "./license-assign.service"
 import { LicenseGetService } from "./license-get.service"
 
 /**
@@ -17,4 +19,9 @@ const zconLicenseHistoryRepository = new ZconLicenseRepository()
 //  License 정보 조회 Service
 export const licenseGetService = new LicenseGetService({
   licenseRepository: zconLicenseRepository
+})
+//  License 할당 Service
+export const licenseAssignService = new LicenseAssignService({
+  licenseRepository: zconLicenseRepository,
+  serverGetService
 })
