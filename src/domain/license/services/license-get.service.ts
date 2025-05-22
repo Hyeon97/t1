@@ -19,6 +19,7 @@ export class LicenseGetService extends BaseService {
    */
   async getLicenses({ filterOptions }: { filterOptions: LicenseFilterOptions }): Promise<LicenseDataResponse> {
     try {
+      asyncContextStorage.addService({ name: this.serviceName })
       asyncContextStorage.addOrder({ component: this.serviceName, method: "getLicenses", state: "start" })
       const licenses = await this.licenseRepository.findAll({ filterOptions })
       asyncContextStorage.addOrder({ component: this.serviceName, method: "getLicenses", state: "end" })
