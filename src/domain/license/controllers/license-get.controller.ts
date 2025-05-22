@@ -6,6 +6,8 @@ import { asyncContextStorage } from "../../../utils/AsyncContext"
 import { BaseController } from "../../../utils/base/base-controller"
 import { ContextLogger } from "../../../utils/logger/logger.custom"
 import { LicenseGetQueryDTO } from "../dto/query/license-get-query"
+import { LicenseResponseFactory } from "../dto/response/license-response-factory"
+import { LicenseGetService } from "../services/license-get.service"
 import { LicenseFilterOptions } from "../types/license-get.type"
 
 export class LicenseGetController extends BaseController {
@@ -79,14 +81,10 @@ export class LicenseGetController extends BaseController {
 
       //  서비스 호출
       const licenseData = await serviceMethod({ ...identifier, filterOptions })
-
       //  출력 가공
-      // const licensesDTO = LicenseResponseFactory.fromEntities({
-      //   licenseData: Array.isArray(licenseData) ? licenseData : [licenseData],
-      // })
-      const licensesDTO = {}
+      const licensesDTO = LicenseResponseFactory.createFromEntities({ licenseData: licenseData.items })
 
-      const resultMessage = `총 ${Array.isArray(licenseData) ? licenseData.length : 1}개의 License 정보를 조회했습니다. 상세 정보 포함: ${filterOptions.detail}`
+      const resultMessage = `총 ${Array.isArray(licenseData) ? licenseData.length : 1}개의 License 정보를 조회했습니다.`
       ContextLogger.info({ message: resultMessage })
 
       ApiUtils.success({ res, data: licensesDTO, message: "License information list" })
@@ -100,4 +98,23 @@ export class LicenseGetController extends BaseController {
       })
     }
   }
+
+  /**
+   * License 전체 정보 조회
+   */
+  getLicenses = async (req: ExtendedRequest, res: Response, next: NextFunction): Promise<void> => {
+    await this.handleLicenseGet({
+      req,
+      res,
+      next,
+      methodName: "getLicenses",
+      errorMessage: "[License 전체 정보 조회] - 오류가 발생했습니다",
+      serviceMethod: ({ filterOptions }) => this.licenseGetService.getLicenses({ filterOptions }),
+    })
+  }
+
+  /**
+   * License ID로 조회
+   */
+
 }

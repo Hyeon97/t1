@@ -3,6 +3,7 @@
 ////////////////////////////////
 
 import { ZconLicenseTable } from "../../types/db/zcon_license"
+import { LicenseTypeMap } from "../../types/license-common.type"
 import { DEFAULT_VALUES_LICENSE_RESPONSE, LicenseResponseFields } from "../../types/license-response.type"
 
 
@@ -54,7 +55,7 @@ export class LicenseResponseBaseDTO implements LicenseResponseFields {
   static fromEntity({ licenseData }: { licenseData: ZconLicenseTable }): LicenseResponseBaseDTO {
     return new LicenseResponseBaseDTO({
       id: String(licenseData.nID),
-      licenseCategory: String(licenseData.nLicenseCategory),
+      licenseCategory: LicenseTypeMap.toString({ value: licenseData.nLicenseCategory }),
       licenseCopyNumber: String(licenseData.nLicenseCopyNumber),
       licenseUseCopyNumber: String(licenseData.nLicenseUseCopyNumber),
       licenseKey: licenseData.sLicenseKey,

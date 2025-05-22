@@ -1,4 +1,6 @@
 import { Router } from "express"
+import { licenseGetController } from "../controllers/controller-registry"
+import { validateLicenseGetQuery } from "../validators/license.validators"
 
 export class LicenseRoutes {
   public router: Router
@@ -13,7 +15,7 @@ export class LicenseRoutes {
   private licenseRoutes(): void {
     //  [License 정보 조회]
     //  전체 목록 리턴
-    this.router.get('/')
+    this.router.get('/', validateLicenseGetQuery, licenseGetController.getLicenses)
     //  [License 할당]
     this.router.put('/assign')
     //  [License 등록]
