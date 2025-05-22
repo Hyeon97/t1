@@ -7,6 +7,7 @@ import { OpenApiConfig } from "./src/config/openapi-manager"
 import { AuthRoutes } from "./src/domain/auth/routes/auth.routes"
 import { validateToken } from "./src/domain/auth/validators/token.validators"
 import { BackupRoutes } from "./src/domain/backup/routes/backup.routes"
+import { LicenseRoutes } from "./src/domain/license/routes/license.routes"
 import { ScheduleRoutes } from "./src/domain/schedule/routes/schedule.routes"
 import { ServerRoutes } from "./src/domain/server/routes/server.routes"
 import { ZdmRoutes } from "./src/domain/zdm/routes/zdm.routes"
@@ -74,6 +75,7 @@ class App {
     this.app.use(`${apiPrefix}/servers`, validateToken, new ServerRoutes().router)
     this.app.use(`${apiPrefix}/servers`, validateToken, new ServerRoutes().router)
     this.app.use(`${apiPrefix}/zdms`, validateToken, new ZdmRoutes().router)
+    this.app.use(`${apiPrefix}/licenses`, validateToken, new LicenseRoutes().router)
     this.app.use(`${apiPrefix}/backups`, validateToken, new BackupRoutes().router)
     this.app.use(`${apiPrefix}/schedules`, validateToken, new ScheduleRoutes().router)
   }
