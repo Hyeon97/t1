@@ -65,10 +65,10 @@ export class ScheduleRegistService extends BaseService {
     let centerInfo = null
     //  ID 인 경우
     if (regNumberOnly.test(center)) {
-      centerInfo = await this.zdmGetService.getZdmInfoById({ id: center })
+      centerInfo = await this.zdmGetService.getZdmInfoOnlyById({ id: center })
     } else {
       // center 이름인 경우
-      centerInfo = await this.zdmGetService.getZdmInfoByName({ name: center })
+      centerInfo = await this.zdmGetService.getZdmInfoOnlyByName({ name: center })
     }
     if (!centerInfo) {
       throw ServiceError.badRequest(ServiceError, {
@@ -87,7 +87,7 @@ export class ScheduleRegistService extends BaseService {
   private async setID(): Promise<number> {
     asyncContextStorage.addOrder({ component: this.serviceName, method: "setID", state: "start" })
     const id = await jobUtils.getRandomNumber({
-      checkExists: async (id) => (await this.scheduleRepository.findById({ id })) !== null
+      checkExists: async (id) => (await this.scheduleRepository.findById({ id })) !== null,
     })
     asyncContextStorage.addOrder({ component: this.serviceName, method: "setID", state: "end" })
     return id
@@ -100,8 +100,7 @@ export class ScheduleRegistService extends BaseService {
 
     // 두 번째 ID 생성 (첫 번째 ID와 겹치지 않도록)
     const secondID = await jobUtils.getRandomNumber({
-      checkExists: async (id) =>
-        id === firstID || (await this.scheduleRepository.findById({ id })) !== null
+      checkExists: async (id) => id === firstID || (await this.scheduleRepository.findById({ id })) !== null,
     })
 
     asyncContextStorage.addOrder({ component: this.serviceName, method: "setIDPair", state: "end" })
@@ -111,11 +110,20 @@ export class ScheduleRegistService extends BaseService {
   /**
    * Schedule 등록
    */
-  private async registScheduleDataSet({ scheduleData, type, transaction }: { scheduleData: RegularScheduleData | SmartScheduleData, type: ScheduleTypeEnum, transaction: TransactionManager }): Promise<{ scheduleID: number, scheduleID_advanced: number }> {
+  private async registScheduleDataSet({
+    scheduleData,
+    type,
+    transaction,
+  }: {
+    scheduleData: RegularScheduleData | SmartScheduleData
+    type: ScheduleTypeEnum
+    transaction: TransactionManager
+  }): Promise<{ scheduleID: number; scheduleID_advanced: number }> {
     try {
       asyncContextStorage.addOrder({ component: this.serviceName, method: "registScheduleDataSet", state: "start" })
 
-      let scheduleID = 0, scheduleID_advanced = 0
+      let scheduleID = 0,
+        scheduleID_advanced = 0
       //  type >= 7
       if (isSmartScheduleData(scheduleData, type)) {
         // 스마트 스케줄 데이터인 경우 (full과 increment가 모두 존재)
@@ -126,8 +134,7 @@ export class ScheduleRegistService extends BaseService {
         // increment 데이터 등록
         await this.scheduleRepository.insertSchedule({ data: scheduleData.increment, transaction })
         scheduleID_advanced = scheduleData.increment.nID
-      }
-      else {
+      } else {
         let data = scheduleData.full || scheduleData.increment
         await this.scheduleRepository.insertSchedule({ data, transaction })
         scheduleID = data.nID
@@ -160,7 +167,7 @@ export class ScheduleRegistService extends BaseService {
       //  schedule 검증 ( type은 미들웨어 에서 검증됨 )
       const scheduleData: ScheduleVerifiInput = {
         full: data?.full,
-        increment: data?.increment
+        increment: data?.increment,
       }
       const scheduleType = Number(data.type)
       const { processedData, scheduleMode } = this.scheduleVerifiService.validateSchedule({ scheduleData, type: scheduleType })
@@ -174,19 +181,18 @@ export class ScheduleRegistService extends BaseService {
         // 스마트 스케줄 데이터인 경우 (full과 increment가 모두 존재)
         //  id 할당
         const [fullID, incID] = await this.setIDPair()
-        processedData['full'].nID = fullID
-        processedData['increment'].nID = incID
+        processedData["full"].nID = fullID
+        processedData["increment"].nID = incID
         //  center id 할당
-        processedData['full'].nCenterID = center.nID
-        processedData['increment'].nCenterID = center.nID
+        processedData["full"].nCenterID = center.nID
+        processedData["increment"].nCenterID = center.nID
         //  user id 할당
-        processedData['full'].nUserID = Number(data.user)
-        processedData['increment'].nUserID = Number(data.user)
+        processedData["full"].nUserID = Number(data.user)
+        processedData["increment"].nUserID = Number(data.user)
         //  jobName 할당
-        processedData['full'].sJobName = data?.jobName || ''
-        processedData['increment'].sJobName = data?.jobName || ''
-      }
-      else {
+        processedData["full"].sJobName = data?.jobName || ""
+        processedData["increment"].sJobName = data?.jobName || ""
+      } else {
         const mode = scheduleMode as "full" | "increment"
         //  id 할당
         processedData[mode]!.nID = await this.setID()
@@ -195,7 +201,7 @@ export class ScheduleRegistService extends BaseService {
         //  user id 할당
         processedData[mode]!.nUserID = Number(data.user)
         //  jobName 할당
-        processedData[mode]!.sJobName = data?.jobName || ''
+        processedData[mode]!.sJobName = data?.jobName || ""
       }
 
       //  등록

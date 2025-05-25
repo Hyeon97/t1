@@ -1,6 +1,8 @@
+import { ResultSetHeader } from "mysql2/promise"
+import { TransactionManager } from "../../../database/connection"
 import { OSTypeMap } from "../../../types/common/os"
 import { asyncContextStorage } from "../../../utils/AsyncContext"
-import { BaseRepository } from "../../../utils/base/base-repository"
+import { BaseRepository, SqlFieldOption } from "../../../utils/base/base-repository"
 import { ContextLogger } from "../../../utils/logger/logger.custom"
 import { ServerBasicTable } from "../types/db/server-basic"
 import { SystemModeMap } from "../types/server-common.type"
@@ -141,6 +143,46 @@ export class ServerBasicRepository extends BaseRepository {
       return this.handleRepositoryError({
         error,
         method: "findByServerId",
+        message: `[서버 ID로 조회] - 오류가 발생했습니다`,
+      })
+    }
+  }
+
+  /**
+   * 서버 정보 업데이트 by server ID
+   */
+  async updateServerById({
+    id,
+    data,
+    transaction,
+  }: {
+    id: number
+    data: Partial<ServerBasicTable>
+    transaction: TransactionManager
+  }): Promise<ResultSetHeader> {
+    try {
+      asyncContextStorage.addRepository({ name: this.repositoryName })
+      asyncContextStorage.addOrder({ component: this.repositoryName, method: "updateServerById", state: "start" })
+
+      const sqlOptions: Record<string, SqlFieldOption> = {
+        sLastUpdateTime: { raw: "now()" },
+      }
+
+      const result = await this.update({
+        data,
+        whereCondition: "nID = ?",
+        whereParams: [id],
+        options: sqlOptions,
+        transaction,
+        request: `${this.repositoryName}.updateBackupInfo`,
+      })
+
+      asyncContextStorage.addOrder({ component: this.repositoryName, method: "updateServerById", state: "end" })
+      return result
+    } catch (error) {
+      return this.handleRepositoryError({
+        error,
+        method: "updateServerById",
         message: `[서버 ID로 조회] - 오류가 발생했습니다`,
       })
     }

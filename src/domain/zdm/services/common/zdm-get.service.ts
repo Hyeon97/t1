@@ -66,7 +66,7 @@ export class ZdmGetService extends BaseService {
           networks: [] as ZdmInfoNetworkTable[],
           partitions: [] as ZdmInfoPartitionTable[],
           repositories: [] as ZdmRepositoryTable[],
-          zosRepositories: [] as ZdmZosRepositoryTable[]
+          zosRepositories: [] as ZdmZosRepositoryTable[],
         }
       }
       // 요청된 데이터만 조회하도록 Promise 배열 구성
@@ -143,7 +143,7 @@ export class ZdmGetService extends BaseService {
         networks: [] as ZdmInfoNetworkTable[],
         partitions: [] as ZdmInfoPartitionTable[],
         repositories: [] as ZdmRepositoryTable[],
-        zosRepositories: [] as ZdmZosRepositoryTable[]
+        zosRepositories: [] as ZdmZosRepositoryTable[],
       }
 
       // 성공한 결과만 처리
@@ -171,7 +171,7 @@ export class ZdmGetService extends BaseService {
         networks: [] as ZdmInfoNetworkTable[],
         partitions: [] as ZdmInfoPartitionTable[],
         repositories: [] as ZdmRepositoryTable[],
-        zosRepositories: [] as ZdmZosRepositoryTable[]
+        zosRepositories: [] as ZdmZosRepositoryTable[],
       }
     }
   }
@@ -185,7 +185,7 @@ export class ZdmGetService extends BaseService {
     networks = [],
     partitions = [],
     repositories = [],
-    zosRepositories = []
+    zosRepositories = [],
   }: {
     zdms: ZdmInfoTable[]
     disks?: ZdmInfoDiskTable[]
@@ -212,7 +212,7 @@ export class ZdmGetService extends BaseService {
               zdmResponse[propertyName as ZdmDataPropertyKey] = []
             }
             // 타입스크립트 타입 단언 필요
-            ; (zdmResponse[propertyName] as any[]).push(item)
+            ;(zdmResponse[propertyName] as any[]).push(item)
           }
         })
       }
@@ -254,7 +254,7 @@ export class ZdmGetService extends BaseService {
         networks,
         partitions,
         repositories,
-        zosRepositories
+        zosRepositories,
       })
 
       asyncContextStorage.addOrder({ component: this.serviceName, method: "getZdms", state: "end" })
@@ -271,25 +271,25 @@ export class ZdmGetService extends BaseService {
   /**
    * ZDM 이름으로 조회 ( ZDM 데이터만 조회 )
    */
-  async getZdmInfoByName({ name, filterOptions }: { name: string; filterOptions?: ZdmFilterOptions }): Promise<ZdmInfoTable> {
+  async getZdmInfoOnlyByName({ name, filterOptions }: { name: string; filterOptions?: ZdmFilterOptions }): Promise<ZdmInfoTable> {
     try {
       asyncContextStorage.addService({ name: this.serviceName })
-      asyncContextStorage.addOrder({ component: this.serviceName, method: "getZdmInfoByName", state: "start" })
+      asyncContextStorage.addOrder({ component: this.serviceName, method: "getZdmInfoOnlyByName", state: "start" })
 
       const zdm = await this.zdmRepository.findByZdmName({ name, filterOptions })
       if (!zdm) {
         throw ServiceError.resourceNotFoundError(ServiceError, {
-          method: "getZdmInfoByName",
+          method: "getZdmInfoOnlyByName",
           message: `이름이 '${name}'인 ZDM을 찾을 수 없습니다`,
         })
       }
 
-      asyncContextStorage.addOrder({ component: this.serviceName, method: "getZdmInfoByName", state: "end" })
+      asyncContextStorage.addOrder({ component: this.serviceName, method: "getZdmInfoOnlyByName", state: "end" })
       return zdm
     } catch (error) {
       return this.handleServiceError({
         error,
-        method: "getZdmInfoByName",
+        method: "getZdmInfoOnlyByName",
         message: `[ZDM 이름으로 조회] - 오류가 발생했습니다`,
       })
     }
@@ -303,8 +303,8 @@ export class ZdmGetService extends BaseService {
       asyncContextStorage.addService({ name: this.serviceName })
       asyncContextStorage.addOrder({ component: this.serviceName, method: "getZdmByName", state: "start" })
 
-      // getZdmInfoByName 함수를 재사용하여 ZDM 정보 조회
-      const zdm = await this.getZdmInfoByName({ name, filterOptions })
+      // getZdmInfoOnlyByName 함수를 재사용하여 ZDM 정보 조회
+      const zdm = await this.getZdmInfoOnlyByName({ name, filterOptions })
 
       const { disks, networks, partitions, repositories, zosRepositories } = await this.getAdditionalInfo({ filterOptions, systemNames: [name] })
 
@@ -315,7 +315,7 @@ export class ZdmGetService extends BaseService {
         networks,
         partitions,
         repositories,
-        zosRepositories
+        zosRepositories,
       })
 
       asyncContextStorage.addOrder({ component: this.serviceName, method: "getZdmByName", state: "end" })
@@ -332,31 +332,31 @@ export class ZdmGetService extends BaseService {
   /**
    * ZDM ID로 조회 ( ZDM 데이터만 조회 )
    */
-  async getZdmInfoById({ id, filterOptions }: { id: string; filterOptions?: ZdmFilterOptions }): Promise<ZdmInfoTable> {
+  async getZdmInfoOnlyById({ id, filterOptions }: { id: string; filterOptions?: ZdmFilterOptions }): Promise<ZdmInfoTable> {
     try {
       asyncContextStorage.addService({ name: this.serviceName })
-      asyncContextStorage.addOrder({ component: this.serviceName, method: "getZdmInfoById", state: "start" })
+      asyncContextStorage.addOrder({ component: this.serviceName, method: "getZdmInfoOnlyById", state: "start" })
       if (!regNumberOnly.test(id)) {
         throw ServiceError.validationError(ServiceError, {
-          method: "getZdmInfoById",
-          message: `ZDM ID는 숫자만 포함해야 합니다. 입력값: '${id}'`,
+          method: "getZdmInfoOnlyById",
+          message: `ZDM ID는 숫자만 가능 합니다. 입력값: '${id}'`,
           metadata: { id },
         })
       }
       const zdm = await this.zdmRepository.findByZdmId({ id: parseInt(id), filterOptions })
       if (!zdm) {
         throw ServiceError.resourceNotFoundError(ServiceError, {
-          method: "getZdmInfoById",
+          method: "getZdmInfoOnlyById",
           message: `ID가 '${id}'인 ZDM을 찾을 수 없습니다`,
           metadata: { id },
         })
       }
-      asyncContextStorage.addOrder({ component: this.serviceName, method: "getZdmInfoById", state: "end" })
+      asyncContextStorage.addOrder({ component: this.serviceName, method: "getZdmInfoOnlyById", state: "end" })
       return zdm
     } catch (error) {
       return this.handleServiceError({
         error,
-        method: "getZdmInfoById",
+        method: "getZdmInfoOnlyById",
         message: `[ZDM ID로 조회] - 오류가 발생했습니다`,
       })
     }
@@ -370,8 +370,8 @@ export class ZdmGetService extends BaseService {
       asyncContextStorage.addService({ name: this.serviceName })
       asyncContextStorage.addOrder({ component: this.serviceName, method: "getZdmById", state: "start" })
 
-      // getZdmInfoById 함수를 재사용하여 ZDM 정보 조회
-      const zdm = await this.getZdmInfoById({ id, filterOptions })
+      // getZdmInfoOnlyById 함수를 재사용하여 ZDM 정보 조회
+      const zdm = await this.getZdmInfoOnlyById({ id, filterOptions })
 
       const { disks, networks, partitions, repositories, zosRepositories } = await this.getAdditionalInfo({
         filterOptions,
@@ -385,7 +385,7 @@ export class ZdmGetService extends BaseService {
         networks,
         partitions,
         repositories,
-        zosRepositories
+        zosRepositories,
       })
       asyncContextStorage.addOrder({ component: this.serviceName, method: "getZdmById", state: "end" })
       return result[0]

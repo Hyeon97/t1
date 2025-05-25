@@ -200,7 +200,7 @@ export class ServerGetService extends BaseService {
               serverResponse[propertyName as ServerDataPropertyKey] = []
             }
             // 타입스크립트 타입 단언 필요
-            ; (serverResponse[propertyName] as any[]).push(item)
+            ;(serverResponse[propertyName] as any[]).push(item)
           }
         })
       }
@@ -307,7 +307,7 @@ export class ServerGetService extends BaseService {
       if (!regNumberOnly.test(id)) {
         throw ServiceError.validationError(ServiceError, {
           method: "getServerById",
-          message: `Server ID는 숫자만 포함해야 합니다. 입력값: '${id}'`,
+          message: `Server ID는 숫자만 가능 합니다. 입력값: '${id}'`,
           metadata: { id },
         })
       }

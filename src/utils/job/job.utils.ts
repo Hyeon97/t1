@@ -9,15 +9,15 @@ import { UtilityError } from "../../errors"
 import { OSTypeMap } from "../../types/common/os"
 import { asyncContextStorage } from "../AsyncContext"
 
-type JobType = 'Backup' | 'Recovery' | 'Replication'
+type JobType = "Backup" | "Recovery" | "Replication"
 
 interface PreprocessJobNameParams {
   jobName: string //  사용자가 입력한 작업 이름
-  server?: ServerBasicTable //  직업이름 생성시 사용할 server 정보 
+  server?: ServerBasicTable //  직업이름 생성시 사용할 server 정보
   center?: ZdmInfoTable //  작업이름 생성시 사용할 center 정보
   partition: string //  작업이름 생성시 사용할 partition 정보
   type: JobType //  작업 타입
-  repository: BackupRepository  //  작업 이름 생성시 조회에 사용할 service
+  repository: BackupRepository //  작업 이름 생성시 조회에 사용할 service
 }
 
 interface ChPartitionNameParams {
@@ -31,7 +31,7 @@ interface JobNameResult {
 }
 
 class JobUtils {
-  private readonly utilitiName = 'job.utils'
+  private readonly utilitiName = "job.utils"
 
   /**
    * 작업 이름 생성 - 파티션 값 변환
@@ -40,19 +40,19 @@ class JobUtils {
     try {
       const os = OSTypeMap.toString({ value: server.nOS })
 
-      if (os === 'Window') {
-        return partition.replaceAll(':', '')
+      if (os === "Window") {
+        return partition.replaceAll(":", "")
       }
 
-      if (os === 'Linux') {
-        return partition === '/' ? '_ROOT' : partition.replaceAll('/', '_')
+      if (os === "Linux") {
+        return partition === "/" ? "_ROOT" : partition.replaceAll("/", "_")
       }
 
       return partition
     } catch (error) {
       throw UtilityError.dataProcessingError({
-        method: 'chPartitionName',
-        message: '[Job 이름 처리] - 파티션 양식 변환 중 오류 발생',
+        method: "chPartitionName",
+        message: "[Job 이름 처리] - 파티션 양식 변환 중 오류 발생",
         error,
       })
     }
@@ -62,27 +62,21 @@ class JobUtils {
    * 데이터 전처리(작업이름 중복 검사 or 자동생성)
    * backup, recovery, replication 에서 사용
    */
-  async preprocessJobName({
-    jobName,
-    server,
-    partition,
-    type,
-    repository,
-  }: PreprocessJobNameParams): Promise<JobNameResult> {
+  async preprocessJobName({ jobName, server, partition, type, repository }: PreprocessJobNameParams): Promise<JobNameResult> {
     try {
       asyncContextStorage.addOrder({
         component: this.utilitiName,
-        method: 'preprocessJobName',
-        state: 'start',
+        method: "preprocessJobName",
+        state: "start",
       })
-      let partitionName = ''
-      let baseName = ''
+      let partitionName = ""
+      let baseName = ""
       let matched = []
 
-      if (type === 'Backup' || type === 'Recovery') {
+      if (type === "Backup" || type === "Recovery") {
         if (!server) throw new Error(`작업 타입이 ${type}인 경우 server는 필수 입니다.`)
         partitionName = this.chPartitionName({ server, partition })
-        baseName = jobName ? `${jobName}${partitionName}` : `${server.sSystemName.split(' (')[0]}${partitionName}`
+        baseName = jobName ? `${jobName}${partitionName}` : `${server.sSystemName.split(" (")[0]}${partitionName}`
         matched = await repository.findByJobNameUseLike({
           jobName: baseName,
           filterOptions: {},
@@ -93,14 +87,14 @@ class JobUtils {
 
       asyncContextStorage.addOrder({
         component: this.utilitiName,
-        method: 'preprocessJobName',
-        state: 'end',
+        method: "preprocessJobName",
+        state: "end",
       })
 
       return { jName: `${baseName}_idx`, idx }
     } catch (error) {
       throw UtilityError.dataProcessingError({
-        method: 'preprocessJobName',
+        method: "preprocessJobName",
         message: `[Job 이름 처리] - ${type} Job 이름 전처리 중 오류 발생`,
         error,
       })
@@ -108,7 +102,8 @@ class JobUtils {
   }
 
   async getRandomNumber({ checkExists }: { checkExists: (id: number) => Promise<boolean> }): Promise<number> {
-    const min = 100, max = 999999
+    const min = 100
+    const max = 999999
     let id = null
 
     while (true) {

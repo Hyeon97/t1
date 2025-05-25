@@ -52,7 +52,7 @@ export class ZconLicenseRepository extends BaseRepository {
   /**
    * 모든 License 정보 조회
    */
-  async findAll({ filterOptions }: { filterOptions?: LicenseFilterOptions }): Promise<any> {
+  async findAll({ filterOptions }: { filterOptions?: LicenseFilterOptions }): Promise<ZconLicenseTable[]> {
     try {
       asyncContextStorage.addRepository({ name: this.repositoryName })
       asyncContextStorage.addOrder({ component: this.repositoryName, method: "findAll", state: "start" })
@@ -70,6 +70,66 @@ export class ZconLicenseRepository extends BaseRepository {
         error,
         method: "findAll",
         message: "[License 정보 조회] - License 정보 조회 중 에러 발생",
+      })
+    }
+  }
+
+  /**
+   * License ID로 조회
+   */
+  async findById({ id, filterOptions }: { id: string; filterOptions?: LicenseFilterOptions }): Promise<ZconLicenseTable | null> {
+    try {
+      asyncContextStorage.addRepository({ name: this.repositoryName })
+      asyncContextStorage.addOrder({ component: this.repositoryName, method: "findById", state: "start" })
+
+      this.resetQueryState()
+      this.addCondition({ condition: "nID = ?", params: [id] })
+      this.applyFilters({ filterOptions })
+
+      const query = `SELECT * FROM ${this.tableName} ${this.buildWhereClause()}`
+      const result = await this.executeQuerySingle<ZconLicenseTable>({
+        sql: query,
+        params: this.params,
+        request: `${this.repositoryName}.findById`,
+      })
+
+      asyncContextStorage.addOrder({ component: this.repositoryName, method: "findById", state: "end" })
+      return result
+    } catch (error) {
+      return this.handleRepositoryError({
+        error,
+        method: "findById",
+        message: "[License ID로 정보 조회] - License 정보 조회 중 에러 발생",
+      })
+    }
+  }
+
+  /**
+   * License Name으로 조회
+   */
+  async findByName({ name, filterOptions }: { name: string; filterOptions?: LicenseFilterOptions }): Promise<ZconLicenseTable | null> {
+    try {
+      asyncContextStorage.addRepository({ name: this.repositoryName })
+      asyncContextStorage.addOrder({ component: this.repositoryName, method: "findByName", state: "start" })
+
+      this.resetQueryState()
+      this.addCondition({ condition: "sLicenseName = ?", params: [name] })
+      this.applyFilters({ filterOptions })
+
+      const query = `SELECT * FROM ${this.tableName} ${this.buildWhereClause()}`
+      const result = await this.executeQuerySingle<ZconLicenseTable>({
+        sql: query,
+        params: this.params,
+        request: `${this.repositoryName}.findByName`,
+      })
+
+      asyncContextStorage.addOrder({ component: this.repositoryName, method: "findByName", state: "end" })
+      return result
+    } catch (error) {
+      return this.handleRepositoryError({
+        error,
+        method: "findByName",
+        message: "[License 이름으로 정보 조회] - License 정보 조회 중 에러 발생",
       })
     }
   }

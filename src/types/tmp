@@ -1,0 +1,98 @@
+#define JOBTYPE2_SYSTEMBACKUP            1
+#define JOBTYPE2_SYSTEMRECOVERY            2
+#define JOBTYPE2_DATABACKUP               3
+#define   JOBTYPE2_DATARECOVERY            4
+#define JOBTYPE2_IMAGE_REPLECATION         5
+#define JOBTYPE2_DATA_REPLICATION         6
+#define JOBTYPE2_REPOSITORY_REPLECATION      7
+#define JOBTYPE2_SYSTEMMIGRATION         8
+#define JOBTYPE2_CLOUDMIGRATION            9
+#define JOBTYPE2_DISKCONVERSION            10
+#define JOBTYPE2_CLOUDSTANDBY            11
+#define JOBTYPE2_INTERACTIVE            12
+#define JOBTYPE_CANCELJOB_2               901
+
+//// Interactive-Job 작업 규정
+#define INTERACTIVE_CHECKPORT_NORMAL         99
+#define INTERACTIVE_CHECKPORT               100
+#define INTERACTIVE_GETBACKUPIMAGE            101
+#define INTERACTIVE_GETBACKUPIMAGE_REPOSITORY   102
+#define INTERACTIVE_REPOSITORYCONNECT         103
+#define INTERACTIVE_REPOSITORYINFORMATION      104
+#define INTERACTIVE_REMOTEFOLDER            105
+#define INTERACTIVE_OPENSTACK_VERIFY_ID         106
+#define INTERACTIVE_OPENSTACK_CREATEVOLUME      107
+#define INTERACTIVE_CHECK_DB               300
+#define INTERACTIVE_CHECK_ZCM               301
+#define INTERACTIVE_CHECK_REGISTER_ZCM         302
+#define INTERACTIVE_REGISTER_ZCM            303
+#define INTERACTIVE_SYNC_ZCM               304
+#define INTERACTIVE_DELETE_SQL               305
+#define INTERACTIVE_SYNC_ZCM_REP            306 // 내 zcm 정보를 원격db에 전송하기
+#define INTERACTIVE_GETTIME_ZCM               307 // zcm 서버 시간 받아오기
+#define INTERACTIVE_HEARTBEAT_SYSTEM         308 // 서버 접속상태 확인하기
+#define INTERACTIVE_ZCM_TIMESTAMP            309 // ZCM 시간 가져오기
+#define INTERACTIVE_REPOSITORYREGISTER         310 // 저장소 등록하기
+#define INTERACTIVE_SENDMAIL               311 // 이메일 전송하기
+#define INTERACTIVE_SCRIPTCOPY               312 // 스크립트 파일 복사하기
+#define INTERACTIVE_SCRIPTCONTENTS            313 // 스크립트 내용 전송하기
+
+#define INTERACTIVE_UPDATE_SYSTEMINFO         315 // 시스템 정보 업데이트(OS정보, 네트워크, 디스크)
+#define INTERACTIVE_UPDATE_DISKINFO            316 // 디스크 정보 업데이트(디스크)
+#define INTERACTIVE_QUERY_FOLDER_INFO         317 // 특정 볼륨이나 폴더 정보 가져오기
+
+
+/////////////////////////////////////////////////////
+//// 작업 Process 타입
+#define DISKCONVERSION_IMAGE         600   // 디스크 변환 이미지 단계
+#define DISKCONVERSION_REPLICATION      601   // 디스크 변환 복제 단계
+#define DISKCONVERSION_RECOVERY         602   // 디스크 변환 복구 단계
+#define JOBTYPE2_SYSTEMBACKUP_START         300
+#define JOBTYPE2_SYSTEMBACKUP_REPOSITORY   301
+#define JOBTYPE2_SYSTEMBACKUP_SCRIPT      302
+#define JOBTYPE2_SYSTEMBACKUP_VSS         303
+#define JOBTYPE2_SYSTEMBACKUP_IMAGING      304
+#define JOBTYPE2_SYSTEMBACKUP_IMAGING_REPLICATION 305
+#define JOBTYPE2_SYSTEMBACKUP_END         306
+#define JOBTYPE2_SYSTEMBACKUP_AUTORECOVERY   307
+#define JOBTYPE2_SYSTEMRECOVERY_START      400
+#define JOBTYPE2_SYSTEMRECOVERY_DISK      401
+#define JOBTYPE2_SYSTEMRECOVERY_REPOSITORY   402
+#define JOBTYPE2_SYSTEMRECOVERY_RECOVERY   403
+#define JOBTYPE2_SYSTEMRECOVERY_END         404
+#define JOBTYPE2_IMAGE_REPLICATION_START      500
+#define JOBTYPE2_IMAGE_REPLICATION_REPLICATING   501
+#define JOBTYPE2_IMAGE_REPLICATION_END         502
+
+/////////////////////////////////////////////////////
+//// 작업 Process 타입
+#define   JOB_ERROR                  900 // 작업 오류
+#define   JOB_CANCEL                  901 // 작업 취소
+#define START_BACKUPJOB               500   // 백업 시작
+#define   CHECK_REPOSITORY            501 // 저장소 체크
+#define   CHECK_SCRIPT               502 // 스크립트 체크
+#define   CHECK_SNAPSHOTSTATUS         503 // 스냅샷 상태 체크
+#define   CREATE_SHADOW               504   // 스냅샷 생성
+#define   MOUNT_SHADOW               505   // 스냅샷 마운트
+#define   BACKUP_ENVIRCHECK            506 // 백업 환경 체크
+#define   START_IMAGING               507   // 백업 엔진 실행
+#define   FINISH_IMAGING               508   // 백업 엔진 종료
+#define DELETE_SHADOW               509   // 스냅샷 삭제
+#define   FINISH_BACKUP               510   // 백업 종료
+#define JOB_CANCELING               511 // 작업 취소 중.
+#define WARNING_IMAGE               512 // 백업 이미지 경고가 발생했다는 의미
+#define START_BACKUPVERIFY            513 // 정합성 체크를 시작한다는 확인.
+#define FINISH_BACKUPVERIFY            514 // 정합성 완료.
+#define JOB_CANCELED               515 // 작업 취소
+#define   RECOVERY_ENVIRCHECK            600 // 복구 환경 체크
+#define   RECOVERY_BOOTMEDIA            601 // 복구 환경 부팅
+#define RECOVERY_IMAGING            602 // 복구 엔진 실행
+#define RECOVERY_FINISH               603 // 복구 완료
+#define UPLOAD_ENVIRCHECK            700   // 업로드 환경 체크
+#define   PROCESSING_UPLOAD            701 // 업로드 진행
+#define FINISH_UPLOAD               702 // 업로드 종료
+#define FINISH_REPLICATION            703 // 복제 종료
+#define   PROCESSING_IMAGING            800 // 백업 중
+#define RECOVERY_CHECK_FINISH         801 // 마이그레이션 이 후 복구 완료되었을 때 발생 메시지
+#define RECOVERYINCREMENTAL_CHECK_FINISH   802 // 마이그레이션 이 후 증분 복구 완료되었을 때 발생 메시지
+#define INTERACTIVE_RESULT            503 // interactive 결과값 받기
