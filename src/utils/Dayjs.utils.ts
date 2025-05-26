@@ -25,6 +25,13 @@ export class DateTimeUtils {
   }
 
   /**
+   * 현재 시간을 밀리초단위로 출력 (13자리숫자)
+   */
+  static getCurrentTimestamp(): number {
+    return dayjs().valueOf()
+  }
+
+  /**
    * 현재 시간을 기본 포맷(YYYY-MM-DD HH:mm:ss)으로 반환
    */
   static getCurrentTime(): string {
