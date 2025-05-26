@@ -28,7 +28,7 @@
   - [Center Repository Modification]
   - [Center Repository Deletion]
 - [License](#license)
-  - [License Registration]
+  - [License Registration](#license-registration)
   - [License Retrieval - All](#license-retrieval---all)
   - [License Deletion]
   - [License Assignment](#license-assignment)
@@ -1258,6 +1258,104 @@ You can combine multiple filters to narrow down the repository list
 
 # License
 ## License Registration
+
+### Description
+```txt
+Register a license to the ZDM Center.
+```
+
+### URL
+```txt
+# Http
+[POST] /api/licenses
+
+# Curl
+curl --request POST \
+  --url http://localhost:3000/api/licenses \
+  --header "Content-Type: application/json" \
+  --header "authorization: token" \
+  --data "{\"center\":\"1\",\"centerUUID\":\"123-abc-456-def-00000\",\"key\":\"LICENSE-KEY\"}"
+```
+
+### Request Parameters
+
+#### Headers
+
+| Parameter     | Type   | Required | Description           | Default | Example |
+| ------------- | ------ | -------- | --------------------- | ------- | ------- |
+| authorization | string | Required | Authentication token. |         | token   |
+
+#### Parameter
+
+```txt
+None
+```
+
+#### Query
+
+```txt
+None
+```
+
+#### Body
+| Parameter  | Type   | Required | Description           | Default | Example |
+| ---------- | ------ | -------- | --------------------- | ------- | ------- |
+| center     | string | Required |ID or name of the center to register the license to. If numeric, it will be treated as center ID.|         | "1" or "zdm-center-01"  |
+| centerUUID | string | Required |UUID of the center to register the license to. (`must be the UUID used when applying for license issuance`) |         | "123-abc-456-def-00000"   |
+| key        | string | Required | License key to register. |         |   "license-key"   |
+
+### Request Example
+```json
+// Example 1: Using center name
+{
+  "center": "zdm-center-01",
+  "centerUUID": "abc-123-def-456-789",
+  "key": "ZDMC-XXXX-XXXX-XXXX-XXXX"
+}
+
+// Example 2: Using center ID
+{
+  "center": "2",
+  "centerUUID": "456-def-789-abc-123",
+  "key": "BACKUP-LICENSE-KEY-001"
+}
+```
+
+### Response Example (Success)
+```json
+{
+	"requestID": "f6a4a3a3-d474-446e-a840-41f82023235a",
+	"message": "License regist result",
+	"success": true,
+	"data": {
+		"id": "1",
+		"licenseCategory": "ZDM(DR)",
+		"licenseCopyNumber": "1",
+		"licenseUseCopyNumber": "0",
+		"licenseKey": "LICENSE-KEY",
+		"licenseExpirationDate": "2025-06-09 23:59:59",
+		"licenseCreateDate": "2025-05-25 16:30:21"
+	},
+	"timestamp": "2025-05-26T08:09:15.357Z"
+}
+```
+
+### Response Structure (Success)
+| Field | Type | Description |
+| ----- | ---- | ----------- |
+| requestID | string | Request unique ID. |
+| message | string | Processing result message. |
+| success | boolean | Request success status. |
+| data | object | License registration result data. |
+| data.id | string | Registered license ID. |
+| data.licenseCategory | string | License category type. |
+| data.licenseCopyNumber | string | Total number of license copies. |
+| data.licenseUseCopyNumber | string | Number of license copies currently in use. |
+| data.licenseKey | string | Registered license key. |
+| data.licenseExpirationDate | string | License expiration date and time. |
+| data.licenseCreateDate | string | License creation date and time. |
+| timestamp | string | Request processing time. (ISO 8601 format) |
+
 ## License Retrieval - All
 
 ### Description
