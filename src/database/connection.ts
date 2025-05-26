@@ -54,6 +54,12 @@ export class DatabasePool {
       connection = await this.pool.getConnection()
       ContextLogger.info({
         message: "데이터베이스 연결 성공",
+        meta: {
+          IP: process.env.DB_HOST || "localhost",
+          Port: process.env.DB_PORT || "3306",
+          User: process.env.DB_USER || "root",
+          Database: process.env.DB_NAME || "test_database",
+        }
       })
       return true
     } catch (error) {
