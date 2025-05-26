@@ -37,3 +37,20 @@ export const DEFAULT_VALUES_LICENSE_RESPONSE = {
 export interface LicenseDataResponse {
   items: ZconLicenseTable[]
 }
+
+/**
+ * License 할당 결과 서비스 리턴 타입
+ */
+export interface LicenseAssignResponse {
+  server: {
+    id: string
+    name: string
+  }
+  license: {
+    id: string
+    name: string
+    category: string
+    created: string
+    expiration: string
+  }
+}

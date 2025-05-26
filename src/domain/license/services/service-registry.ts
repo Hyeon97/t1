@@ -7,15 +7,16 @@ import { jobInteractiveService } from "../../interactive/services/service-regist
 import { ServerBasicRepository } from "../../server/repositories/server-basic.repository"
 import { serverGetService } from "../../server/services/service-registry"
 import { zdmGetService } from "../../zdm/services/service-registry"
-import { ZconLicenseRepository } from "../repositories/zcon-license.repository"
+import { LicenseHistoryRepository } from "../repositories/zcon-license-history.repository"
+import { LicenseRepository } from "../repositories/zcon-license.repository"
 import { LicenseAssignService } from "./license-assign.service"
 import { LicenseGetService } from "./license-get.service"
 
 /**
  * 레포지토리 인스턴스 생성
  */
-const zconLicenseRepository = new ZconLicenseRepository()
-const zconLicenseHistoryRepository = new ZconLicenseRepository()
+const zconLicenseRepository = new LicenseRepository()
+const zconLicenseHistoryRepository = new LicenseHistoryRepository()
 const jobInteractiveRepository = new JobInteractiveRepository()
 const serverBasicRepository = new ServerBasicRepository()
 
@@ -29,6 +30,7 @@ export const licenseGetService = new LicenseGetService({
 //  License 할당 Service
 export const licenseAssignService = new LicenseAssignService({
   licenseRepository: zconLicenseRepository,
+  licenseHistoryRepository: zconLicenseHistoryRepository,
   jobInteractiveRepository,
   serverBasicRepository,
   jobInteractiveService,

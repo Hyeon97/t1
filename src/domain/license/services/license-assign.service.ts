@@ -17,13 +17,18 @@ import { ServerGetService } from "../../server/services/server-get.service"
 import { ServerBasicTable } from "../../server/types/db/server-basic"
 import { ZdmGetService } from "../../zdm/services/common/zdm-get.service"
 import { ZdmInfoTable } from "../../zdm/types/db/center-info"
-import { ZconLicenseRepository } from "../repositories/zcon-license.repository"
+import { LicenseHistoryRepository } from "../repositories/zcon-license-history.repository"
+import { LicenseRepository } from "../repositories/zcon-license.repository"
 import { ZconLicenseTable } from "../types/db/zcon_license"
 import { LicenseAssignRequestBody } from "../types/license-assign.type"
+import { LicenseTypeMap } from "../types/license-common.type"
+import { LicenseHistoryTableInput } from "../types/license-history.type"
+import { LicenseAssignResponse } from "../types/license-response.type"
 import { LicenseGetService } from "./license-get.service"
 
 export class LicenseAssignService extends BaseService {
-  private readonly licenseRepository: ZconLicenseRepository
+  private readonly licenseRepository: LicenseRepository
+  private readonly licenseHistoryRepository: LicenseHistoryRepository
   private readonly jobInteractiveRepository: JobInteractiveRepository
   private readonly serverBasicRepository: ServerBasicRepository
   private readonly licenseGetService: LicenseGetService
@@ -32,6 +37,7 @@ export class LicenseAssignService extends BaseService {
   private readonly jobInteractiveService: JobInteractiveService
   constructor({
     licenseRepository,
+    licenseHistoryRepository,
     jobInteractiveRepository,
     serverBasicRepository,
     licenseGetService,
@@ -39,7 +45,8 @@ export class LicenseAssignService extends BaseService {
     zdmGetService,
     jobInteractiveService,
   }: {
-    licenseRepository: ZconLicenseRepository
+    licenseRepository: LicenseRepository
+    licenseHistoryRepository: LicenseHistoryRepository
     jobInteractiveRepository: JobInteractiveRepository
     serverBasicRepository: ServerBasicRepository
     licenseGetService: LicenseGetService
@@ -51,6 +58,7 @@ export class LicenseAssignService extends BaseService {
       serviceName: "LicenseAssignService",
     })
     this.licenseRepository = licenseRepository
+    this.licenseHistoryRepository = licenseHistoryRepository
     this.jobInteractiveRepository = jobInteractiveRepository
     this.serverBasicRepository = serverBasicRepository
     this.licenseGetService = licenseGetService
@@ -129,9 +137,9 @@ export class LicenseAssignService extends BaseService {
   }
 
   /**
-   * job interactive table에 License 검증 disable/enable을 위한 form 생성
+   * job_interactive table에 License 검증 disable/enable을 위한 form 생성
    */
-  private createLicenseVerificationForm = async ({
+  private async createLicenseVerificationForm({
     type,
     license,
     center,
@@ -141,12 +149,13 @@ export class LicenseAssignService extends BaseService {
     license: ZconLicenseTable
     center: ZdmInfoTable
     user: AuthenticatedUser
-  }): Promise<JobInteractiveLicenseVerificationInput> => {
+  }): Promise<JobInteractiveLicenseVerificationInput> {
     try {
+      asyncContextStorage.addOrder({ component: this.serviceName, method: "createLicenseVerificationForm", state: "start" })
       const nRequestID = await jobUtils.getRandomNumber({
         checkExists: async (requestID) => (await this.jobInteractiveRepository.findByRequestID({ requestID })) !== null,
       })
-      return {
+      const form: JobInteractiveLicenseVerificationInput = {
         nUserID: user.id,
         nGroupID: 0,
         nRequestID,
@@ -156,11 +165,44 @@ export class LicenseAssignService extends BaseService {
         nJobType: JobInteractiveTypeEnum.JOBTYPE_LICENSE_VALIDATION_CHECK,
         sJobData: String(JobInteractiveLicenseVerificationMap.fromString({ str: type })),
       }
+      asyncContextStorage.addOrder({ component: this.serviceName, method: "createLicenseVerificationForm", state: "end" })
+      return form
     } catch (error) {
       return this.handleServiceError({
         error,
         method: "assignLicense",
-        message: "[License 할당] - License 할당 중 오류 발생",
+        message: "[License 할당] - License 검증 disable/enable을 위한 form 생성 중 오류 발생",
+      })
+    }
+  }
+
+  /**
+   * zcon_license_history table에 등록할 form 생성
+   */
+  private createLicenseHistoryForm({
+    user, license, server
+  }: {
+    user: AuthenticatedUser
+    license: ZconLicenseTable
+    server: ServerBasicTable
+  }): LicenseHistoryTableInput {
+    try {
+      asyncContextStorage.addOrder({ component: this.serviceName, method: "createLicenseHistoryForm", state: "start" })
+      const form: LicenseHistoryTableInput = {
+        nUserID: user.id,
+        nLicenseID: license.nID,
+        nCenterID: license.nCenterID,
+        nLicenseType: license.nLicenseCategory,
+        sSystemName: server.sSystemName,
+        sUpdateTime: "now()"
+      }
+      asyncContextStorage.addOrder({ component: this.serviceName, method: "createLicenseHistoryForm", state: "end" })
+      return form
+    } catch (error) {
+      return this.handleServiceError({
+        error,
+        method: "createLicenseHistoryForm",
+        message: "[License 할당] - License 할당 history data form 생성 중 오류 발생",
       })
     }
   }
@@ -186,26 +228,27 @@ export class LicenseAssignService extends BaseService {
       const disableForm = await this.createLicenseVerificationForm({ type: "disable", license, center, user })
       //  License 검증 disable
       const disableResult = await this.jobInteractiveService.toggleLicenseVerification({ data: disableForm })
-      console.log("disableResult")
-      console.dir(disableResult, { depth: null })
-      //  server에 license 할당
       await this.executeTransaction({
         callback: async (transaction) => {
+          //  server에 license 할당
+          //  server data의 license id 업데이트
+          const licensedServerData = structuredClone(server)
+          licensedServerData.nLicenseID = license.nID
           await this.serverBasicRepository.updateServerById({
             id: server.nID,
-            data: null,
+            data: licensedServerData,
             transaction,
           })
+          //  license history에 기록 추가
+          const historyForm = this.createLicenseHistoryForm({ user, license, server })
+          await this.licenseHistoryRepository.insertHistory({ data: historyForm, transaction })
         },
       })
-      //  license history에 기록 추가
       //  [license 검증 enable]
       //  license 검증 enable form 생성
       const enableForm = await this.createLicenseVerificationForm({ type: "enable", license, center, user })
       //  license 검증 enable
       const enableResult = await this.jobInteractiveService.toggleLicenseVerification({ data: enableForm })
-      console.log("enableResult")
-      console.dir(enableResult, { depth: null })
       asyncContextStorage.addOrder({ component: this.serviceName, method: "assignLicense", state: "end" })
     } catch (error) {
       return this.handleServiceError({
@@ -219,12 +262,11 @@ export class LicenseAssignService extends BaseService {
   /**
    * License 할당 main 함수
    */
-  async main({ data, user }: { data: LicenseAssignRequestBody; user: AuthenticatedUser }): Promise<any> {
+  async main({ data, user }: { data: LicenseAssignRequestBody; user: AuthenticatedUser }): Promise<LicenseAssignResponse> {
     try {
       asyncContextStorage.addService({ name: this.serviceName })
       asyncContextStorage.addOrder({ component: this.serviceName, method: "main", state: "start" })
       //  라이센스 할당 시작
-      console.dir(data, { depth: null })
       //  server 정보 검증 및 가져오기
       const server = await this.getServerInfo({ server: data.server })
       //  license 정보 검증
@@ -234,8 +276,21 @@ export class LicenseAssignService extends BaseService {
       //  license 할당
       await this.assignLicense({ server, license, center, user })
 
+      const returnData: LicenseAssignResponse = {
+        server: {
+          id: String(server.nID),
+          name: server.sSystemName
+        },
+        license: {
+          id: String(license.nID),
+          name: license.sLicenseName,
+          category: LicenseTypeMap.toString({ value: license.nLicenseCategory }),
+          created: license.sLicenseCreateDate,
+          expiration: license.sLicenseExpirationDate
+        }
+      }
       asyncContextStorage.addOrder({ component: this.serviceName, method: "main", state: "end" })
-      return data
+      return returnData
     } catch (error) {
       return this.handleServiceError({
         error,

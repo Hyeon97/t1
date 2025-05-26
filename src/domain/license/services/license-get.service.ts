@@ -2,14 +2,14 @@ import { ServiceError } from "../../../errors/service/service-error"
 import { asyncContextStorage } from "../../../utils/AsyncContext"
 import { BaseService } from "../../../utils/base/base-service"
 import { regNumberOnly } from "../../../utils/regex.utils"
-import { ZconLicenseRepository } from "../repositories/zcon-license.repository"
+import { LicenseRepository } from "../repositories/zcon-license.repository"
 import { LicenseFilterOptions } from "../types/license-get.type"
 import { LicenseDataResponse } from "../types/license-response.type"
 
 export class LicenseGetService extends BaseService {
-  private readonly licenseRepository: ZconLicenseRepository
+  private readonly licenseRepository: LicenseRepository
 
-  constructor({ licenseRepository }: { licenseRepository: ZconLicenseRepository }) {
+  constructor({ licenseRepository }: { licenseRepository: LicenseRepository }) {
     super({
       serviceName: "LicenseGetService",
     })

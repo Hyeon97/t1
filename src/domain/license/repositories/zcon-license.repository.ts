@@ -6,10 +6,10 @@ import { ZconLicenseTable } from "../types/db/zcon_license"
 import { LicenseTypeMap } from "../types/license-common.type"
 import { LicenseFilterOptions } from "../types/license-get.type"
 
-export class ZconLicenseRepository extends BaseRepository {
+export class LicenseRepository extends BaseRepository {
   constructor() {
     super({
-      repositoryName: "ZconLicenseRepository",
+      repositoryName: "LicenseRepository",
       tableName: "zcon_license",
     })
   }
