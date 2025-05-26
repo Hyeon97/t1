@@ -18,7 +18,6 @@ import { ServerBasicTable } from "../../server/types/db/server-basic"
 import { ZdmGetService } from "../../zdm/services/common/zdm-get.service"
 import { ZdmInfoTable } from "../../zdm/types/db/center-info"
 import { LicenseHistoryRepository } from "../repositories/zcon-license-history.repository"
-import { LicenseRepository } from "../repositories/zcon-license.repository"
 import { ZconLicenseTable } from "../types/db/zcon_license"
 import { LicenseAssignRequestBody } from "../types/license-assign.type"
 import { LicenseTypeMap } from "../types/license-common.type"
@@ -27,7 +26,6 @@ import { LicenseAssignResponse } from "../types/license-response.type"
 import { LicenseGetService } from "./license-get.service"
 
 export class LicenseAssignService extends BaseService {
-  private readonly licenseRepository: LicenseRepository
   private readonly licenseHistoryRepository: LicenseHistoryRepository
   private readonly jobInteractiveRepository: JobInteractiveRepository
   private readonly serverBasicRepository: ServerBasicRepository
@@ -36,7 +34,6 @@ export class LicenseAssignService extends BaseService {
   private readonly zdmGetService: ZdmGetService
   private readonly jobInteractiveService: JobInteractiveService
   constructor({
-    licenseRepository,
     licenseHistoryRepository,
     jobInteractiveRepository,
     serverBasicRepository,
@@ -45,7 +42,6 @@ export class LicenseAssignService extends BaseService {
     zdmGetService,
     jobInteractiveService,
   }: {
-    licenseRepository: LicenseRepository
     licenseHistoryRepository: LicenseHistoryRepository
     jobInteractiveRepository: JobInteractiveRepository
     serverBasicRepository: ServerBasicRepository
@@ -57,7 +53,6 @@ export class LicenseAssignService extends BaseService {
     super({
       serviceName: "LicenseAssignService",
     })
-    this.licenseRepository = licenseRepository
     this.licenseHistoryRepository = licenseHistoryRepository
     this.jobInteractiveRepository = jobInteractiveRepository
     this.serverBasicRepository = serverBasicRepository
@@ -220,7 +215,7 @@ export class LicenseAssignService extends BaseService {
     license: ZconLicenseTable
     center: ZdmInfoTable
     user: AuthenticatedUser
-  }): Promise<any> {
+  }): Promise<void> {
     try {
       asyncContextStorage.addOrder({ component: this.serviceName, method: "assignLicense", state: "start" })
       //  [License 검증 disable]
