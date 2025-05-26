@@ -3,6 +3,7 @@
 ## 서브 제목
 ### Description
 > **Warning!** This feature is currently not supported. (will be supported in the future)
+> **Note**: The issued token has an expiration period of 1 hour and must be included in the authentication header for subsequent API requests.
 ```txt
 ```
 ### URL
@@ -17,7 +18,7 @@
 or
 | Parameter | Type | Required | Description | Default | Example |
 | --------- | ---- | -------- | ----------- | ------- | ------- |
-####  Headers
+#### Headers
 #### Parameter
 #### Query
 > This endpoint uses the same query parameters as [Server Retrieval - All](#server-retrieval---all).

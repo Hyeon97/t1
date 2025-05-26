@@ -31,7 +31,7 @@
   - [License Registration]
   - [License Retrieval - All](#license-retrieval---all)
   - [License Deletion]
-  - [License Assignment]
+  - [License Assignment](#license-assignment)
 - [Backup](#backup)
   - [Backup Job Registration](#backup-job-registration)
   - [Backup Job Retrieval - All](#backup-job-retrieval---all)
@@ -1271,7 +1271,7 @@ Retrieve the list of licenses registered in the ZDM Center.
 [GET] /api/licenses
 
 # Curl
-curl --request POST \
+curl --request GET \
   --url http://localhost:3000/api/licenses \
   --header "Content-Type: application/json" \
   --header "authorization: token" \
@@ -1361,6 +1361,120 @@ None
 
 ## License Deletion
 ## License Assignment
+
+### Description
+```txt
+Assign a license to a server registered in the ZDM Center.
+```
+
+### URL
+```txt
+# Http
+[PUT] /api/licenses/assign
+
+# Curl
+curl --request PUT \
+  --url http://localhost:3000/api/licenses/assign \
+  --header "Content-Type: application/json" \
+  --header "authorization: token" \
+  --data "{\"server\":\"1\",\"license\":\"2\"}"
+```
+
+### Request Parameters
+
+#### Headers
+| Parameter     | Type   | Required | Description           | Default | Example |
+| ------------- | ------ | -------- | --------------------- | ------- | ------- |
+| authorization | string | Required | Authentication token. |         | token   |
+
+#### Parameter
+```txt
+None
+```
+
+#### Query
+```txt
+None
+```
+
+#### Body
+> **Note**: Both the server and license must be registered in the same center.
+
+| Parameter | Type   | Required | Description           | Default | Example                          |
+| --------- | ------ | -------- | --------------------- | ------- | -------------------------------- |
+| server    | string | Required | Name or ID of the server to assign the license to. If numeric, it will be treated as server ID. |         | "1" or "test-server (127.0.0.1)" |
+| license   | string | Required | Name or ID of the license to assign. If numeric, it will be treated as license ID.|         | "2" or "test-license"            |
+
+### Request Example
+```json
+// Using server and license names
+{
+  "server": "test-server (127.0.0.1)",
+  "license": "test-license"
+}
+
+// Using server and license IDs
+{
+  "server": "1",
+  "license": "2"
+}
+
+// Mixed approach - server ID and license name
+{
+  "server": "1",
+  "license": "production-license"
+}
+```
+
+### Response Example (Success)
+<details>
+<summary>Click to expand/collapse examples</summary>
+
+```json
+{
+	"requestID": "1d52ce84-4c2a-48cc-9b18-2be354a1e191",
+	"message": "License assign result",
+	"success": true,
+	"data": {
+		"server": {
+			"id": "1",
+			"name": "test-server (127.0.0.1)"
+		},
+		"license": {
+			"id": "2",
+			"name": "test-license",
+			"category": "ZDM(DR)",
+			"created": "2024-11-10 20:34:48",
+			"expiration": "2025-12-31 23:59:59"
+		}
+	},
+	"timestamp": "2025-05-26T04:59:07.455Z"
+}
+```
+</details>
+
+### Response Structure (Success)
+<details>
+<summary>Click to expand/collapse examples</summary>
+
+| Field                    | Type    | Description                                |
+| ------------------------ | ------- | ------------------------------------------ |
+| requestID                | string  | Request unique ID.                         |
+| message                  | string  | Processing result message.                 |
+| success                  | boolean | Request success status.                    |
+| data                     | object  | Assignment result data.                    |
+| data.server              | object  | Server information.                        |
+| data.server.id           | string  | Server ID.                                 |
+| data.server.name         | string  | Server name.                               |
+| data.license             | object  | License information.                       |
+| data.license.id          | string  | License ID.                                |
+| data.license.name        | string  | License name.                              |
+| data.license.category    | string  | License category.                          |
+| data.license.created     | string  | License creation date and time.            |
+| data.license.expiration  | string  | License expiration date and time.          |
+| timestamp                | string  | Request processing time. (ISO 8601 format) |
+</details>
+
 <br><br>
 
 # Backup
@@ -1446,7 +1560,7 @@ None
 <summary>Click to expand/collapse</summary>
 
 ```json
-# Backup Job Registration Example
+// Backup Job Registration Example
 - Register a job for only the "/" partition, full backup.
 - Register job using Center ID and Server ID.
 - Specify Repo ID, type and path are automatically registered.
@@ -1469,7 +1583,7 @@ None
   "excludeDir": "tmp|cache|logs"
 }
 
-# Backup Job Registration Example
+// Backup Job Registration Example
 - Register job for all partitions, increment backup
 - Register job using Center name and Server name
 - Specify Repo ID, user-defined type and path
