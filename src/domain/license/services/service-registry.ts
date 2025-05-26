@@ -11,6 +11,7 @@ import { LicenseHistoryRepository } from "../repositories/zcon-license-history.r
 import { LicenseRepository } from "../repositories/zcon-license.repository"
 import { LicenseAssignService } from "./license-assign.service"
 import { LicenseGetService } from "./license-get.service"
+import { LicenseRegistService } from "./license-regist.service"
 
 /**
  * 레포지토리 인스턴스 생성
@@ -27,9 +28,9 @@ const serverBasicRepository = new ServerBasicRepository()
 export const licenseGetService = new LicenseGetService({
   licenseRepository: zconLicenseRepository,
 })
+
 //  License 할당 Service
 export const licenseAssignService = new LicenseAssignService({
-  licenseRepository: zconLicenseRepository,
   licenseHistoryRepository: zconLicenseHistoryRepository,
   jobInteractiveRepository,
   serverBasicRepository,
@@ -37,4 +38,12 @@ export const licenseAssignService = new LicenseAssignService({
   licenseGetService,
   serverGetService,
   zdmGetService,
+})
+
+//  License 등록 Service
+export const licenseRegistService = new LicenseRegistService({
+  jobInteractiveRepository,
+  jobInteractiveService,
+  zdmGetService,
+  licenseGetService
 })

@@ -1,10 +1,10 @@
 import { ResultSetHeader } from "mysql2/promise"
+import { TransactionManager } from "../../../database/connection"
 import { asyncContextStorage } from "../../../utils/AsyncContext"
 import { BaseRepository, SqlFieldOption } from "../../../utils/base/base-repository"
 import { ContextLogger } from "../../../utils/logger/logger.custom"
 import { JobInteractiveTable } from "../types/db/job_interactive"
-import { JobInteractiveFilterOptions, JobInteractiveLicenseVerificationInput } from "../types/interactive"
-import { TransactionManager } from "../../../database/connection"
+import { JobInteractiveFilterOptions, JobInteractiveLicenseRegistInput, JobInteractiveLicenseVerificationInput } from "../types/interactive"
 
 export class JobInteractiveRepository extends BaseRepository {
   constructor() {
@@ -227,7 +227,7 @@ export class JobInteractiveRepository extends BaseRepository {
   /**
    * 데이터 등록 Transaction 미사용
    */
-  async insertDataWithOutTransaction({ data }: { data: JobInteractiveLicenseVerificationInput }): Promise<ResultSetHeader> {
+  async insertDataWithOutTransaction({ data }: { data: JobInteractiveLicenseVerificationInput | JobInteractiveLicenseRegistInput }): Promise<ResultSetHeader> {
     try {
       asyncContextStorage.addRepository({ name: this.repositoryName })
       asyncContextStorage.addOrder({ component: this.repositoryName, method: "create", state: "start" })

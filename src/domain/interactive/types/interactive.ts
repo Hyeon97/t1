@@ -86,10 +86,10 @@ export enum JobInteractiveTypeEnum {
  * job_interactive table 작업진행 상태 관련
  */
 //  job_interactive 작업 진행상태 정의
-export type JobInteractiveStatus = "running" | "completed" | "waiting" | "error"
+export type JobInteractiveStatus = "processing" | "completed" | "waiting" | "error"
 export enum JobInteractiveStatusEnum {
   ERROR = 0,
-  RUNNING = 1,
+  PROCESSING = 1,
   COMPLETED = 2,
   WAITING = 3,
 }
@@ -98,8 +98,8 @@ export const JobInteractiveStatusMap = {
   fromString: ({ str }: { str: string }): number => {
     const lowerStr = str.toLowerCase()
     switch (lowerStr) {
-      case "running":
-        return JobInteractiveStatusEnum.RUNNING
+      case "processing":
+        return JobInteractiveStatusEnum.PROCESSING
       case "completed":
         return JobInteractiveStatusEnum.COMPLETED
       case "waiting":
@@ -110,7 +110,7 @@ export const JobInteractiveStatusMap = {
   },
   toString: ({ value }: { value: number }): string => {
     switch (value) {
-      case JobInteractiveStatusEnum.RUNNING:
+      case JobInteractiveStatusEnum.PROCESSING:
         return "Running"
       case JobInteractiveStatusEnum.COMPLETED:
         return "Completed"
@@ -172,3 +172,11 @@ export interface JobInteractiveFilterOptions {
   jobType?: number
   jobStatus?: number
 }
+
+/**
+ * job_interactive table license 등록 input 객체
+ */
+export type JobInteractiveLicenseRegistInput = Pick<
+  JobInteractiveTable,
+  "nGroupID" | "nUserID" | "nCenterID" | "nRequestID" | "sSystemName" | "nJobType" | "nJobStatus" | "sJobData" | "nJobID"
+>

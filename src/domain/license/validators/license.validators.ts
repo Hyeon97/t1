@@ -1,5 +1,6 @@
 import { validationMiddleware } from "../../../middlewares/validation/validationMiddleware"
 import { LicenseAssignBodyDTO } from "../dto/body/license-assign-body.dto"
+import { LicenseRegistBodyDTO } from "../dto/body/license-regist-body.dto"
 import { LicenseGetQueryDTO } from "../dto/query/license-get-query"
 
 /**
@@ -11,6 +12,12 @@ export const validateLicenseGetQuery = validationMiddleware.validateQuery(Licens
 export const validateLicenseGetByLicenseIdParams = validationMiddleware.validateParams(null)
 //  License Name으로 조회 parameter 검증
 export const validateLicenseGetByLicenseNameParams = validationMiddleware.validateParams(null)
+
+/**
+ * License 등록
+ */
+//  License 등록 Body 검증
+export const validateLicenseRegistBody = validationMiddleware.validateBody(LicenseRegistBodyDTO)
 
 /**
  * License 할당

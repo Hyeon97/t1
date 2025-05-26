@@ -54,3 +54,12 @@ export interface LicenseAssignResponse {
     expiration: string
   }
 }
+
+/**
+ * License 등록 결과 서비스 리턴 타입
+ */
+export interface LicenseRegistResponse {
+  id: string
+  name: string
+  category: string
+}
