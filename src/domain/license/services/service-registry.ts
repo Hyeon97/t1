@@ -10,6 +10,7 @@ import { zdmGetService } from "../../zdm/services/service-registry"
 import { LicenseHistoryRepository } from "../repositories/zcon-license-history.repository"
 import { LicenseRepository } from "../repositories/zcon-license.repository"
 import { LicenseAssignService } from "./license-assign.service"
+import { LicenseDeleteService } from "./license-delete.service"
 import { LicenseGetService } from "./license-get.service"
 import { LicenseRegistService } from "./license-regist.service"
 
@@ -46,4 +47,9 @@ export const licenseRegistService = new LicenseRegistService({
   jobInteractiveService,
   zdmGetService,
   licenseGetService
+})
+
+//  License 삭제 Service
+export const licenseDeleteService = new LicenseDeleteService({
+  licenseRepository: zconLicenseRepository
 })

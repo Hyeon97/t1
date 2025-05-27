@@ -1,6 +1,7 @@
 import { validationMiddleware } from "../../../middlewares/validation/validationMiddleware"
 import { LicenseAssignBodyDTO } from "../dto/body/license-assign-body.dto"
 import { LicenseRegistBodyDTO } from "../dto/body/license-regist-body.dto"
+import { LicenseDeleteByLicenseIdParamDTO, LicenseDeleteByLicenseKeyParamDTO } from "../dto/param/license-delete-param.dto"
 import { LicenseGetQueryDTO } from "../dto/query/license-get-query"
 
 /**
@@ -24,6 +25,14 @@ export const validateLicenseRegistBody = validationMiddleware.validateBody(Licen
  */
 //  License 할당 Body 검증
 export const validateLicenseAssignBody = validationMiddleware.validateBody(LicenseAssignBodyDTO)
+
+/**
+ * License 삭제
+ */
+//  License ID로 삭제 parameter 검증
+export const validateLicenseDeleteByLicenseIdParams = validationMiddleware.validateParams(LicenseDeleteByLicenseIdParamDTO)
+//  License Key로 삭제 parameter 검증
+export const validateLicenseDeleteByLicenseKeyParams = validationMiddleware.validateParams(LicenseDeleteByLicenseKeyParamDTO)
 
 /**
  * License History 조회

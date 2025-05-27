@@ -2,8 +2,9 @@
 //  License Controller 선언 및 관리  //
 /////////////////////////////////////
 
-import { licenseAssignService, licenseGetService, licenseRegistService } from "../services/service-registry"
+import { licenseAssignService, licenseDeleteService, licenseGetService, licenseRegistService } from "../services/service-registry"
 import { LicenseAssignController } from "./license-assign.controller"
+import { LicenseDeleteController } from "./license-delete.controller"
 import { LicenseGetController } from "./license-get.controller"
 import { LicenseRegistController } from "./license-regist.controller"
 
@@ -16,3 +17,5 @@ export const licenseGetController = new LicenseGetController({ licenseGetService
 export const licenseAssignController = new LicenseAssignController({ licenseAssignService })
 //  License 등록 Controller
 export const licenseRegistController = new LicenseRegistController({ licenseRegistService })
+//  License 삭제 Controller
+export const licenseDeleteController = new LicenseDeleteController({ licenseDeleteService })

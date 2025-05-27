@@ -1,6 +1,6 @@
 import { Router } from "express"
-import { licenseAssignController, licenseGetController, licenseRegistController } from "../controllers/controller-registry"
-import { validateLicenseAssignBody, validateLicenseGetQuery, validateLicenseRegistBody } from "../validators/license.validators"
+import { licenseAssignController, licenseDeleteController, licenseGetController, licenseRegistController } from "../controllers/controller-registry"
+import { validateLicenseAssignBody, validateLicenseDeleteByLicenseIdParams, validateLicenseGetQuery, validateLicenseRegistBody } from "../validators/license.validators"
 
 export class LicenseRoutes {
   public router: Router
@@ -21,10 +21,10 @@ export class LicenseRoutes {
     //  [License 등록]
     this.router.post('/', validateLicenseRegistBody, licenseRegistController.regist)
     //  [License 삭제]
-    //  License 이름으로 삭제
-    this.router.delete('/license-name/:licenseName')
+    //  License Key로 삭제
+    // this.router.delete('/license-key/:licenseKey', validateLicenseDeleteByLicenseKeyParams, licenseDeleteController.deleteByKey)
     //  License ID로 삭제
-    this.router.delete('/license-id/:licenseId')
+    this.router.delete('/license-id/:licenseId', validateLicenseDeleteByLicenseIdParams, licenseDeleteController.deleteById)
   }
 
   //  License History 관련

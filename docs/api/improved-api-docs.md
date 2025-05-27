@@ -4,6 +4,7 @@
 - Version: 1.0.1
 - 확인 필요
   - Backup Job Reterieval - All ( 작업 상태 추가 작성 필요 )
+  - License 삭제시 Center ID 조회 안하는데 추가해야할까?
             
 
 ## Table of Contents
@@ -30,7 +31,7 @@
 - [License](#license)
   - [License Registration](#license-registration)
   - [License Retrieval - All](#license-retrieval---all)
-  - [License Deletion]
+  - [License Deletion - By License ID](#license-deletion---by-license-id)
   - [License Assignment](#license-assignment)
 - [Backup](#backup)
   - [Backup Job Registration](#backup-job-registration)
@@ -1457,7 +1458,96 @@ None
 | data[].licenseCreateDate | string | License creation date and time. |
 | timestamp | string | Request processing time. (ISO 8601 format) |
 
-## License Deletion
+## License Deletion - By License ID
+
+### Description
+```txt
+Delete a license registered in the ZDM Center by its ID.
+```
+
+### URL
+```txt
+# Http
+[DELTE] /api/licenses/license-id/{licenseId}
+
+# Curl
+curl --request DELETE \
+  --url http://localhost:3000/api/licenses/license-id/{licenseId} \
+  --header "Content-Type: application/json" \
+  --header "authorization: token"
+```
+
+### Request Parameters
+
+#### Headers
+| Parameter     | Type   | Required | Description           | Default | Example |
+| ------------- | ------ | -------- | --------------------- | ------- | ------- |
+| authorization | string | Required | Authentication token. |         | token   |
+
+#### Parameter
+```txt
+| Parameter     | Type   | Required | Description           | Default | Example |
+| ------------- | ------ | -------- | --------------------- | ------- | ------- |
+| licenseId | string | Required | License ID to delete. |         | `12`   |
+```
+
+#### Query
+```txt
+None
+```
+
+#### Body
+```txt
+None
+```
+
+### Request Example
+```txt
+# Delete license with ID 12
+[DELETE] /api/licenses/license-id/12
+
+# Delete license with ID 25
+[DELETE] /api/licenses/license-id/25
+```
+
+### Response Example (Success)
+<details>
+<summary>Click to expand/collapse examples</summary>
+
+```json
+{
+	"requestID": "c9dd06ca-daf1-4db0-9f6a-a2b857ab8698",
+	"message": "License data delete result",
+	"success": true,
+	"data": {
+		"license_Id": 12,
+		"message": "License deleted successfully",
+		"delete_state": {
+			"data": "success"
+		}
+	},
+	"timestamp": "2025-05-27T05:36:51.144Z"
+}
+```
+</details>
+
+### Response Structure (Success)
+<details>
+<summary>Click to expand/collapse examples</summary>
+
+| Field                 | Type    | Description                                           |
+| --------------------- | ------- | ----------------------------------------------------- |
+| requestID             | string  | Request unique ID.                                    |
+| message               | string  | Processing result message.                            |
+| success               | boolean | Request success status.                               |
+| data                  | object  | Deletion result data.                                 |
+| data.license_Id       | number  | ID of the deleted license.                            |
+| data.message          | string  | Deletion result message.                              |
+| data.delete_state     | object  | Status of deletion operations.                        |
+| data.delete_state.data| string  | Status of license data deletion. Returns `success` or `fail`. |
+| timestamp             | string  | Request processing time. (ISO 8601 format)            |
+</details>
+
 ## License Assignment
 
 ### Description

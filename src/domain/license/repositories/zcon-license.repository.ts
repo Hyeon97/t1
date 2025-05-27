@@ -1,3 +1,5 @@
+import { ResultSetHeader } from "mysql2"
+import { TransactionManager } from "../../../database/connection"
 import { asyncContextStorage } from "../../../utils/AsyncContext"
 import { BaseRepository } from "../../../utils/base/base-repository"
 import { DateTimeUtils } from "../../../utils/Dayjs.utils"
@@ -133,4 +135,54 @@ export class LicenseRepository extends BaseRepository {
       })
     }
   }
+
+  /**
+   * License ID로 삭제
+   */
+  async deleteLicenseById({ licenseId, transaction }: { licenseId: number; transaction: TransactionManager }): Promise<ResultSetHeader> {
+    try {
+      asyncContextStorage.addRepository({ name: this.repositoryName })
+      asyncContextStorage.addOrder({ component: this.repositoryName, method: "deleteLicenseById", state: "start" })
+
+      const result = await this.delete({
+        data: { nID: licenseId },
+        transaction,
+        request: `${this.repositoryName}.deleteLicenseById`,
+      })
+
+      asyncContextStorage.addOrder({ component: this.repositoryName, method: "deleteLicenseById", state: "end" })
+      return result
+    } catch (error) {
+      return this.handleRepositoryError({
+        error,
+        method: "deleteLicenseById",
+        message: `[License 정보 삭제(단일)] - 오류가 발생했습니다`,
+      })
+    }
+  }
+
+  // /**
+  //  * License Key로 삭제
+  //  */
+  // async deleteLicenseByKey({ key, transaction }: { key: number; transaction: TransactionManager }): Promise<ResultSetHeader> {
+  //   try {
+  //     asyncContextStorage.addRepository({ name: this.repositoryName })
+  //     asyncContextStorage.addOrder({ component: this.repositoryName, method: "deleteLicenseByKey", state: "start" })
+
+  //     const result = await this.delete({
+  //       data: { nID: key },
+  //       transaction,
+  //       request: `${this.repositoryName}.deleteLicenseByKey`,
+  //     })
+
+  //     asyncContextStorage.addOrder({ component: this.repositoryName, method: "deleteLicenseByKey", state: "end" })
+  //     return result
+  //   } catch (error) {
+  //     return this.handleRepositoryError({
+  //       error,
+  //       method: "deleteLicenseByKey",
+  //       message: `[License 정보 삭제(단일)] - 오류가 발생했습니다`,
+  //     })
+  //   }
+  // }
 }

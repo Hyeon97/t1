@@ -63,3 +63,15 @@ export interface LicenseRegistResponse {
   name: string
   category: string
 }
+
+/**
+ * License 삭제 결과 서비스 리턴 타입
+ */
+export interface LicenseDeleteResponse {
+  license_Id?: number
+  license_Name?: string
+  message: string
+  delete_state: {
+    data: string
+  }
+}
