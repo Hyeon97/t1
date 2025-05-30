@@ -5,7 +5,7 @@
 import { Expose } from "class-transformer"
 import { IsIn, IsOptional, IsString } from "class-validator"
 import { VALID_JOB_TYPE_VALUES, VALID_SYSTEM_MODE_VALUES } from "../../../../types/common/const-value"
-import { JobResult, JobStatusType } from "../../../../types/common/job"
+import { JobStatusType } from "../../../../types/common/job"
 import { RepositoryTypeNonSSH } from "../../../../types/common/repository"
 import { SystemModeType } from "../../../server/types/server-common.type"
 import { BackupType } from "../../types/backup-common.type"
@@ -32,9 +32,8 @@ export class BackupGetQueryDTO implements BackupFilterOptions {
 
   //  작업 결과
   @IsOptional()
-  @IsIn(["connect", "disconnect"], { message: "result는 'connect' 또는 'disconnect'만 가능합니다" })
   @Expose()
-  result?: JobResult
+  result?: string
 
   //  작업 사용 repository ID
   @IsOptional()

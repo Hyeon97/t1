@@ -14,10 +14,11 @@ export type JobType = (typeof VALID_JOB_TYPE_VALUES)[number]
 export type AutoStartType = (typeof VALID_JOB_AUTOSTART_VALUES)[number]
 
 /**
- * 작업 진행 상태 정의
+ * 작업 진행 상태 정의 ( nJobStatus )
  */
 export type JobStatusType = (typeof JOB_STATUS_VALUES)[number]
 export enum JobStatusEnum {
+  UNKNOWN = 0,  //  알 수 없음
   RUNNING = 1, // 실행중
   COMPLETE = 2, //  완료
   START = 3, // 작업 시작
@@ -43,7 +44,7 @@ export const JobStatusMap = {
       case "schedule":
         return JobStatusEnum.SCHEDULE
       default:
-        throw new Error(`Unknown Job Status: ${str}`)
+        return JobStatusEnum.UNKNOWN
     }
   },
   toString: ({ value }: { value: number }): string => {
@@ -61,12 +62,12 @@ export const JobStatusMap = {
       case JobStatusEnum.SCHEDULE:
         return "Schedule"
       default:
-        throw new Error(`Unknown Job Status: ${value}`)
+        return "Unknown"
     }
   },
 }
 
 /**
- * 작업 결과 정의
+ * 작업 결과 정의 ( sJobResult )
+ * 작업 결과는 랜덤문자열이 들어감으로 별도의 타입지정 안함
  */
-export enum JobResult {}

@@ -112,4 +112,29 @@ export class BackupLogRepository extends BaseRepository {
       })
     }
   }
+
+  /**
+   * Event Type으로 조회 ( job_backup.nID 와 동일한 값을 가짐 )
+   */
+  async getByEventType({ eventType }: { eventType: number }): Promise<BackupLogEventTable[]> {
+    try {
+      asyncContextStorage.addRepository({ name: this.repositoryName })
+      asyncContextStorage.addOrder({ component: this.repositoryName, method: "getByEventType", state: "start" })
+
+      this.resetQueryState()
+      this.addCondition({ condition: "nEventType = ?", params: [eventType] })
+
+      const query = `SELECT * FROM ${this.tableName} ${this.buildWhereClause()}`
+      const result = await this.executeQuery<BackupLogEventTable[]>({ sql: query, request: `${this.repositoryName}.getByEventType` })
+
+      asyncContextStorage.addOrder({ component: this.repositoryName, method: "getByEventType", state: "end" })
+      return result
+    } catch (error) {
+      return this.handleRepositoryError({
+        error,
+        method: "getByEventType",
+        message: "[Backup Log 조회] - 오류가 발생했습니다",
+      })
+    }
+  }
 }

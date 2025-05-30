@@ -39,11 +39,3 @@ export class BackupMonitoringQueryDTO implements BackupMonitoringFilterOptions {
   @Expose()
   detail?: string
 }
-
-//  작업 대상 server 이름으로 조회 요청시 DTO
-export class BackupMonitoringByServerNameQueryDTO extends BackupMonitoringQueryDTO {
-  //  작업 대상 서버 타입
-  @IsString()
-  @Expose()
-  serverType!: string
-}

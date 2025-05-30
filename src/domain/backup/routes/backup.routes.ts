@@ -65,16 +65,11 @@ export class BackupRoutes {
   //  Backup Monitoring 관련
   private BackupMonitoringRoutes(): void {
     // 작업 ID로 백업 모니터링
-    this.router.get("/job-id/:jobId/monitoring", validateBackupMonitoringByJobIdParams, validateBackupMonitoringQuery)
+    this.router.get("/job-id/:jobId/monitoring", validateBackupMonitoringByJobIdParams, validateBackupMonitoringQuery, backupMonitoringController.monitByJobId)
     // 작업 이름으로 백업 모니터링
-    this.router.get(
-      "/job-name/:jobName/monitoring",
-      validateBackupMonitoringByJobNameParams,
-      validateBackupMonitoringQuery,
-      backupMonitoringController.monitByJobName
-    )
+    this.router.get("/job-name/:jobName/monitoring", validateBackupMonitoringByJobNameParams, validateBackupMonitoringQuery, backupMonitoringController.monitByJobName)
     // 작업 대상 서버 이름으로 백업 모니터링
-    this.router.get("/server-name/:serverName/monitoring", validateBackupMonitoringByServerNameParams, validateBackupMonitoringQuery)
+    this.router.get("/server-name/:serverName/monitoring", validateBackupMonitoringByServerNameParams, validateBackupMonitoringQuery, backupMonitoringController.monitByServerName)
   }
 
   //  Backup History 관련

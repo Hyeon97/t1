@@ -185,6 +185,32 @@ export class BackupRepository extends BaseRepository {
   }
 
   /**
+   * 특정 작업 조회 ( by server name )
+   */
+  async findByServerName({ serverName, filterOptions }: { serverName: string; filterOptions?: BackupFilterOptions }): Promise<BackupTable[]> {
+    try {
+      asyncContextStorage.addRepository({ name: this.repositoryName })
+      asyncContextStorage.addOrder({ component: this.repositoryName, method: "findByServerName", state: "start" })
+
+      this.resetQueryState()
+      this.addCondition({ condition: "sSystemName = ?", params: [serverName] })
+      this.applyFilters({ filterOptions })
+
+      const query = `SELECT * FROM ${this.tableName} ${this.buildWhereClause()} ORDER BY sStartTime DESC`
+      const result = await this.executeQuery<BackupTable[]>({ sql: query, request: `${this.repositoryName}.findByServerName` })
+
+      asyncContextStorage.addOrder({ component: this.repositoryName, method: "findByServerName", state: "end" })
+      return result
+    } catch (error) {
+      return this.handleRepositoryError({
+        error,
+        method: "findByServerName",
+        message: `[Backup 작업 대상 Server Name으로 조회] - 오류가 발생했습니다`,
+      })
+    }
+  }
+
+  /**
    * Backup 작업 정보 추가
    */
   async insertBackup({ backupData, transaction }: { backupData: BackupTableInput; transaction: TransactionManager }): Promise<ResultSetHeader> {

@@ -136,6 +136,58 @@ export class BackupInfoRepository extends BaseRepository {
   }
 
   /**
+   * 특정 작업 조회 ( by JobId )
+   */
+  async findByJobId({ jobId, filterOptions }: { jobId: number; filterOptions?: BackupFilterOptions }): Promise<BackupInfoTable[]> {
+    try {
+      asyncContextStorage.addRepository({ name: this.repositoryName })
+      asyncContextStorage.addOrder({ component: this.repositoryName, method: "findByJobId", state: "start" })
+
+      this.resetQueryState()
+      this.addCondition({ condition: "nID = ?", params: [jobId] })
+      this.applyFilters({ filterOptions })
+
+      const query = `SELECT * FROM ${this.tableName}`
+      const result = await this.executeQuery<BackupInfoTable[]>({ sql: query, request: `${this.repositoryName}.findByJobId` })
+
+      asyncContextStorage.addOrder({ component: this.repositoryName, method: "findByJobId", state: "end" })
+      return result
+    } catch (error) {
+      return this.handleRepositoryError({
+        error,
+        method: "findByJobId",
+        message: `[Backup Info 작업 ID로 조회] - 오류가 발생했습니다`,
+      })
+    }
+  }
+
+  /**
+   * 특정 작업 조회 ( by server name )
+   */
+  async findByServerName({ serverName, filterOptions }: { serverName: string; filterOptions?: BackupFilterOptions }): Promise<BackupInfoTable[]> {
+    try {
+      asyncContextStorage.addRepository({ name: this.repositoryName })
+      asyncContextStorage.addOrder({ component: this.repositoryName, method: "findByServerName", state: "start" })
+
+      this.resetQueryState()
+      this.addCondition({ condition: "sSystemName = ?", params: [serverName] })
+      this.applyFilters({ filterOptions })
+
+      const query = `SELECT * FROM ${this.tableName} ${this.buildWhereClause()}`
+      const result = await this.executeQuery<BackupInfoTable[]>({ sql: query, request: `${this.repositoryName}.findByServerName` })
+
+      asyncContextStorage.addOrder({ component: this.repositoryName, method: "findByServerName", state: "end" })
+      return result
+    } catch (error) {
+      return this.handleRepositoryError({
+        error,
+        method: "findByServerName",
+        message: `[Backup Info 작업 대상 Server Name으로 조회] - 오류가 발생했습니다`,
+      })
+    }
+  }
+
+  /**
    * Backup info 작업 정보 추가
    */
   async insertBackupInfo({

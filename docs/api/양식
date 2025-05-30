@@ -37,10 +37,10 @@ or
 ```json
 ```
 </details>
-# 단일 객체 리턴시
+<!-- # 단일 객체 배열 리턴시
 > This structure is nearly identical to the **Response Example (Success)** of [Center Retrieval - All](#center-retrieval---all), but with the difference that the data is provided as a single object rather than an array.
-# 단일 객체 배열 리턴시
-> This structure is nearly identical to the **Response Example (Success)** of [Server Retrieval - All](#server-retrieval---all), but with the difference that the data array will contain only a single server object instead of multiple servers.
+# 단일 객체 리턴시
+> This structure is nearly identical to the **Response Example (Success)** of [Server Retrieval - All](#server-retrieval---all), but with the difference that the data array will contain only a single server object instead of multiple servers. -->
 
 ### Response Structure (Success)
 <details>

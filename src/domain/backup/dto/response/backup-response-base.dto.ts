@@ -2,7 +2,6 @@
 //  기본 Backup 정보 응답 DTO  //
 ///////////////////////////////
 
-import { JobResult } from "../../../../types/common/job"
 import { AllRepositoryType, RepositoryConnectionTypeMap } from "../../../../types/common/repository"
 import { BackupTypeMap } from "../../../backup/types/backup-common.type"
 import { BackupType } from "../../types/backup-common.type"
@@ -14,7 +13,7 @@ export class BackupResponseBaseDTO implements BackupResponseFields {
   systemName: string
   partition: string
   mode: BackupType | string
-  result: JobResult | string
+  result: string
   schedule: {
     basic: string
     advanced: string

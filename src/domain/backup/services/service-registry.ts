@@ -68,4 +68,6 @@ export const backupMonitoringGetService = new BackupMonitoringGetService({
   backupRepository,
   backupInfoRepository,
   backupActiveRepository,
+  backupLogRepository,
+  serverPartitionService
 })

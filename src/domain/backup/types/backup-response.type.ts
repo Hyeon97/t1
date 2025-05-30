@@ -2,7 +2,6 @@
 //  backup 조회 응답 type 정의  //
 /////////////////////////////////
 
-import { JobResult } from "../../../types/common/job"
 import { AllRepositoryType } from "../../../types/common/repository"
 import { BackupType } from "./backup-common.type"
 import { BackupTable } from "./db/job-backup"
@@ -17,7 +16,7 @@ export interface BackupResponseFields {
   systemName: string
   partition: string
   mode: BackupType | string
-  result: JobResult | string
+  result: string
   schedule: {
     basic: string //  schedule id
     advanced: string //  schedule id
@@ -110,9 +109,27 @@ export interface BackupDataDeleteResponse {
  * Backup 작업 모니터링 결과 서비스 리턴 타입
  */
 export interface BackupDataMonitoringResponse {
-  job_name?: string
-  job_id?: string
-  monitoring_data: {}
+  system: {
+    name: string  //  Backup 작업 대상 시스템 이름
+  },
+  job: {
+    name: string
+    id: string
+    backup_type: string // Backup 작업 타입
+    drive: string // Backup 작업 대상 드라이브(파티션)
+  },
+  state: {
+    status: string  //  Backup 작업 상태
+    percent: string //  Backup 작업 진행률
+    result: string  //  Backup 작업 결과
+    description: string //  Backup 작업 설명( 에러 발생시 에러 메시지도 포함 )
+  },
+  time: {
+    start: string // Backup 작업 시작 시간
+    elapsed: string // Backup 작업 경과 시간
+    end: string // Backup 작업 종료 시간
+  }
+  log: string[]
 }
 
 /**

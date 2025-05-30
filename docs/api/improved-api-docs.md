@@ -43,9 +43,9 @@
   - [Backup Job Modification - By Job Name](#backup-job-modification---by-job-name)
   - [Backup Job Deletion - By Job ID](#backup-job-deletion---by-job-id)
   - [Backup Job Deletion - By Job Name](#backup-job-deletion---by-job-name)
-  - [Backup Job Monitoring - By Job ID]
-  - [Backup Job Monitoring - By Job Name]
-  - [Backup Job Monitoring - By Source Server Name]
+  - [Backup Job Monitoring - By Job ID](#backup-job-monitoring---by-job-id)
+  - [Backup Job Monitoring - By Job Name](#backup-job-monitoring---by-job-name)
+  - [Backup Job Monitoring - By Source Server Name](#backup-job-monitoring---by-source-server-name)
   - [Backup Job History]
   - [Backup Job Logs]
 - [Schedule](#schedule)
@@ -2664,9 +2664,10 @@ curl --request GET \
 
 #### Query
 
-```txt
-None
-```
+| Parameter | Type   | Required | Description                          | Default | Example |
+| --------- | ------ | -------- | ------------------------------------ | ------- | ------- |
+| mode           | string  | Optional | Backup job mode. Only `full`, `inc`, `smart` allowed.                          |         | `full`                                                        |
+| partition      | string  | Optional | Backup job target partition. `(Currently only single partition query is possible)` |         | `/test`                                             |
 
 #### Body
 
@@ -2674,108 +2675,97 @@ None
 None
 ```
 
-### Response Example (Success - Running Job)
+### Request Example
+```txt
+# Monitor backup job with ID 318
+[GET] /api/backups/job-id/318/monitoring
+
+# Monitor full backup job with ID 318
+[GET] /api/backups/job-id/318/monitoring?mode=full
+
+# Monitor backup job with ID 318 for specific partition
+[GET] /api/backups/job-id/318/monitoring?partition=/test
+
+# Monitor full backup job with ID 318 for specific partition
+[GET] /api/backups/job-id/318/monitoring?mode=full&partition=/
+```
+
+
+### Response Example (Success)
+<details>
+<summary>Click to expand/collapse examples</summary>
 
 ```json
 {
-  "requestID": "a9s8d7f6-g5h4-j3k2-l1m0-n9b8v7c6x5z4",
-  "message": "Backup job monitoring information",
-  "success": true,
-  "data": {
-    "id": "25",
-    "jobName": "Daily-Data-Backup",
-    "systemName": "rim-ubuntu24-uefi (192.168.1.12)",
-    "partition": "/data",
-    "mode": "Incremental Backup",
-    "status": "running",
-    "progress": {
-      "percent": 42,
-      "processed": "862 MB",
-      "total": "2.1 GB",
-      "elapsed": "00:05:23",
-      "estimated": "00:12:48",
-      "speed": "2.7 MB/s",
-      "stage": "Transferring data"
-    },
-    "timestamp": {
-      "start": "2025-05-12T06:40:00.000Z",
-      "current": "2025-05-12T06:45:23.000Z"
-    }
-  },
-  "timestamp": "2025-05-12T06:45:25.678Z"
+	"requestID": "0b452621-9477-4af6-8057-4f0b0f545b8d",
+	"message": "Backup Monitoring infomation list",
+	"success": true,
+	"data": {
+			"system": {
+				"name": "source-ubuntu24-uefi (127.0.0.1)"
+			},
+			"job": {
+				"name": "test_ROOT_1",
+				"id": "318",
+				"backup_type": "Full Backup",
+				"drive": "/"
+			},
+			"state": {
+				"status": "Complete",
+				"percent": "100%",
+				"result": "COMPLETE",
+				"description": "-"
+			},
+			"time": {
+				"start": "2025-05-28 16:00:35",
+				"elapsed": "0 day, 00:05:25",
+				"end": "2025-05-28 16:06:00"
+			},
+			"log": [
+				"[2025-05-28 16:00:35]Start backup job",
+				"[2025-05-28 16:00:35]log id             : 7253",
+				"[2025-05-28 16:00:35]System Name        : source-ubuntu24-uefi (127.0.0.1)",
+				"[2025-05-28 16:01:00][Backup-test_ROOT_1]001% (backup_size:78905344)",
+				"[2025-05-28 16:01:04][Backup-test_ROOT_1]002% (backup_size:146800640)",
+				"[2025-05-28 16:06:00]Skipped script process.",
+				"[2025-05-28 16:06:00]End Backup job"
+			]
+		},
+	"timestamp": "2025-05-30T00:58:14.078Z"
 }
 ```
+</details>
 
-### Response Example (Success - Non-Running Job)
+### Response Structure (Success)
+<details>
+<summary>Click to expand/collapse examples</summary>
 
-```json
-{
-  "requestID": "p1o2i3u4-y5t6-r7e8-w9q0-a1s2d3f4g5h6",
-  "message": "Backup job monitoring information",
-  "success": true,
-  "data": {
-    "id": "23",
-    "jobName": "Updated-Weekly-System-Backup",
-    "systemName": "rim-ubuntu24-uefi (192.168.1.12)",
-    "partition": "/,/test",
-    "mode": "Full Backup",
-    "status": "completed",
-    "result": "success",
-    "timestamp": {
-      "start": "2025-05-12T05:30:00.000Z",
-      "end": "2025-05-12T05:52:15.000Z",
-      "elapsed": "0 day, 00:22:15"
-    },
-    "nextSchedule": "2025-05-19T05:30:00.000Z"
-  },
-  "timestamp": "2025-05-12T06:45:30.123Z"
-}
-```
-
-### Response Structure (Running Job)
-
-| Field                   | Type    | Description                              |
-| ----------------------- | ------- | ---------------------------------------- |
-| requestID               | string  | Request unique ID.                       |
-| message                 | string  | Processing result message.               |
-| success                 | boolean | Request success status.                  |
-| data.id                 | string  | Job ID.                                  |
-| data.jobName            | string  | Job name.                                |
-| data.systemName         | string  | Source server name.                      |
-| data.partition          | string  | Job partitions.                          |
-| data.mode               | string  | Job mode.                                |
-| data.status             | string  | Job status.                              |
-| data.progress           | object  | Progress information.                    |
-| data.progress.percent   | number  | Completion percentage.                   |
-| data.progress.processed | string  | Processed data size.                     |
-| data.progress.total     | string  | Total data size.                         |
-| data.progress.elapsed   | string  | Elapsed time.                            |
-| data.progress.estimated | string  | Estimated completion time.               |
-| data.progress.speed     | string  | Current processing speed.                |
-| data.progress.stage     | string  | Current processing stage.                |
-| data.timestamp.start    | string  | Job start time.                          |
-| data.timestamp.current  | string  | Current monitoring time.                 |
-| timestamp               | string  | Request processing time. (ISO 8601 format) |
-
-### Response Structure (Non-Running Job)
-
-| Field                | Type    | Description                                |
-| -------------------- | ------- | ------------------------------------------ |
-| requestID            | string  | Request unique ID.                         |
-| message              | string  | Processing result message.                 |
-| success              | boolean | Request success status.                    |
-| data.id              | string  | Job ID.                                    |
-| data.jobName         | string  | Job name.                                  |
-| data.systemName      | string  | Source server name.                        |
-| data.partition       | string  | Job partitions.                            |
-| data.mode            | string  | Job mode.                                  |
-| data.status          | string  | Job status.                                |
-| data.result          | string  | Job result.                                |
-| data.timestamp.start | string  | Job start time.                            |
-| data.timestamp.end   | string  | Job end time.                              |
-| data.timestamp.elapsed | string | Job elapsed time.                          |
-| data.nextSchedule    | string  | Next scheduled execution time.             |
-| timestamp            | string  | Request processing time. (ISO 8601 format) |
+| Field                    | Type    | Description                                           |
+| ------------------------ | ------- | ----------------------------------------------------- |
+| requestID                | string  | Request unique ID.                                    |
+| message                  | string  | Processing result message.                            |
+| success                  | boolean | Request success status.                               |
+| data                     | object  | Monitoring information object.                        |
+| data.system              | object  | Information about the server targeted for backup job. |
+| data.system.name         | string  | Name of the server targeted for backup job.           |
+| data.job                 | object  | Job information.                                      |
+| data.job.name            | string  | Job name.                                             |
+| data.job.id              | string  | Job ID.                                               |
+| data.job.backup_type     | string  | Backup type.                                          |
+| data.job.drive           | string  | Partition (drive) of the server targeted for backup job.  |
+| data.state               | object  | Job state information.                                |
+| data.state.status        | string  | Job status. (`Running`, `Complete`, `Start`, `Waiting`, `Cancel`, `Schedule`)    |
+| data.state.percent       | string  | Current progress percentage.                                |
+| data.state.result        | string  | Job result.     |
+| data.state.description   | string  | Status description.                                   |
+| data.time                | object  | Time information.                                     |
+| data.time.start          | string  | Job start time.                                       |
+| data.time.elapsed        | string  | Elapsed time.                                         |
+| data.time.end            | string  | Job end time.                                         |
+| data.log                 | array   | Job log entries.                                      |
+| data.log[]               | string  | Individual log entry with timestamp.                  |
+| timestamp                | string  | Request processing time. (ISO 8601 format)            |
+</details>
 
 ## Backup Job Monitoring - By Job Name
 
@@ -2813,10 +2803,7 @@ curl --request GET \
 | jobName   | string | Required | The name of the backup job to monitor. |         | Daily-Data-Backup    |
 
 #### Query
-
-```txt
-None
-```
+> This endpoint uses the same query parameters as [Backup Job Monitoring - By Job ID](#backup-job-monitoring---by-job-id).
 
 #### Body
 
@@ -2824,52 +2811,34 @@ None
 None
 ```
 
-### Response Example (Success - Running Job)
+### Request Example
+> The request examples from [Backup Job Monitoring - By Job Name](#backup-job-monitoring---by-job-name) can be used with this endpoint by simply changing the URL path from `/api/backups/job-id/{jobId}/monitoring` to `/api/backups/job-name/{jobName}/monitoring`.
+```txt
+# Monitor backup job with name test-job
+[GET] /api/backups/job-name/test-job/monitoring
 
-```json
-{
-  "requestID": "q1w2e3r4-t5y6-u7i8-o9p0-a1s2d3f4g5h6",
-  "message": "Backup job monitoring information",
-  "success": true,
-  "data": {
-    "id": "25",
-    "jobName": "Daily-Data-Backup",
-    "systemName": "rim-ubuntu24-uefi (192.168.1.12)",
-    "partition": "/data",
-    "mode": "Incremental Backup",
-    "status": "running",
-    "progress": {
-      "percent": 45,
-      "processed": "943 MB",
-      "total": "2.1 GB",
-      "elapsed": "00:05:45",
-      "estimated": "00:12:00",
-      "speed": "2.8 MB/s",
-      "stage": "Transferring data"
-    },
-    "timestamp": {
-      "start": "2025-05-12T06:40:00.000Z",
-      "current": "2025-05-12T06:45:45.000Z"
-    }
-  },
-  "timestamp": "2025-05-12T06:45:48.123Z"
-}
+# Monitor full backup job with name test-job
+[GET] /api/backups/job-name/test-job/monitoring?mode=full
+
+# Monitor backup job with name test-job for specific partition
+[GET] /api/backups/job-name/test-job/monitoring?partition=/test
+
+# Monitor full backup job with name test-job for specific partition
+[GET] /api/backups/job-name/test-job/monitoring?mode=full&partition=/
 ```
 
-### Response Example (Success - Non-Running Job)
-
-The response for a non-running job is identical to the "Backup Job Monitoring - By Job ID" endpoint.
+### Response Example (Success)
+> The success response format is identical to that of the **Response Example (Success)** section in the [Backup Job Monitoring - By Job ID](#backup-job-monitoring---by-job-id) endpoint.
 
 ### Response Structure (Success)
-
-The response structure is identical to the "Backup Job Monitoring - By Job ID" endpoint, with separate formats for running and non-running jobs.
+> The response structure is identical to that of the **Response Structure (Success)** section in the [Backup Job Monitoring - By Job ID](#backup-job-monitoring---by-job-id) endpoint.
 
 ## Backup Job Monitoring - By Source Server Name
 
 ### Description
 
 ```txt
-Monitor all backup jobs' current status and progress for a specific server.
+Monitor the current status and progress of the latest backup jobs for all partitions of a specific server.
 ```
 
 ### URL
@@ -2900,10 +2869,7 @@ curl --request GET \
 | serverName | string | Required | The name of the server whose backup jobs are to monitor. |         | rim-ubuntu24-uefi |
 
 #### Query
-
-```txt
-None
-```
+> This endpoint uses the same query parameters as [Backup Job Monitoring - By Job ID](#backup-job-monitoring---by-job-id).
 
 #### Body
 
@@ -2911,56 +2877,123 @@ None
 None
 ```
 
+### Request Example
+> The request examples from [Backup Job Monitoring - By Source Server Name](#backup-job-monitoring---by-source-server-name) can be used with this endpoint by simply changing the URL path from `/api/backups/job-id/{jobId}/monitoring` to `/api/backups/server-name/{serverName}/monitoring`.
+```txt
+# Monitor backup job with name test-job
+[GET] /api/backups/server-name/test-server/monitoring
+
+# Monitor full backup job with name test-job
+[GET] /api/backups/server-name/test-server/monitoring?mode=full
+
+# Monitor backup job with name test-job for specific partition
+[GET] /api/backups/server-name/test-server/monitoring?partition=/test
+
+# Monitor full backup job with name test-job for specific partition
+[GET] /api/backups/server-name/test-server/monitoring?mode=full&partition=/
+```
+
 ### Response Example (Success)
+> The success response format is nearly identical to that of the **Response Example (Success)** section in the [Backup Job Monitoring - By Job ID](#backup-job-monitoring---by-job-id) endpoint, but with the difference that the data is provided as an array rather than a single object.
+<details>
+<summary>Click to expand/collapse examples</summary>
 
 ```json
 {
-  "requestID": "t5y6u7i8-o9p0-a1s2-d3f4-g5h6j7k8l9m0",
-  "message": "Server backup jobs monitoring information",
-  "success": true,
-  "data": [
-    {
-      "id": "23",
-      "jobName": "Updated-Weekly-System-Backup",
-      "partition": "/,/test",
-      "mode": "Full Backup",
-      "status": "completed",
-      "result": "success",
-      "timestamp": {
-        "start": "2025-05-12T05:30:00.000Z",
-        "end": "2025-05-12T05:52:15.000Z",
-        "elapsed": "0 day, 00:22:15"
-      },
-      "nextSchedule": "2025-05-19T05:30:00.000Z"
-    },
-    {
-      "id": "25",
-      "jobName": "Daily-Data-Backup",
-      "partition": "/data",
-      "mode": "Incremental Backup",
-      "status": "running",
-      "progress": {
-        "percent": 48,
-        "processed": "1.01 GB",
-        "total": "2.1 GB",
-        "elapsed": "00:06:10",
-        "estimated": "00:11:15",
-        "speed": "2.9 MB/s",
-        "stage": "Transferring data"
-      },
-      "timestamp": {
-        "start": "2025-05-12T06:40:00.000Z",
-        "current": "2025-05-12T06:46:10.000Z"
-      }
-    }
-  ],
-  "timestamp": "2025-05-12T06:46:15.789Z"
+	"requestID": "15cd6279-0c20-4f4a-bab9-042827b76773",
+	"message": "Backup Monitoring infomation list",
+	"success": true,
+	"data": [
+		{
+			"system": {
+				"name": "source-ubuntu24-uefi (127.0.0.1)"
+			},
+			"job": {
+				"name": "test_ROOT_1",
+				"id": "318",
+				"backup_type": "Full Backup",
+				"drive": "/"
+			},
+			"state": {
+				"status": "Complete",
+				"percent": "100%",
+				"result": "COMPLETE",
+				"description": "-"
+			},
+			"time": {
+				"start": "2025-05-28 16:00:35",
+				"elapsed": "0 day, 00:05:25",
+				"end": "2025-05-28 16:06:00"
+			},
+			"log": [
+				"[2025-05-28 16:00:35]Start backup job",
+				"[2025-05-28 16:06:00]End Backup job"
+			]
+		},
+		{
+			"system": {
+				"name": "source-ubuntu24-uefi (127.0.0.1)"
+			},
+			"job": {
+				"name": "test_boot_1",
+				"id": "319",
+				"backup_type": "Full Backup",
+				"drive": "/boot"
+			},
+			"state": {
+				"status": "Complete",
+				"percent": "100%",
+				"result": "COMPLETE",
+				"description": "-"
+			},
+			"time": {
+				"start": "2025-05-28 16:00:35",
+				"elapsed": "0 day, 00:00:29",
+				"end": "2025-05-28 16:01:04"
+			},
+			"log": [
+				"[2025-05-28 16:00:35]Start backup job",
+				"[2025-05-28 16:00:35]log id             : 7253",
+				"[2025-05-28 16:01:04]End Backup job"
+			]
+		}
+	],
+	"timestamp": "2025-05-30T05:02:14.640Z"
 }
 ```
+</details>
 
 ### Response Structure (Success)
+> The success response format is nearly identical to that of the **Response Example (Success)** section in the [Backup Job Monitoring - By Job ID](#backup-job-monitoring---by-job-id) endpoint, but with the difference that the data is provided as an array rather than a single object.
+<details>
+<summary>Click to expand/collapse examples</summary>
 
-The response includes an array of job monitoring information objects, with each object following the structure of either the "Running Job" or "Non-Running Job" as described in the "Backup Job Monitoring - By Job ID" endpoint.
+| Field                    | Type    | Description                                           |
+| ------------------------ | ------- | ----------------------------------------------------- |
+| requestID                | string  | Request unique ID.                                    |
+| message                  | string  | Processing result message.                            |
+| success                  | boolean | Request success status.                               |
+| data                     | array   | Monitoring information array.                         |
+| data[].system            | object  | Information about the server targeted for backup job. |
+| data[].system.name       | string  | Name of the server targeted for backup job.           |
+| data[].job               | object  | Job information.                                      |
+| data[].job.name          | string  | Job name.                                             |
+| data[].job.id            | string  | Job ID.                                               |
+| data[].job.backup_type   | string  | Backup type.                                          |
+| data[].job.drive         | string  | Partition (drive) of the server targeted for backup job. |
+| data[].state             | object  | Job state information.                                |
+| data[].state.status      | string  | Job status. (`Running`, `Complete`, `Start`, `Waiting`, `Cancel`, `Schedule`) |
+| data[].state.percent     | string  | Current progress percentage.                          |
+| data[].state.result      | string  | Job result.                                           |
+| data[].state.description | string  | Status description.                                   |
+| data[].time              | object  | Time information.                                     |
+| data[].time.start        | string  | Job start time.                                       |
+| data[].time.elapsed      | string  | Elapsed time.                                         |
+| data[].time.end          | string  | Job end time.                                         |
+| data[].log               | array   | Job log entries.                                      |
+| data[].log[]             | string  | Individual log entry with timestamp.                  |
+| timestamp                | string  | Request processing time. (ISO 8601 format)            |
+</details>
 
 ## Backup Job History
 
