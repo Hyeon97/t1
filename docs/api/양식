@@ -75,6 +75,8 @@ or
 
 > The success response format is identical to that of the **Response Example (Success)** section in the [Backup Job Modification - By Job ID](#backup-job-modification---by-job-id) endpoint.
 
+> The success response format is nearly identical to that of the **Response Example (Success)** section in the [Backup Job Monitoring - By Job ID](#backup-job-monitoring---by-job-id) endpoint, but with the difference that the data is provided as an array rather than a single object.
+
 #### Response Structure (Success)
 - 양식에 대한 각각의 구조 설명시에는 structure
 <!-- > The response structure is identical to that of the [Backup Job Modification - By Job ID](#backup-job-modification---by-job-id) endpoint. -->
